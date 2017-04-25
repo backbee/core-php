@@ -1,0 +1,112 @@
+<?php
+
+namespace BackBeeCloud;
+
+use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
+use BackBeeCloud\ImageHandlerInterface;
+use BackBeePlanet\GlobalSettings;
+use BackBee\BBApplication;
+use BackBee\ClassContent\Media\Image;
+
+/**
+ * @author Eric Chau <eric.chau@lp-digital.fr>
+ */
+class ImageFilesystemHandler implements ImageHandlerInterface
+{
+    protected $mediaDir;
+
+    public function __construct(BBApplication $app)
+    {
+        $this->mediaDir = $app->getMediaDir();
+    }
+
+    public function onImageDuplicatePreSave(ContentDuplicatePreSaveEvent $event)
+    {
+        $content = $event->getContent();
+        if (!($content instanceof Image)) {
+            return;
+        }
+
+        $event->stopPropagation();
+        if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->path)) {
+            $sourcepath = str_replace('/img/', $this->mediaDir . '/', $content->path);
+            if (is_readable($sourcepath)) {
+                $content->path = $this->upload(
+                    sprintf('%s.%s', $content->getUid(), explode('.', basename($sourcepath))[1]),
+                    $sourcepath,
+                    false
+                );
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function upload($filename, $filepath, $removeFile = true)
+    {
+        if (!is_file($filepath) || !is_readable($filepath)) {
+            return null;
+        }
+
+        return $this->runUpload($filename, $filepath, $removeFile);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function uploadFromUrl($url, $filename = null)
+    {
+        $newPath = null;
+        if (false !== $rawContent = file_get_contents($url)) {
+            if (false == $filename) {
+                $filename = basename($url);
+            }
+
+            touch($tmpfile = sprintf('%s/%s', sys_get_temp_dir(), $filename));
+
+            file_put_contents($tmpfile, $rawContent);
+
+            $newPath = $this->runUpload($filename, $tmpfile);
+        }
+
+        return $newPath;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete($path, $throwException = false)
+    {
+        $filepath = str_replace('/img/', $this->mediaDir . '/', str_replace(['\\/', '"'], ['/', ''], $path));
+        if (file_exists($filepath)) {
+            unlink($filepath);
+        }
+    }
+
+    /**
+     * Performs the real upload.
+     *
+     * @param  string  $filename
+     * @param  string  $filepath
+     * @param  boolean $removeFile
+     * @return null|string
+     */
+    protected function runUpload($filename, $filepath, $removeFile = true)
+    {
+        $newname = $this->mediaDir . DIRECTORY_SEPARATOR . $filename;
+        $result = copy($filepath, $newname);
+        if (false === $result) {
+            throw new \RuntimeException(sprintf(
+                '[%s] failed to rename %s to %s.',
+                __METHOD__,
+                $filepath,
+                $newname
+            ));
+        } elseif (true === $removeFile) {
+            unlink($filepath);
+        }
+
+        return '/img/' . $filename;
+    }
+}

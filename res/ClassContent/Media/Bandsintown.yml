@@ -1,0 +1,10 @@
+Bandsintown:
+  properties:
+    name: yaml_block_bandsintown
+    description: ~
+    category: [block_category_more]
+  parameters:
+    artist_name:
+      type: text
+      label: yaml_block_bandsintown_artist_name
+      value: ''

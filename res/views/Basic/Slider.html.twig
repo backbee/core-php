@@ -1,0 +1,98 @@
+{% set sliderId = "slider_" ~ this.getObject().getUid() %}
+
+{% if images != null and images is not iterable %}
+{% set images = [images] %}
+{% endif %}
+
+<div data-forbidden-plugins="click" {{this.bbcontent(null)|raw}}>
+  {% if images|length == 0 %}
+  {% include 'common/missing_config_block.html.twig' %}
+  {% else %}
+  <div id="{{ sliderId }}" class="owl-carousel slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('format') }} slider{% if thumbnail %} slider-main{% endif %}">
+  {% for image in images %}
+    {% if image != false %}
+    {{ this.render(image, 'slider', {'in_fluid': in_fluid})|raw }}
+    {% endif %}
+  {% endfor %}
+  </div>
+  {% if thumbnail.value %}
+  <div id="{{ sliderId }}" class="owl-carousel slider-wrapper slider-thumbnail slider-loader">
+  {% for key, image in images %}
+    {% if image != false %}
+    {{ this.render(image, 'slider-thumbnail', {'index': key})|raw }}
+    {% endif %}
+  {% endfor %}
+  </div>
+  {% endif %}
+
+
+  <script>
+    setTimeout(function () {
+      var sliders = $('#{{ sliderId }}, #{{ sliderId }}-thumb');
+
+      sliders.each(function(){
+        var slider = $(this),
+          duration = 300,
+          config = {
+            touchDrag: false,
+            mouseDrag: false,
+            items: 1,
+            loop: true,
+            autoplay: true,
+            itemsDesktop: [1199,3],
+            itemsDesktopSmall: [979,2],
+            itemsTablet: [768,2],
+            itemsMobile: [479,1],
+            nav : true,
+            navText: ["<i class=\"arrow_carrot-left\"></i>","<i class=\"arrow_carrot-right\"></i>"],
+            dots : true,
+            onInitialized: function (element) {
+              $(element.target).removeClass('slider-loader');
+            }
+          },
+          configThumbnail = {
+            items: 4,
+            itemsCustom: [[320,3],[480,4]],
+            dots:false,
+            nav: true,
+            margin: 10,
+            responsiveRefreshRate: 100,
+            onInitialized: function (element) {
+              var current = $(element.target).find('.owl-item.active').eq(0);
+              current.addClass('current');
+            }
+        };
+
+        if (slider.hasClass('slider-thumbnail')) {
+          config.linked = slider.prev();
+          $.extend(config, configThumbnail);
+        } else if (slider.hasClass('slider-main')) {
+          config.linked = slider.next();
+        }
+
+        //$('.slider-fw').masterHead({'bottom': 100});
+
+        if (slider.children().length < 2) {
+          return;
+        }
+
+        slider.owlCarousel(config);
+
+        slider.on('click', '.owl-item', function (e) {
+          slider.trigger('to.owl.carousel', [$(e.currentTarget).find('> .slider-item').data('index'), duration, true]);
+        });
+
+        if (slider.hasClass('slider-thumbnail')) {
+          slider.on('initialized.owl.carousel linked.to.owl.carousel', function() {
+            slider.find('.owl-item.current').removeClass('current');
+            var current = slider.find('.owl-item.active.center').length ? slider.find('.owl-item.active.center') : slider.find('.owl-item.active').eq(0);
+            current.addClass('current');
+          });
+        }
+
+      });
+
+    }, 500);
+  </script>
+{% endif %}
+</div>

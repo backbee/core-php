@@ -1,0 +1,3 @@
+User-Agent: *
+Disallow:{{do_index ? '' : ' /'}}
+{% if has_sitemap %}Sitemap: {{ this.getUri('/sitemap.xml') }}{% endif %}

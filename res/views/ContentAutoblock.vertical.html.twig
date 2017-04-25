@@ -1,0 +1,13 @@
+<div {{this.bbcontent()|raw}}>
+{% if contents|length > 0 %}
+  <div class="autoblock-vertical">
+  	  {% for content in contents %}
+      {{content|raw}}
+    {% endfor %}
+
+    {% include 'pagination_autoblock.html.twig' %}
+  </div>
+{% else %}
+  {% include 'common/missing_config_block.html.twig' %}
+{% endif %}
+</div>

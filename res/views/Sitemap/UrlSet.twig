@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{% for part in this.LocationIterator(locations, step) %}
+    {% for location in part %}
+    <url>
+        <loc>{{ bb.routing.getUri(location.getUrl(), '', site) }}</loc>
+        <lastmod>{{ this.dateHelper(location.modified, 'c') }}</lastmod>
+        <priority>{{ this.CloudLocationPriority(location) }}</priority>
+    </url>
+    {% endfor %}
+{% endfor %}
+</urlset>

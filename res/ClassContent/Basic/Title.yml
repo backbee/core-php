@@ -1,0 +1,17 @@
+Title:
+  extends: \BackBee\ClassContent\Element\Text
+  properties:
+    name: yaml_block_title
+    description: ~
+    category: [block_category_basics]
+    rte:
+      placeholder: yaml_block_title_rte_placeholder
+  parameters:
+   align:
+        type: selectButton
+        label: yaml_block_title_position
+        buttons:
+          left: {'icon': 'icon-align-left'}
+          center: {'icon': 'icon-align-center'}
+          right: {'icon': 'icon-align-right'}
+        value: 'center'

@@ -1,0 +1,9 @@
+<nav {{this.bbcontent(null)|raw}} itemscope itemtype="//schema.org/SiteNavigationElement">
+  <ul class="nav navbar-nav navbar-right">
+  {% for item in items %}
+  <li {% if item.is_current %}class="active"{% endif %}>
+    <a href="{{item.url}}" {% if item.is_online == false %} title="This page is offline"{% endif %}><span class="{{item.is_online == false ? 'offline': ''}}">{{item.label}}</span></a>
+  </li>
+  {% endfor %}
+  </ul>
+</nav>

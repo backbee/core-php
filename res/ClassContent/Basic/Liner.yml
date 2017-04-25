@@ -1,0 +1,8 @@
+Liner:
+  properties:
+    name: yaml_block_liner
+    description: ~
+    category: [block_category_more]
+  parameters:
+    height:
+      value: 26

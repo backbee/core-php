@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="canonical" href="{{ bb.routing.getUri(this.getCurrentPage().getUrl(), '', this.getCurrentSite()) }}" />
+
+    {{this.seoMetadata(this.getCurrentPage())|raw}}
+
+
+    {% if favicon_data is defined %}
+      {% if favicon_data.url_144x144 is defined and favicon_data.url_144x144 != '' %}
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{favicon_data.url_144x144}}" />
+      {% endif %}
+
+      {% if favicon_data.url_152x152 is defined and favicon_data.url_152x152 != '' %}
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{{favicon_data.url_152x152}}" />
+      {% endif %}
+
+      {% if favicon_data.url_32x32 is defined and favicon_data.url_32x32 != '' %}
+        <link rel="icon" type="image/png" href="{{favicon_data.url_32x32}}" sizes="32x32" />
+      {% endif %}
+
+      {% if favicon_data.url_16x16 is defined and favicon_data.url_16x16 != '' %}
+        <link rel="icon" type="image/png" href="{{favicon_data.url_16x16}}" sizes="16x16" />
+      {% endif %}
+
+      {% if favicon_data.url_144x144 is defined and favicon_data.url_144x144 != '' %}
+        <meta name="application-name" content="{{this.sitename()}}" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-TileImage" content="{{favicon_data.url_144x144}}" />
+      {% endif %}
+    {% endif %}
+
+    {% block stylesheets %}{% endblock %}
+    {% if bb.token == null %}
+    <link rel="stylesheet" href="{{this.getCdnUri('/static/css/login-help.css')}}">
+    {% endif %}
+
+    {% if bb.token == null and google_analytics_code is defined %}
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', '{{google_analytics_code}}', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+    {% endif %}
+
+    {% if bb.token == null and facebook_analytics_code is defined %}
+      <script>
+        window.fbAsyncInit = function() {
+          FB.init({
+            appId      : "{{facebook_analytics_code}}",
+            xfbml      : true,
+            version    : 'v2.8'
+          });
+          FB.AppEvents.logPageView();
+        };
+
+        (function(d, s, id){
+           var js, fjs = d.getElementsByTagName(s)[0];
+           if (d.getElementById(id)) {return;}
+           js = d.createElement(s); js.id = id;
+           js.src = "//connect.facebook.net/en_US/sdk.js";
+           fjs.parentNode.insertBefore(js, fjs);
+         }(document, 'script', 'facebook-jssdk'));
+      </script>
+    {% endif %}
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    {{ this.bbtoolbar()|raw }}
+
+    <div id="fb-root"></div>
+
+    <div id="bb-site-wrapper" class="{{bb.token ? 'cloud-edit' : ''}}">
+      <!-- JS Alert -->
+      <noscript>
+      <p><span lang="fr">JavaScript désactivé - Ce site requiert l'activation de JavaScript.</span><br><span lang="en">JavaScript is deactivated - This site requires JavaScript.</span></p>
+      </noscript>
+      <!-- -->
+
+      <!--[if lt IE 9]>
+      <div class="browser-ie-alert">
+      <p lang="fr">Ce site requiert Microsoft Internet Explorer 9 minimum. SVP, mettez-le à jour.</p>
+      <p lang="en">This website requires Microsoft Internet Explorer browser 9 minimum; please update.</p>
+      </div>
+      <![endif]-->
+
+      {% block main_content %}{% endblock %}
+
+      {% if bb.token == null %}
+      <div class="admin-help-wrapper hidden">
+        <div class="admin-help-wrapper-inner">
+          <div class="cover-container">
+            <h2>To start contributing your website</h2>
+            <p class="lead desktop hidden">Press <span class="keyboard-touch">CTRL + ALT + B</span></p>
+            <p class="lead mobile hidden"><span class="keyboard-touch">Triple taps</span> your screen</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% block javascripts %}{% endblock %}
+      <script src="{{this.getCdnUri('/static/js/login-help.js')}}"></script>
+
+
+      {% if bb.token != null %}
+        <script type="text/javascript">CRISP_WEBSITE_ID = "ade0fb3b-06b2-4936-8eab-9c510f1797fb";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.im/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+      {% endif %}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+<header data-forbidden-plugins="remove" {{this.bbcontent(null, {'class': 'article-header text-center'})|raw}}>
+  <nav>
+    <ul class="pager pager-news">
+      {% if prev != null %}
+        <li class="previous">
+          <a href="{{prev.url}}" title="{{prev.title}}">
+            <span class="icon arrow_carrot-left" aria-hidden="true"></span>
+          </a>
+        </li>
+      {% endif %}
+      {% if next != null %}
+      <li class="next">
+        <a href="{{next.url}}" title="{{next.title}}">
+          <span class="icon arrow_carrot-right" aria-hidden="true"></span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <h1 data-cloud-rte="true">{{value|raw}}</h1>
+  <div class="cloud-spacer"></div>
+
+  {% if show_tags.value == true or show_date.value == true %}
+    <p class="metadata-wrapper">
+      {% if show_tags.value == true %}
+        {% for tag in this.getPageTags(this.getCurrentPage()) %}
+          <span class="metadata-tag">{{tag}}</span>
+        {% endfor %}
+      {% endif %}
+      {% if show_date.value == true %}
+        {% set publishing = this.getCurrentPage().getPublishing() %}
+        {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d - H:i') ~ '</time>' : '<em class="metadata-time">Not yet published</em>')|raw}}
+      {% endif %}
+    </p>
+  {% endif %}
+</header>

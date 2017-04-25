@@ -1,0 +1,7 @@
+{% set data = this.getObject().getData() %}
+
+<div {{this.bbcontent(null, {'class': 'colcontentset'})|raw}}>
+    {% for content in this.getObject().getData() %}
+      {{this.render(content, this.getMode(), {'multi_column': multi_column, 'in_fluid': in_fluid, 'multi_line': data|length > 1}, null, this.getIgnoreIfNotAvailable())|raw}}
+    {% endfor %}
+</div>

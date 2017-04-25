@@ -1,0 +1,75 @@
+{% set resizeClass = 'image-fullwidth' %}
+{% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %}
+{% set autoSizeClass = this.getObject().getParamValue('stretch') ? ' image-auto-width' : autoSizeClass %}
+
+{% if multi_column == true %}
+  {% set resizeClass = 'image-resize' %}
+{% endif %}
+
+{% set linkValue = link.value %}
+
+<figure
+  {{this.bbcontent(null, {class: 'content figure ' ~ resizeClass ~ autoSizeClass ~ ' media-image'})|raw}}
+  {% if bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
+  {% if bb.token == null and linkValue.link == 'lightbox' %}data-toggle="lightbox" data-remote="{{this.getCdnImageUrl(path)|raw}}"{% endif %}
+  data-forbidden-plugins="click"
+  {% set ratio = this.getObject().getParamValue('ratio') %}
+  {% if ratio %}style="padding-top: {{ratio}}%;"{% endif %}
+{% if bb.token != null %}
+  {% set focus = this.getObject().getParamValue('focus') %}
+  {% set left = focus['left'] ? focus['left'] : 0 %}
+  {% set top = focus['top'] ? focus['top'] : 0 %}
+  {% set resetPos = this.getObject().getParamValue('stretch') != this.getObject().getParamValue('stretch_state') %}
+  data-focus='{"top":{{top}}, "left":{{left}}}'
+  data-auto-width='{{this.getObject().getParamValue('stretch')}}'
+  data-state='{{this.getObject().getParamValue('stretch_state')}}'
+  data-width='{{this.getObject().getParamValue('width')}}'
+  {% if resetPos %}data-reset-position{% endif %}
+{% endif %}
+>
+
+  <div class="contentwrapper">
+    {% set img_alt = description.value != false ? description.value|striptags : '' %}
+    {% set coord = this.getObject().getParamValue('position') %}
+    {% set left = coord['left'] ? coord['left'] : 0 %}
+    {% set top = coord['top'] ? coord['top'] : 0 %}
+    {% set imgWidth = this.getObject().getParamValue('width') ? (' width:' ~ this.getObject().getParamValue('width') ~ '%') : '' %}
+    <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %} alt="{{img_alt}}" style="top:{{top}}%; left:{{left}}%;{{ imgWidth }}" />
+
+    {% if display_overlay.value == true %}
+      <span class="image-overlay"></span>
+    {% endif %}
+
+    {% if linkValue.link == 'with_button' %}
+      <div class="buttonwrapper">
+        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}}">
+          {{linkValue.options.title|default('Button title')|raw}}
+        </a>
+      </div>
+    {% endif %}
+
+    {% set picto = this.getObject().getParamValue('picto') %}
+    {% if picto != '' %}
+      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto">
+    {% endif %}
+
+    {% if display_title.value == true or display_description.value == true %}
+    <div class="textwrapper">
+
+      {% if display_title.value == true %}
+      <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="is-h3 lead">
+        {{ this.getObject().getParamValue('title')|raw }}
+      </div>
+      {% endif %}
+
+      {% if display_description.value == true %}
+      <figcaption data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="is-h3 lead hidden-xs">
+        {{ this.getObject().getParamValue('description')|raw }}
+      </figcaption>
+      {% endif %}
+
+    </div>
+    {% endif %}
+  </div>
+
+</figure>

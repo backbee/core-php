@@ -1,0 +1,51 @@
+{% set imageClass = '' %}
+
+{% set path = this.getCdnImageUrl(path)|raw %}
+{% set linkValue = link.value %}
+
+{% if in_fluid == true %}
+  {% set imageClass = 'image-fullwidth' %}
+{% endif %}
+
+<div data-editable="false"
+ {{ this.bbcontent(null, {'class': 'slider-item'})|raw }}
+ data-forbidden-plugins="upload"
+ {% if bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
+>
+
+  <figure class="figure {{imageClass}}">
+    <img src="{{path}}">
+    {% set picto = this.getObject().getParamValue('picto') %}
+    {% if picto != '' %}
+      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto">
+    {% endif %}
+  </figure>
+
+  {% if display_overlay.value == true %}
+    <span class="image-overlay"></span>
+  {% endif %}
+
+  <div class="slider-content text-center">
+
+    {% if display_title.value == true %}
+      <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="content paragraph">
+        {{ this.getObject().getParamValue('title')|raw }}
+      </div>
+    {% endif %}
+
+    {% if display_description.value == true %}
+      <div data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="content paragraph hidden-xs">
+        {{ this.getObject().getParamValue('description')|raw }}
+      </div>
+    {% endif %}
+
+    {% if linkValue.link == 'with_button' %}
+      <div class="content button">
+        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}}" {% if bb.token != null %}onclick="return false;"{% endif %}>
+          {{linkValue.options.title|default('Button title')|raw}}
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>

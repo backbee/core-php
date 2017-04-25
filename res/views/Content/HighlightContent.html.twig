@@ -1,0 +1,7 @@
+<div {{this.bbcontent()|raw}}>
+{% if content == false %}
+  {% include 'common/missing_config_block.html.twig' %}
+{% else %}
+  {{content|raw}}
+{% endif %}
+</div>

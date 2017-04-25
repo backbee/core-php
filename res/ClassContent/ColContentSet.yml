@@ -1,0 +1,6 @@
+ColContentSet:
+  extends: \BackBee\ClassContent\ContentSet
+  properties:
+    name: Col ContentSet
+    description: ~
+    category: []

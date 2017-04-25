@@ -1,0 +1,9 @@
+<div data-mobile-edit="false" data-forbidden-plugins="dnd,remove" {{this.bbcontent(null, {class: 'content button text-' ~ align.value})|raw}}>
+  <a href="{{url.value}}"
+    {% if target_blank.value == true %}target="_blank"{% endif %}
+    class="btn btn-{{color.value}} btn-{{size.value}}"
+    onclick="return false;"
+  >
+    {{title.value|default('Button title')|raw}}
+  </a>
+</div>

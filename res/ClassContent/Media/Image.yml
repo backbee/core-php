@@ -1,0 +1,65 @@
+Image:
+  extends: \BackBee\ClassContent\Element\Image
+  properties:
+    name: yaml_block_image
+    description: ~
+    iconized-by: path
+    category: [block_category_basics]
+    rte:
+      placeholder: "Your text here"
+    form_width: 430
+  parameters:
+    title:
+      value: ''
+    alt:
+      type: text
+      label: yaml_block_image_title
+      value: ''
+      tab: yaml_block_image_seo_title
+    stretch:
+      type: switch
+      label: yaml_block_image_stretch
+      value: false
+      tab: yaml_block_image_style
+    stretch_state:
+      value: false
+    auto_height:
+      value: false
+    ratio:
+      value: ''
+    width:
+      value: ''
+    position:
+      value: []
+    focus:
+      value: []
+    display_title:
+      type: switch
+      label: yaml_block_image_display_title
+      value: false
+      tab: yaml_block_image_style
+    description:
+      value: ''
+    display_description:
+      type: switch
+      label: yaml_block_image_display_description
+      value: false
+      tab: yaml_block_image_style
+    display_overlay:
+      type: switch
+      label: yaml_block_image_overlay
+      value: false
+      tab: yaml_block_image_style
+    link:
+      type: imageLink
+      value: {}
+      tab: yaml_block_image_link
+    image_small:
+      value: {}
+    image_medium:
+      value: {}
+    picto:
+      type: upload
+      label: yaml_block_image_picto
+      value: ''
+      tab: yaml_block_image_picto

@@ -1,0 +1,42 @@
+{
+    "name": "backbee-planet/core-php",
+    "description": "Core PHP of BackBee Planet",
+    "keywords": [],
+    "type": "library",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Eric Chau",
+            "email": "eric.chau@lp-digital.fr"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@gitlab.lp-lab.com:backbee/CloudToolbarBundle.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@gitlab.lp-lab.com:backbee-planet/common-components.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@gitlab.lp-lab.com:lpdigital/sitemap-bundle.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "backbee/backbee-php": "~1.2.0",
+        "backbee/cloud-toolbar-bundle": "~1.3.0",
+        "backbee-planet/common-components": "~1.3.0",
+        "lp-digital/hauth-bundle": "~0.1.0",
+        "lp-digital/sitemap-bundle": "~0.2",
+        "guzzlehttp/guzzle": "~6.0",
+        "jenssegers/agent": "~2.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BackBeeCloud\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,10 @@
+Searchbar:
+  properties:
+    name: yaml_block_searchbar
+    description: ~
+    category: [block_category_basics]
+  parameters:
+    input_placeholder:
+      type: text
+      label: yaml_block_searchbar_input_placeholder
+      value: Search…

@@ -1,0 +1,32 @@
+{% extends 'default_template.html.twig' %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{this.getCdnUri('/css/gen.css')}}">
+{% endblock %}
+
+{% block main_content %}
+<!-- SHORTCUTS -->
+<div id="access-shortcuts-wrapper">
+    <ul class="nav">
+        <li><a href="#content">Go to content</a></li>
+        <li><a href="#header">Go to header</a></li>
+        <li><a href="#footer">Go to footer</a></li>
+    </ul>
+</div>
+<!-- END SHORTCUTS -->
+
+{{this.render(this.globalContentFactory().getHeader())|raw}}
+
+{{this.renderMainAds()|raw}}
+
+<main class="main" role="main" id="content">
+  {% block content %}{% endblock %}
+</main>
+
+{{this.render(this.globalContentFactory().getFooter())|raw}}
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{this.getCdnUri('/js/theme-bottom.min.js')}}"></script>
+{% endblock %}

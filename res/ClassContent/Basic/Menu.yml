@@ -1,0 +1,10 @@
+Menu:
+  properties:
+    name: Menu
+    description: ~
+    category: [!Common]
+    forbidden_plugins: ['remove', 'dnd', 'parameter']
+  parameters:
+    items:
+      type: menu
+      value: []

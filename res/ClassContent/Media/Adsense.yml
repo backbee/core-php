@@ -1,0 +1,24 @@
+Adsense:
+  properties:
+    name: yaml_block_adsens
+    description: ~
+    category: [block_category_more]
+  parameters:
+    client_id:
+      type: text
+      label: yaml_block_adsens_client_id
+      value: ''
+      placeholder: 'ca-pub-0000000000000000'
+    ad_slot:
+      type: text
+      label: yaml_block_adsens_ad_slot
+      value: ''
+      placeholder: '0000000000'
+    height:
+      type: select
+      label: yaml_block_adsens_size
+      options:
+        90: 'yaml_block_adsens_small'
+        200: 'yaml_block_adsens_medium'
+        350: 'yaml_block_adsens_large'
+      value: 90

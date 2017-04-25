@@ -1,0 +1,93 @@
+
+{% set formId = 'form_' ~ this.getObject().getUid() %}
+
+<div {{this.bbcontent(null)|raw}}>
+    {% if email.value is not empty %}
+    <form id="{{ formId }}" class="form" data-email="{{ email.value }}">
+        <p class="error-form-message" style="display:none;">{{error_message.value|nl2br}}</p>
+        <p class="confirmation-form-message" style="display:none;">{{confirmation_message.value|nl2br}}</p>
+        <div class="form-group">
+            <label class="form-label sr-only" for="formName">{{ name_placeholder.value }}</label>
+            <input name="name" type="text" class="form-control" id="formName" placeholder="{{ name_placeholder.value }}">
+        </div>
+        <div class="form-group">
+            <label class="form-label sr-only" for="formEmail">{{ email_address_placeholder.value }}</label>
+            <input name="email" type="email" class="form-control" id="formEmail" placeholder="{{ email_address_placeholder.value }}">
+        </div>
+        <div class="form-group">
+            <label class="form-label sr-only" for="formMessage">{{ message_placeholder.value }}</label>
+            <textarea name="message" class="form-control" id="formMessage" rows="3" placeholder="{{ message_placeholder.value }}"></textarea>
+        </div>
+        <div class="form-action text-{{button_align.value}}">
+            <button type="button" class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_style.value}}">{{ button_title.value }}</button>
+        </div>
+
+        <script>
+            (function () {
+
+                var init = function () {
+                    var $form = $('#{{formId}}');
+                    var $error = $form.find('.error-form-message');
+                    var message = '{{error_message.value}}';
+
+                    $form.find('button').on('click', function () {
+
+                        $form.find('.has-error').removeClass('has-error');
+                        $error.css('display', 'none');
+
+                        var data = $form.serializeArray().reduce(function(obj, item) {
+                            obj[item.name] = item.value;
+
+                            return obj;
+                        }, {});
+
+                        data.dest_email = $form.data('email');
+
+                        if (false == $.trim(data.name)) {
+                            $form.find('input[name="name"]').parent().addClass('has-error');
+                        }
+
+                        if (false == $.trim(data.email) || false === /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email)) {
+                            $form.find('input[name="email"]').parent().addClass('has-error');
+                        }
+
+                        if (false == $.trim(data.message)) {
+                            $form.find('textarea[name="message"]').parent().addClass('has-error');
+                        }
+
+                        if ($form.find('.has-error').length) {
+                            $error.removeAttr('style');
+                        } else {
+                            $.ajax({
+                                'method': 'POST',
+                                'url': '/send-contact',
+                                'data': data
+                            }).done(function () {
+                                $form.find('.confirmation-form-message').removeAttr('style');
+                                $form.find('.form-group, .form-action').css('display', 'none');
+
+                                {% if bb.token != null %}
+                                    window.dndZone.apply();
+                                {% endif %}
+                            });
+                        }
+
+                        {% if bb.token != null %}
+                            window.dndZone.apply();
+                        {% endif %}
+                    });
+                };
+
+                if (document.readyState === 'complete' || document.readyState === 'loaded') {
+                    init();
+                } else {
+                    document.addEventListener('DOMContentLoaded', init);
+                }
+            })();
+        </script>
+
+    </form>
+    {% else %}
+      {% include 'common/missing_config_block.html.twig' %}
+    {% endif %}
+</div>

@@ -1,0 +1,49 @@
+<div class="row">
+{% if image.url != false and display_image == true %}
+  <div class="col-md-3">
+    {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
+    <a href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive" alt="{{img_alt}}" /></a>
+  </div>
+  <div class="col-md-9">
+    <h3>
+      <a href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
+      {% if title_max_length > 0 %}
+        {{this.perfectTruncate(title, title_max_length)}}
+      {% else %}
+        {{title|striptags|raw}}
+      {% endif %}
+      </a>
+    </h3>
+
+    <p>
+    {% if abstract_max_length > 0 %}
+      {{this.perfectTruncate(abstract, abstract_max_length)}}
+    {% else %}
+      {{abstract|striptags|raw}}
+    {% endif %}
+    </p>
+  </div>
+{% else %}
+  <div class="col-md-12">
+    <h3>
+      <a href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
+      {% if title_max_length > 0 %}
+        {{this.perfectTruncate(title, title_max_length)}}
+      {% else %}
+        {{title|striptags|raw}}
+      {% endif %}
+      </a>
+    </h3>
+
+    {% if display_abstract %}
+    <p>
+    {% if abstract_max_length > 0 %}
+      {{this.perfectTruncate(abstract, abstract_max_length)}}
+    {% else %}
+      {{abstract|striptags|raw}}
+    {% endif %}
+    </p>
+    {% endif %}
+  </div>
+{% endif %}
+</div>

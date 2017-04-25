@@ -1,0 +1,22 @@
+Share:
+  properties:
+    name: yaml_block_share
+    description: ~
+    category: [block_category_social]
+  parameters:
+    enable_facebook:
+      type: switch
+      label: yaml_block_share_enable_facebook
+      value: true
+    enable_tweet:
+      type: switch
+      label: yaml_block_share_enable_tweet
+      value: true
+    align:
+      type: selectButton
+      label: yaml_block_share_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'center'

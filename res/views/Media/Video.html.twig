@@ -1,0 +1,11 @@
+<div {{this.bbcontent(null, {class: 'content video'})|raw}}>
+{% if src is empty %}
+  {% include 'common/missing_config_block.html.twig' %}
+{% else %}
+  <div class="embed-size-{{size}} embed-align-{{position}}">
+    <div class="embed-responsive embed-responsive-16by9">
+      <iframe class="embed-responsive-item edit-iframe" src="{{src}}" {{attributes}}></iframe>
+    </div>
+  </div>
+{% endif %}
+</div>

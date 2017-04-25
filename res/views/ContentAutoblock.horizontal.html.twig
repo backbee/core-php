@@ -1,0 +1,27 @@
+<div {{this.bbcontent()|raw}}>
+  <div class="autoblock-horizontal">
+  {% if contents|length > 0 %}
+    {% for content in contents %}
+      {% if loop.index == 1 %}
+        <div class="row">
+      {% endif %}
+
+      <div class="col-md-3">
+      {{content|raw}}
+      </div>
+
+      {% if loop.last or loop.index % 4 == 0 %}
+        </div>
+      {% endif %}
+
+      {% if loop.index % 4 == 0 and loop.last == false %}
+        <div class="row">
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% include 'pagination_autoblock.html.twig' %}
+{% else %}
+  {% include 'common/missing_config_block.html.twig' %}
+{% endif %}
+</div>

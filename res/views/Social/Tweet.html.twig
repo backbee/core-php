@@ -1,0 +1,15 @@
+<div {{this.bbcontent(null, {'class': 'text-' ~ align.value})|raw}}>
+    {% if url.value is empty or html is not defined %}
+        {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+        {{ html|raw }}
+
+        {% if bb.token != null %}
+            <script>
+              setTimeout(function () {
+                window.dndZone.apply();
+              }, 2000);
+          </script>
+        {% endif %}
+    {% endif %}
+</div>

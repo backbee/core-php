@@ -1,0 +1,9 @@
+ArticleAbstract:
+  extends: \BackBee\ClassContent\Element\Text
+  properties:
+    name: Article's abstract
+    description: ~
+    category: [!Article]
+    forbidden_plugins: ['parameter']
+    rte:
+      placeholder: "Your abstract here"

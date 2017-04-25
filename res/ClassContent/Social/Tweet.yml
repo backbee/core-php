@@ -1,0 +1,27 @@
+Tweet:
+  properties:
+    name: yaml_block_tweet
+    description: ~
+    category: [block_category_social]
+  parameters:
+    url:
+      label: yaml_block_tweet_url
+      type: text
+      value: ''
+      tab: yaml_block_tweet_general
+    align:
+      type: selectButton
+      label: yaml_block_share_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'center'
+      tab: yaml_block_tweet_style
+      group:
+        id: align
+    limit:
+      label: yaml_block_tweet_number_of_items_display
+      type: text
+      value: 10
+      tab: yaml_block_tweet_style

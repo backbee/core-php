@@ -1,0 +1,5 @@
+Footer:
+  properties:
+    name: Footer
+    description: ~
+    category: [!Footer]

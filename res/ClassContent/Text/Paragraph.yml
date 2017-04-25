@@ -1,0 +1,34 @@
+Paragraph:
+  extends: \BackBee\ClassContent\Element\Text
+  properties:
+    name: yaml_block_text
+    description: ~
+    category: [block_category_basics]
+    rte:
+      placeholder: yaml_block_text_rte_placeholder
+  parameters:
+    bg_color:
+      type: selectButton
+      label: yaml_block_text_bg_color
+      buttons:
+        color1: {'icon': 'icon-text', 'bgcolor': 'pink'}
+        color2: {'icon': 'icon-text', 'bgcolor': 'color2'}
+        color3: {'icon': 'icon-text', 'bgcolor': 'color3'}
+      value: 'color1'
+      group:
+        id: bg
+    transparency:
+      type: switch
+      value: false
+      label: yaml_block_text_transparency
+      group:
+        id: transparency
+    style:
+      type: radio
+      inline: true
+      options:
+        full-color: yaml_block_text_full_color
+        bordered: yaml_block_text_line_color
+      value: full-color
+      group:
+        id: color

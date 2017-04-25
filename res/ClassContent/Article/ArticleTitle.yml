@@ -1,0 +1,18 @@
+ArticleTitle:
+  extends: \BackBee\ClassContent\Basic\Title
+  properties:
+    name: yaml_block_article_title
+    description: ~
+    category: ["!Article"]
+    forbidden_plugins: ['parameter']
+    rte:
+      placeholder: yaml_block_article_title_rte_placeholder
+  parameters:
+    show_tags:
+      label: yaml_block_article_title_show_tags
+      type: switch
+      value: true
+    show_date:
+      label: yaml_block_article_title_show_publication_date
+      type: switch
+      value: true

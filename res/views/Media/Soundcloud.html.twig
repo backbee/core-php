@@ -1,0 +1,8 @@
+<div {{ this.bbcontent(null)|raw }}>
+    {% if url.value is empty or valid_url == false %}
+      {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+        <iframe width="100%" height="{{size.value}}" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url={{url.value}}&amp;color=010d0f&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;"></iframe>
+    {% endif %}
+</div>
+

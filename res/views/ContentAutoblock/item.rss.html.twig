@@ -1,0 +1,10 @@
+<item>
+  <title><![CDATA[ {{title|raw}} ]]></title>
+  <description><![CDATA[ {{abstract|striptags|raw}} ]]></description>
+  <link>{{this.getUri(url, '')}}</link>
+  <pubDate>{{publishing|date('D, d M Y H:i:s O')}}</pubDate>
+  <guid isPermaLink="false">{{this.getUri(url, '')}}</guid>
+{% if image.url != false %}
+  <enclosure url="{{this.getCdnImageUrl(image.url, true)}}" {{this.rssImageHelper(image)|raw}} />
+{% endif %}
+</item>

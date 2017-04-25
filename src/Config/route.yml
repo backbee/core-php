@@ -1,0 +1,248 @@
+
+# Override "bb.rss" pattern to also work for home page
+bb.rss:
+  pattern: /rss/{uri}
+  defaults:
+    _action: rssAction
+    _controller: controller
+    uri:     _root_
+  requirements:
+    uri: .*
+
+# Send contact email
+
+cloud.send_contact:
+  pattern: /send-contact
+  defaults:
+    _action: send
+    _controller: contact_controller
+  requirements:
+    _method: POST
+
+# robots.txt
+
+cloud.robots_txt:
+  pattern: /robots.txt
+  defaults:
+    _action: robotsTxt
+    _controller: search_engine_controller
+  requirements:
+    _method: GET
+
+# User preference API
+
+cloud.api.user_preferences.get_collection:
+  pattern: /api/user-preferences
+  defaults:
+    _action: getCollection
+    _controller: cloud.api.user_preference_controller
+  requirements:
+    _method: GET
+
+cloud.api.user_preferences.get:
+  pattern: /api/user-preferences/{name}
+  defaults:
+    _action: get
+    _controller: cloud.api.user_preference_controller
+  requirements:
+    _method: GET
+
+cloud.api.user_preferences.put:
+  pattern: /api/user-preferences/{name}
+  defaults:
+    _action: put
+    _controller: cloud.api.user_preference_controller
+  requirements:
+    _method: PUT
+
+cloud.api.user_preferences.delete:
+  pattern: /api/user-preferences/{name}
+  defaults:
+    _action: delete
+    _controller: cloud.api.user_preference_controller
+  requirements:
+    _method: DELETE
+
+# Import Status API
+
+cloud.import_status:
+  pattern: /api/import-status
+  defaults:
+    _action: getCollection
+    _controller: cloud.api.import_status_controller
+
+# Search route
+
+cloud.search:
+  pattern: /search
+  defaults:
+    _action: search
+    _controller: search_controller
+  requirements:
+    _method: GET
+
+# User API
+
+cloud.api.user.update_password:
+  pattern: /api/users/{id}/update-password
+  defaults:
+    _action: updatePassword
+    _controller: cloud.api.user_controller
+  requirements:
+    id: \d+
+    _method: PUT
+
+# Content API
+
+cloud.api.contents.delete:
+  pattern: /api/contents/{type}/{uid}
+  defaults:
+    _action: delete
+    _controller: cloud.api.content_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    type: .+
+    _method: DELETE
+
+cloud.api.contents.publish:
+  pattern: /api/contents/publish-page/{pageuid}
+  defaults:
+    _action: publish
+    _controller: cloud.api.content_controller
+  requirements:
+    pageuid: "[a-f0-9]{32}"
+    _method: PUT
+
+cloud.api.contents.publish_all:
+  pattern: /api/contents/publish-all-page
+  defaults:
+    _action: publishAll
+    _controller: cloud.api.content_controller
+  requirements:
+    _method: PUT
+
+cloud.api.contents.reset:
+  pattern: /api/contents/reset-page/{pageuid}
+  defaults:
+    _action: reset
+    _controller: cloud.api.content_controller
+  requirements:
+    pageuid: "[a-f0-9]{32}"
+    _method: PUT
+
+# Page type API
+
+cloud.api.pages_types.get_collection:
+  pattern: /api/pages-types
+  defaults:
+    _action: getCollection
+    _controller: cloud.api.page_type_controller
+  requirements:
+    _method: GET
+
+# Page API
+
+cloud.api.pages.get:
+  pattern: /api/pages/{uid}
+  defaults:
+    _action: get
+    _controller: cloud.api.page_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: GET
+
+cloud.api.pages.get_collection:
+  pattern: /api/pages
+  defaults:
+    _action: getCollection
+    _controller: cloud.api.page_controller
+  requirements:
+    _method: GET
+
+cloud.api.pages.post:
+  pattern: /api/pages
+  defaults:
+    _action: post
+    _controller: cloud.api.page_controller
+  requirements:
+    _method: POST
+
+cloud.api.pages.put:
+  pattern: /api/pages/{uid}
+  defaults:
+    _action: put
+    _controller: cloud.api.page_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: PUT
+
+cloud.api.pages.delete:
+  pattern: /api/pages/{uid}
+  defaults:
+    _action: delete
+    _controller: cloud.api.page_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: DELETE
+
+cloud.api.pages.duplicate:
+  pattern: /api/pages/duplicate/{uid}
+  defaults:
+    _action: duplicate
+    _controller: cloud.api.page_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: POST
+
+# Tag API
+
+cloud.api.tags.get_collection:
+  pattern: /api/tags
+  defaults:
+    _action: getCollection
+    _controller: cloud.api.tag_controller
+  requirements:
+    _method: GET
+
+cloud.api.tags.linked_pages:
+  pattern: /api/tags/{uid}/linked-pages
+  defaults:
+    _action: getLinkedPages
+    _controller: cloud.api.tag_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: GET
+
+cloud.api.tags.post:
+  pattern: /api/tags
+  defaults:
+    _action: post
+    _controller: cloud.api.tag_controller
+  requirements:
+    _method: POST
+
+cloud.api.tags.put:
+  pattern: /api/tags/{uid}
+  defaults:
+    _action: put
+    _controller: cloud.api.tag_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: PUT
+
+cloud.api.tags.delete:
+  pattern: /api/tags/{uid}
+  defaults:
+    _action: delete
+    _controller: cloud.api.tag_controller
+  requirements:
+    uid: "[a-f0-9]{32}"
+    _method: DELETE
+
+cloud.hauth.authenticate:
+  pattern: /social/authenticate
+  defaults:
+    _action: authenticateAction
+    _controller: cloud.hauth.controller
+  requirements:
+    _method: POST

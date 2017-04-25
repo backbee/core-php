@@ -1,0 +1,66 @@
+Button:
+  extends: \BackBee\ClassContent\Element\Text
+  properties:
+    name: yaml_block_button
+    description: ~
+    category: [block_category_basics]
+  parameters:
+    title:
+      type: text
+      label: yaml_block_button_title
+      value: ''
+      tab: yaml_block_button_general
+      group:
+        id: text
+    url:
+      type: text
+      label: yaml_block_button_url
+      value: ''
+      format: URL
+      tab: yaml_block_button_general
+      group:
+        id: text
+    target_blank:
+      type: switch
+      label: yaml_block_button_open_in_tab
+      value: false
+      tab: yaml_block_button_general
+    align:
+      type: selectButton
+      label: yaml_block_button_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'center'
+      tab: yaml_block_button_style
+      group:
+        id: align
+    color:
+      type: color
+      label: yaml_block_button_color
+      value: color2
+      tab: yaml_block_button_style
+      group:
+        id: color
+    style:
+      type: radio
+      inline: true
+      options:
+        btn-full: yaml_block_button_full_color
+        btn-border: yaml_block_button_line_color
+      value: btn-full
+      tab: yaml_block_button_style
+      group:
+        id: color
+    size:
+      type: select
+      label: yaml_block_button_size
+      options:
+        xs: yaml_block_button_small
+        md: yaml_block_button_medium
+        lg: yaml_block_button_large
+      value: md
+      tab: yaml_block_button_style
+      group:
+        id: size

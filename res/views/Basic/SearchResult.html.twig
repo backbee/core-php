@@ -1,0 +1,47 @@
+<div {{this.bbcontent()|raw}} data-forbidden-plugins="remove">
+  <div class="form-group">
+    <form action="/search" method="get">
+      <input type="text" class="form-control" name="q" value="{{query}}" placeholder="{{this.getObject().getParamValue('input_placeholder')}}" />
+    </form>
+  </div>
+
+  {% if query %}
+  <h3>{{this.getObject().getParamValue('result_label')}} <strong>{{query}}</strong></h3>
+  {% endif %}
+
+  <ul class="list-unstyled list-result">
+  {% for content in contents %}
+    <li>{{content|raw}}</li>
+  {% else %}
+    <li><em>{{this.getObject().getParamValue('no_results_message')}}</em></li>
+  {% endfor %}
+  </ul>
+
+  {% if pages.maxPagination() > 1 %}
+  <nav class="text-center">
+    <ul class="pagination">
+      {% if pages.currentPagination() != 1 and pages.currentPagination() > 0 %}
+      <li>
+        <a href="?q={{ query|url_encode }}&page={{ pages.currentPagination() - 1 }}" aria-label="Previous">
+          <span class="arrow_carrot-left" aria-hidden="true"></span>
+        </a>
+      </li>
+      {% endif %}
+
+      {% for i in 1..pages.maxPagination() %}
+      <li {% if pages.currentPagination() == i %}class="active"{% endif %}>
+        <a href="?q={{ query|url_encode }}&page={{ i }}">{{i}}</a>
+      </li>
+      {% endfor %}
+
+      {% if pages.maxPagination() > pages.currentPagination() %}
+      <li>
+        <a href="?q={{ query|url_encode }}&page={{ pages.currentPagination() + 1 }}" aria-label="Next">
+          <span class="arrow_carrot-right" aria-hidden="true"></span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>

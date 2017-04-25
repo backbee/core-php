@@ -1,0 +1,24 @@
+Icons:
+    properties:
+        name: yaml_block_socials
+        description: ~
+        category: [block_category_social]
+    parameters:
+        align:
+            type: selectButton
+            label: yaml_block_socials_position
+            buttons:
+                left: {'icon': 'icon-align-left'}
+                center: {'icon': 'icon-align-center'}
+                right: {'icon': 'icon-align-right'}
+            value: 'left'
+        social:
+            type: social
+            label: yaml_block_socials
+            value:
+                facebook: {'placeholder': 'https://facebook.com/username', 'url': '', 'enable': false}
+                twitter: {'placeholder': 'https://twitter.com/username', 'url': '', 'enable': false}
+                instagram: {'placeholder': 'https://instagram.com/username', 'url': '', 'enable': false}
+                googleplus: {'placeholder': 'https://plus.google.com/userid', 'url': '', 'enable': false}
+                linkedin: {'placeholder': 'https://www.linkedin.com/in/username-userid', 'url': '', 'enable': false}
+                flickr: {'placeholder': 'https://www.flickr.com/photos/userid', 'url': '', 'enable': false}

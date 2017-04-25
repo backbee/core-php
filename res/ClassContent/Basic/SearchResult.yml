@@ -1,0 +1,43 @@
+SearchResult:
+  properties:
+    name: yaml_block_search_result
+    description: ~
+    category: [!Basics]
+  parameters:
+    input_placeholder:
+      type: text
+      label: yaml_block_search_result_input_placeholder
+      value: Search…
+      tab: yaml_block_general_tab
+    result_label:
+      type: text
+      label: yaml_block_search_result_result_label
+      value: Results for
+      tab: yaml_block_general_tab
+    no_results_message:
+      type: text
+      label: yaml_block_search_result_no_result
+      value: No results
+      tab: yaml_block_general_tab
+    show_image:
+      type: switch
+      value: true
+      label: yaml_block_page_list_of_pages_show_image
+      tab: yaml_block_page_list_of_pages_style
+      group:
+        id: show-hide
+        title: yaml_block_page_list_of_pages_show_hide_elements
+    show_abstract:
+      type: switch
+      value: true
+      label: yaml_block_page_list_of_pages_show_abstract
+      tab: yaml_block_page_list_of_pages_style
+      group:
+        id: show-hide
+    show_published_at:
+      type: switch
+      value: true
+      label: yaml_block_page_list_of_pages_show_publication_date
+      tab: yaml_block_page_list_of_pages_style
+      group:
+        id: show-hide

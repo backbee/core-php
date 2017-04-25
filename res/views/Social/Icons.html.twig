@@ -1,0 +1,18 @@
+<div {{this.bbcontent(null, {class: 'content text-' ~ align.value})|raw}}>
+  <ul class="list-inline social-list">
+  {% set found = false %}
+  {% for key, social in social.value %}
+    {% if social.enable == true and social.url %}
+    {% set found = true %}
+    <li>
+      <a {% if bb.token == null %}href="{{social.url}}"{% endif %} target="_blank" rel="nofollow" class="social-icon-{{key}}">
+        <i class="social_{{key}}"></i>
+      </a>
+    </li>
+    {% endif %}
+  {% endfor %}
+  {% if found == false %}
+      {% include 'common/missing_config_block.html.twig' %}
+  {% endif %}
+  </ul>
+</div>

@@ -1,0 +1,29 @@
+CloudContentSet:
+  extends: \BackBee\ClassContent\ContentSet
+  properties:
+    name: Cloud ContentSet
+    description: ~
+    category: []
+  parameters:
+    width:
+      value: 'container'
+    height:
+      value: ''
+    blocksize:
+      value: []
+    bg_color:
+      value: default
+    bg_image:
+      value: ''
+    bg_overlay:
+      value: false
+    bg_image_position_y:
+      value: '0%'
+    responsive_mobile:
+      value: {}
+    responsive_tablet:
+      value: {}
+    remove_padding:
+      value: false
+    remove_gutter:
+      value: false

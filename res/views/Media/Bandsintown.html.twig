@@ -1,0 +1,15 @@
+<div {{ this.bbcontent(null)|raw }}>
+    {% if artist_name.value is empty %}
+      {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+        <script type='text/javascript' src='http://widget.bandsintown.com/javascripts/bit_widget.js'></script>
+        <a href="http://bandsintown.com/{{ artist_name.value }}" class="bit-widget-initializer" data-artist="{{ artist_name.value }}">{{ artist_name.value }}</a>
+        {% if bb.token != null %}
+            <script>
+                setTimeout(function () {
+                    window.dndZone.apply();
+                }, 3500);
+            </script>
+        {% endif %}
+    {% endif %}
+</div>

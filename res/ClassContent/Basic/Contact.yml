@@ -1,0 +1,82 @@
+Contact:
+  properties:
+    name: yaml_block_contact
+    description: ~
+    category: [block_category_more]
+  parameters:
+    email:
+      label: yaml_block_contact_destination
+      type: text
+      value: ''
+      tab: yaml_block_contact_email
+    name_placeholder:
+      label: yaml_block_contact_name_placeholder
+      type: text
+      value: yaml_block_contact_your_name
+      tab: yaml_block_contact_fields
+    email_address_placeholder:
+      label: yaml_block_contact_email_placeholder
+      type: text
+      value: yaml_block_contact_your_email
+      tab: yaml_block_contact_fields
+    message_placeholder:
+      label: yaml_block_contact_message_placeholder
+      type: text
+      value: yaml_block_contact_message
+      tab: yaml_block_contact_fields
+    error_message:
+      label: yaml_block_contact_error_message
+      type: textarea
+      value: yaml_block_contact_infos_missing
+      tab: yaml_block_contact_fields
+    confirmation_message:
+      label: yaml_block_contact_confirmation_message
+      type: textarea
+      value: yaml_block_contact_confirmation_message_placeholder
+      tab: yaml_block_contact_fields
+    button_title:
+      type: text
+      label: yaml_block_contact_title
+      value: ''
+      tab: yaml_block_contact_button
+      group:
+        id: text
+    button_align:
+      type: selectButton
+      label: yaml_block_contact_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'center'
+      tab: yaml_block_contact_button
+      group:
+        id: align
+    button_color:
+      type: color
+      label: yaml_block_contact_color
+      value: color2
+      tab: yaml_block_contact_button
+      group:
+        id: color
+    button_style:
+      type: radio
+      inline: true
+      options:
+        btn-full: yaml_block_contact_full_color
+        btn-border: yaml_block_contact_line_color
+      value: btn-full
+      tab: yaml_block_contact_button
+      group:
+        id: color
+    button_size:
+      type: select
+      label: yaml_block_contact_size
+      options:
+        xs: yaml_block_contact_small
+        md: yaml_block_contact_medium
+        lg: yaml_block_contact_large
+      value: md
+      tab: yaml_block_contact_button
+      group:
+        id: size

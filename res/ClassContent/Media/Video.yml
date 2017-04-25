@@ -1,0 +1,31 @@
+Video:
+  properties:
+    name: yaml_block_video
+    description: ~
+    category: [block_category_basics]
+  parameters:
+    video_url:
+      type: text
+      label: yaml_block_video_url
+      value: ''
+      tab: yaml_block_video_general
+    position:
+      type: selectButton
+      label: yaml_block_video_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: left
+      tab: yaml_block_video_style
+      group:
+        id: position
+    size:
+      type: select
+      label: yaml_block_video_size
+      options:
+        auto: yaml_block_video_auto
+        xs: yaml_block_video_small
+        md: yaml_block_video_medium
+      value: auto
+      tab: yaml_block_video_style

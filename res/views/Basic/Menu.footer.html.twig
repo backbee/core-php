@@ -1,0 +1,7 @@
+<ul data-mobile-edit="false" {{ this.bbcontent(null, {'class': 'list-inline term-list'})|raw }}>
+  {% for item in items %}
+    <li {% if item.is_current %}class="active"{% endif %}>
+        <a href="{{item.url}}" {% if item.is_online == false %}class="offline" title="This page is offline"{% endif %}>{{item.label}}</a>
+    </li>
+  {% endfor %}
+</ul>

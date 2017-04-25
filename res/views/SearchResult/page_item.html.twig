@@ -1,0 +1,31 @@
+<div class="row">
+    {% if show_image %}
+    <div class="col-md-3">
+        <figure class="figure">
+            <div class="contentwrapper">
+            {% if image.url != false %}
+                {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
+                <a href="{{url}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive" alt="{{img_alt}}" /></a>
+            {% else %}
+                <a href="{{url}}"><img src="{{this.getCdnUri('/static/img/img_placeholder.png')}}" class="img-responsive" /></a>
+            {% endif %}
+            </div>
+        </figure>
+    </div>
+    {% endif %}
+
+    <div class="col-md-{{show_image ? 9 : 12}}">
+        <h3><a href="{{url}}">{{title|striptags|raw}}</a></h3>
+
+        {% if show_published_at %}
+        <p class="metadata-wrapper border-top">
+            {{(publishing ? '<time class="time metadata-time" pubdate="' ~ publishing.format('Y-m-d H:i') ~ '">' ~ publishing.format('Y.m.d') ~ '</time>' : '<em>Not yet published.</em>')|raw}}
+        </p>
+        {% endif %}
+
+        {% if show_abstract %}
+        <p>{{this.perfectTruncate(abstract, 144)}}</p>
+        {% endif %}
+    </div>
+</div>
+

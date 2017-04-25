@@ -1,0 +1,9 @@
+{% set height = this.getObject().getParamValue('height') %}
+
+{% if height is empty %}
+    {% set height = 'auto' %}
+{% else %}
+    {% set height = height ~ 'px' %}
+{% endif %}
+
+<div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-spacer'})|raw}} style="height: {{height}};"></div>

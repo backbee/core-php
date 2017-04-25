@@ -1,0 +1,31 @@
+{% set urlPart = 'page_' ~ this.getObject().getUid()|slice(0, 5) %}
+
+{% if pagination.value %}
+    {% if pagination_data.count > contents|length %}
+        <nav class="text-center">
+            <ul class="pagination">
+                {% if pagination_data.current_page != 1 and pagination_data.current_page > 0 %}
+                    <li>
+                        <a href="?{{urlPart}}={{ pagination_data.current_page - 1 }}" aria-label="Previous">
+                            <span class="arrow_carrot-left" aria-hidden="true"></span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for i in pagination_data.start_pagination..pagination_data.nb_page %}
+                    <li {% if pagination_data.current_page == i %}class="active"{% endif %}>
+                        <a href="?{{urlPart}}={{ i }}">{{i}}</a>
+                    </li>
+                {% endfor %}
+
+                {% if pagination_data.nb_page != pagination_data.current_page %}
+                    <li>
+                        <a href="?{{urlPart}}={{ pagination_data.current_page + 1 }}" aria-label="Next">
+                            <span class="arrow_carrot-right" aria-hidden="true"></span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endif %}

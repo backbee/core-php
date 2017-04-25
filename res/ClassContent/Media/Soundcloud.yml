@@ -1,0 +1,18 @@
+Soundcloud:
+  properties:
+    name: yaml_block_soundcloud
+    description: ~
+    category: [block_category_more]
+  parameters:
+    url:
+      type: text
+      label: yaml_block_soundcloud_url
+      value: ''
+    size:
+      type: select
+      label: yaml_block_soundcloud_player_size
+      options:
+        150: yaml_block_soundcloud_small
+        225: yaml_block_soundcloud_medium
+        500: yaml_block_soundcloud_large
+      value: 150

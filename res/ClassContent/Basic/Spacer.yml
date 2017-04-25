@@ -1,0 +1,8 @@
+Spacer:
+  properties:
+    name: yaml_block_spacer
+    description: ~
+    category: [block_category_more]
+  parameters:
+    height:
+      value: 20

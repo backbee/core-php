@@ -1,0 +1,179 @@
+parameters:
+  bbapp.classcontent.exception_on_unknown_classname: false
+  error.base_folder: ''
+  error.404: error_404.html.twig
+  error.500: error_500.html.twig
+  error.default: error_default.html.twig
+
+services:
+  cloud.page_manager:
+    class: BackBeeCloud\Entity\PageManager
+    arguments: [@bbapp]
+
+  cloud.content_manager:
+    class: BackBeeCloud\Entity\ContentManager
+    arguments: [@em, @classcontent.manager, @event.dispatcher]
+
+  cloud.tag_manager:
+    class: BackBeeCloud\Entity\TagManager
+    arguments: [@em, @elasticsearch.manager]
+
+  cloud.image_listener:
+    class: BackBeeCloud\Listener\ImageListener
+    arguments: [@cloud.file_handler]
+
+  cloud.file_handler:
+    class: BackBeeCloud\ImageFilesystemHandler
+    arguments: [@bbapp]
+
+  user_preference.manager:
+    class: BackBeeCloud\UserPreference\UserPreferenceManager
+    arguments: [@em]
+
+  site_option.manager:
+    class: BackBeeCloud\SiteOption\OptionManager
+    arguments: [@em]
+
+  # Contact service
+  contact_controller:
+    class: BackBeeCloud\Controller\ContactController
+    arguments: [@bbapp]
+
+  # Search Engine service
+  search_engine_controller:
+    class: BackBeeCloud\Controller\SearchEngineController
+    arguments: [@renderer, @user_preference.manager]
+
+  # Search service
+  search_controller:
+    class: BackBeeCloud\Controller\SearchController
+    arguments: [@bbapp]
+
+  # API services
+  cloud.api.user_controller:
+    class: BackBeeCloud\Api\Controller\UserController
+    arguments: [@bbapp]
+
+  cloud.api.user_preference_controller:
+    class: BackBeeCloud\Api\Controller\UserPreferenceController
+    arguments: [@bbapp]
+
+  cloud.api.import_status_controller:
+    class: BackBeeCloud\Api\Controller\ImportStatusController
+    arguments: [@em]
+
+  cloud.api.page_controller:
+    class: BackBeeCloud\Api\Controller\PageController
+    arguments: [@bbapp]
+
+  cloud.api.content_controller:
+    class: BackBeeCloud\Api\Controller\ContentController
+    arguments: [@bbapp]
+
+  cloud.api.page_type_controller:
+    class: BackBeeCloud\Api\Controller\PageTypeController
+    arguments: [@bbapp]
+
+  cloud.api.tag_controller:
+    class: BackBeeCloud\Api\Controller\TagController
+    arguments: [@bbapp]
+
+  # Page type services
+  cloud.page_type.manager:
+    class: BackBeeCloud\PageType\TypeManager
+    arguments: [@service_container]
+
+  cloud.page_type.home_type:
+    class: BackBeeCloud\PageType\HomeType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.page_type.blank_type:
+    class: BackBeeCloud\PageType\BlankType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.page_type.article_type:
+    class: BackBeeCloud\PageType\ArticleType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.page_type.search_result_type:
+    class: BackBeeCloud\PageType\SearchResultType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.disqus_listener:
+    class: BackBeeCloud\Listener\ClassContent\DisqusListener
+    arguments: [@bbapp]
+
+  elasticsearch.manager:
+    class: BackBeeCloud\Elasticsearch\ElasticsearchManager
+    arguments: [@bbapp]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+
+  import.manager:
+    class: BackBeeCloud\Importer\ImportManager
+    arguments: [@em, @cloud.structure_builder]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  # Structure's services
+  yaml_structure_dumper.manager:
+    class: BackBeeCloud\Structure\YamlStructureDumperManager
+    arguments: [@bbapp]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  structure.parameter_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ParameterHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.paragraph_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ParagraphHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.image_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ImageHandler
+    arguments: [@cloud.file_handler]
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.slider_handler:
+    class: BackBeeCloud\Structure\ContentHandler\SliderHandler
+    arguments: [@structure.image_handler, @structure.parameter_handler]
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.highlightcontent_handler:
+    class: BackBeeCloud\Structure\ContentHandler\HighlightContentHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.contact_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ContactHandler
+    arguments: [@em]
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.socialicons_handler:
+    class: BackBeeCloud\Structure\ContentHandler\SocialIconsHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  cloud.global_content_factory:
+    class: BackBeeCloud\Structure\GlobalContentFactory
+    arguments: [@bbapp]
+
+  cloud.hauth.controller:
+    class: BackBeeCloud\Controller\HAuthController
+    arguments: [@bbapp]
+
+  # Security services
+  security.voter.sudo:
+    class: BackBeeCloud\Security\Authorization\Voter\SudoVoter
+    arguments: [@bbapp]
