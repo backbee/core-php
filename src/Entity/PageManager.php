@@ -60,6 +60,11 @@ class PageManager
      */
     protected $hydratePage = true;
 
+    /**
+     * @var null|PageManager
+     */
+    protected $currentPage;
+
     public function __construct(BBApplication $app)
     {
         $this->bbtoken = $app->getBBUserToken();
@@ -85,6 +90,17 @@ class PageManager
     public function disablePageHydratation()
     {
         $this->hydratePage = false;
+    }
+
+    /**
+     * Returns current page, which means page that is currently creating or
+     * duplicating. Otherwise null is returned.
+     *
+     * @return null|Page
+     */
+    public function getCurrentPage()
+    {
+        return $this->currentPage;
     }
 
     /**
@@ -242,11 +258,15 @@ class PageManager
         unset($data['title']);
         $this->update($page, ['type' => $data['type']], false);
         unset($data['type']);
+
+        $this->currentPage = $page;
         $this->update($page, $data);
 
         if (null !== $redirections) {
             $this->handleRedirections($page, (array) $redirections);
         }
+
+        $this->currentPage = null;
 
         return $page;
     }
@@ -321,6 +341,11 @@ class PageManager
 
         $this->entyMgr->persist($copy);
         $this->typeMgr->associate($copy, $this->typeMgr->findByPage($page));
+
+        $this->update($copy, ['title' => $data['title']], false);
+        unset($data['title']);
+
+        $this->currentPage = $copy;
         $this->update($copy, $data, false);
 
         $this->entyMgr->flush();
@@ -329,6 +354,8 @@ class PageManager
 
         $this->entyMgr->flush();
         $this->entyMgr->commit();
+
+        $this->currentPage = null;
 
         return $copy;
     }
