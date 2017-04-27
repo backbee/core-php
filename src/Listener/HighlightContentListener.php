@@ -65,34 +65,58 @@ class HighlightContentListener
         $content = null;
 
         $param = $block->getParamValue('content');
+        $contents = [];
 
         if (isset($param['id'])) {
-            $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage([
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            [ 'match' => [ '_id' => $param['id'] ] ],
-                        ],
-                    ],
-                ],
-            ], 0, 1, [], false);
+            $id = $param['id'];
+            $param = [];
 
-            if (1 !== $pages->countMax()) {
-                $renderer->assign('content', null);
-
-                return;
-            }
-
-            $content = self::renderPageFromRawData(
-                reset($pages->collection()),
-                $block,
-                $renderer->getMode(),
-                $app
-            );
+            $param[] = ['id' => $id];
         }
 
-        $renderer->assign('content', $content);
+        if (false != $param) {
+            $shouldMatch = [];
+            foreach ($param as $data) {
+                $shouldMatch[] = [ 'match' => [ '_id' => $data['id'] ] ];
+            }
+
+            $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage([
+               'query' => [
+                   'bool' => [
+                       'should' => $shouldMatch,
+                       'minimum_should_match' => 1,
+                   ],
+               ],
+            ], 0, count($param), [], false);
+
+            $pages = self::sortPagesByUids($param, $pages);
+
+            foreach ($pages as $page) {
+                $contents[] = self::renderPageFromRawData($page, $block, $renderer->getMode(), $app);
+            }
+        }
+
+        $renderer->assign('contents', $contents);
     }
+
+    public static function sortPagesByUids(array $param, $pages)
+    {
+        $uids = [];
+        foreach($param as $data) {
+            $uids[] = $data['id'];
+        }
+
+        $sorted = [];
+        $positions = array_flip($uids);
+        foreach ($pages as $page) {
+            $sorted[$positions[$page['_id']]] = $page;
+        }
+
+        ksort($sorted);
+
+        return array_values($sorted);
+    }
+
 
     public static function renderPageFromRawData(array $pageRawData, AbstractClassContent $wrapper, $currentMode, BBApplication $app)
     {

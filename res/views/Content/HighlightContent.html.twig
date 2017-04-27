@@ -1,7 +1,31 @@
+{% set col = 12 / nb_item_per_line.value %}
+
 <div {{this.bbcontent()|raw}}>
-{% if content == false %}
+{% if contents == false %}
   {% include 'common/missing_config_block.html.twig' %}
 {% else %}
-  {{content|raw}}
+  <div class="autoblock-horizontal">
+  {% if contents|length > 0 %}
+    {% for content in contents %}
+      {% if loop.index == 1 %}
+        <div class="row">
+      {% endif %}
+
+      <div class="col-md-{{col}}">
+      {{content|raw}}
+      </div>
+
+      {% if loop.last or loop.index % nb_item_per_line.value == 0 %}
+        </div>
+      {% endif %}
+
+      {% if loop.index % nb_item_per_line.value == 0 and loop.last == false %}
+        <div class="row">
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  </div>
+
 {% endif %}
 </div>
+
