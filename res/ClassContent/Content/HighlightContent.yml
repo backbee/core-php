@@ -4,16 +4,6 @@ HighlightContent:
     description: ~
     category: [block_category_pages]
   parameters:
-    nb_item_per_line:
-      type: select
-      label: yaml_block_page_list_of_pages_number_item_per_line
-      options:
-        1: 1
-        2: 2
-        3: 3
-        4: 4
-      value: 4
-      tab: yaml_block_page_highlight_style
     content:
       type: searchPageType
       label: yaml_block_page_highlight_select_page_display
@@ -52,6 +42,16 @@ HighlightContent:
       tab: yaml_block_page_highlight_style
       group:
         id: show-hide
+    nb_item_per_line:
+      type: select
+      label: yaml_block_page_list_of_pages_number_item_per_line
+      options:
+        1: 1
+        2: 2
+        3: 3
+        4: 4
+      value: 4
+      tab: yaml_block_page_highlight_style
     title_max_length:
       type: text
       value: ~
