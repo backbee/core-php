@@ -191,6 +191,16 @@ class UserPreferenceManager
     protected function authorizedNamesAndKeys()
     {
         return [
+            'error_page_404' => [
+                'button_title' => 'is_string',
+                'description' => 'is_string',
+                'title' => 'is_string',
+            ],
+            'error_page_500' => [
+                'button_title' => 'is_string',
+                'description' => 'is_string',
+                'title' => 'is_string',
+            ],
             'search-engines' => [
                 'robots_index' => null,
             ],
