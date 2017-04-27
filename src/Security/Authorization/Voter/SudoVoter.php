@@ -13,19 +13,16 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  */
 class SudoVoter extends BaseSudoVoter
 {
-    private $sudoers = [];
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $entyMgr;
 
     public function __construct(BBApplication $app)
     {
         parent::__construct($app);
 
-        $criteria = [
-            '_activated'       => true,
-            '_api_key_enabled' => true,
-        ];
-        foreach ($app->getEntityManager()->getRepository(User::class)->findBy($criteria) as $user) {
-            $this->sudoers[$user->getUsername()] = $user->getId();
-        }
+        $this->entyMgr = $app->getEntityManager();
     }
 
     /**
@@ -34,10 +31,12 @@ class SudoVoter extends BaseSudoVoter
     public function vote(TokenInterface $token, $object, array $attributes)
     {
         $isSudoer = false;
+        $sudoers = $this->getSudoers();
+
         if (
             $this->supportsClass(get_class($token))
-            && isset($this->sudoers[$token->getUser()->getUsername()])
-            && $token->getUser()->getId() === $this->sudoers[$token->getUser()->getUsername()]
+            && isset($sudoers[$token->getUser()->getUsername()])
+            && $token->getUser()->getId() === $sudoers[$token->getUser()->getUsername()]
         ) {
             $isSudoer = true;
         }
@@ -46,5 +45,25 @@ class SudoVoter extends BaseSudoVoter
             ? VoterInterface::ACCESS_GRANTED
             : parent::vote($token, $object, $attributes)
         ;
+    }
+
+    /**
+     * Returns list of sudoers.
+     *
+     * @return array
+     */
+    protected function getSudoers()
+    {
+        $sudoers = [];
+
+        $criteria = [
+            '_activated'       => true,
+            '_api_key_enabled' => true,
+        ];
+        foreach ($this->entyMgr->getRepository(User::class)->findBy($criteria) as $user) {
+            $sudoers[$user->getUsername()] = $user->getId();
+        }
+
+        return $sudoers;
     }
 }

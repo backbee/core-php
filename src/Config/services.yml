@@ -113,13 +113,6 @@ services:
     tags:
       - { name: worker.job_handler, dispatch_event: false }
 
-
-  import.manager:
-    class: BackBeeCloud\Importer\ImportManager
-    arguments: [@em, @cloud.structure_builder]
-    tags:
-      - { name: worker.job_handler, dispatch_event: false }
-
   # Structure's services
   yaml_structure_dumper.manager:
     class: BackBeeCloud\Structure\YamlStructureDumperManager
