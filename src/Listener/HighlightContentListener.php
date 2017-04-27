@@ -169,6 +169,7 @@ class HighlightContentListener
             'image'                => $imageData,
             'display_abstract'     => $wrapper->getParamValue('abstract'),
             'display_published_at' => $wrapper->getParamValue('published_at'),
+            'reduce_title_size'    => !$displayImage && !$wrapper->getParamValue('abstract'),
             'display_image'        => $displayImage,
             'title_max_length'     => $wrapper->getParamValue('title_max_length'),
             'abstract_max_length'  => $wrapper->getParamValue('abstract_max_length'),
