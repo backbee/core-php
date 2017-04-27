@@ -138,4 +138,12 @@ class ImageListener
             );
         }
     }
+
+    public function onCloudContentSetRender(RendererEvent $event)
+    {
+        $block = $event->getTarget();
+        if (false !== strpos($block->getParamValue('bg_image'), 'theme-default-resources')) {
+            $block->setParam('bg_image', $event->getRenderer()->getCdnImageUrl($block->getParamValue('bg_image')));
+        }
+    }
 }

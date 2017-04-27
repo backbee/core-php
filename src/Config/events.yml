@@ -184,3 +184,7 @@ content.duplicate.presave:
 bundle.hauth.started:
   listeners:
     - [BackBeeCloud\Listener\HAuthListener, onBundleStart]
+
+cloudcontentset.render:
+  listeners:
+    - [@cloud.image_listener, onCloudContentSetRender]
