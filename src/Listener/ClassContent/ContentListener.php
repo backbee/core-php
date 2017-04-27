@@ -45,9 +45,9 @@ class ContentListener
                 }
             }
         } elseif ($content instanceof Title) {
-            // if (null !== $page) {
-            //     $content->value = $page->getTitle();
-            // }
+            if (null !== $page = $dic->get('cloud.page_manager')->getCurrentPage()) {
+                $content->value = $page->getTitle();
+            }
         }
     }
 
