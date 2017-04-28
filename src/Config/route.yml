@@ -19,6 +19,16 @@ cloud.send_contact:
   requirements:
     _method: POST
 
+# Newsletter
+
+cloud.newsletter_send:
+  pattern: /newsletter/send
+  defaults:
+    _action: send
+    _controller: newsletter_controller
+  requirements:
+    _method: POST
+
 # robots.txt
 
 cloud.robots_txt:
@@ -39,6 +49,32 @@ cloud.api.acl.get:
   requirements:
     _method: GET
     id: \d+
+
+# MailChimp API
+
+cloud.api.mailchimp.get_information:
+  pattern: /api/mailchimp/get-information
+  defaults:
+    _action: getInformation
+    _controller: cloud.api.mailchimp_controller
+  requirements:
+    _method: GET
+
+cloud.api.mailchimp.get_token:
+  pattern: /api/mailchimp/get-token/{code}
+  defaults:
+    _action: getToken
+    _controller: cloud.api.mailchimp_controller
+  requirements:
+    _method: GET
+
+cloud.api.mailchimp.get_lists:
+  pattern: /api/mailchimp/lists/{token}
+  defaults:
+    _action: getLists
+    _controller: cloud.api.mailchimp_controller
+  requirements:
+    _method: GET
 
 # User preference API
 

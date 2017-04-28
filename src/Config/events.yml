@@ -138,7 +138,11 @@ controller.frontcontroller.defaultaction.precall:
 
 backbeecloud.controller.contactcontroller.send.precall:
   listeners:
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContactFormSubmissionPreCall]
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
+
+backbeecloud.controller.newslettercontroller.send.precall:
+  listeners:
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
 
 # ClassContents listeners
 
@@ -210,4 +214,8 @@ cloudcontentset.render:
 
 basic.contact.render:
   listeners:
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContactRender]
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
+
+basic.newsletter.render:
+  listeners:
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]

@@ -16,12 +16,16 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class ReCaptchaListener
 {
     /**
-     * Listens to "basic.contact.render" to inject 'recaptcha_sitekey' to view
-     * if current host is authorized.
+     * Listens to:
+     *
+     * - "basic.contact.render"
+     * - "basic.newsletter.render"
+     *
+     *  To inject 'recaptcha_sitekey' to view if current host is authorized.
      *
      * @param  RendererEvent $event
      */
-    public static function onContactRender(RendererEvent $event)
+    public static function onContentRequireReCaptchaRender(RendererEvent $event)
     {
         $settings = (new GlobalSettings())->reCaptcha();
         if (false == $settings) {
@@ -37,8 +41,12 @@ class ReCaptchaListener
     }
 
     /**
-     * Listens to "backbeecloud.controller.contactcontroller.send.precall" to check
-     * that current user is not a bot by using Google reCAPTCHA.
+     * Listens to:
+     *
+     * - "backbeecloud.controller.contactcontroller.send.precall"
+     * - "backbeecloud.controller.newslettercontroller.send.precall"
+     *
+     * To check that current user is not a bot by using Google reCAPTCHA.
      *
      * Note that nothing will be done if there is a valid BBUserToken.
      *
@@ -48,7 +56,7 @@ class ReCaptchaListener
      *                                            or if the host name is different between
      *                                            reCAPTCHA and $_SERVER['SERVER_NAME']
      */
-    public static function onContactFormSubmissionPreCall(PreRequestEvent $event)
+    public static function onReCaptchaFormSubmissionPreCall(PreRequestEvent $event)
     {
         if (null !== $event->getApplication()->getBBUserToken()) {
             return;
