@@ -2,8 +2,9 @@ Menu:
   properties:
     name: Menu
     description: ~
-    category: [!Common]
+    category: ['!Common']
     forbidden_plugins: ['remove', 'dnd', 'parameter']
+    form_height: 500
   parameters:
     items:
       type: menu

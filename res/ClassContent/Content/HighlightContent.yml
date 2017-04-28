@@ -3,6 +3,7 @@ HighlightContent:
     name: yaml_block_page_highlight
     description: ~
     category: [block_category_pages]
+    form_height: 500
   parameters:
     content:
       type: searchPageType
