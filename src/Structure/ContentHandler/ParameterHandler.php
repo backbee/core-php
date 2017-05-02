@@ -29,10 +29,19 @@ class ParameterHandler implements ContentHandlerInterface
      */
     public function handleReverse(AbstractClassContent $content)
     {
+        $all = $content->getAllParams();
+
         return [
             'parameters' => array_map(function($param) {
-                return $param['value'];
-            }, $content->getAllParams())
+                $result = $param['value'];
+                if (isset($param['type']) && 'selectTag' === $param['type']) {
+                    $result = array_map(function ($value) {
+                        return isset($value['label']) ? $value['label'] : $value;
+                    }, $result);
+                }
+
+                return $result;
+            }, $all),
         ];
     }
 
