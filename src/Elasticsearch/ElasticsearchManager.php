@@ -145,6 +145,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
                     'should' => [
                         [ 'match' => ['title' => $term] ],
                         [ 'match' => ['title.raw' => $term] ],
+                        [ 'match' => ['title.folded' => $term] ],
                         [ 'match' => ['tags' => $term] ],
                         [ 'match' => ['tags.raw' => $term] ],
                         [ 'match' => ['contents' => $term] ],
