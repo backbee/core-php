@@ -35,9 +35,12 @@ class SearchResultListener
                         'should' => [
                             [ 'match' => ['title' => $query] ],
                             [ 'match' => ['title.raw' => $query] ],
+                            [ 'match' => ['title.folded' => $query] ],
                             [ 'match' => ['tags' => $query] ],
                             [ 'match' => ['tags.raw' => $query] ],
+                            [ 'match' => ['tags.folded' => $query] ],
                             [ 'match' => ['contents' => $query] ],
+                            [ 'match' => ['contents.folded' => $query] ],
                             [ 'match_phrase_prefix' => ['title' => $query] ],
                             [ 'match_phrase_prefix' => ['tags' => $query] ],
                         ],
