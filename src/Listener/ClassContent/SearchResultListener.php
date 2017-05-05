@@ -33,15 +33,17 @@ class SearchResultListener
                 'query' => [
                     'bool' => [
                         'should' => [
-                            [ 'match' => ['title' => $query] ],
-                            [ 'match' => ['title.raw' => $query] ],
-                            [ 'match' => ['title.folded' => $query] ],
+                            [ 'match' => ['title' => ['query' => $query, 'boost' => 2] ] ],
+                            [ 'match' => ['title.raw' => ['query' => $query, 'boost' => 2] ] ],
+                            [ 'match' => ['title.folded' => ['query' => $query, 'boost' => 2] ] ],
                             [ 'match' => ['tags' => $query] ],
                             [ 'match' => ['tags.raw' => $query] ],
                             [ 'match' => ['tags.folded' => $query] ],
                             [ 'match' => ['contents' => $query] ],
                             [ 'match' => ['contents.folded' => $query] ],
-                            [ 'match_phrase_prefix' => ['title' => $query] ],
+                            [ 'match_phrase_prefix' => ['title' => ['query' => $query, 'boost' => 2] ] ],
+                            [ 'match_phrase_prefix' => ['title.raw' => ['query' => $query, 'boost' => 2] ] ],
+                            [ 'match_phrase_prefix' => ['title.folded' => ['query' => $query, 'boost' => 2] ] ],
                             [ 'match_phrase_prefix' => ['tags' => $query] ],
                         ],
                         'minimum_should_match' => 1,
