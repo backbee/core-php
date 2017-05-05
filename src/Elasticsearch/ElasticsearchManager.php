@@ -143,13 +143,15 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
             'query' => [
                 'bool' => [
                     'should' => [
-                        [ 'match' => ['title' => $term] ],
-                        [ 'match' => ['title.raw' => $term] ],
-                        [ 'match' => ['title.folded' => $term] ],
+                        [ 'match' => ['title' => ['query' => $term, 'boost' => 2] ] ],
+                        [ 'match' => ['title.raw' => ['query' => $term, 'boost' => 2] ] ],
+                        [ 'match' => ['title.folded' => ['query' => $term, 'boost' => 2] ] ],
                         [ 'match' => ['tags' => $term] ],
                         [ 'match' => ['tags.raw' => $term] ],
                         [ 'match' => ['contents' => $term] ],
-                        [ 'match_phrase_prefix' => ['title' => $term] ],
+                        [ 'match_phrase_prefix' => ['title' => ['query' => $term, 'boost' => 2] ] ],
+                        [ 'match_phrase_prefix' => ['title.raw' => ['query' => $term, 'boost' => 2] ] ],
+                        [ 'match_phrase_prefix' => ['title.folded' => ['query' => $term, 'boost' => 2] ] ],
                         [ 'match_phrase_prefix' => ['tags' => $term] ],
                     ],
                 ],
