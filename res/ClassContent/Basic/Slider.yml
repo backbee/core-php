@@ -25,5 +25,5 @@ Slider:
         square: yaml_block_slider_square
         landscape: yaml_block_slider_landscape
         banner: yaml_block_slider_banner
-      value: square
+      value: landscape
       tab: yaml_block_slider_style
