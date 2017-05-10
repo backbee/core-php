@@ -6,7 +6,7 @@ use BackBee\Bundle\Registry;
 use Doctrine\ORM\EntityManager;
 
 /**
- * @author Eric Chau <eriic.chau@gmail.com>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserPreferenceManager
 {

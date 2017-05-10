@@ -35,7 +35,7 @@ class ImageHandler implements ContentHandlerInterface
 
         $settings = (new GlobalSettings())->cdn();
 
-        if (isset($data['path'])) {
+        if (isset($data['path']) && false != $data['path']) {
             if (1 === preg_match('~^https?://~', $data['path'])) {
                 $content->path = $this->imgUploadHandler->uploadFromUrl($data['path']);
             } else {
@@ -52,15 +52,20 @@ class ImageHandler implements ContentHandlerInterface
     public function handleReverse(AbstractClassContent $content, $config = [])
     {
         $settings = (new GlobalSettings())->cdn();
-        $path = ltrim($content->path, '/');
 
-        $fileName = $config['uploadCallback']($settings['image_domain'] . '/' . $path);
+        $filename = '';
+        if ($path = ltrim($content->path, '/')) {
+            $filename = $config['uploadCallback']($settings['image_domain'] . '/' . $path);
+        }
+
+        $params = $content->getAllParams();
+        unset($params['image_small'], $params['image_medium']);
 
         return [
-            'path' => false == $fileName ? '' : $config['themeName'] . '/' . $fileName,
+            'path' => false == $filename ? '' : $config['themeName'] . '/' . $filename,
             'parameters' => array_map(function($param) {
                 return $param['value'];
-            }, $content->getAllParams())
+            }, $params)
         ];
     }
 

@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @author Eric Chau <eriic.chau@gmail.com>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserPreferenceController extends AbstractController
 {

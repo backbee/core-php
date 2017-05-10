@@ -4,8 +4,6 @@ namespace BackBeeCloud\Entity;
 
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
-use BackBee\ClassContent\CloudContentSet;
-use BackBee\ClassContent\ColContentSet;
 use BackBee\MetaData\MetaData;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\KeyWord;
@@ -417,7 +415,7 @@ class PageManager
     {
         $keywords = [];
         foreach (explode(',', $tags) as $tag) {
-            if (null === $keyword = $this->entyMgr->getRepository('BackBee\NestedNode\KeyWord')->exists($tag)) {
+            if (null === $keyword = $this->entyMgr->getRepository(KeyWord::class)->exists($tag)) {
                 throw new EmptyPageSelectionException();
             }
 
@@ -643,39 +641,8 @@ class PageManager
         }
 
         $this->typeMgr->associate($page, $type);
-        if ($this->entyMgr->getUnitOfWork()->isScheduledForInsert($page)) {
-            $mainContainer = $page->getContentSet()->first();
-            if ($this->hydratePage) {
-                foreach ($type->defaultContents() as $classname => $callback) {
-                    if (class_exists($classname)) {
-                        $content = new $classname();
-                        if (!($content instanceof AbstractClassContent)) {
-                            continue;
-                        }
-
-                        $this->entyMgr->persist($content);
-                        if (is_callable($callback)) {
-                            $callback($content, $page);
-                        }
-
-                        $this->contentMgr->hydrateDraft($content, $this->bbtoken);
-
-                        $colcontainer = new ColContentSet();
-                        $colcontainer->push($content);
-                        $this->contentMgr->hydrateDraft($colcontainer, $this->bbtoken);
-                        $this->entyMgr->persist($colcontainer);
-
-                        $container = new CloudContentSet();
-                        $container->push($colcontainer);
-                        $this->contentMgr->hydrateDraft($container, $this->bbtoken);
-                        $this->entyMgr->persist($container);
-
-                        $mainContainer->push($container);
-                    }
-                }
-            }
-
-            $this->contentMgr->hydrateDraft($mainContainer, $this->bbtoken);
+        if ($this->hydratePage && $this->entyMgr->getUnitOfWork()->isScheduledForInsert($page)) {
+            $this->typeMgr->hydratePageContentsByType($type, $page, $this->bbtoken);
         }
     }
 

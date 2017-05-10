@@ -3,7 +3,7 @@
 namespace BackBeeCloud\Listener;
 
 /**
- * @author Eric Chau <eriic.chau@gmail.com>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class SiteSuspendedException extends \LogicException
 {

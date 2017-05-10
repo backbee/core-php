@@ -3,23 +3,16 @@
 namespace BackBeeCloud\Structure;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Menu;
-use BackBee\ClassContent\CloudContentSet;
-use BackBee\ClassContent\ColContentSet;
-use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
-abstract class AbstractStructureBuilder
+class StructureBuilder
 {
     use ClassContentHelperTrait;
-
-    const CONTENT_HANDLER_SERVICE_TAG = 'structure.content_handler';
 
     const MENU_NONE = 'none';
     const MENU_HEADER = 'header';
@@ -29,22 +22,20 @@ abstract class AbstractStructureBuilder
     protected $entyMgr;
     protected $pageMgr;
     protected $themeCore;
-    protected $contentHandlers;
-    protected $globalContentFactory;
+    protected $schemaParser;
+    protected $contentBuilder;
     protected $elasticsearchMgr;
+    protected $globalContentFactory;
 
-    public function __construct(BBApplication $app)
+    public function __construct(BBApplication $app, SchemaParserInterface $schemaParser)
     {
+        $this->schemaParser = $schemaParser;
         $this->entyMgr = $app->getEntityManager();
-        $this->pageMgr = $app->getContainer()->get('cloud.page_manager');
-        $this->globalContentFactory = $app->getContainer()->get('cloud.global_content_factory');
-        $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->themeCore = $app->getBundle('theme');
-
-        $this->contentHandlers = [];
-        foreach ($app->getContainer()->findTaggedServiceIds(self::CONTENT_HANDLER_SERVICE_TAG) as $id => $data) {
-            $this->contentHandlers[] = $app->getContainer()->get($id);
-        }
+        $this->pageMgr = $app->getContainer()->get('cloud.page_manager');
+        $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
+        $this->contentBuilder = $app->getContainer()->get('cloud.structure.content_builder');
+        $this->globalContentFactory = $app->getContainer()->get('cloud.global_content_factory');
     }
 
     /**
@@ -61,14 +52,14 @@ abstract class AbstractStructureBuilder
         }
 
         if (isset($schema['logo_header'])) {
-            $this->hydrateContent(
+            $this->contentBuilder->hydrateContent(
                 $this->globalContentFactory->getHeaderLogo(),
                 ['path' => $schema['logo_header']]
             );
         }
 
         if (isset($schema['logo_footer'])) {
-            $this->hydrateContent(
+            $this->contentBuilder->hydrateContent(
                 $this->globalContentFactory->getFooterLogo(),
                 ['path' => $schema['logo_footer']]
             );
@@ -77,14 +68,14 @@ abstract class AbstractStructureBuilder
         if (isset($schema['header']) && is_array($schema['header'])) {
             foreach ($schema['header'] as $attr => $data) {
                 $content = $this->globalContentFactory->getHeaderContent($attr, $data['type']);
-                $this->hydrateContent($content, $data['data']);
+                $this->contentBuilder->hydrateContent($content, $data['data']);
             }
         }
 
         if (isset($schema['footer']) && is_array($schema['footer'])) {
             foreach ($schema['footer'] as $attr => $data) {
                 $content = $this->globalContentFactory->getFooterContent($attr, $data['type']);
-                $this->hydrateContent($content, $data['data']);
+                $this->contentBuilder->hydrateContent($content, $data['data']);
             }
         }
 
@@ -133,6 +124,7 @@ abstract class AbstractStructureBuilder
         $page = null;
         $menu = $pageData['menu'];
         unset($pageData['menu']);
+        $randomDatetime = new \DateTime(date('Y-m-d H:i:s', time() - rand(1, 1000)));
         if ('home' !== $pageData['type']) {
             if (!isset($pageData['uid'])) {
                 $pageData['uid'] = md5($pageData['title']);
@@ -140,7 +132,7 @@ abstract class AbstractStructureBuilder
 
             $page = $this->pageMgr->create($pageData);
             $page->setState(Page::STATE_ONLINE);
-            $page->setPublishing(new \DateTime());
+            $page->setPublishing($randomDatetime);
         } else {
             $site = $this->entyMgr->getRepository(Site::class)->findOneBy([]);
             $page = $this->entyMgr->getRepository(Page::class)->getRoot($site);
@@ -149,8 +141,9 @@ abstract class AbstractStructureBuilder
             ], false);
         }
 
+        $page->setModified($randomDatetime);
         $this->handlePageWithMenu($page, $menu);
-        $this->buildContents($page, $contents);
+        $this->contentBuilder->hydrateContents($page, $contents);
 
         if ($doFlush) {
             $this->entyMgr->flush();
@@ -170,18 +163,12 @@ abstract class AbstractStructureBuilder
      * @throws \InvalidArgumentException if the provided structure name does not exist or if the schame file is not
      *                                   readable.
      */
-    protected function getSchema($name)
+    public function getSchema($name)
     {
-        $path = realpath("{$this->basedir()}/{$name}.yml");
-        if (false === $path) {
-            throw new \InvalidArgumentException("Cannot find structure schema for `{$name}`.");
-        }
+        $data = $this->schemaParser->getSchema($name);
+        $data['schema'] = $data['schema'] ?: [];
 
-        if (!is_readable($path)) {
-            throw new \InvalidArgumentException("Cannot read the file located at `{$path}`.");
-        }
-
-        return Yaml::parse(file_get_contents($path));
+        return $data;
     }
 
     /**
@@ -223,86 +210,4 @@ abstract class AbstractStructureBuilder
             $fnAddItem($this->globalContentFactory->getFooterMenu(), $page);
         }
     }
-
-    /**
-     * Loops into contents data to inject them into page contentset.
-     *
-     * @param  Page   $page
-     * @param  array  $contents
-     */
-    protected function buildContents(Page $page, array $contents)
-    {
-        $this
-            ->putContentOnline($page->getContentSet())
-            ->putContentOnline($page->getContentSet()->first())
-        ;
-
-        $mainContainer = $page->getContentSet()->first();
-
-        $mainContainer->clear();
-
-        foreach ($contents as $data) {
-            $cloudContentSet = $this->createContent(CloudContentSet::class);
-            $this->hydrateContent($cloudContentSet, isset($data['data']) ? $data['data'] : []);
-
-            $mainContainer->push($cloudContentSet);
-
-            foreach ($data['columns'] as $items) {
-                $colContentSet = $this->createContent(ColContentSet::class);
-                $cloudContentSet->push($colContentSet);
-
-                foreach ($items as $item) {
-                    $content = $this->createContent($item['type']);
-                    $colContentSet->push($content);
-                    $this->hydrateContent($content, isset($item['data']) ? $item['data'] : []);
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates a new content according to provided name (could be classcontent type or classname)
-     * and updates it to be visible online.
-     *
-     * @param  string $name
-     * @return AbstractClassContent
-     */
-    protected function createContent($type)
-    {
-        $content = $this->createOnlineContent($type);
-        $this->entyMgr->persist($content);
-
-        return $content;
-    }
-
-    public function getContentHandlers()
-    {
-        return $this->contentHandlers;
-    }
-
-    /**
-     * Loops into all content handlers to find the handler which can handle the
-     * hydratation of provided content with provided data.
-     *
-     * @param  AbstractClassContent $content
-     * @param  array                $data
-     * @return self
-     */
-    protected function hydrateContent(AbstractClassContent $content, array $data)
-    {
-        foreach ($this->contentHandlers as $handler) {
-            if ($handler->supports($content)) {
-                $handler->handle($content, $data);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Returns structures base directory.
-     *
-     * @return string
-     */
-    abstract protected function basedir();
 }
