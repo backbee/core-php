@@ -81,7 +81,7 @@ services:
   # Page type services
   cloud.page_type.manager:
     class: BackBeeCloud\PageType\TypeManager
-    arguments: [@service_container]
+    arguments: [@service_container, @cloud.structure.schema_parser]
 
   cloud.page_type.home_type:
     class: BackBeeCloud\PageType\HomeType
@@ -114,6 +114,17 @@ services:
       - { name: worker.job_handler, dispatch_event: false }
 
   # Structure's services
+  cloud.structure.schema_parser:
+    class: BackBeeCloud\Structure\VoidSchemaParser
+
+  cloud.structure.content_builder:
+    class: BackBeeCloud\Structure\ContentBuilder
+    arguments: [@service_container, @em]
+
+  cloud.structure_builder:
+    class: BackBeeCloud\Structure\StructureBuilder
+    arguments: [@bbapp, @cloud.structure.schema_parser]
+
   yaml_structure_dumper.manager:
     class: BackBeeCloud\Structure\YamlStructureDumperManager
     arguments: [@bbapp]

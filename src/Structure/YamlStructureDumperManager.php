@@ -39,9 +39,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
     protected $pageMgr;
 
     /**
-     * @var \BackBeeCloud\Structure\StructureBuilder
+     * @var \BackBeeCloud\Structure\ContentBuilder
      */
-    protected $structureBuilder;
+    protected $contentBuilder;
 
     /**
      * @var \BackBee\Renderer\Helper\GlobalContentFactory
@@ -49,7 +49,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
     protected $globalContentFactory;
 
     protected $folderPath;
-    protected $imagePath = '/images/static/theme-default-resources';
+    protected $imagePath = '/static/theme-default-resources';
     protected $imageFolderPath;
 
     protected $imageId = 1;
@@ -65,7 +65,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
         $this->app = $app;
         $this->em = $app->getEntityManager();
         $this->pageMgr = $container->get('cloud.page_manager');
-        $this->structureBuilder = $container->get('cloud.structure_builder');
+        $this->contentBuilder = $container->get('cloud.structure.content_builder');
         $this->globalContentFactory = $container->get('cloud.global_content_factory');
         $this->awsHandler = $container->get('cloud.file_handler');
 
@@ -197,7 +197,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
             'data' => []
         ];
 
-        foreach ($this->structureBuilder->getContentHandlers() as $handler) {
+        foreach ($this->contentBuilder->getContentHandlers() as $handler) {
             if ($handler->supports($content)) {
 
                 $handlerData = $handler->handleReverse($content, [
@@ -311,7 +311,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
         $imageUrl = $imagePath;
 
         if (1 !== preg_match('#^https?://#', $imageUrl)) {
-            $imageUrl = 'http://' . $this->domain . '/' . $imagePath;
+            $imageUrl = $this->cdnFilePath . $imagePath;
         }
 
         if (false !== $rawContent = file_get_contents($imageUrl)) {

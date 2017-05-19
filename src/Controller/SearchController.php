@@ -16,8 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class SearchController
 {
-    use \BackBeeCloud\Structure\ClassContentHelperTrait;
-
     protected $app;
     protected $request;
 

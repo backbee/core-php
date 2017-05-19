@@ -10,8 +10,8 @@
 
 <figure
   {{this.bbcontent(null, {class: 'content figure ' ~ resizeClass ~ autoSizeClass ~ ' media-image'})|raw}}
-  {% if bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
-  {% if bb.token == null and linkValue.link == 'lightbox' %}data-toggle="lightbox" data-remote="{{this.getCdnImageUrl(path)|raw}}"{% endif %}
+  {% if path != null and bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
+  {% if path != null and bb.token == null and linkValue.link == 'lightbox' %}data-toggle="lightbox" data-remote="{{this.getCdnImageUrl(path)|raw}}"{% endif %}
   data-forbidden-plugins="click"
   {% set ratio = this.getObject().getParamValue('ratio') %}
   {% if ratio %}style="padding-top: {{ratio}}%;"{% endif %}

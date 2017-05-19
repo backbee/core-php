@@ -6,7 +6,7 @@ use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
 
 /**
- * @author Eric Chau <eriic.chau@gmail.com>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentDuplicatePreSaveEvent extends Event
 {
