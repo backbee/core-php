@@ -246,3 +246,63 @@ cloud.hauth.authenticate:
     _controller: cloud.hauth.controller
   requirements:
     _method: POST
+
+# MultiLang API
+
+api.multilang.get_collection:
+  pattern: /api/langs
+  defaults:
+    _action: getCollection
+    _controller: api.multilang_controller
+  requirements:
+    _method: GET
+
+api.multilang.work_progress:
+  pattern: /api/langs/work-progress
+  defaults:
+    _action: getWorkProgress
+    _controller: api.multilang_controller
+  requirements:
+    _method: GET
+
+api.multilang.get:
+  pattern: /api/langs/{id}
+  defaults:
+    _action: get
+    _controller: api.multilang_controller
+  requirements:
+    _method: GET
+
+api.multilang.enable:
+  pattern: /api/langs/enable/{id}
+  defaults:
+    _action: enable
+    _controller: api.multilang_controller
+  requirements:
+    _method: PUT
+
+api.multilang.disable:
+  pattern: /api/langs/disable/{id}
+  defaults:
+    _action: disable
+    _controller: api.multilang_controller
+  requirements:
+    _method: PUT
+
+api.multilang.define_default:
+  pattern: /api/langs/define-default/{id}
+  defaults:
+    _action: defineDefault
+    _controller: api.multilang_controller
+  requirements:
+    _method: PUT
+
+cloud.search_i18n:
+  pattern: /{lang}/search
+  defaults:
+    _action: search
+    _controller: search_controller
+  requirements:
+    _method: GET
+    lang: "[a-z]{2}"
+

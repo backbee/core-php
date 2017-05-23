@@ -1,11 +1,17 @@
 {% set tag = 'div' %}
 
 {% if bb.token == null %}
-    {% set tag = 'a' %}
+  {% set tag = 'a' %}
 {% endif %}
 
-<{{tag}} data-img-quality="100" data-mobile-edit="false" data-forbidden-plugins="dnd,parameter,remove,resize,focus" {{this.bbcontent(null, {class: 'media-image cloud-logo'})|raw}} href="/">
-    <span class="logo navbar-brand">
-        <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %}>
-    </span>
+<{{tag}}
+  {{this.bbcontent(null, {class: 'media-image cloud-logo'})|raw}}
+  data-img-quality="100"
+  data-mobile-edit="false"
+  data-forbidden-plugins="dnd,parameter,remove,resize,focus"
+  href="{{this.getHomeUrl()}}"
+>
+  <span class="logo navbar-brand">
+    <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %}>
+  </span>
 </{{tag}}>

@@ -9,8 +9,9 @@ file_upload.validation:
 
 bbapplication.start:
   listeners:
-    - [BackBeeCloud\Listener\CoreListener, onApplicationStart]
     - [BackBeeCloud\Listener\HAuthListener, onApplicationStart]
+    - [BackBeeCloud\Listener\CoreListener, onApplicationStart, -50]
+    - [BackBeeCloud\Listener\MultiLangListener, onApplicationStart, -100]
 
 kernel.request:
   listeners:
@@ -21,6 +22,7 @@ kernel.exception:
     - [BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100]
     - [@cloud.disqus_listener, onDisqusControlledException, 100]
     - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
+    - [BackBeeCloud\Listener\MultiLangListener, onMultiLangException, 100]
     - [BackBeeCloud\Listener\CoreListener, onKernelException, 50]
 
 nestednode.page.render:
@@ -124,6 +126,11 @@ rest.user.creation:
   listeners:
     - [BackBeeCloud\Listener\Api\UserListener, onRestUserCreationEvent]
 
+controller.frontcontroller.defaultaction.precall:
+  listeners:
+    - [BackBeeCloud\Listener\MultiLangListener, onHomePreCall, 100]
+
+
 # ClassContents listeners
 
 basic.searchresult.render:
@@ -152,6 +159,7 @@ article.articletitle.render:
 
 basic.menu.prepersist:
   listeners:
+    - [BackBeeCloud\Listener\MultiLangListener, onMenuPrePersist, 100]
     - [BackBeeCloud\Listener\MenuListener, onPrePersist]
 
 basic.menu.render:

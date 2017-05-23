@@ -6,9 +6,11 @@ use BackBeeCloud\Listener\ClassContent\SearchbarListener;
 use BackBeeCloud\PageType\SearchResultType;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Layout;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -18,35 +20,50 @@ class SearchController
 {
     protected $app;
     protected $request;
+    protected $multilangMgr;
 
     public function __construct(BBApplication $app)
     {
         $this->app = $app;
+        $this->multilangMgr = $app->getContainer()->get('multilang_manager');
     }
 
-    public function search()
+    public function search($lang = null)
     {
-        return new Response($this->app->getRenderer()->render($this->getSearchResultPage()));
+        if (null !== $lang) {
+            $data = $this->multilangMgr->getLang($lang);
+            if (null === $data || !$data['is_active']) {
+                throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
+            }
+        }
+
+        if (null === $lang && null !== $defaultLang = $this->multilangMgr->getDefaultLang()) {
+            return new RedirectResponse($this->app->getRouting()->getUrlByRouteName('cloud.search_i18n', [
+                'lang' => $defaultLang['id'],
+            ], null, false));
+        }
+
+        return new Response($this->app->getRenderer()->render($this->getSearchResultPage($lang)));
     }
 
-    protected function getSearchResultPage()
+    protected function getSearchResultPage($lang = null)
     {
-        $uid = md5('search_result');
+        $uid = md5('search_result' . ($lang ? '_' . $lang : ''));
         $entyMgr = $this->app->getEntityManager();
         if (null === $page = $entyMgr->find(Page::class, $uid)) {
             $entyMgr->beginTransaction();
-            $page = (new Page($uid))
-                ->setTitle('Search result')
-                ->setLayout($entyMgr->getRepository(Layout::class)->findOneBy([]))
-                ->setState(Page::STATE_ONLINE)
-                ->setMetaData(new MetaDataBag())
-                ->setUrl('/search')
-            ;
+            $data = [
+                'title' => 'Search result',
+                'type'  => 'search_result',
+            ];
+            if ($lang) {
+                $data['lang'] = $lang;
+            }
 
-            $entyMgr->persist($page);
-            $this->app->getContainer()->get('cloud.page_manager')->update($page, [
-                'type' => (new SearchResultType())->uniqueName(),
-            ]);
+            $page = $this->app->getContainer()->get('cloud.page_manager')->create($data, false);
+            $page->setState(Page::STATE_ONLINE);
+            $page->setUrl($lang ? sprintf('/%s/search', $lang) : '/search');
+            $entyMgr->flush();
 
             $uids = $this->app->getContainer()->get('cloud.content_manager')->getUidsFromPage(
                 $page,

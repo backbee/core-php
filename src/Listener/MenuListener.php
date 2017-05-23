@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeeCloud\Entity\Lang;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
@@ -61,6 +62,14 @@ class MenuListener
                 if (null !== $page = $entyMgr->find('BackBee\NestedNode\Page', $item['id'])) {
                     if (null === $bbtoken && !$page->isOnline()) {
                         continue;
+                    }
+
+                    if (
+                        $page->isRoot()
+                        && null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()
+                    ) {
+                        $lang = $entyMgr->find(Lang::class, $currentLang);
+                        $page = $app->getContainer()->get('multilang_manager')->getRootByLang($lang);
                     }
 
                     $item['url'] = $page->getUrl();

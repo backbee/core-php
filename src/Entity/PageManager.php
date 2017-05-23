@@ -2,14 +2,15 @@
 
 namespace BackBeeCloud\Entity;
 
+use BackBeeCloud\Entity\Lang;
+use BackBeeCloud\Entity\PageRedirection;
+use BackBeeCloud\Entity\PageTag;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\MetaData\MetaData;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
-use BackBeeCloud\Entity\PageRedirection;
-use BackBeeCloud\Entity\PageTag;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -59,9 +60,19 @@ class PageManager
     protected $hydratePage = true;
 
     /**
-     * @var null|PageManager
+     * @var null|Page
      */
     protected $currentPage;
+
+    /**
+     * @var \BackBeeCloud\MultiLangManager
+     */
+    protected $multilangMgr;
+
+    /**
+     * @var null|Lang
+     */
+    protected $currentLang;
 
     public function __construct(BBApplication $app)
     {
@@ -69,9 +80,10 @@ class PageManager
         $this->entyMgr = $app->getEntityManager();
         $this->typeMgr = $app->getContainer()->get('cloud.page_type.manager');
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
-        $this->repository = $this->entyMgr->getRepository('BackBee\NestedNode\Page');
+        $this->repository = $this->entyMgr->getRepository(Page::class);
         $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->tagMgr = $app->getContainer()->get('cloud.tag_manager');
+        $this->multilangMgr = $app->getContainer()->get('multilang_manager');
     }
 
     /**
@@ -142,19 +154,21 @@ class PageManager
             }, $this->getPageTag($page)->getTags()->toArray()),
             'modified'   => $page->getModified()->format('d-m-Y H:i:s'),
             'seo'        => [
-                'title'       => $metadatabag->get('title')
+                'title'       => null !== $metadatabag && $metadatabag->get('title')
                     ? $metadatabag->get('title')->getAttribute('content', '')
                     : ''
                 ,
-                'description' => $metadatabag->get('description')
+                'description' => null !== $metadatabag && $metadatabag->get('description')
                     ? $metadatabag->get('description')->getAttribute('content', '')
                     : ''
                 ,
-                'keywords'    => $metadatabag->get('keywords')
+                'keywords'    => null !== $metadatabag && $metadatabag->get('keywords')
                     ? $metadatabag->get('keywords')->getAttribute('content', '')
                     : ''
                 ,
-            ]
+            ],
+            'lang' => $this->multilangMgr->getLangByPage($page),
+
         ];
     }
 
@@ -194,6 +208,38 @@ class PageManager
      */
     public function getBy(array $criteria = [], $start, $limit)
     {
+        if (
+            isset($criteria['page_uid'])
+            && (1 === count($criteria) || (2 === count($criteria) && isset($criteria['title'])))
+        ) {
+            $page = $this->get($criteria['page_uid']);
+            if (null !== $page && null !== $lang = $this->multilangMgr->getLangByPage($page)) {
+                $query = [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                [ 'prefix' => ['url' => sprintf('/%s/', $lang)] ],
+                            ],
+                        ]
+                    ]
+                ];
+
+                if (isset($criteria['title'])) {
+                    $title = str_replace('%', '', $criteria['title']);
+                    $query['query']['bool']['should'] = [
+                        [ 'match' => ['title' => $title] ],
+                        [ 'match' => ['title.raw' => $title] ],
+                        [ 'match_phrase_prefix' => ['title' => $title] ],
+                        [ 'match_phrase_prefix' => ['tags' => $title] ],
+                    ];
+                    $query['query']['bool']['minimum_should_match'] = 1;
+                }
+
+                return $this->elasticsearchMgr->customSearchPage($query, $start, $limit);
+            }
+        }
+
+        unset($criteria['page_uid']);
         if (1 === count($criteria) && isset($criteria['title'])) {
             return $this->elasticsearchMgr->searchPage(str_replace('%', '', $criteria['title']), $start, $limit);
         }
@@ -205,6 +251,13 @@ class PageManager
             ->setFirstResult($start)
             ->setMaxResults($limit)
         ;
+
+        if (null !== $this->multilangMgr->getDefaultLang()) {
+            $qb
+                ->where($qb->expr()->neq('p._url', ':url'))
+                ->setParameter('url', '/')
+            ;
+        }
 
         try {
             foreach ($criteria as $attr => $data) {
@@ -230,6 +283,7 @@ class PageManager
      */
     public function create(array $data)
     {
+        $data = $this->prepareDataWithLang($data);
         $uid = isset($data['uid']) ? $data['uid'] : null;
 
         $page = new Page($uid);
@@ -324,10 +378,12 @@ class PageManager
     public function duplicate(Page $page, array $data)
     {
         $this->entyMgr->beginTransaction();
-        $data = [
-            'title' => isset($data['title']) ? $data['title'] : '',
-            'tags'  => isset($data['tags']) ? (array) $data['tags'] : [],
-        ];
+
+        $data = $this->prepareDataWithLang($data);
+        $data['title'] = isset($data['title']) ? $data['title'] : '';
+        $data['tags'] = isset($data['tags']) ? (array) $data['tags'] : [];
+        $data['seo'] = isset($data['seo']) ? $data['seo'] : [];
+        unset($data['type'], $data['is_online']);
 
         $copy = new Page();
 
@@ -647,6 +703,20 @@ class PageManager
     }
 
     /**
+     * @param  Page   $page  The page to update
+     * @param  string $value The value to set
+     * @throws \InvalidArgumentException if provided value is not string or
+     *                                   does not contain at least 2 characters
+     */
+    protected function runSetLang(Page $page, $value)
+    {
+        if ($this->currentLang instanceof Lang) {
+            $this->multilangMgr->associate($page, $this->currentLang);
+            $this->currentLang = null;
+        }
+    }
+
+    /**
      * Create redirection for all URLs in $redirections to provided page's url.
      *
      * @param  Page  $page
@@ -700,7 +770,18 @@ class PageManager
      */
     protected function getRootPage()
     {
-        return $this->repository->getRoot($this->getSite());
+        $root = null;
+        if (null !== $this->currentLang) {
+            $root = $this->multilangMgr->getRootByLang($this->currentLang);
+        }
+
+        if (null === $root) {
+            $root = $this->entyMgr->getRepository(Page::class)->findOneBy([
+                '_url' => '/',
+            ]);
+        }
+
+        return $root;
     }
 
     /**
@@ -712,4 +793,30 @@ class PageManager
     {
         return $this->entyMgr->getRepository('BackBee\Site\Site')->findOneBy([]);
     }
+
+    protected function prepareDataWithLang(array $data)
+    {
+        if (isset($data['lang'])) {
+            $lang = $data['lang'];
+            unset($data['lang']);
+            $data = ['lang' => $lang] + $data;
+
+            $langEntity = $this->entyMgr->find(Lang::class, $lang);
+            if (null === $langEntity || !$langEntity->isActive()) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Lang "%s" does not exist or is not activated',
+                    $lang
+                ));
+            }
+        } elseif (null !== $defaultlang = $this->multilangMgr->getDefaultLang()) {
+            $data['lang'] = $defaultlang['id'];
+        }
+
+        if (isset($data['lang'])) {
+            $this->currentLang = $this->entyMgr->find(Lang::class, $data['lang']);
+        }
+
+        return $data;
+    }
+
 }

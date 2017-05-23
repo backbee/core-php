@@ -110,6 +110,12 @@ class ContentAutoblockListener
             $start = ($currentPaginationPage * $limit) - $limit;
         }
 
+        if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
+            $esQuery['query']['bool']['must'][]['prefix'] = [
+                'url' => sprintf('/%s/', $currentLang),
+            ];
+        }
+
         // Requesting Elasticsearch to get result
         $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
             $esQuery,
