@@ -6,6 +6,7 @@ use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Entity\PageTag;
 use BackBeeCloud\Entity\PageType;
 use BackBeeCloud\PageType\ArticleType;
+use BackBeeCloud\PageType\HomeType;
 use BackBee\ClassContent\Basic\Menu;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Revision;
@@ -86,7 +87,6 @@ class PageListener
      *     - rest.controller.classcontentcontroller.postaction.precall
      *     - rest.controller.classcontentcontroller.putaction.precall
      *     - backbeecloud.api.controller.contentcontroller.delete.precall
-     *
      *
      * @param  Event  $event
      */

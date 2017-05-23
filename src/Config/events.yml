@@ -21,6 +21,7 @@ kernel.exception:
     - [BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100]
     - [@cloud.disqus_listener, onDisqusControlledException, 100]
     - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
+    - [BackBeeCloud\Listener\CoreListener, onKernelException, 50]
 
 nestednode.page.render:
   listeners:
