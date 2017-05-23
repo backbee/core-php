@@ -85,4 +85,9 @@ class CoreListener
         $response->setStatusCode(Response::HTTP_UNAUTHORIZED, 'Invalid authentication informations');
         $event->setResponse($response);
     }
+
+    public static function onKernelException(GetResponseForExceptionEvent $event)
+    {
+        error_log($event->getException()->getMessage());
+    }
 }
