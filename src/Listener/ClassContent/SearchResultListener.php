@@ -59,6 +59,13 @@ class SearchResultListener
             }
 
             $esQuery['query']['bool']['must'] = $mustClauses;
+
+            if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
+                $esQuery['query']['bool']['must'][]['prefix'] = [
+                    'url' => sprintf('/%s/', $currentLang),
+                ];
+            }
+
             $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
                 $esQuery,
                 $start = ($page > 0 ? $page - 1 : 0) * self::RESULT_PER_PAGE,

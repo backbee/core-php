@@ -113,6 +113,17 @@ services:
     tags:
       - { name: worker.job_handler, dispatch_event: false }
 
+  # MultiLang service
+  multilang_manager:
+    class: BackBeeCloud\MultiLang\MultiLangManager
+    arguments: [@bbapp]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  api.multilang_controller:
+    class: BackBeeCloud\Api\Controller\MultiLangController
+    arguments: [@multilang_manager, @bbapp]
+
   # Structure's services
   cloud.structure.schema_parser:
     class: BackBeeCloud\Structure\VoidSchemaParser

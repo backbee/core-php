@@ -33,11 +33,17 @@ class GlobalContentFactory
      */
     protected $contentMgr;
 
+    /**
+     * @var \BackBeePlanet\Bundle\MultiLang\MultiLangManager
+     */
+    protected $multilangMgr;
+
     public function __construct(BBApplication $app)
     {
         $this->bbtoken = $app->getBBUserToken();
         $this->entyMgr = $app->getEntityManager();
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
+        $this->multilangMgr = $app->getContainer()->get('multilang_manager');
     }
 
     /**
@@ -124,6 +130,18 @@ class GlobalContentFactory
         return $this->genericContentGetter('footer_' . $name, $this->getClassnameFromType($type));
     }
 
+    public function duplicateLogoForLang($lang)
+    {
+        $this->contentMgr->duplicateContent($this->getHeaderLogo(), null, $this->computeUid('header_logo', $lang));
+        $this->contentMgr->duplicateContent($this->getFooterLogo(), null, $this->computeUid('footer_logo', $lang));
+    }
+
+    public function duplicateMenuForLang($lang)
+    {
+        $this->contentMgr->duplicateContent($this->getHeaderMenu(), null, $this->computeUid('header_menu', $lang));
+        $this->contentMgr->duplicateContent($this->getFooterMenu(), null, $this->computeUid('footer_menu', $lang));
+    }
+
     protected function genericContentGetter($type, $classname)
     {
         if (null === $content = $this->entyMgr->find($classname, $uid = $this->computeUid($type))) {
@@ -147,9 +165,11 @@ class GlobalContentFactory
      * @param  string $type
      * @return string
      */
-    protected function computeUid($type)
+    protected function computeUid($type, $lang = null)
     {
-        return md5($this->getSite()->getLabel() . '_' . $type);
+        $lang = $lang ?: $this->multilangMgr->getCurrentLang();
+
+        return md5($this->getSite()->getLabel() . '_' . $type . ($lang ? '_' . $lang : ''));
     }
 
     /**

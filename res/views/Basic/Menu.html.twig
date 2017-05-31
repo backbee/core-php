@@ -1,9 +1,40 @@
 <nav {{this.bbcontent(null)|raw}} itemscope itemtype="//schema.org/SiteNavigationElement">
   <ul class="nav navbar-nav navbar-right">
-  {% for item in items %}
-  <li {% if item.is_current %}class="active"{% endif %}>
-    <a href="{{item.url}}" {% if item.is_online == false %} title="This page is offline"{% endif %}><span class="{{item.is_online == false ? 'offline': ''}}">{{item.label}}</span></a>
-  </li>
-  {% endfor %}
+    {% for item in items %}
+    <li {% if item.is_current %}class="active"{% endif %}>
+      <a href="{{item.url}}" {% if item.is_online == false %} title="This page is offline"{% endif %}><span class="{{item.is_online == false ? 'offline': ''}}">{{item.label}}</span></a>
+    </li>
+    {% endfor %}
+
+    {% set current_lang = this.getCurrentLang() %}
+    {% if current_lang %}
+      {# Langs selector for desktop #}
+      <li class="dropdown hidden-xs langs-dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          {{current_lang|upper}}
+          <span class="caret"></span>
+        </a>
+
+        <ul class="dropdown-menu">
+          {% for lang in this.getActiveLangs() %}
+          {% if current_lang != lang.id %}
+            <li><a href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </li>
+
+      {# Langs selector for mobile #}
+      <li class="hidden-sm hidden-md hidden-lg">
+        <select class="langs-selector">
+          <option disabled selected>{{current_lang|upper}}</option>
+          {% for lang in this.getActiveLangs() %}
+          {% if current_lang != lang.id %}
+            <option><a href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a></option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </li>
+    {% endif %}
   </ul>
 </nav>
