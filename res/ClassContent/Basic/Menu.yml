@@ -3,7 +3,7 @@ Menu:
     name: Menu
     description: ~
     category: ['!Common']
-    forbidden_plugins: ['remove', 'dnd', 'parameter']
+    forbidden_plugins: ['remove', 'dnd', 'parameter', 'click']
     form_height: 500
   parameters:
     items:
