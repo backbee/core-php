@@ -168,7 +168,6 @@ class PageManager
                 ,
             ],
             'lang' => $this->multilangMgr->getLangByPage($page),
-
         ];
     }
 
@@ -318,6 +317,7 @@ class PageManager
             $this->handleRedirections($page, (array) $redirections);
         }
 
+        $this->elasticsearchMgr->indexPage($page);
         $this->currentPage = null;
 
         return $page;
@@ -409,6 +409,7 @@ class PageManager
         $this->entyMgr->flush();
         $this->entyMgr->commit();
 
+        $this->elasticsearchMgr->indexPage($copy);
         $this->currentPage = null;
 
         return $copy;

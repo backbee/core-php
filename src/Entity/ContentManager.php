@@ -163,7 +163,6 @@ class ContentManager
     {
         $this->entyMgr->beginTransaction();
 
-        // $deletedContents = [];
         foreach ($this->getDraftStageToDelete($page, $token) as $draft) {
             $content = $draft->getContent();
             $content->setDraft(null);
@@ -173,7 +172,6 @@ class ContentManager
 
             $classname = AbstractClassContent::getClassnameByContentType($content->getContentType());
             $this->entyMgr->getRepository($classname)->deleteContent($content);
-            // $deletedContents[] = $content->getUid();
         }
 
         $this->entyMgr->flush();
@@ -188,22 +186,6 @@ class ContentManager
                 'parameters' => [],
             ];
             if ($content instanceof ContentSet) {
-                // $children = $content->getData();
-                // $content->clear();
-                // foreach ($children as $child) {
-                //     if ($child instanceof AbstractClassContent && !in_array($child->getUid(), $deletedContents)) {
-                //         $content->push($child);
-                //     }
-                // }
-
-                // if (0 === $content->count()) {
-                //     $classname = AbstractClassContent::getClassnameByContentType($content->getContentType());
-                //     $this->entyMgr->getRepository($classname)->deleteContent($content);
-
-                //     continue;
-                // }
-
-                // $data = $draft->jsonSerialize();
                 $result['elements'] = !($data['elements']['current'] === $data['elements']['draft']);
             } else {
                 foreach ($data['elements'] as $attr => $stateData) {
@@ -219,14 +201,20 @@ class ContentManager
                 }
             }
 
-            $content->setDraft(null);
-            try {
-                $this->bbContentMgr->commit($content, $result);
-            } catch (\Exception $e) {
+            $commitedCount++;
+            if (false == $result['elements'] && false == $result['parameters']) {
+                $content->setDraft($draft);
+                $content->prepareCommitDraft();
+
                 continue;
             }
 
-            $commitedCount++;
+            $content->setDraft(null);
+
+            try {
+                $this->bbContentMgr->commit($content, $result);
+            } catch (\Exception $e) {
+            }
         }
 
         $this->entyMgr->flush();

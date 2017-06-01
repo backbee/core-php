@@ -6,6 +6,7 @@ use BackBeeCloud\Listener\ClassContent\SearchbarListener;
 use BackBeeCloud\PageType\SearchResultType;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Revision;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
@@ -53,6 +54,7 @@ class SearchController
         if (null === $page = $entyMgr->find(Page::class, $uid)) {
             $entyMgr->beginTransaction();
             $data = [
+                'uid'   => $uid,
                 'title' => 'Search result',
                 'type'  => 'search_result',
             ];
@@ -71,10 +73,20 @@ class SearchController
             );
             foreach ($uids as $contentUid) {
                 $content = $entyMgr->find(AbstractClassContent::class, $contentUid);
+                $content->setDraft(
+                    $entyMgr->getRepository(Revision::class)->getDraft($content, $this->app->getBBUserToken())
+                );
+                if (null !== $content->getDraft()) {
+                    $content->prepareCommitDraft();
+
+                    continue;
+                }
+
+                $content->setRevision(1);
                 $content->setState(AbstractClassContent::STATE_NORMAL);
-                $entyMgr->flush($content);
             }
 
+            $entyMgr->flush();
             $entyMgr->commit();
         }
 
