@@ -23,12 +23,15 @@ class HighlightContentHandler implements ContentHandlerInterface
         }
 
         if (isset($data['parameters']) && isset($data['parameters']['content'])) {
-            $pageTitle = $data['parameters']['content']['title'];
+            $contents = [];
+            foreach ($data['parameters']['content'] as $row) {
+                $contents[] = [
+                    'id'    => md5($row['label']),
+                    'title' => $row['label'],
+                ];
+            }
 
-            $content->setParam('content', [
-                'id'    => md5($pageTitle),
-                'title' => $pageTitle,
-            ]);
+            $content->setParam('content', $contents);
         }
     }
 

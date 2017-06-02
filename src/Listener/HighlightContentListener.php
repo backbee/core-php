@@ -34,7 +34,6 @@ class HighlightContentListener
         $pageMgr = $app->getContainer()->get('cloud.page_manager');
 
         if ($data['type'] === 'Content/HighlightContent') {
-
             $contentParameters = $data['parameters']['content'];
             if (isset($contentParameters['value']['id'])) {
                 $page = $pageMgr->get($contentParameters['value']['id']);
