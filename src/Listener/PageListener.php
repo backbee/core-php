@@ -43,7 +43,6 @@ class PageListener
             return;
         }
 
-        $app->getContainer()->get('elasticsearch.manager')->indexPage($page);
         if ($uow->isScheduledForInsert($page)) {
             $entyMgr
                 ->getRepository(PageRedirection::class)
@@ -58,6 +57,7 @@ class PageListener
             return;
         }
 
+        $app->getContainer()->get('elasticsearch.manager')->indexPage($page);
         if ($app->getContainer()->get('cloud.page_type.manager')->findByPage($page) instanceof HomeType) {
             return;
         }

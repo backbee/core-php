@@ -91,7 +91,7 @@ class ContentController extends AbstractController
             return $response;
         }
 
-        $page = $this->entyMgr->find('BackBee\NestedNode\Page', $pageuid);
+        $page = $this->entyMgr->find(Page::class, $pageuid);
         if (false == $page) {
             return $this->getPageNotFoundResponse($pageuid);
         }
