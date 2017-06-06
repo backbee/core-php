@@ -132,14 +132,14 @@ class GlobalContentFactory
 
     public function duplicateLogoForLang($lang)
     {
-        $this->contentMgr->duplicateContent($this->getHeaderLogo(), null, $this->computeUid('header_logo', $lang));
-        $this->contentMgr->duplicateContent($this->getFooterLogo(), null, $this->computeUid('footer_logo', $lang));
+        $this->contentMgr->duplicateContent($this->getHeaderLogo(), null, $this->computeUid('header_logo', $lang), true);
+        $this->contentMgr->duplicateContent($this->getFooterLogo(), null, $this->computeUid('footer_logo', $lang), true);
     }
 
     public function duplicateMenuForLang($lang)
     {
-        $this->contentMgr->duplicateContent($this->getHeaderMenu(), null, $this->computeUid('header_menu', $lang));
-        $this->contentMgr->duplicateContent($this->getFooterMenu(), null, $this->computeUid('footer_menu', $lang));
+        $this->contentMgr->duplicateContent($this->getHeaderMenu(), null, $this->computeUid('header_menu', $lang), true);
+        $this->contentMgr->duplicateContent($this->getFooterMenu(), null, $this->computeUid('footer_menu', $lang), true);
     }
 
     protected function genericContentGetter($type, $classname)

@@ -7,6 +7,7 @@ use BackBee\ClassContent\Basic\Title;
 use BackBee\ClassContent\CloudContentSet;
 use BackBee\ClassContent\ColContentSet;
 use BackBee\ClassContent\ContentAutoblock;
+use BackBee\ClassContent\Revision;
 use BackBee\DependencyInjection\Container;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
@@ -77,17 +78,17 @@ class ContentBuilder
         $mainContainer->clear();
 
         foreach ($contents as $data) {
-            $cloudContentSet = $this->createContent(CloudContentSet::class);
+            $cloudContentSet = $this->createContent(CloudContentSet::class, $token);
             $this->hydrateContent($cloudContentSet, isset($data['data']) ? $data['data'] : []);
 
             $mainContainer->push($cloudContentSet);
 
             foreach ($data['columns'] as $items) {
-                $colContentSet = $this->createContent(ColContentSet::class);
+                $colContentSet = $this->createContent(ColContentSet::class, $token);
                 $cloudContentSet->push($colContentSet);
 
                 foreach ($items as $item) {
-                    $content = $this->createContent($item['type']);
+                    $content = $this->createContent($item['type'], $token);
                     $itemData = isset($item['data']) ? $item['data'] : [];
                     if ($content instanceof Title) {
                         $itemData['text'] = str_replace(
@@ -111,10 +112,36 @@ class ContentBuilder
      * @param  string $name
      * @return AbstractClassContent
      */
-    protected function createContent($type)
+    protected function createContent($type, BBUserToken $token = null)
     {
-        $content = $this->createOnlineContent($type);
+        $classname = $this->getClassnameFromType($type);
+        $content = new $classname($uid);
+        if ($token) {
+            $this->hydrateDraft($content, $token);
+        } else {
+            $this->putContentOnline($content);
+        }
+
         $this->entyMgr->persist($content);
+
+        return $content;
+    }
+
+    /**
+     * Hydrates a draft to the given content if an instance of BBUserToken is provided.
+     *
+     * This method will checkout a new draft if no draft is found.
+     *
+     * @param  AbstractClassContent $content
+     * @param  BBUserToken|null     $token
+     * @return AbstractClassContent
+     */
+    public function hydrateDraft(AbstractClassContent $content, BBUserToken $token = null)
+    {
+        if (null !== $token) {
+            $draft = $this->entyMgr->getRepository(Revision::class)->checkout($content, $token);
+            $content->setDraft($draft);
+        }
 
         return $content;
     }

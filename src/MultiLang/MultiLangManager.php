@@ -154,6 +154,8 @@ class MultiLangManager implements JobHandlerInterface
             return;
         }
 
+        $this->entyMgr->beginTransaction();
+
         $lang = new Lang($id);
         $lang->enable();
         $this->entyMgr->persist($lang);
@@ -165,8 +167,9 @@ class MultiLangManager implements JobHandlerInterface
             $root = $this->app->getContainer()->get('cloud.page_manager')->duplicate(
                 $this->entyMgr->getRepository(Page::class)->getRoot($this->getSite()),
                 [
-                    'title' => 'Home',
-                    'lang'  => $lang->getLang(),
+                    'title'              => 'Home',
+                    'lang'               => $lang->getLang(),
+                    'put_content_online' => true,
                 ]
             );
             $root->setState(Page::STATE_ONLINE);
@@ -185,6 +188,8 @@ class MultiLangManager implements JobHandlerInterface
         }
 
         $this->app->getContainer()->get('cloud.global_content_factory')->duplicateLogoForLang($id);
+
+        $this->entyMgr->commit();
     }
 
     public function associate(Page $page, Lang $lang)
@@ -226,6 +231,8 @@ class MultiLangManager implements JobHandlerInterface
         if (null !== $this->getDefaultLang()) {
             $writer->write(sprintf('Default lang of site "%s" is already defined.', $job->siteId()));
             $this->unlockSite();
+
+            return;
         }
 
         // ensure that lang is activated
