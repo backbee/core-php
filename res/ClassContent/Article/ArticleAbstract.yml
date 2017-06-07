@@ -6,4 +6,4 @@ ArticleAbstract:
     category: [!Article]
     forbidden_plugins: ['parameter']
     rte:
-      placeholder: "Your abstract here"
+      placeholder: yaml_block_abstract_rte_placeholder
