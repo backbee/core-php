@@ -42,8 +42,8 @@
             <div class="progress-wrapper"><span class="percent"></span>%</div>
           </div>
 
-          <h1>Multilanguage activation...</h1>
-          <p class="reason">It might take a few minutes...</p>
+          <h1 class="multilang-title"></h1>
+          <p class="reason multilang-message"></p>
         </div>
       </div>
     </div>
@@ -51,6 +51,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
       $(document).ready(function() {
+        var messages = {
+          'multilang-title': {
+            'fr': 'Activation du multilangue...',
+            'en': 'Multilanguage activation...'
+          },
+          'multilang-message': {
+            'fr': 'Cela peut prendre plusieurs minutes...',
+            'en': 'It might take a few minutes...'
+          }
+        };
+
+        if ('fr' === navigator.language) {
+          jQuery('.multilang-title').text(messages['multilang-title'].fr);
+          jQuery('.multilang-message').text(messages['multilang-message'].fr);
+        } else {
+          jQuery('.multilang-title').text(messages['multilang-title'].en);
+          jQuery('.multilang-message').text(messages['multilang-message'].en);
+        }
+
         function updatePercent(percent) {
           $('span.percent').text(percent);
         }
