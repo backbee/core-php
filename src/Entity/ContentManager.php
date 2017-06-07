@@ -46,7 +46,7 @@ class ContentManager
      * @param  BBUserToken|null     $token
      * @return AbstractClassContent
      */
-    public function duplicateContent(AbstractClassContent $original, BBUserToken $token = null, $uid = null)
+    public function duplicateContent(AbstractClassContent $original, BBUserToken $token = null, $uid = null, $putOnline = false)
     {
         $draft = $token
             ? $this->entyMgr->getRepository(Revision::class)->getDraft($original, $token)
@@ -60,7 +60,7 @@ class ContentManager
         foreach ($original->getData() as $key => $value) {
             $newVal = $value;
             if ($value instanceof AbstractClassContent) {
-                $newVal = $this->duplicateContent($value, $token);
+                $newVal = $this->duplicateContent($value, $token, null, $putOnline);
             }
 
             if ($copy->hasElement($key)) {
@@ -75,8 +75,11 @@ class ContentManager
         }
 
         $this->eventDispatcher->dispatch('content.duplicate.presave', new ContentDuplicatePreSaveEvent($copy));
-        $this->hydrateDraft($copy);
-        $copy->setState(AbstractClassContent::STATE_NORMAL);
+        $this->hydrateDraft($copy, $token);
+        if (true === $putOnline) {
+            $copy->setState(AbstractClassContent::STATE_NORMAL);
+        }
+
         $this->entyMgr->persist($copy);
         $this->entyMgr->flush($copy);
 

@@ -7,8 +7,10 @@ use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\AbstractContent;
 use BackBee\ClassContent\Basic\Title;
 use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Content\HighlightContent;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Event\Event;
+use BackBee\NestedNode\Page;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -48,6 +50,36 @@ class ContentListener
             if (null !== $page = $dic->get('cloud.page_manager')->getCurrentPage()) {
                 $content->value = $page->getTitle();
             }
+        } elseif ($content instanceof HighlightContent) {
+            $data = $content->getParamValue('content');
+            if (false == $data) {
+                return;
+            }
+
+            $currentPage = $dic->get('cloud.page_manager')->getCurrentPage();
+            if (null === $currentPage) {
+                $content->setParam('content', []);
+
+                return;
+            }
+
+            $results = [];
+            $langMgr = $dic->get('multilang_manager');
+            $currentLang = $langMgr->getLangByPage($currentPage);
+            foreach ($content->getParamValue('content') as $row) {
+                if (!isset($row['id'])) {
+                    continue;
+                }
+
+                $page = $dic->get('em')->find(Page::class, $row['id']);
+                if ($page && $currentLang !== $langMgr->getLangByPage($page)) {
+                    continue;
+                }
+
+                $results[] = $row;
+            }
+
+            $content->setParam('content', $results);
         }
     }
 

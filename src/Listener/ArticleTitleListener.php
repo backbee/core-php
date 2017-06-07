@@ -64,6 +64,12 @@ class ArticleTitleListener
         }
 
         $baseQuery['query']['bool']['must'] = $mustClauses;
+        $app = $renderer->getApplication();
+        if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
+            $baseQuery['query']['bool']['must'][]['prefix'] = [
+                'url' => sprintf('/%s/', $currentLang),
+            ];
+        }
 
         $esMgr = $renderer->getApplication()->getContainer()->get('elasticsearch.manager');
         $prevQuery = $nextQuery = $baseQuery;
@@ -151,6 +157,7 @@ class ArticleTitleListener
         $mustClauses = [
             [ 'match' => [ 'type' => 'article' ] ],
         ];
+
         if (null === $app->getBBUserToken()) {
             $mustClauses[] = [ 'match' => [ 'is_online' => true ] ];
         }
@@ -184,6 +191,12 @@ class ArticleTitleListener
         if (false != $shouldClauses) {
             $esQuery['query']['bool']['should'] = $shouldClauses;
             $esQuery['query']['bool']['minimum_should_match'] = 1;
+        }
+
+        if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
+            $esQuery['query']['bool']['must'][]['prefix'] = [
+                'url' => sprintf('/%s/', $currentLang),
+            ];
         }
 
         return $esQuery;

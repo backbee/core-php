@@ -383,7 +383,8 @@ class PageManager
         $data['title'] = isset($data['title']) ? $data['title'] : '';
         $data['tags'] = isset($data['tags']) ? (array) $data['tags'] : [];
         $data['seo'] = isset($data['seo']) ? $data['seo'] : [];
-        unset($data['type'], $data['is_online']);
+        $putContentOnline = isset($data['put_content_online']) ? (bool) $data['put_content_online'] : false;
+        unset($data['type'], $data['is_online'], $data['put_content_online']);
 
         $copy = new Page();
 
@@ -404,7 +405,12 @@ class PageManager
 
         $this->entyMgr->flush();
 
-        $copy->setContentset($this->contentMgr->duplicateContent($page->getContentSet(), $this->bbtoken));
+        $copy->setContentset($this->contentMgr->duplicateContent(
+            $page->getContentSet(),
+            $this->bbtoken,
+            null,
+            $putContentOnline
+        ));
 
         $this->entyMgr->flush();
         $this->entyMgr->commit();
