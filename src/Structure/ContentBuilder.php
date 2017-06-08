@@ -115,7 +115,7 @@ class ContentBuilder
     protected function createContent($type, BBUserToken $token = null)
     {
         $classname = $this->getClassnameFromType($type);
-        $content = new $classname($uid);
+        $content = new $classname();
         if ($token) {
             $this->hydrateDraft($content, $token);
         } else {
