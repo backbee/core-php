@@ -73,9 +73,10 @@ class SearchController
             );
             foreach ($uids as $contentUid) {
                 $content = $entyMgr->find(AbstractClassContent::class, $contentUid);
-                $content->setDraft(
-                    $entyMgr->getRepository(Revision::class)->getDraft($content, $this->app->getBBUserToken())
-                );
+                if ($bbtoken = $this->app->getBBUserToken()) {
+                    $content->setDraft($entyMgr->getRepository(Revision::class)->getDraft($content, $bbtoken));
+                }
+
                 if (null !== $content->getDraft()) {
                     $content->prepareCommitDraft();
 
