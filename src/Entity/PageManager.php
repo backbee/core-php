@@ -207,35 +207,46 @@ class PageManager
      */
     public function getBy(array $criteria = [], $start, $limit)
     {
-        if (
-            isset($criteria['page_uid'])
-            && (1 === count($criteria) || (2 === count($criteria) && isset($criteria['title'])))
-        ) {
+        $lang = isset($criteria['lang']) ? $criteria['lang'] : null;
+        if (null === $lang && isset($criteria['page_uid'])) {
             $page = $this->get($criteria['page_uid']);
-            if (null !== $page && null !== $lang = $this->multilangMgr->getLangByPage($page)) {
-                $query = [
-                    'query' => [
-                        'bool' => [
-                            'must' => [
-                                [ 'prefix' => ['url' => sprintf('/%s/', $lang)] ],
-                            ],
-                        ]
-                    ]
+            $lang = $page ? $this->multilangMgr->getLangByPage($page) : null;
+        }
+
+        unset($criteria['lang'], $criteria['page_uid']);
+
+        if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title']))) {
+            $query = [
+                'query' => [
+                    'bool' => [
+                        'must'   => [],
+                        'should' => [],
+                    ],
+                ],
+            ];
+
+            if (null !== $this->multilangMgr->getDefaultLang()) {
+                $query['query']['bool']['must_not'] = [
+                    [ 'match' => ['url' => '/' ] ],
                 ];
-
-                if (isset($criteria['title'])) {
-                    $title = str_replace('%', '', $criteria['title']);
-                    $query['query']['bool']['should'] = [
-                        [ 'match' => ['title' => $title] ],
-                        [ 'match' => ['title.raw' => $title] ],
-                        [ 'match_phrase_prefix' => ['title' => $title] ],
-                        [ 'match_phrase_prefix' => ['tags' => $title] ],
-                    ];
-                    $query['query']['bool']['minimum_should_match'] = 1;
-                }
-
-                return $this->elasticsearchMgr->customSearchPage($query, $start, $limit);
             }
+
+            if ($lang) {
+                $query['query']['bool']['must'][] = [ 'prefix' => ['url' => sprintf('/%s/', $lang)] ];
+            }
+
+            if (isset($criteria['title'])) {
+                $title = str_replace('%', '', $criteria['title']);
+                $query['query']['bool']['should'] = [
+                    [ 'match' => ['title' => $title] ],
+                    [ 'match' => ['title.raw' => $title] ],
+                    [ 'match_phrase_prefix' => ['title' => $title] ],
+                    [ 'match_phrase_prefix' => ['tags' => $title] ],
+                ];
+                $query['query']['bool']['minimum_should_match'] = 1;
+            }
+
+            return $this->elasticsearchMgr->customSearchPage($query, $start, $limit);
         }
 
         unset($criteria['page_uid']);
