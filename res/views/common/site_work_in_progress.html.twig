@@ -86,6 +86,8 @@
                     return;
                   }
 
+                  localStorage.setItem('flash-callback', '[{"type":"lang-finish"}]');
+
                   window.location.reload();
                 });
               }, 3000);
