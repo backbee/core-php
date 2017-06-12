@@ -49,7 +49,13 @@ class MultiLangListener
         $entyMgr = $app->getEntityManager();
         foreach ($app->getRequest()->getLanguages() as $langId) {
             if (2 === strlen($langId) && $lang = $entyMgr->find(Lang::class, $langId)) { // TO REWORK
-                throw new RedirectToDefaultLangHomeException($multilangMgr->getRootByLang($lang)->getUrl());
+                $queryString = http_build_query($event->getTarget()->query->all());
+
+                throw new RedirectToDefaultLangHomeException(sprintf(
+                    '%s%s',
+                    $multilangMgr->getRootByLang($lang)->getUrl(),
+                    $queryString ? '?' . $queryString : ''
+                ));
             }
         }
 
