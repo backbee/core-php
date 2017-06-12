@@ -1,4 +1,5 @@
 {% set current_lang = this.getCurrentLang() %}
-<form {{this.bbcontent()|raw}} action="{{current_lang ? '/' ~ current_lang : ''}}/search" method="get">
+<form {{this.bbcontent(null, {class: 'searchbar-wrapper'})|raw}} action="{{current_lang ? '/' ~ current_lang : ''}}/search" method="get">
   <input type="text" name="q" class="form-control" placeholder="{{this.getObject().getParamValue('input_placeholder')}}" />
+  <i class="icon_search"></i>
 </form>
