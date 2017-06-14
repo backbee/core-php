@@ -170,6 +170,10 @@ class TypeManager
         }
 
         $data = $this->schemaParser->getSchema(self::CUSTOM_CONTENTS_SCHEMA_NAME);
+        if (false == $data) {
+            return;
+        }
+
         foreach ($data['schema']['pages'] as $page) {
             if (!isset($page['custom_type'])) {
                 continue;
