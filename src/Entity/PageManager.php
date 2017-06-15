@@ -246,7 +246,12 @@ class PageManager
                 $query['query']['bool']['minimum_should_match'] = 1;
             }
 
-            return $this->elasticsearchMgr->customSearchPage($query, $start, $limit);
+            return $this->elasticsearchMgr->customSearchPage(
+                $query,
+                $start,
+                $limit,
+                0 === count($criteria) ? ['modified_at:desc'] : []
+            );
         }
 
         unset($criteria['page_uid']);
