@@ -7,7 +7,8 @@
     {% endfor %}
 
     {% set current_lang = this.getCurrentLang() %}
-    {% if current_lang %}
+    {% set actives_lang = this.getActiveLangs() %}
+    {% if current_lang and actives_lang|length > 1 %}
       {# Langs selector for desktop #}
       <li class="dropdown hidden-xs langs-dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -16,7 +17,7 @@
         </a>
 
         <ul class="dropdown-menu">
-          {% for lang in this.getActiveLangs() %}
+          {% for lang in actives_lang %}
           {% if current_lang != lang.id %}
             <li><a href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a></li>
           {% endif %}
@@ -28,7 +29,7 @@
       <li class="hidden-sm hidden-md hidden-lg">
         <select class="langs-selector">
           <option disabled selected>{{current_lang|upper}}</option>
-          {% for lang in this.getActiveLangs() %}
+          {% for lang in actives_lang %}
           {% if current_lang != lang.id %}
             <option><a href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a></option>
           {% endif %}
