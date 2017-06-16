@@ -85,7 +85,8 @@ class ArticleTitleListener
         ];
         $result = $esMgr->customSearchPage($prevQuery, null, 1, ['modified_at:desc'], false);
         if (0 < $result->count()) {
-            $prev = array_pop($result->collection())['_source'];
+            $collection = $result->collection();
+            $prev = array_pop($collection)['_source'];
         }
 
         // get next article
@@ -99,7 +100,8 @@ class ArticleTitleListener
         ];
         $result = $esMgr->customSearchPage($nextQuery, null, 1, ['modified_at:asc'], false);
         if (0 < $result->count()) {
-            $next = array_pop($result->collection())['_source'];
+            $collection = $result->collection();
+            $next = array_pop($collection)['_source'];
         }
 
         $renderer->assign('prev', $prev);
