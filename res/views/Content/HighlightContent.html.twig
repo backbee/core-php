@@ -1,4 +1,5 @@
-{% set col = 12 / nb_item_per_line.value %}
+{% set item_per_line = nb_item_per_line.value ?: 1 %}
+{% set col = 12 / item_per_line %}
 
 <div {{this.bbcontent()|raw}}>
 {% if contents == false %}
@@ -15,11 +16,11 @@
       {{content|raw}}
       </div>
 
-      {% if loop.last or loop.index % nb_item_per_line.value == 0 %}
+      {% if loop.last or loop.index % item_per_line == 0 %}
         </div>
       {% endif %}
 
-      {% if loop.index % nb_item_per_line.value == 0 and loop.last == false %}
+      {% if loop.index % item_per_line == 0 and loop.last == false %}
         <div class="row">
       {% endif %}
     {% endfor %}
