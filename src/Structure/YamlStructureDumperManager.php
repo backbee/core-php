@@ -314,6 +314,10 @@ class YamlStructureDumperManager implements JobHandlerInterface
             $imageUrl = $this->cdnFilePath . $imagePath;
         }
 
+        if (1 === preg_match('#^//#', $imageUrl)) {
+            $imageUrl = 'https:' . $imageUrl;
+        }
+
         if (false !== $rawContent = file_get_contents($imageUrl)) {
             touch($tmpfile = sprintf('%s/%s', $this->imageFolderPath, $imageFilename));
             file_put_contents($tmpfile, $rawContent);
