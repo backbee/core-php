@@ -29,6 +29,17 @@ cloud.robots_txt:
   requirements:
     _method: GET
 
+# ACL API
+
+cloud.api.acl.get:
+  pattern: /api/acl-permissions/{id}
+  defaults:
+    _action: get
+    _controller: cloud.api.acl_controller
+  requirements:
+    _method: GET
+    id: \d+
+
 # User preference API
 
 cloud.api.user_preferences.get_collection:

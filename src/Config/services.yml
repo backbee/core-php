@@ -195,3 +195,7 @@ services:
   security.voter.sudo:
     class: BackBeeCloud\Security\Authorization\Voter\SudoVoter
     arguments: [@bbapp]
+
+  cloud.api.acl_controller:
+    class: BackBeeCloud\Api\Controller\AclController
+    arguments: [@bbapp]

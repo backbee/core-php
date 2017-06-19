@@ -32,11 +32,17 @@ class ContentManager
      */
     protected $eventDispatcher;
 
+    /**
+     * @var BBUserToken
+     */
+    protected $uniqToken;
+
     public function __construct(EntityManager $entyMgr, ClassContentManager $bbContentMgr, Dispatcher $eventDispatcher)
     {
         $this->entyMgr = $entyMgr;
         $this->bbContentMgr = $bbContentMgr;
         $this->eventDispatcher = $eventDispatcher;
+        $this->uniqToken = $this->entyMgr->getRepository(Revision::class)->getUniqToken();
     }
 
     /**
@@ -144,7 +150,7 @@ class ContentManager
     public function getPageContentDrafts(Page $page, BBUserToken $token)
     {
         return $this->entyMgr->getRepository(Revision::class)->findBy([
-            '_owner'   => UserSecurityIdentity::fromToken($token),
+            '_owner'   => UserSecurityIdentity::fromToken($this->uniqToken),
             '_state'   => [Revision::STATE_ADDED, Revision::STATE_MODIFIED],
             '_content' => array_merge(
                 $this->getGlobalContentsUids(),
@@ -341,7 +347,7 @@ class ContentManager
     {
         return $this->entyMgr->getRepository(Revision::class)->findBy([
             '_state'   => Revision::STATE_TO_DELETE,
-            '_owner'   => UserSecurityIdentity::fromToken($token),
+            '_owner'   => UserSecurityIdentity::fromToken($this->uniqToken),
             '_content' => $this->getUidsFromPage($page, null),
         ]);
     }
