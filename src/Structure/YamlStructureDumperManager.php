@@ -310,7 +310,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
         $imageFilename = $this->getImageFilename($pathInfo['extension']);
         $imageUrl = $imagePath;
 
-        if (1 !== preg_match('#^https?://#', $imageUrl)) {
+        if (1 !== preg_match('#^(https?:)?//#', $imageUrl)) {
             $imageUrl = $this->cdnFilePath . $imagePath;
         }
 

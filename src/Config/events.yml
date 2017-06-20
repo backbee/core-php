@@ -24,6 +24,7 @@ kernel.exception:
     - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
     - [BackBeeCloud\Listener\MultiLangListener, onMultiLangException, 100]
     - [BackBeeCloud\Listener\CoreListener, onKernelException, 50]
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100]
 
 nestednode.page.render:
   listeners:
@@ -130,6 +131,9 @@ controller.frontcontroller.defaultaction.precall:
   listeners:
     - [BackBeeCloud\Listener\MultiLangListener, onHomePreCall, 100]
 
+backbeecloud.controller.contactcontroller.send.precall:
+  listeners:
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContactFormSubmissionPreCall]
 
 # ClassContents listeners
 
@@ -197,3 +201,7 @@ bundle.hauth.started:
 cloudcontentset.render:
   listeners:
     - [@cloud.image_listener, onCloudContentSetRender]
+
+basic.contact.render:
+  listeners:
+    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContactRender]
