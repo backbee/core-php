@@ -1,0 +1,13 @@
+<div {{ this.bbcontent(null)|raw }}>
+    {% if url.value is empty %}
+      {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+        {% set height = 380 %}
+        {% if view.value == 'simple' %}
+            {% set height = 80 %}
+        {% endif %}
+
+        <iframe style="display:block;" width="100%" height="{{height}}" scrolling="no" frameborder="no" src="https://open.spotify.com/embed?uri={{url.value}}&theme={{theme.value}}&view={{view.value}}" frameborder="0" allowtransparency="true"></iframe>
+    {% endif %}
+</div>
+
