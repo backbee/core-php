@@ -1,7 +1,7 @@
 <div {{this.bbcontent(null, {class: 'content button text-' ~ align.value})|raw}}>
   <a href="{{url.value}}"
     {% if target_blank.value == true %}target="_blank"{% endif %}
-    class="btn btn-{{color.value}} btn-{{size.value}} {{style.value}}"
+    class="btn btn-{{color.value}} btn-{{size.value}} {{style.value}} {{font.value}}"
   >
     {{title.value|default('Hello')|raw}}
   </a>
