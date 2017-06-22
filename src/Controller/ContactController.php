@@ -28,7 +28,9 @@ class ContactController
         $mailerConfig = (new GlobalSettings())->mailer();
 
         $name = $request->get('name');
-        $destEmail = $request->get('dest_email');
+        $destEmail = explode(';', $request->get('dest_email'));
+        array_walk($destEmail, function (&$item) { $item = trim($item); });
+
         $email = $request->get('email');
         $message = $request->get('message');
 
