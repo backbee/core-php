@@ -38,14 +38,14 @@ class ContentCategoryListener
      *
      * @param  PostResponseEvent $event
      */
-    public static function onGetCategoryPostCall(PostResponseEvent $event)
+    public function onGetCategoryPostCall(PostResponseEvent $event)
     {
         $response = $event->getResponse();
         $result = [];
         foreach (json_decode($response->getContent(), true) as $data) {
             $id = $data['id'];
-            if (array_key_exists($id, self::$categoriesOrder)) {
-                $config = self::$categoriesOrder[$id];
+            if (array_key_exists($id, static::$categoriesOrder)) {
+                $config = static::$categoriesOrder[$id];
                 if (isset($config['contents_order'])) {
                     $contents = [];
                     foreach ($data['contents'] as $content) {

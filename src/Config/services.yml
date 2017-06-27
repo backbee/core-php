@@ -34,6 +34,9 @@ services:
     class: BackBeeCloud\SiteOption\OptionManager
     arguments: [@em]
 
+  content.category_listener:
+    class: BackBeeCloud\Listener\ContentCategoryListener
+
   # Contact service
   contact_controller:
     class: BackBeeCloud\Controller\ContactController
