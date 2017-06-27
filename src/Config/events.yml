@@ -89,7 +89,7 @@ rest.controller.securitycontroller.authenticateaction.postcall:
 rest.controller.classcontentcontroller.getcategorycollectionaction.postcall:
   listeners:
     - [BackBeeCloud\Listener\PageTypeListener, onGetCategoryPostCall]
-    - [BackBeeCloud\Listener\ContentCategoryListener, onGetCategoryPostCall]
+    - [@content.category_listener, onGetCategoryPostCall]
     - [BackBeeCloud\Listener\CacheListener, onGetCategoryPostCall]
 
 rest.controller.pagecontroller.deleteaction.postcall:
