@@ -32,7 +32,8 @@
         "lp-digital/hauth-bundle": "~0.1.0",
         "lp-digital/sitemap-bundle": "~0.3.0",
         "guzzlehttp/guzzle": "~6.0",
-        "jenssegers/agent": "~2.5.0"
+        "jenssegers/agent": "~2.5.0",
+        "google/recaptcha": "~1.1"
     },
     "autoload": {
         "psr-4": {

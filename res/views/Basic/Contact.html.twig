@@ -19,20 +19,37 @@
             <textarea name="message" class="form-control" id="formMessage" rows="3" placeholder="{{ message_placeholder.value }}"></textarea>
         </div>
         <div class="form-action text-{{button_align.value}}">
+            {% if recaptcha_sitekey is defined and bb.token == null %}
+                <div class="g-recaptcha" data-sitekey="{{ recaptcha_sitekey }}"></div>
+                <p class="recaptcha-error error-form-message"></p>
+                {{ this.addFooterJs('https://www.google.com/recaptcha/api.js') }}
+            {% endif %}
+
             <button type="button" class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_style.value}}">{{ button_title.value }}</button>
         </div>
 
         <script>
             (function () {
-
                 var init = function () {
                     var $form = $('#{{formId}}');
-                    var $error = $form.find('.error-form-message');
+                    var $error = $form.find('.error-form-message').not('.recaptcha-error');
                     var message = '{{error_message.value}}';
 
-                    $form.find('button').on('click', function () {
+                    function transformFormToSuccess() {
+                        $form.find('.confirmation-form-message').removeAttr('style');
+                        $form.find('.form-group, .form-action').css('display', 'none');
 
-                        $form.find('.has-error').removeClass('has-error');
+                        {% if bb.token != null %}
+                        window.dndZone.apply();
+                        {% endif %}
+                    }
+
+                    $form.find('button').on('click', function () {
+                        {% if recaptcha_sitekey is defined and bb.token == null %}
+                        $('.recaptcha-error').addClass('hidden');
+                        {% endif %}
+
+                        $form.find('.has-error').removeClass('display', 'none');
                         $error.css('display', 'none');
 
                         var data = $form.serializeArray().reduce(function(obj, item) {
@@ -62,18 +79,28 @@
                                 'method': 'POST',
                                 'url': '/send-contact',
                                 'data': data
-                            }).done(function () {
-                                $form.find('.confirmation-form-message').removeAttr('style');
-                                $form.find('.form-group, .form-action').css('display', 'none');
+                            }).done(transformFormToSuccess).fail(function (res) {
+                                {% if recaptcha_sitekey is defined and bb.token == null %}
+                                var error = JSON.parse(res.responseText);
+                                if ('missing input response' !== error.reason) {
+                                    transformFormToSuccess();
 
-                                {% if bb.token != null %}
-                                    window.dndZone.apply();
+                                    return;
+                                }
+
+                                $('.recaptcha-error')
+                                    .removeClass('hidden')
+                                    .text('fr' === navigator.language
+                                        ? 'Vous devez cocher la case "Je ne suis pas un robot" pour pouvoir envoyer votre message'
+                                        : 'You must check the box "I\'m not a robot" to send your message'
+                                    )
+                                ;
                                 {% endif %}
                             });
                         }
 
                         {% if bb.token != null %}
-                            window.dndZone.apply();
+                        window.dndZone.apply();
                         {% endif %}
                     });
                 };
