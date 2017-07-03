@@ -19,6 +19,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
  */
 class MultiLangListener
 {
+    const LANG_MAIN_FALLBACK = 'en';
+
     public static function onApplicationStart(Event $event)
     {
         if (!$event->getApplication()->getBBUserToken()) {
@@ -48,7 +50,7 @@ class MultiLangListener
 
         $entyMgr = $app->getEntityManager();
         foreach ($app->getRequest()->getLanguages() as $langId) {
-            if (2 === strlen($langId) && $lang = $entyMgr->find(Lang::class, $langId)) { // TO REWORK
+            if (2 === strlen($langId) && $lang = $entyMgr->find(Lang::class, $langId)) {
                 $queryString = http_build_query($event->getTarget()->query->all());
 
                 throw new RedirectToDefaultLangHomeException(sprintf(
@@ -59,7 +61,13 @@ class MultiLangListener
             }
         }
 
-        if (null === $lang = $multilangMgr->getDefaultLang()) {
+        $lang = $multilangMgr->getDefaultLang();
+        $fallback = $entyMgr->find(Lang::class, self::LANG_MAIN_FALLBACK);
+        if ($fallback) {
+            $lang = $multilangMgr->getLang($fallback->getLang());
+        }
+
+        if (null === $lang) {
             return;
         }
 
