@@ -25,7 +25,13 @@
                 {{ this.addFooterJs('https://www.google.com/recaptcha/api.js') }}
             {% endif %}
 
-            <button type="button" class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_style.value}}">{{ button_title.value }}</button>
+            <button
+                {% block data_button_attributes %}{% endblock %}
+                type="button"
+                class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_style.value}}"
+            >
+                {{ button_title.value }}
+            </button>
         </div>
 
         <script>

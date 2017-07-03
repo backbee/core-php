@@ -1,4 +1,4 @@
-<div {{this.bbcontent(null, {class: 'content video'})|raw}}>
+<div {{this.bbcontent(null, {class: 'content video'})|raw}} {% block data_attributes %}{% endblock %}>
 {% if src is empty %}
   {% include 'common/missing_config_block.html.twig' %}
 {% else %}

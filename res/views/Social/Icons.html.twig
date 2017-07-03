@@ -3,12 +3,8 @@
   {% set found = false %}
   {% for key, social in social.value %}
     {% if social.enable == true and social.url %}
-    {% set found = true %}
-    <li>
-      <a {% if bb.token == null %}href="{{social.url}}"{% endif %} target="_blank" rel="nofollow" class="social-icon-{{key}}">
-        <i class="social_{{key}}"></i>
-      </a>
-    </li>
+      {% set found = true %}
+      {% include 'Social/Icons.item.html.twig' with {'key': key, 'social': social} %}
     {% endif %}
   {% endfor %}
   {% if found == false %}

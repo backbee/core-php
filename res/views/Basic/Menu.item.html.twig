@@ -1,0 +1,9 @@
+<li {% if item.is_current %}class="active"{% endif %}>
+    <a
+        {% block data_item_attributes %}{% endblock %}
+        href="{{item.url}}"
+        {% if item.is_online == false %} title="This page is offline"{% endif %}
+    >
+        <span class="{{item.is_online == false ? 'offline': ''}}">{{item.label}}</span>
+    </a>
+</li>

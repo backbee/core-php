@@ -1,3 +1,10 @@
 <header {{this.bbcontent()|raw}}>
-  <h1 data-cloud-rte="true" data-font-size="vmin" class="text-{{align.value}}">{{value|raw}}</h1>
+  <h1
+    {% block data_attributes %}{% endblock %}
+    data-cloud-rte="true"
+    data-font-size="vmin"
+    class="text-{{align.value}}"
+  >
+    {{value|raw}}
+  </h1>
 </header>

@@ -3,14 +3,14 @@
     <ul class="pager pager-news">
       {% if prev != null %}
         <li class="previous">
-          <a href="{{prev.url}}" title="{{prev.title}}">
+          <a href="{{prev.url}}" title="{{prev.title}}" {% block data_prev_attributes %}{% endblock %}>
             <span class="icon arrow_carrot-left" aria-hidden="true"></span>
           </a>
         </li>
       {% endif %}
       {% if next != null %}
       <li class="next">
-        <a href="{{next.url}}" title="{{next.title}}">
+        <a href="{{next.url}}" title="{{next.title}}" {% block data_next_attributes %}{% endblock %}>
           <span class="icon arrow_carrot-right" aria-hidden="true"></span>
         </a>
       </li>

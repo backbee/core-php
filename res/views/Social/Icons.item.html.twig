@@ -1,0 +1,11 @@
+<li>
+    <a
+        {% block data_item_attributes %}{% endblock %}
+        {% if bb.token == null %}href="{{social.url}}"{% endif %}
+        target="_blank"
+        rel="nofollow"
+        class="social-icon-{{key}}"
+    >
+        <i class="social_{{key}}"></i>
+    </a>
+</li>

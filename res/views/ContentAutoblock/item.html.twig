@@ -2,12 +2,12 @@
 {% if image.url != false and display_image == true %}
   <div class="col-md-3">
     {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-    <a href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive" alt="{{img_alt}}" /></a>
+    <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive" alt="{{img_alt}}" /></a>
   </div>
   <div class="col-md-9">
 
     <h3 {% if reduce_title_size %}class="reduce-title"{% endif %}>
-      <a href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
+      <a {% block data_item_title_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
       {% if title_max_length > 0 %}
         {{this.perfectTruncate(title, title_max_length)}}
       {% else %}
@@ -27,7 +27,7 @@
 {% else %}
   <div class="col-md-12">
     <h3 {% if reduce_title_size %}class="reduce-title"{% endif %}>
-      <a href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
+      <a {% block data_item_title_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
       {% if title_max_length > 0 %}
         {{this.perfectTruncate(title, title_max_length)}}
       {% else %}

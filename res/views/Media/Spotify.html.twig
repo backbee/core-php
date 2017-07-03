@@ -1,4 +1,4 @@
-<div {{ this.bbcontent(null)|raw }}>
+<div {{ this.bbcontent(null)|raw }} {% block data_attributes %}{% endblock %}>
     {% if url.value is empty %}
       {% include 'common/missing_config_block.html.twig' %}
     {% else %}
