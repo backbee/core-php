@@ -77,13 +77,13 @@ class AclHandler
             $this->em->flush($group);
 
             $this->setSiteGroupRights($group, $rights);
+        }
 
-            $adminGroup = $this->em->getRepository(Group::class)->findOneBy(['_name' => 'administrator']);
-            if (0 === $group->getUsers()->count()) {
-                $user = $this->em->getRepository(User::class)->findOneBy([], ['_created' => 'desc']);
-                $group->addUser($user);
-                $this->em->flush($group);
-            }
+        $adminGroup = $this->em->getRepository(Group::class)->findOneBy(['_name' => 'administrator']);
+        if (0 === $adminGroup->getUsers()->count()) {
+            $user = $this->em->getRepository(User::class)->findOneBy([], ['_created' => 'asc']);
+            $adminGroup->addUser($user);
+            $this->em->flush($adminGroup);
         }
     }
 
