@@ -112,11 +112,6 @@
 
       {% block javascripts %}{% endblock %}
       <script src="{{this.getCdnUri('/static/js/login-help.js')}}"></script>
-
-
-      {% if bb.token != null %}
-        <script type="text/javascript">CRISP_WEBSITE_ID = "ade0fb3b-06b2-4936-8eab-9c510f1797fb";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.im/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
-      {% endif %}
     </div>
   </body>
 </html>
