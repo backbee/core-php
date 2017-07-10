@@ -207,6 +207,12 @@ class PageManager
      */
     public function getBy(array $criteria = [], $start, $limit)
     {
+        $hasDraftOnly = isset($criteria['has_draft_only'])
+            ? (bool) $criteria['has_draft_only']
+            : false
+        ;
+        unset($criteria['has_draft_only']);
+
         $lang = isset($criteria['lang']) ? $criteria['lang'] : null;
         if (null === $lang && isset($criteria['page_uid'])) {
             $page = $this->get($criteria['page_uid']);
@@ -244,6 +250,10 @@ class PageManager
                     [ 'match_phrase_prefix' => ['tags' => $title] ],
                 ];
                 $query['query']['bool']['minimum_should_match'] = 1;
+            }
+
+            if ($hasDraftOnly) {
+                $query['query']['bool']['must'][] = [ 'match' => ['has_draft_contents' => true] ];
             }
 
             return $this->elasticsearchMgr->customSearchPage(
