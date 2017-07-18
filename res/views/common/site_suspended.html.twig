@@ -19,14 +19,37 @@
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
         <div class="cover-container">
-          <div class="masthead">
-            {{this.render(this.globalContentFactory().getHeaderLogo(), 'logo_header')|raw}}
+          <div class="masthead text-center">
+            <nav class="navbar navbar-fixed-top" id="header">
+              {{this.render(this.globalContentFactory().getHeaderLogo(), 'logo_header')|raw}}
+            </nav>
           </div>
 
-          <h1>Site unavailable</h1>
-          <p class="reason">If you are the administrator, please sign in on <a href="https://backbee.com">backbee.com</a> for more information.</p>
+          <h1 class="title"></h1>
+          <p class="reason"></p>
         </div>
       </div>
     </div>
+
+    <script>
+      var messages = {
+        'title': {
+          'fr': 'Site indisponible',
+          'en': 'Site unavailable'
+        },
+        'message': {
+          'fr': 'Si vous êtes l\'administrateur du site, veuillez vous connecter sur <a href="https://backbee.com">backbee.com</a> pour plus d\'informations.',
+          'en': 'If you are the administrator, please sign in on <a href="https://backbee.com">backbee.com</a> for more information.'
+        }
+      };
+
+      if ('fr' === navigator.language) {
+        document.getElementsByClassName('title')[0].innerHTML = messages['title'].fr;
+        document.getElementsByClassName('reason')[0].innerHTML = messages['message'].fr;
+      } else {
+        document.getElementsByClassName('title')[0].innerHTML = messages['title'].en;
+        document.getElementsByClassName('reason')[0].innerHTML = messages['message'].en;
+      }
+    </script>
   </body>
 </html>
