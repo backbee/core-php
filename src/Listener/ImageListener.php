@@ -3,13 +3,12 @@
 namespace BackBeeCloud\Listener;
 
 use BackBeeCloud\ImageHandlerInterface;
+use BackBeeCloud\UserAgentHelper;
 use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Event\Event;
-
-use Jenssegers\Agent\Agent;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -49,13 +48,13 @@ class ImageListener
         $imageSmall = $block->getParamValue('image_small');
         $imageMedium = $block->getParamValue('image_medium');
 
-        $agent = new Agent();
-
-        if ($agent->isMobile() && $imageSmall !== null && isset($imageSmall['path'])) {
-            $renderer->assign('path', $imageSmall['path']);
+        if (UserAgentHelper::isDesktop()) {
+            return;
         }
 
-        if ($agent->isTablet() && $imageMedium !== null && isset($imageMedium['path'])) {
+        if (UserAgentHelper::isMobile() && $imageSmall !== null && isset($imageSmall['path'])) {
+            $renderer->assign('path', $imageSmall['path']);
+        } elseif (UserAgentHelper::isTablet() && $imageMedium !== null && isset($imageMedium['path'])) {
             $renderer->assign('path', $imageMedium['path']);
         }
     }

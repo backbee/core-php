@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\RedisManager;
 use BackBee\Controller\Event\PostResponseEvent;
@@ -65,7 +66,11 @@ class CacheListener
         }
 
         $redisClient->set(
-            $key = sprintf('%s:%s', $app->getSite()->getLabel(), $app->getRequest()->getRequestUri()),
+            $key = sprintf(
+                '%s:%s[%s]',
+                $app->getSite()->getLabel(), $app->getRequest()->getRequestUri(),
+                UserAgentHelper::getDeviceType()
+            ),
             $event->getRender()
         );
         $redisClient->expire($key, 60 * 60 * 24);
