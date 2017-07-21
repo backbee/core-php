@@ -7,7 +7,7 @@ use BackBee\NestedNode\Page;
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
-interface TypeInterface extends \JsonSerializable
+interface TypeInterface extends \JsonSerializable, \Serializable
 {
     /**
      * Returns page type label.

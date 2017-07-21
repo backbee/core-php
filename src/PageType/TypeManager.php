@@ -16,6 +16,7 @@ use BackBee\Security\Token\BBUserToken;
  */
 class TypeManager
 {
+    const CACHE_KEY = 'page.type_manager.cache';
     const PAGE_TYPE_TAG = 'page.type';
     const CUSTOM_CONTENTS_SCHEMA_NAME = 'custom_contents';
 
@@ -33,15 +34,7 @@ class TypeManager
         $this->contentBuilder = $dic->get('cloud.structure.content_builder');
         $this->schemaParser = $schemaParser;
 
-        foreach ($dic->findTaggedServiceIds(self::PAGE_TYPE_TAG) as $id => $data) {
-            $service = $dic->get($id);
-            $this->types[$service->uniqueName()] = $service;
-            if ($service->isDefault()) {
-                $this->defaultType = $service;
-            }
-        }
-
-        $this->initTemplateTypes();
+        $this->initTemplateTypes($dic);
     }
 
     protected function add(TypeInterface $type)
@@ -163,8 +156,26 @@ class TypeManager
         $this->contentMgr->hydrateDraft($mainContainer, $token);
     }
 
-    private function initTemplateTypes()
+    private function initTemplateTypes(Container $dic)
     {
+        $cache = $dic->get('cache.control');
+        if ($result = $cache->load(self::CACHE_KEY)) {
+            list(
+                $this->types,
+                $this->defaultType
+            ) = unserialize($result);
+
+            return;
+        }
+
+        foreach ($dic->findTaggedServiceIds(self::PAGE_TYPE_TAG) as $id => $data) {
+            $service = $dic->get($id);
+            $this->types[$service->uniqueName()] = $service;
+            if ($service->isDefault()) {
+                $this->defaultType = $service;
+            }
+        }
+
         if (null === $this->schemaParser) {
             return;
         }
@@ -186,5 +197,10 @@ class TypeManager
             );
             $this->types[$customType->uniqueName()] = $customType;
         }
+
+        $cache->save(self::CACHE_KEY, serialize([
+            $this->types,
+            $this->defaultType,
+        ]));
     }
 }
