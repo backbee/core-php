@@ -90,4 +90,19 @@ abstract class AbstractType implements TypeInterface
             'is_duplicable' => $this->isDuplicable(),
         ];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function serialize()
+    {
+        return serialize([]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($raw)
+    {
+    }
 }

@@ -62,4 +62,28 @@ class TemplateCustomType extends AbstractType
     {
         return $this->contentsRawData;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function serialize()
+    {
+        return serialize([
+            $this->uniqueName,
+            $this->label,
+            $this->contentsRawData,
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($raw)
+    {
+        list(
+            $this->uniqueName,
+            $this->label,
+            $this->contentsRawData
+        ) = unserialize($raw);
+    }
 }
