@@ -3,6 +3,7 @@
 namespace BackBeeCloud;
 
 use BackBeeCloud\Listener\CacheListener;
+use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\RedisManager;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +39,7 @@ class CacheLayer
             }
 
             preg_match('~/(bp[0-9]+)\.~', $basedir, $matches);
-            $key = sprintf('%s:%s', $matches[1], $request->getRequestUri());
+            $key = sprintf('%s:%s[%s]', $matches[1], $request->getRequestUri(), UserAgentHelper::getDeviceType());
             if (false != $result = $redisClient->get($key)) {
                 $response = new Response($result);
             }
