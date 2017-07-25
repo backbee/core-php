@@ -20,9 +20,13 @@ CloudContentSet:
     bg_image_position_y:
       value: '0%'
     responsive_mobile:
-      value: {}
+      value:
+        nb_item: "1"
+        nb_item_max: "4"
     responsive_tablet:
-      value: {}
+      value:
+        nb_item: "1"
+        nb_item_max: "4"
     remove_padding:
       value: false
     remove_gutter:
