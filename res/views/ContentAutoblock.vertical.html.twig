@@ -1,7 +1,7 @@
 <div {{this.bbcontent()|raw}}>
 {% if contents|length > 0 %}
   <div class="autoblock-vertical">
-  	  {% for content in contents %}
+	  {% for content in contents %}
       {{content|raw}}
     {% endfor %}
 
