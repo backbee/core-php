@@ -1,78 +1,80 @@
-{% set data = this.getObject().getData() %}
-{% set default_colsize = data|length ? 12 / data|length : '12' %}
+{% if hide_content is not defined %}
+  {% set data = this.getObject().getData() %}
+  {% set default_colsize = data|length ? 12 / data|length : '12' %}
 
-{% set backgroundImage = this.getObject().getParamValue('bg_image') %}
-{% set backgroundPosition = this.getObject().getParamValue('bg_image_position_y') %}
+  {% set backgroundImage = this.getObject().getParamValue('bg_image') %}
+  {% set backgroundPosition = this.getObject().getParamValue('bg_image_position_y') %}
 
-{% set spacerClass = '' %}
+  {% set spacerClass = '' %}
 
-{% set tabletMaxItem = 4 %}
-{% if responsive_tablet.value.nb_item_max %}
-  {% set tabletMaxItem = responsive_tablet.value.nb_item_max %}
-{% endif %}
-
-{% set mobileMaxItem = 4 %}
-{% if responsive_mobile.value.nb_item_max %}
-  {% set mobileMaxItem = responsive_mobile.value.nb_item_max %}
-{% endif %}
-
-{% set mobileNbItem = null %}
-{% if responsive_mobile.value.nb_item is defined and responsive_mobile.value.nb_item > 0 %}
-  {% if data|length < responsive_mobile.value.nb_item %}
-    {% set mobileNbItem = 12 / data|length %}
-  {% else %}
-    {% set mobileNbItem = 12 / responsive_mobile.value.nb_item %}
+  {% set tabletMaxItem = 4 %}
+  {% if responsive_tablet.value.nb_item_max %}
+    {% set tabletMaxItem = responsive_tablet.value.nb_item_max %}
   {% endif %}
-{% endif %}
 
-{% set tabletNbItem = null %}
-{% if responsive_tablet.value.nb_item is defined and responsive_tablet.value.nb_item > 0 %}
-  {% if data|length < responsive_tablet.value.nb_item %}
-    {% set tabletNbItem = 12 / data|length %}
-  {% else %}
-    {% set tabletNbItem = 12 / responsive_tablet.value.nb_item %}
+  {% set mobileMaxItem = 4 %}
+  {% if responsive_mobile.value.nb_item_max %}
+    {% set mobileMaxItem = responsive_mobile.value.nb_item_max %}
   {% endif %}
-{% endif %}
 
-{% set mobileClass = '' %}
-{% if responsive_tablet.value.rendermode %}
-  {% set mobileClass = responsive_mobile.value.rendermode ~ '_mobile'  %}
-{% endif %}
-
-{% set tabletClass = '' %}
-{% if responsive_tablet.value.rendermode %}
-  {% set tabletClass = responsive_tablet.value.rendermode ~ '_tablet'  %}
-{% endif %}
-
-{% if data|length == 1 and data[0]|length == 1 %}
-  {% if this.getObject().first().first().getContentType() == 'Basic/Spacer' %}
-    {% set spacerClass = 'is-spacer ' %}
+  {% set mobileNbItem = null %}
+  {% if responsive_mobile.value.nb_item is defined and responsive_mobile.value.nb_item > 0 %}
+    {% if data|length < responsive_mobile.value.nb_item %}
+      {% set mobileNbItem = 12 / data|length %}
+    {% else %}
+      {% set mobileNbItem = 12 / responsive_mobile.value.nb_item %}
+    {% endif %}
   {% endif %}
-{% endif %}
 
-{% set overlayClass = '' %}
-{% set hasOverlay = this.getObject().getParamValue('bg_overlay') %}
-{% if hasOverlay %}
-  {% set overlayClass = 'row-overlay' %}
-{% endif %}
+  {% set tabletNbItem = null %}
+  {% if responsive_tablet.value.nb_item is defined and responsive_tablet.value.nb_item > 0 %}
+    {% if data|length < responsive_tablet.value.nb_item %}
+      {% set tabletNbItem = 12 / data|length %}
+    {% else %}
+      {% set tabletNbItem = 12 / responsive_tablet.value.nb_item %}
+    {% endif %}
+  {% endif %}
 
-{% set noPaddingClass = '' %}
-{% if remove_padding.value == true %}
-  {% set noPaddingClass = 'no-padding' %}
-{% endif %}
+  {% set mobileClass = '' %}
+  {% if responsive_tablet.value.rendermode %}
+    {% set mobileClass = responsive_mobile.value.rendermode ~ '_mobile'  %}
+  {% endif %}
 
-<div {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}">
-  <div class="{{ width.value }}">
-    <div class="row {% if remove_gutter.value %}no-gutter{% endif %}">
-    {% for key, content in data %}
-      {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
-      {% set colsize = colsize ? colsize : default_colsize %}
-      {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
+  {% set tabletClass = '' %}
+  {% if responsive_tablet.value.rendermode %}
+    {% set tabletClass = responsive_tablet.value.rendermode ~ '_tablet'  %}
+  {% endif %}
 
-      <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
-      {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+  {% if data|length == 1 and data[0]|length == 1 %}
+    {% if this.getObject().first().first().getContentType() == 'Basic/Spacer' %}
+      {% set spacerClass = 'is-spacer ' %}
+    {% endif %}
+  {% endif %}
+
+  {% set overlayClass = '' %}
+  {% set hasOverlay = this.getObject().getParamValue('bg_overlay') %}
+  {% if hasOverlay %}
+    {% set overlayClass = 'row-overlay' %}
+  {% endif %}
+
+  {% set noPaddingClass = '' %}
+  {% if remove_padding.value == true %}
+    {% set noPaddingClass = 'no-padding' %}
+  {% endif %}
+
+  <div {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}">
+    <div class="{{ width.value }}">
+      <div class="row {% if remove_gutter.value %}no-gutter{% endif %}">
+      {% for key, content in data %}
+        {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
+        {% set colsize = colsize ? colsize : default_colsize %}
+        {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
+
+        <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
+        {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+        </div>
+      {% endfor %}
       </div>
-    {% endfor %}
     </div>
   </div>
-</div>
+{% endif %}
