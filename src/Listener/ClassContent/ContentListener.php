@@ -3,14 +3,16 @@
 namespace BackBeeCloud\Listener\ClassContent;
 
 use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
+use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\AbstractContent;
 use BackBee\ClassContent\Basic\Title;
-use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Content\HighlightContent;
+use BackBee\ClassContent\Media\Image;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
+use BackBee\Renderer\Event\RendererEvent;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -80,6 +82,20 @@ class ContentListener
             }
 
             $content->setParam('content', $results);
+        }
+    }
+
+    public static function onCloudContentSetRender(RendererEvent $event)
+    {
+        if (UserAgentHelper::isDesktop()) {
+            return;
+        }
+
+        $content = $event->getTarget();
+        $param = $content->getParamValue('responsive_' . UserAgentHelper::getDeviceType());
+        if (isset($param['nb_item_max']) && 0 == $param['nb_item_max']) {
+            $event->getRenderer()->assign('hide_content', true);
+            $event->stopPropagation();
         }
     }
 

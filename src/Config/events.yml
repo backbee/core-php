@@ -200,6 +200,7 @@ bundle.hauth.started:
 
 cloudcontentset.render:
   listeners:
+    - [BackBeeCloud\Listener\ClassContent\ContentListener, onCloudContentSetRender]
     - [@cloud.image_listener, onCloudContentSetRender]
 
 basic.contact.render:
