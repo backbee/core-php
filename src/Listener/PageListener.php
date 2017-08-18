@@ -7,6 +7,7 @@ use BackBeeCloud\Entity\PageTag;
 use BackBeeCloud\Entity\PageType;
 use BackBeeCloud\PageType\ArticleType;
 use BackBeeCloud\PageType\HomeType;
+use BackBeeCloud\PageType\SearchResultType;
 use BackBee\ClassContent\Basic\Menu;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Revision;
@@ -24,8 +25,57 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
  */
 class PageListener
 {
+    /**
+     * @var array
+     */
     protected static $redirections = [];
+
+    /**
+     * @var array
+     */
     protected static $toDelete = [];
+
+    public static function handleUriCollisionOnFlushPage(Event $event)
+    {
+        $page = $event->getTarget();
+        $app = $event->getApplication();
+        $entyMgr = $app->getEntityManager();
+        $uow = $entyMgr->getUnitOfWork();
+
+        if ($uow->isScheduledForDelete($page)) {
+            return;
+        }
+
+        $container = $app->getContainer();
+        if ($container->get('cloud.page_type.manager')->findByPage($page) instanceof SearchResultType) {
+            return;
+        }
+
+        if (1 === preg_match('~/search$~', $page->getUrl())) {
+            $elsMgr = $container->get('elasticsearch.manager');
+            $count = $elsMgr->getClient()->count([
+                'index' => $elsMgr->getIndexName(),
+                'type'  => $elsMgr->getPageTypeName(),
+                'body'  => [
+                    'query' => [
+                        'regexp' => [
+                            'url' => [
+                                'value' => $page->getUrl() . '\-[0-9]+',
+                            ],
+                        ],
+                    ],
+                ],
+            ])['count'];
+
+            $url = $page->getUrl() . '-' . ++$count;
+            while ($url !== $container->get('rewriting.urlgenerator')->getUniqueness($page, $url)) {
+                $url = $page->getUrl() . '-' . ++$count;
+            }
+
+            $page->setUrl($url);
+            $uow->recomputeSingleEntityChangeSet($entyMgr->getClassMetadata(Page::class), $page);
+        }
+    }
 
     public static function onFlush(Event $event)
     {
@@ -57,8 +107,9 @@ class PageListener
             return;
         }
 
-        $app->getContainer()->get('elasticsearch.manager')->indexPage($page);
-        if ($app->getContainer()->get('cloud.page_type.manager')->findByPage($page) instanceof HomeType) {
+        $container = $app->getContainer();
+        $container->get('elasticsearch.manager')->indexPage($page);
+        if ($container->get('cloud.page_type.manager')->findByPage($page) instanceof HomeType) {
             return;
         }
 
@@ -72,14 +123,14 @@ class PageListener
             $currUrl = $changes['_url'][0];
         }
 
-        $newUrl = $app->getContainer()->get('rewriting.urlgenerator')->generate($page, null, true);
+        $newUrl = $container->get('rewriting.urlgenerator')->generate($page, null, true);
         if ($newUrl === $currUrl) {
             return;
         }
 
         self::$redirections[$currUrl] = $newUrl;
         $page->setUrl($newUrl);
-        $uow->recomputeSingleEntityChangeSet($app->getEntityManager()->getClassMetadata(Page::class), $page);
+        $uow->recomputeSingleEntityChangeSet($entyMgr->getClassMetadata(Page::class), $page);
     }
 
     /**

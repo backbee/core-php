@@ -33,6 +33,7 @@ nestednode.page.render:
 nestednode.page.onflush:
   listeners:
     - [BackBeeCloud\Listener\PageListener, onFlush]
+    - [BackBeeCloud\Listener\PageListener, handleUriCollisionOnFlushPage]
 
 nestednode.page.postpersist:
   listeners:
