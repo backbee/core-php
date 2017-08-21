@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManager;
  */
 class UpdateTaskScheduler
 {
-    const VERSION = '1.4.18';
+    const VERSION = '2.0.10';
 
     const VOID_MASK = 0;
     const ELASTICSEARCH_MASK = 1;
@@ -88,6 +88,10 @@ class UpdateTaskScheduler
             ],
             '1.4.18' => [
                 'version'     => '1.4.18',
+                'update_mask' => self::ELASTICSEARCH_MASK,
+            ],
+            '2.0.10' => [
+                'version'     => '2.0.10',
                 'update_mask' => self::ELASTICSEARCH_MASK,
             ],
         ];
