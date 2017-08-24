@@ -88,6 +88,7 @@ class CoreListener
 
     public static function onKernelException(GetResponseForExceptionEvent $event)
     {
-        error_log($event->getException()->getMessage());
+        $exception = $event->getException();
+        error_log(sprintf('[%s] %s', get_class($exception), $exception->getMessage()));
     }
 }
