@@ -6,6 +6,10 @@ Menu:
     forbidden_plugins: ['remove', 'dnd', 'parameter', 'click']
     form_height: 500
   parameters:
+    burger:
+      type: switch
+      label: yaml_block_menu_burger
+      value: false
     items:
       type: menu
       value: []

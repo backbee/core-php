@@ -1,5 +1,5 @@
-
-<nav class="navbar navbar-fixed-top" id="header">
+{% set header_menu = this.globalContentFactory().getHeaderMenu() %}
+<nav class="navbar navbar-fixed-top {% if header_menu.getParamValue('burger') %}nav-burger{% endif %}" id="header">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-primary" aria-expanded="false">
