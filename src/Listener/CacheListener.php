@@ -89,6 +89,19 @@ class CacheListener
         RedisManager::removePageCache($event->getApplication()->getSite()->getLabel());
     }
 
+    public static function onPublishAllPostCall(PostResponseEvent $event)
+    {
+        if (Response::HTTP_NO_CONTENT !== $event->getResponse()->getStatusCode()) {
+            return;
+        }
+
+        if (0 === $event->getResponse()->headers->get('x-published-page-count')) {
+            return;
+        }
+
+        RedisManager::removePageCache($event->getApplication()->getSite()->getLabel());
+    }
+
     public static function onChangePostCall(PostResponseEvent $event)
     {
         if (Response::HTTP_NO_CONTENT !== $event->getResponse()->getStatusCode()) {

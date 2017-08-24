@@ -119,11 +119,15 @@ class ContentController extends AbstractController
             return $response;
         }
 
+        $pageCount = 0;
         foreach ($this->pageMgr->getPagesWithDraftContents() as $page) {
             $this->runPublishPage($page);
+            $pageCount++;
         }
 
-        return new Response('', Response::HTTP_NO_CONTENT);
+        return new Response('', Response::HTTP_NO_CONTENT, [
+            'x-published-page-count' => $pageCount,
+        ]);
     }
 
     public function reset($pageuid)

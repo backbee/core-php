@@ -120,6 +120,10 @@ backbeecloud.api.controller.contentcontroller.publish.postcall:
   listeners:
     - [BackBeeCloud\Listener\CacheListener, onPublishPostCall]
 
+backbeecloud.api.controller.contentcontroller.publishall.postcall:
+  listeners:
+    - [BackBeeCloud\Listener\CacheListener, onPublishAllPostCall]
+
 controller.frontcontroller.rssaction.precall:
   listeners:
     - [BackBeeCloud\Listener\PageListener, onRssActionPreCall]
