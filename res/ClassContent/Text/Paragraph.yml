@@ -14,7 +14,8 @@ Paragraph:
         color1: {'icon': 'icon-text', 'bgcolor': 'pink'}
         color2: {'icon': 'icon-text', 'bgcolor': 'color2'}
         color3: {'icon': 'icon-text', 'bgcolor': 'color3'}
-      value: 'color1'
+        color4: {'icon': 'icon-ban', 'bgcolor': 'default'}
+      value: 'color4'
       group:
         id: bg
     transparency:
