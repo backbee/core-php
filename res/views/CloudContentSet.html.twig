@@ -1,9 +1,12 @@
 {% if hide_content is not defined %}
+  {% set rowId = "row_" ~ this.getObject().getUid() %}
+
   {% set data = this.getObject().getData() %}
   {% set default_colsize = data|length ? 12 / data|length : '12' %}
 
   {% set backgroundImage = this.getObject().getParamValue('bg_image') %}
   {% set backgroundPosition = this.getObject().getParamValue('bg_image_position_y') %}
+  {% set withParallax = this.getObject().getParamValue('bg_parallax') %}
 
   {% set spacerClass = '' %}
 
@@ -62,7 +65,7 @@
     {% set noPaddingClass = 'no-padding' %}
   {% endif %}
 
-  <div {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}">
+  <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}} style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
     <div class="{{ width.value }}">
       <div class="row {% if remove_gutter.value %}no-gutter{% endif %}">
       {% for key, content in data %}
@@ -77,4 +80,20 @@
       </div>
     </div>
   </div>
+  {% if false != backgroundImage and withParallax %}
+  <script>
+  var callback = function(){
+    $('#{{rowId}}').parallax({imageSrc: '{{backgroundImage|raw}}'});
+  };
+
+  if (
+      document.readyState === "complete" ||
+      (document.readyState !== "loading" && !document.documentElement.doScroll)
+  ) {
+    callback();
+  } else {
+    document.addEventListener("DOMContentLoaded", callback);
+  }
+  </script>
+  {% endif %}
 {% endif %}
