@@ -18,6 +18,16 @@ Slider:
       label: yaml_block_slider_display_thumbnails
       value: false
       tab: yaml_block_slider_style
+    dots:
+      type: switch
+      label: yaml_block_slider_display_dots
+      value: false
+      tab: yaml_block_slider_style
+    autoplay:
+      type: switch
+      label: yaml_block_slider_autoplay
+      value: true
+      tab: yaml_block_slider_style
     format:
       type: select
       label: yaml_block_slider_format
@@ -26,4 +36,13 @@ Slider:
         landscape: yaml_block_slider_landscape
         banner: yaml_block_slider_banner
       value: landscape
+      tab: yaml_block_slider_style
+    navigation:
+      type: select
+      label: yaml_block_slider_navigation
+      options:
+        hidenav: yaml_block_slider_hidenav
+        shownav: yaml_block_slider_shownav
+        shownavonhover: yaml_block_slider_shownavonhover
+      value: shownavonhover
       tab: yaml_block_slider_style

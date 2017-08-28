@@ -8,7 +8,7 @@
   {% if images|length == 0 %}
   {% include 'common/missing_config_block.html.twig' %}
   {% else %}
-  <div id="{{ sliderId }}" class="owl-carousel slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('format') }} slider{% if thumbnail %} slider-main{% endif %}">
+  <div id="{{ sliderId }}" class="owl-carousel slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('navigation') }} slider-{{ this.getObject().getParamValue('format') }} slider{% if thumbnail %} slider-main{% endif %}">
   {% for image in images %}
     {% if image != false %}
     {{ this.render(image, 'slider', {'in_fluid': in_fluid})|raw }}
@@ -38,14 +38,14 @@
             mouseDrag: false,
             items: 1,
             loop: true,
-            autoplay: true,
+            autoplay: {{ this.getObject().getParamValue('autoplay') ? 'true' : 'false' }},
             itemsDesktop: [1199,3],
             itemsDesktopSmall: [979,2],
             itemsTablet: [768,2],
             itemsMobile: [479,1],
-            nav : true,
+            nav : !$(this).hasClass('slider-hidenav'),
             navText: ["<i class=\"arrow_carrot-left\"></i>","<i class=\"arrow_carrot-right\"></i>"],
-            dots : true,
+            dots : {{ this.getObject().getParamValue('dots') ? 'true' : 'false' }},
             onInitialized: function (element) {
               $(element.target).removeClass('slider-loader');
             }
@@ -53,7 +53,7 @@
           configThumbnail = {
             items: 4,
             itemsCustom: [[320,3],[480,4]],
-            dots:false,
+            dots: true,
             nav: true,
             margin: 10,
             responsiveRefreshRate: 100,
