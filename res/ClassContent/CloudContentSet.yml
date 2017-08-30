@@ -15,6 +15,8 @@ CloudContentSet:
       value: default
     bg_image:
       value: ''
+    bg_video:
+      value: ''
     bg_overlay:
       value: false
     bg_parallax:
