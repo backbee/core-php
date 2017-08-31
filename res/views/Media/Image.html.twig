@@ -1,3 +1,5 @@
+{% if bb.token != null or path != null %}
+
 {% set resizeClass = 'image-fullwidth' %}
 {% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %}
 {% set autoSizeClass = this.getObject().getParamValue('stretch') ? ' image-auto-width' : autoSizeClass %}
@@ -73,3 +75,5 @@
   </div>
 
 </figure>
+
+{% endif %}
