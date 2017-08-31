@@ -67,18 +67,8 @@ class ContentController extends AbstractController
         }
 
         $this->entyMgr->beginTransaction();
-        if (AbstractClassContent::STATE_NEW === $content->getState()) {
-            $content->setDraft(null);
-            if ($content instanceof ContentSet) {
-                $content->clear();
-            }
-
-            $this->entyMgr->getRepository($classname)->deleteContent($content);
-        } else {
-            $draft = $this->entyMgr->getRepository(Revision::class)->getDraft($content, $this->bbtoken, true);
-            $draft->setState(Revision::STATE_TO_DELETE);
-        }
-
+        $draft = $this->entyMgr->getRepository(Revision::class)->getDraft($content, $this->bbtoken, true);
+        $draft->setState(Revision::STATE_TO_DELETE);
         $this->entyMgr->flush();
         $this->entyMgr->commit();
 

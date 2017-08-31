@@ -99,8 +99,16 @@ class ContentBuilder
                     }
 
                     $this->hydrateContent($content, $itemData);
+                    if ($token) {
+                        $this->hydrateDraft($content, $token);
+                    }
+
                     $colContentSet->push($content);
                 }
+            }
+
+            if ($token) {
+                $this->hydrateDraft($cloudContentSet, $token);
             }
         }
     }
@@ -116,9 +124,7 @@ class ContentBuilder
     {
         $classname = $this->getClassnameFromType($type);
         $content = new $classname();
-        if ($token) {
-            $this->hydrateDraft($content, $token);
-        } else {
+        if (null === $token) {
             $this->putContentOnline($content);
         }
 
