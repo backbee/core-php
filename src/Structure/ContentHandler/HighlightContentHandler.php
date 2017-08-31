@@ -27,7 +27,7 @@ class HighlightContentHandler implements ContentHandlerInterface
             foreach ($data['parameters']['content'] as $row) {
                 $contents[] = [
                     'id'    => md5($row['label']),
-                    'title' => $row['label'],
+                    'label' => $row['label'],
                 ];
             }
 
