@@ -51,6 +51,10 @@ class MultiLangListener
         $entyMgr = $app->getEntityManager();
         foreach ($app->getRequest()->getLanguages() as $langId) {
             if (2 === strlen($langId) && $lang = $entyMgr->find(Lang::class, $langId)) {
+                if (!$lang->isActive()) {
+                    continue;
+                }
+
                 $queryString = http_build_query($event->getTarget()->query->all());
 
                 throw new RedirectToDefaultLangHomeException(sprintf(

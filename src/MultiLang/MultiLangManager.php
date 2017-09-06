@@ -10,6 +10,7 @@ use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
+use BackBeePlanet\RedisManager;
 use BackBee\BBApplication;
 use BackBee\Bundle\Registry;
 use BackBee\NestedNode\Page;
@@ -138,7 +139,12 @@ class MultiLangManager implements JobHandlerInterface
             if (null !== $lang) {
                 $lang->disable();
                 $this->entyMgr->flush($lang);
+                $root = $this->getRootByLang($lang);
+                $root->setState(Page::STATE_OFFLINE);
+                $this->entyMgr->flush($root);
             }
+
+            RedisManager::removePageCache($this->app->getSite()->getLabel());
 
             return;
         }
@@ -150,6 +156,11 @@ class MultiLangManager implements JobHandlerInterface
         if (null !== $lang) {
             $lang->enable();
             $this->entyMgr->flush($lang);
+            $root = $this->getRootByLang($lang);
+            $root->setState(Page::STATE_ONLINE);
+            $this->entyMgr->flush($root);
+
+            RedisManager::removePageCache($this->app->getSite()->getLabel());
 
             return;
         }
@@ -190,6 +201,8 @@ class MultiLangManager implements JobHandlerInterface
         $this->app->getContainer()->get('cloud.global_content_factory')->duplicateLogoForLang($id);
 
         $this->entyMgr->commit();
+
+        RedisManager::removePageCache($this->app->getSite()->getLabel());
     }
 
     public function associate(Page $page, Lang $lang)
