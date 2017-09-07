@@ -49,7 +49,7 @@
                         $('.recaptcha-error').addClass('hidden');
                         {% endif %}
 
-                        $form.find('.has-error').removeClass('display', 'none');
+                        $form.find('.has-error').removeClass('has-error');
                         $error.css('display', 'none');
 
                         var data = $form.serializeArray().reduce(function(obj, item) {

@@ -33,7 +33,8 @@
         "lp-digital/sitemap-bundle": "~0.3.0",
         "guzzlehttp/guzzle": "~6.0",
         "jenssegers/agent": "~2.5.0",
-        "google/recaptcha": "~1.1"
+        "google/recaptcha": "~1.1",
+        "drewm/mailchimp-api": "^2.4"
     },
     "autoload": {
         "psr-4": {

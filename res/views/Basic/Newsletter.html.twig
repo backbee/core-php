@@ -1,0 +1,96 @@
+<div {{this.bbcontent(null, {'class': 'newsletter text-' ~ btn_align.value})|raw}} id="newsletter_{{ this.getObject().getUid() }}">
+    {% if connector.value.mailchimp.token and connector.value.mailchimp.current_list != "0" %}
+        <h2>{{ title.value }}</h2>
+        <p>{{ description.value }}</p>
+        <form class="form">
+            <p class="error-form-message" style="display:none;"></p>
+            <div class="form-group">
+                <label class="form-label sr-only" for="forNewsletter">{{ placeholder.value }}</label>
+                <input name="newsletter" type="email" class="form-control" id="formNewsletter" placeholder="{{ placeholder.value }}">
+            </div>
+            <div class="form-action text-{{button_align.value}}">
+                {% if recaptcha_sitekey is defined and bb.token == null %}
+                    <div class="g-recaptcha" data-sitekey="{{ recaptcha_sitekey }}"></div>
+                    <p class="recaptcha-error error-form-message"></p>
+                    {{ this.addFooterJs('https://www.google.com/recaptcha/api.js') }}
+                {% endif %}
+
+                <button class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_style.value}}" type="button">{{ button_title.value }}</button>
+            </div>
+        </form>
+
+        <script>
+            (function () {
+                var init = function () {
+                    var $content = $('#newsletter_{{ this.getObject().getUid() }}');
+                    var $input = $content.find('input');
+                    var $error = $content.find('.error-form-message').not('.recaptcha-error');
+
+                    $content.find('button').on('click', function () {
+                        {% if recaptcha_sitekey is defined and bb.token == null %}
+                        $('.recaptcha-error').addClass('hidden');
+                        {% endif %}
+
+                        $content.find('.has-error').removeClass('has-error');
+                        $error.css('display', 'none');
+
+                        if (false === /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test($('#formNewsletter').val())) {
+                            $('#formNewsletter').parent().addClass('has-error');
+                        }
+
+                        if ($content.find('.has-error').length) {
+                            $error
+                                .removeAttr('style')
+                                .text('fr' === navigator.language
+                                    ? 'Email inccorect'
+                                    : 'Email is not correct'
+                                );
+                        } else {
+                            var data = {
+                                'content_uid': '{{ this.getObject().getUid() }}',
+                                'email': $input.val(),
+                            };
+
+                            {% if recaptcha_sitekey is defined and bb.token == null %}
+                            data['g-recaptcha-response'] = $('[name="g-recaptcha-response"]').val();
+                            {% endif %}
+
+                            $.ajax({
+                                'method': 'POST',
+                                'url': '/newsletter/send',
+                                'data': data
+                            }).done(function () {
+                                $content.find('.form').html('<p class="text-confirmation">{{ confirmation.value }}</p>');
+                            }).fail(function (res) {
+                                {% if recaptcha_sitekey is defined and bb.token == null %}
+                                var error = JSON.parse(res.responseText);
+                                if ('missing input response' !== error.reason) {
+                                    transformFormToSuccess();
+
+                                    return;
+                                }
+
+                                $('.recaptcha-error')
+                                    .removeClass('hidden')
+                                    .text('fr' === navigator.language
+                                        ? 'Vous devez cocher la case "Je ne suis pas un robot" pour pouvoir envoyer votre message'
+                                        : 'You must check the box "I\'m not a robot" to send your message'
+                                    )
+                                ;
+                                {% endif %}
+                            });
+                        }
+                    });
+                };
+
+                if (document.readyState === 'complete' || document.readyState === 'loaded') {
+                    init();
+                } else {
+                    document.addEventListener('DOMContentLoaded', init);
+                }
+            })();
+        </script>
+    {% else %}
+        {% include 'common/missing_config_block.html.twig' %}
+    {% endif %}
+</div>

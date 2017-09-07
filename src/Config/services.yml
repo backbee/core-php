@@ -42,6 +42,11 @@ services:
     class: BackBeeCloud\Controller\ContactController
     arguments: [@bbapp]
 
+  # Newsletter service
+  newsletter_controller:
+    class: BackBeeCloud\Controller\NewsletterController
+    arguments: [@em]
+
   # Search Engine service
   search_engine_controller:
     class: BackBeeCloud\Controller\SearchEngineController
@@ -64,6 +69,10 @@ services:
   cloud.api.import_status_controller:
     class: BackBeeCloud\Api\Controller\ImportStatusController
     arguments: [@em]
+
+  cloud.api.mailchimp_controller:
+    class: BackBeeCloud\Api\Controller\MailchimpController
+    arguments: [@bbapp]
 
   cloud.api.page_controller:
     class: BackBeeCloud\Api\Controller\PageController
