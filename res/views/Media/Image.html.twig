@@ -44,7 +44,7 @@
 
     {% if linkValue.link == 'with_button' %}
       <div class="buttonwrapper">
-        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}}">
+        <a {% block data_item_attributes %}{% endblock %} href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}}">
           {{linkValue.options.title|default('Button title')|raw}}
         </a>
       </div>

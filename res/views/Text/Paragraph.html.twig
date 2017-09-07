@@ -4,6 +4,10 @@
     {% set transparencyClass = 'transparency' %}
 {% endif %}
 
-<div data-cloud-rte="true" {{this.bbcontent(null, {class: style.value ~ ' ' ~transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' bg bg-' ~ bg_color.value)})|raw}}>
+<div
+    {% block data_attributes %}{% endblock %}
+    data-cloud-rte="true"
+    {{this.bbcontent(null, {class: style.value ~ ' ' ~transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' bg bg-' ~ bg_color.value)})|raw}}
+>
   {{value|raw}}
 </div>

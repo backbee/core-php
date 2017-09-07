@@ -30,6 +30,9 @@
     setTimeout(function () {
       var sliders = $('#{{ sliderId }}, #{{ sliderId }}-thumb');
 
+      var navLeft = '<i {% block data_left_attributes %}{% endblock %} class="arrow_carrot-left"></i>';
+      var navRight = '<i {% block data_right_attributes %}{% endblock %} class="arrow_carrot-right"></i>';
+
       sliders.each(function(){
         var slider = $(this),
           duration = 300,
