@@ -9,8 +9,9 @@ class getHomeUrl extends AbstractHelper
 {
     public function __invoke($lang = null)
     {
-        $lang = $lang ?: $this->_renderer->getApplication()->getContainer()->get('multilang_manager')->getCurrentLang();
+        $multilangMgr = $this->_renderer->getApplication()->getContainer()->get('multilang_manager');
+        $lang = $multilangMgr->getLang($lang ?: $multilangMgr->getCurrentLang());
 
-        return null !== $lang ? sprintf('/%s/', $lang) : '/';
+        return null !== $lang && $lang['is_active'] ? sprintf('/%s/', $lang['id']) : '/';
     }
 }
