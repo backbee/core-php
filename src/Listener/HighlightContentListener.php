@@ -8,6 +8,7 @@ use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Content\HighlightContent;
 use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\Event\Event;
@@ -142,9 +143,19 @@ class HighlightContentListener
             }
         }
 
-        $imageData = [];
-        if (false != $imageUid = $pageRawData['_source']['image_uid']) {
-            $image = self::getContentWithDraft(Image::class, $imageUid, $entyMgr, $bbtoken);
+        $imageData = [
+            'is_video_thumbnail' => false,
+        ];
+        if (false != $mediaUid = $pageRawData['_source']['image_uid']) {
+            $image = null;
+            $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $entyMgr, $bbtoken);
+            if ($media instanceof Video) {
+                $image = $media->thumbnail;
+                $imageData['is_video_thumbnail'] = true;
+            } elseif ($media instanceof Image) {
+                $image = $media;
+            }
+
             if (null !== $image) {
                 $imageData = [
                     'uid'    => $image->getUid(),
@@ -152,7 +163,7 @@ class HighlightContentListener
                     'title'  => $image->getParamValue('title'),
                     'legend' => $image->getParamValue('description'),
                     'stat'   => $image->getParamValue('stat'),
-                ];
+                ] + $imageData;
             }
         }
 

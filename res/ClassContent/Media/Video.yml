@@ -3,6 +3,10 @@ Video:
     name: yaml_block_video
     description: ~
     category: [block_category_basics]
+  elements:
+    thumbnail:
+      type: \BackBee\ClassContent\Media\Image
+      maxentry: 1
   parameters:
     video_url:
       type: text

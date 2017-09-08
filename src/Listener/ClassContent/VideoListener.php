@@ -2,14 +2,19 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
+use BackBeeCloud\VideoHelper;
+use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Media\Video;
+use BackBee\ClassContent\Revision;
+use BackBee\Event\Event;
 use BackBee\Renderer\Event\RendererEvent;
 
 /**
  * @author Marian Hodis <marian.hodis@lp-digital.fr>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class VideoListener
 {
-
     const YOUTUBE_HOST = 'www.youtube.com';
     const DAILYMOTION_HOST = 'www.dailymotion.com';
     const VIMEO_HOST = 'vimeo.com';
@@ -30,6 +35,76 @@ class VideoListener
         'md' => 75,
         'xs' => 50
     ];
+
+    public static function onVideoRevisionFlush(Event $event)
+    {
+        $app = $event->getApplication();
+        if (null === $bbtoken = $app->getBBUserToken()) {
+            return;
+        }
+
+        $revision = $event->getTarget();
+        if (!($revision->getContent() instanceof Video)) {
+            return;
+        }
+
+        if (false == $videoUrl = $revision->getParamValue('video_url')) {
+            return;
+        }
+
+        $entyMgr = $event->getApplication()->getEntityManager();
+        $uow = $entyMgr->getUnitOfWork();
+        if ($uow->isScheduledForDelete($revision)) {
+            return;
+        }
+
+        if (Revision::STATE_TO_DELETE === $revision->getState()) {
+            return;
+        }
+
+        $filename = md5($videoUrl);
+        $thumbnailDraft = $entyMgr->getRepository(Revision::class)->getDraft(
+            $revision->thumbnail,
+            $bbtoken,
+            true
+        );
+
+        if (false !== strpos($thumbnailDraft->path, $filename)) {
+            $method = $uow->isScheduledForInsert($thumbnailDraft)
+                ? 'computeChangeSet'
+                : 'recomputeSingleEntityChangeSet'
+            ;
+            $uow->$method(
+                $entyMgr->getClassMetadata(Revision::class),
+                $thumbnailDraft
+            );
+
+            return;
+        }
+
+        if (null === $thumbnailUrl = VideoHelper::getVideoThumbnailUrl($videoUrl)) {
+            return;
+        }
+
+        $tmpfilepath = tempnam(sys_get_temp_dir(), '');
+        file_put_contents($tmpfilepath, file_get_contents($thumbnailUrl));
+        $filename .= '.' . pathinfo($thumbnailUrl, PATHINFO_EXTENSION);
+
+        $thumbnailDraft->path = $app->getContainer()->get('cloud.file_handler')->upload(
+            $filename,
+            $tmpfilepath,
+            true
+        );
+
+        $method = $uow->isScheduledForInsert($thumbnailDraft)
+            ? 'computeChangeSet'
+            : 'recomputeSingleEntityChangeSet'
+        ;
+        $uow->$method(
+            $entyMgr->getClassMetadata(Revision::class),
+            $thumbnailDraft
+        );
+    }
 
     /**
      * Video onRender event

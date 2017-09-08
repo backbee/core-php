@@ -6,6 +6,9 @@
                 <div class="contentwrapper">
                     {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
                     <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive image-resize" alt="{{img_alt}}" /></a>
+                    {% if image.is_video_thumbnail %}
+                        <span class="picto-video"><i></i></span>
+                    {% endif %}
                 </div>
             </figure>
             {% endif %}
