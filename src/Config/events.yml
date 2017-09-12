@@ -153,6 +153,7 @@ basic.searchresult.render:
 revision.onflush:
   listeners:
     - [@cloud.image_listener, onImageRevisionFlush]
+    - [BackBeeCloud\Listener\ClassContent\VideoListener, onVideoRevisionFlush]
 
 media.video.render:
   listeners:

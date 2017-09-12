@@ -9,10 +9,12 @@ use BackBeePlanet\ElasticsearchManager as PlanetElasticsearchManager;
 use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
 use BackBee\BBApplication;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Article\ArticleTitle;
 use BackBee\ClassContent\Basic\Title;
 use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
@@ -399,14 +401,34 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     protected function extractImageUidFromPage(Page $page)
     {
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
-        $image = $this->getRealFirstContentByUid(
-            $this->entyMgr->getRepository(Image::class)->findBy([
-                '_uid' => $contentUids,
-            ]),
+        $media = $this->getRealFirstContentByUid(
+            array_merge(
+                $this->entyMgr->getRepository(Image::class)->findBy([
+                    '_uid' => $contentUids,
+                ]),
+                $this->entyMgr->getRepository(Video::class)->findBy([
+                    '_uid' => $contentUids,
+                ])
+            ),
             $contentUids
         );
 
-        return $image ? $image->getUid() : null;
+        if ($media instanceof Video) {
+            $image = $media->thumbnail;
+            if (false == $image->path || AbstractClassContent::STATE_NORMAL !== $image->getState()) {
+                $contentUids = array_filter($contentUids, function ($uid) use ($image) {
+                    return $uid !== $image->getUid();
+                });
+                $media = $this->getRealFirstContentByUid(
+                    $this->entyMgr->getRepository(Image::class)->findBy([
+                        '_uid' => $contentUids,
+                    ]),
+                    $contentUids
+                );
+            }
+        }
+
+        return $media ? $media->getUid() : null;
     }
 
     protected function cleanText($text)
