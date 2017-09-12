@@ -1,4 +1,4 @@
-<li {% if item.is_current %}class="active"{% endif %}>
+<li class="{% if item.is_current %}active{% endif %}{% if item.children %} has-children{% endif %}">
     <a
         {% block data_item_attributes %}{% endblock %}
         href="{{item.url}}"
@@ -6,4 +6,14 @@
     >
         <span class="{{item.is_online == false ? 'offline': ''}}">{{item.label}}</span>
     </a>
+	{% if item.children %}
+    <div class="submenu">
+		<ul>
+		{% for link in item.children %}
+			<li><a href="{{item.url}}" {% if item.is_online == false %} title="This page is offline"{% endif %}><span class="{{item.is_online == false ? 'offline': ''}}">{{link.label|escape}}</span></a></li>
+		{% endfor %}
+		</ul>
+    </div>
+    {% endif%}
+
 </li>
