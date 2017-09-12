@@ -65,10 +65,14 @@ class MultiLangListener
             }
         }
 
-        $lang = $multilangMgr->getDefaultLang();
+        $lang = null;
         $fallback = $entyMgr->find(Lang::class, self::LANG_MAIN_FALLBACK);
         if ($fallback) {
             $lang = $multilangMgr->getLang($fallback->getLang());
+        }
+
+        if (null !== $lang && false === $lang['is_active']) {
+            $lang = $multilangMgr->getDefaultLang();
         }
 
         if (null === $lang) {
