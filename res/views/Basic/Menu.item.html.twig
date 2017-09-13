@@ -10,7 +10,7 @@
     <div class="submenu">
 		<ul>
 		{% for link in item.children %}
-			<li><a href="{{item.url}}" {% if item.is_online == false %} title="This page is offline"{% endif %}><span class="{{item.is_online == false ? 'offline': ''}}">{{link.label|escape}}</span></a></li>
+			<li><a href="{{link.url}}" {% if link.is_online == false %} title="This page is offline"{% endif %}><span class="{{link.is_online == false ? 'offline': ''}}">{{link.label|escape}}</span></a></li>
 		{% endfor %}
 		</ul>
     </div>

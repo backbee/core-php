@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Listener;
 
 use BackBeeCloud\Entity\Lang;
+use BackBee\BBApplication;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
@@ -58,26 +59,31 @@ class MenuListener
 
         $validItems = [];
         foreach ($items as $item) {
-            if (false != $item['id']) {
-                if (null !== $page = $entyMgr->find('BackBee\NestedNode\Page', $item['id'])) {
-                    if (null === $bbtoken && !$page->isOnline()) {
-                        continue;
-                    }
+            if (
+                false != $item['id']
+                && null !== $page = self::getPageByUid($item['id'], $app)
+            ) {
+                $item['url'] = $page->getUrl();
+                $item['label'] = $page->getTitle();
+                $item['is_online'] = $page->isOnline();
+                $item['is_current'] = $renderer->getCurrentPage() === $page;
 
+                $validChildren = [];
+                foreach ((array) $item['children'] as $child) {
                     if (
-                        $page->isRoot()
-                        && null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()
+                        false != $item['id']
+                        && null !== $page = self::getPageByUid($child['id'], $app)
                     ) {
-                        $lang = $entyMgr->find(Lang::class, $currentLang);
-                        $page = $app->getContainer()->get('multilang_manager')->getRootByLang($lang);
+                        $child['url'] = $page->getUrl();
+                        $child['label'] = $page->getTitle();
+                        $child['is_online'] = $page->isOnline();
+                        $child['is_current'] = $renderer->getCurrentPage() === $page;
+                        $validChildren[] = $child;
                     }
-
-                    $item['url'] = $page->getUrl();
-                    $item['label'] = $page->getTitle();
-                    $item['is_online'] = $page->isOnline();
-                    $item['is_current'] = $renderer->getCurrentPage() === $page;
-                    $validItems[] = $item;
                 }
+
+                $item['children'] = $validChildren;
+                $validItems[] = $item;
             }
         }
 
@@ -87,5 +93,27 @@ class MenuListener
         }
 
         $renderer->assign('items', $validItems);
+    }
+
+    protected static function getPageByUid($uid = null, BBApplication $app)
+    {
+        $bbtoken = $app->getBBUserToken();
+        $entyMgr = $app->getEntityManager();
+        $multilangMgr = $app->getContainer()->get('multilang_manager');
+        if (null !== $page = $entyMgr->find(Page::class, (string) $uid)) {
+            if (null === $bbtoken && !$page->isOnline()) {
+                return null;
+            }
+
+            if (
+                $page->isRoot()
+                && null !== $currentLang = $multilangMgr->getCurrentLang()
+            ) {
+                $lang = $entyMgr->find(Lang::class, $currentLang);
+                $page = $multilangMgr->getRootByLang($lang);
+            }
+        }
+
+        return $page;
     }
 }
