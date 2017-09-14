@@ -144,7 +144,7 @@ class MultiLangManager implements JobHandlerInterface
                 $this->entyMgr->flush($root);
             }
 
-            RedisManager::removePageCache($this->app->getSite()->getLabel());
+            RedisManager::removePageCache($this->getSite()->getLabel());
 
             return;
         }
@@ -160,7 +160,7 @@ class MultiLangManager implements JobHandlerInterface
             $root->setState(Page::STATE_ONLINE);
             $this->entyMgr->flush($root);
 
-            RedisManager::removePageCache($this->app->getSite()->getLabel());
+            RedisManager::removePageCache($this->getSite()->getLabel());
 
             return;
         }
@@ -202,7 +202,7 @@ class MultiLangManager implements JobHandlerInterface
 
         $this->entyMgr->commit();
 
-        RedisManager::removePageCache($this->app->getSite()->getLabel());
+        RedisManager::removePageCache($this->getSite()->getLabel());
     }
 
     public function associate(Page $page, Lang $lang)
