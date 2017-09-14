@@ -65,8 +65,8 @@ class TagManager
             return $this;
         }
 
+        $elasticsearchMethod = 'indexTag';
         $pages = $this->getLinkedPages($tag);
-
         $newTag = $this->entyMgr->getRepository(Tag::class)->exists($newName);
         if (null === $newTag) {
             $tag->setKeyWord($newName);
@@ -79,7 +79,7 @@ class TagManager
             $inClause = '"' . implode('", "', array_column($result, 'id')) . '"';
             $this->entyMgr->getConnection()->executeUpdate(
                 "DELETE FROM page_tag_keyword WHERE page_tag_id IN ({$inClause}) AND tag_uid = :new_tag_uid",
-                [ 'new_tag_uid' => $newTag->getUid() ]
+                ['new_tag_uid' => $newTag->getUid()]
             );
 
             $this->entyMgr->getConnection()->executeUpdate(
@@ -90,9 +90,11 @@ class TagManager
                 ]
             );
             $this->entyMgr->remove($tag);
+            $elasticsearchMethod = 'deleteTag';
         }
 
         $this->entyMgr->flush($tag);
+        $this->elasticMgr->$elasticsearchMethod($tag);
         foreach ($pages as $row) {
             $this->elasticMgr->indexPage($this->entyMgr->find('BackBee\NestedNode\Page', $row['id']));
         }
