@@ -19,6 +19,9 @@ use BackBee\Renderer\Event\RendererEvent;
  */
 class ContentListener
 {
+    const YOUTUBE_URL_REGEX = '(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"\'>]+)';
+    const YOUTUBE_EMBED_BASE_URL = 'https://www.youtube.com/embed/';
+
     private static $imgCdnHost;
 
     /**
@@ -87,11 +90,36 @@ class ContentListener
 
     public static function onCloudContentSetRender(RendererEvent $event)
     {
+        $content = $event->getTarget();
+        if (false != $bgVideoUrl = $content->getParamValue('bg_video')) {
+            $videoId = null;
+            if (1 === preg_match('~' . self::YOUTUBE_URL_REGEX . '~', $bgVideoUrl, $matches)) {
+                $videoId = $matches[5];
+            }
+
+            if ($videoId) {
+                $event->getRenderer()->assign('bg_video_id', $videoId);
+                $event->getRenderer()->assign(
+                    'bg_video_url',
+                    self::YOUTUBE_EMBED_BASE_URL . $videoId . '?' . http_build_query([
+                        'autohide'       => 0,
+                        'autoplay'       => 1,
+                        'cc_load_policy' => 0,
+                        'controls'       => 0,
+                        'iv_load_policy' => 3,
+                        'loop'           => 1,
+                        'mute'           => 1,
+                        'playlist'       => $videoId,
+                        'showinfo'       => 0,
+                    ])
+                );
+            }
+        }
+
         if (UserAgentHelper::isDesktop()) {
             return;
         }
 
-        $content = $event->getTarget();
         $param = $content->getParamValue('responsive_' . UserAgentHelper::getDeviceType());
         if (isset($param['nb_item_max']) && 0 == $param['nb_item_max']) {
             $event->getRenderer()->assign('hide_content', true);

@@ -65,34 +65,61 @@
     {% set noPaddingClass = 'no-padding' %}
   {% endif %}
 
-  <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}} style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
-    <div class="{{ width.value }}">
-      <div class="row {% if remove_gutter.value %}no-gutter{% endif %}">
-      {% for key, content in data %}
-        {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
-        {% set colsize = colsize ? colsize : default_colsize %}
-        {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
-        <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
-        {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+  {% if bg_video_url %}
+    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}}>
+
+      <div style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
+        {% if this.userAgentHelper.isDesktop() %}
+          <div class="bg-video-wrapper embed-responsive embed-responsive-16by9">
+            <iframe id="bg_video_{{bg_video_id}}" src="{{bg_video_url}}" frameborder="0" allowfullscreen autoplay controls="0"></iframe>
+            <!-- <iframe frameborder="0" width="480" height="270" src="//www.dailymotion.com/embed/video/x5yho03" allowfullscreen></iframe> -->
+          </div>
+        {% endif %}
+        <div class="{{ width.value }}">
+          <div class="row {% if remove_gutter.value %}no-gutter{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
+          {% for key, content in data %}
+            {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
+            {% set colsize = colsize ? colsize : default_colsize %}
+            {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
+            <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
+            {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+            </div>
+          {% endfor %}
+          </div>
         </div>
-      {% endfor %}
       </div>
     </div>
-  </div>
-  {% if false != backgroundImage and withParallax %}
-  <script>
-  var callback = function(){
-    $('#{{rowId}}').parallax({imageSrc: '{{backgroundImage|raw}}'});
-  };
+  {% else %}
+    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass})|raw}} style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
+      <div class="{{ width.value }}">
+        <div class="row {% if remove_gutter.value %}no-gutter{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
+        {% for key, content in data %}
+          {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
+          {% set colsize = colsize ? colsize : default_colsize %}
+          {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
+          <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
+          {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+          </div>
+        {% endfor %}
+        </div>
+      </div>
 
-  if (
-      document.readyState === "complete" ||
-      (document.readyState !== "loading" && !document.documentElement.doScroll)
-  ) {
-    callback();
-  } else {
-    document.addEventListener("DOMContentLoaded", callback);
-  }
-  </script>
+      {% if false != backgroundImage and withParallax %}
+      <script>
+      var callback = function(){
+        $('#{{rowId}}').parallax({imageSrc: '{{backgroundImage|raw}}'});
+      };
+
+      if (
+          document.readyState === "complete" ||
+          (document.readyState !== "loading" && !document.documentElement.doScroll)
+      ) {
+        callback();
+      } else {
+        document.addEventListener("DOMContentLoaded", callback);
+      }
+      </script>
+      {% endif %}
+    </div>
   {% endif %}
 {% endif %}
