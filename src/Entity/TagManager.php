@@ -161,7 +161,11 @@ class TagManager
 
     public function getBy($prefix = '', $start = 0, $limit = self::DEFAULT_LIMIT)
     {
-        return $this->elasticMgr->searchTag($prefix, $start, $limit);
+        return $this->elasticMgr->searchTag(
+            preg_replace('#[/\"]#', '', trim($prefix)),
+            $start,
+            $limit
+        );
     }
 
     public function get($uid)
