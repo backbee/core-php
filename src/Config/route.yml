@@ -160,13 +160,13 @@ cloud.api.contents.publish:
     pageuid: "[a-f0-9]{32}"
     _method: PUT
 
-cloud.api.contents.publish_all:
-  pattern: /api/contents/publish-all-page
+cloud.api.contents.get_pages_to_publish:
+  pattern: /api/contents/pages-to-publish
   defaults:
-    _action: publishAll
+    _action: getPagesToPublish
     _controller: cloud.api.content_controller
   requirements:
-    _method: PUT
+    _method: GET
 
 cloud.api.contents.reset:
   pattern: /api/contents/reset-page/{pageuid}
