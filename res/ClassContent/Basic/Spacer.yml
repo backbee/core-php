@@ -3,6 +3,7 @@ Spacer:
     name: yaml_block_spacer
     description: ~
     category: [block_category_more]
+    forbidden_plugins: ['parameter']
   parameters:
     height:
       value: 40

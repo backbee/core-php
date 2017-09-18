@@ -3,6 +3,7 @@ Liner:
     name: yaml_block_liner
     description: ~
     category: [block_category_more]
+    forbidden_plugins: ['parameter']
   parameters:
     height:
-      value: 26
+      value: 40
