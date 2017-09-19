@@ -105,41 +105,25 @@
       </div>
 
       {% if false != backgroundImage and withParallax %}
-      <script>
-      var callback = function(){
-        $('#{{rowId}}').parallax({imageSrc: '{{backgroundImage|raw}}'});
-      };
+        <script>
+          var callback = function(){
+            var IEVersion = GetIEVersion();
 
-      if (
-          document.readyState === "complete" ||
-          (document.readyState !== "loading" && !document.documentElement.doScroll)
-      ) {
-        callback();
-      } else {
-        document.addEventListener("DOMContentLoaded", callback);
-      }
-      </script>
+            if (IEVersion === 0 || (IEVersion !== 0 && IEVersion <= 11)) {
+              $('#{{rowId}}').parallax({imageSrc: '{{backgroundImage|raw}}'});
+            }
+          };
+
+          if (
+            document.readyState === "complete"
+            || (document.readyState !== "loading" && !document.documentElement.doScroll)
+          ) {
+            callback();
+          } else {
+            document.addEventListener("DOMContentLoaded", callback);
+          }
+        </script>
       {% endif %}
     </div>
-  </div>
-  {% if false != backgroundImage and withParallax %}
-  <script>
-  var callback = function(){
-    var IEVersion = GetIEVersion();
-
-    if (IEVersion === 0 || (IEVersion !== 0 && IEVersion <= 11)) {
-      $('#{{rowId}}').parallax({imageSrc: '{{backgroundImage|raw}}'});
-    }
-  };
-
-  if (
-      document.readyState === "complete" ||
-      (document.readyState !== "loading" && !document.documentElement.doScroll)
-  ) {
-    callback();
-  } else {
-    document.addEventListener("DOMContentLoaded", callback);
-  }
-  </script>
   {% endif %}
 {% endif %}
