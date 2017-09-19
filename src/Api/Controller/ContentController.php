@@ -103,20 +103,25 @@ class ContentController extends AbstractController
         ]);
     }
 
-    public function publishAll()
+    public function getPagesToPublish()
     {
         if (null !== $response = $this->getResponseOnAnonymousUser()) {
             return $response;
         }
 
-        $pageCount = 0;
+        $result = [];
         foreach ($this->pageMgr->getPagesWithDraftContents() as $page) {
-            $this->runPublishPage($page);
-            $pageCount++;
+            $result[] = [
+                'uid'   => $page->getUid(),
+                'title' => $page->getTitle(),
+            ];
         }
 
-        return new Response('', Response::HTTP_NO_CONTENT, [
-            'x-published-page-count' => $pageCount,
+        $max = count($result);
+        $end = $max - 1;
+
+        return new JsonResponse($result, Response::HTTP_OK, [
+            'Content-Range' => $max ? "0-$end/$max" : '-/-',
         ]);
     }
 
