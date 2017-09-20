@@ -1,5 +1,6 @@
 <div data-mobile-edit="false" data-forbidden-plugins="dnd,parameter,remove,resize,focus" data-img-quality="100" {{this.bbcontent(null, {class: 'media-image logo'})|raw}}>
   <div {% block data_item_attributes %}{% endblock %}>
-    <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %} alt="{{ title.value }}"/>
+    <img draggable="false" src="/img/logo-footer.png">
+    {# <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %} alt="{{ title.value }}"/> #}
   </div>
 </div>
