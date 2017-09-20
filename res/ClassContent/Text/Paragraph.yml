@@ -22,7 +22,6 @@ Paragraph:
       type: switch
       value: false
       label: yaml_block_text_transparency
-      tab: yaml_block_text_tab_style
       group:
         id: transparency
     style:
@@ -32,6 +31,5 @@ Paragraph:
         full-color: yaml_block_text_full_color
         bordered: yaml_block_text_line_color
       value: full-color
-      tab: yaml_block_text_tab_style
       group:
         id: color
