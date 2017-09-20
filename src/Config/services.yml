@@ -138,7 +138,7 @@ services:
 
   # Structure's services
   cloud.structure.schema_parser:
-    class: BackBeeCloud\Structure\VoidSchemaParser
+    class: BackBeeCloud\Structure\DefaultSchemaParser
 
   cloud.structure.content_builder:
     class: BackBeeCloud\Structure\ContentBuilder

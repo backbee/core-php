@@ -1,0 +1,1124 @@
+schema:
+  theme: default
+  logo_header: ~
+  logo_footer: ~
+  header: {  }
+  footer: {  }
+  pages:
+    -
+      menu: none
+      title: Gallery
+      custom_type:
+        unique_name: custom_gallery
+        label: Gallery
+      tags: {  }
+      type: blank
+      contents:
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Spacer
+                data:
+                  parameters:
+                    height: 40
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Title
+                data:
+                  text: Gallery
+                  parameters:
+                    align: center
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\"><span style=\"font-size:22px\">This the description of your gallery</span></p>\n"
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize:
+                - 4
+                - 4
+                - 4
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize:
+                - 8
+                - 4
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize:
+                - 3
+                - 3
+                - 3
+                - 3
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link:
+                      link: lightbox
+                      options: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+    -
+      menu: none
+      title: Contact
+      custom_type:
+        unique_name: custom_contact
+        label: Contact
+      tags: {  }
+      type: blank
+      contents:
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Spacer
+                data:
+                  parameters:
+                    height: 40
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Title
+                data:
+                  text: Contact
+                  parameters:
+                    align: center
+        -
+          data:
+            parameters:
+              width: 'container container-small'
+              height: 0
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile:
+                nb_item: '1'
+                nb_item_max: '4'
+              responsive_tablet:
+                nb_item: '1'
+                nb_item_max: '4'
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\"><span style=\"font-size:22px\">Write a good description here otherwise people won't contact you</span></p>\n"
+        -
+          data:
+            parameters:
+              width: 'container container-small'
+              height: 0
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile:
+                nb_item: '1'
+                nb_item_max: '4'
+              responsive_tablet:
+                nb_item: '1'
+                nb_item_max: '4'
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Contact
+                data:
+                  parameters:
+                    email: ~
+                    name_placeholder: 'Votre nom'
+                    email_address_placeholder: 'Votre adresse email'
+                    message_placeholder: Message
+                    error_message: 'Des informations sont manquantes'
+                    confirmation_message: 'Votre message a bien été envoyé. Merci pour votre temps.'
+                    button_title: 'GET IN TOUCH'
+                    button_align: center
+                    button_color: color2
+                    button_style: btn-border
+                    button_size: md
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Spacer
+                data:
+                  parameters:
+                    height: 40
+    -
+      menu: none
+      title: '2 columns'
+      custom_type:
+        unique_name: custom_2_columns
+        label: 2 columns
+      tags: {  }
+      type: blank
+      contents:
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Spacer
+                data:
+                  parameters:
+                    height: 40
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Title
+                data:
+                  text: '2 columns'
+                  parameters:
+                    align: center
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\"><span style=\"font-size:24px\">This is the abstract zone. Write the summary of your page&nbsp;down here!</span></p>\n"
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize:
+                - 9
+                - 3
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p>\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"</p>\n"
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3><span style=\"font-size:20px\">Title of the second column</span></h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p>\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"</p>\n"
+    -
+      menu: none
+      title: '3 columns'
+      custom_type:
+        unique_name: custom_3_columns
+        label: 3 columns
+      tags: {  }
+      type: blank
+      contents:
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Spacer
+                data:
+                  parameters:
+                    height: 40
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Title
+                data:
+                  text: '3 columns'
+                  parameters:
+                    align: center
+        -
+          data:
+            parameters:
+              width: container
+              height: 0
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile:
+                nb_item: '1'
+                nb_item_max: '4'
+              responsive_tablet:
+                nb_item: '1'
+                nb_item_max: '4'
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\"><span style=\"font-size:24px\">This is the abstract zone. Write the summary of your page down here!</span></p>\n"
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize:
+                - 4
+                - 4
+                - 4
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">First content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"&nbsp;</p>\n"
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">Second content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">Third content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+    -
+      menu: none
+      title: '4 columns'
+      custom_type:
+        unique_name: custom_4_columns
+        label: 4 columns
+      tags: {  }
+      type: blank
+      contents:
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Spacer
+                data:
+                  parameters:
+                    height: 40
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Basic/Title
+                data:
+                  text: '4 columns'
+                  parameters:
+                    align: center
+        -
+          data:
+            parameters:
+              width: container
+              height: 0
+              blocksize: {  }
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile:
+                nb_item: '1'
+                nb_item_max: '4'
+              responsive_tablet:
+                nb_item: '1'
+                nb_item_max: '4'
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\"><span style=\"font-size:24px\">This is the abstract zone. Write the summary of your page down here!</span></p>\n"
+        -
+          data:
+            parameters:
+              width: container
+              height: ''
+              blocksize:
+                - 3
+                - 3
+                - 3
+                - 3
+              bg_color: default
+              bg_image: ''
+              bg_overlay: false
+              bg_image_position_y: 0%
+              responsive_mobile: {  }
+              responsive_tablet: {  }
+              remove_padding: false
+              remove_gutter: false
+          columns:
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">First content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"&nbsp;</p>\n"
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">Second content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">Third content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+            -
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<h3 style=\"text-align:center\">Fourth content title</h3>\n"
+              -
+                type: Media/Image
+                data:
+                  path: ~
+                  parameters:
+                    title: ''
+                    alt: ''
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
+                    ratio: ''
+                    width: ''
+                    position: {  }
+                    focus: {  }
+                    display_title: false
+                    description: ''
+                    display_description: false
+                    display_overlay: false
+                    link: {  }
+                    image_small: {  }
+                    image_medium: {  }
+                    picto: ''
+                    height: null
+                    crop: null
+                    stat: null
+              -
+                type: Text/Paragraph
+                data:
+                  text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
