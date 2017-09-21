@@ -47,7 +47,7 @@ class PageManager
     /**
      * @var \BackBeeCloud\Elasticsearch\ElasticsearchManager
      */
-    protected $elasticsearchMgr;
+    protected $elsMgr;
 
     /**
      * @var \BackBeeCloud\Entity\TagManager
@@ -81,7 +81,7 @@ class PageManager
         $this->typeMgr = $app->getContainer()->get('cloud.page_type.manager');
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
         $this->repository = $this->entyMgr->getRepository(Page::class);
-        $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
+        $this->elsMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->tagMgr = $app->getContainer()->get('cloud.tag_manager');
         $this->multilangMgr = $app->getContainer()->get('multilang_manager');
     }
@@ -137,6 +137,16 @@ class PageManager
     {
         $metadatabag = $page->getMetaData();
         $type = $this->typeMgr->findByPage($page);
+        $result = $this->elsMgr->getClient()->get([
+            'id'      => $page->getUid(),
+            'index'   => $this->elsMgr->getIndexName(),
+            'type'    => $this->elsMgr->getPageTypeName(),
+            '_source' => ['has_draft_contents'],
+        ]);
+
+        $isDrafted = $result['found'] && isset($result['_source']['has_draft_contents'])
+            ? $result['_source']['has_draft_contents']
+            : false;
 
         return [
             'id'         => $page->getUid(),
@@ -144,7 +154,7 @@ class PageManager
             'type'       => $type ? $type->uniqueName() : null,
             'type_data'  => $type,
             'is_online'  => $page->isOnline(),
-            'is_drafted' => $this->bbtoken ? $this->contentMgr->isDraftedPage($page, $this->bbtoken) : false,
+            'is_drafted' => $isDrafted,
             'url'        => $page->getUrl(),
             'tags'       => array_map(function(KeyWord $keyword) {
                 return [
@@ -256,7 +266,7 @@ class PageManager
                 $query['query']['bool']['must'][] = [ 'match' => ['has_draft_contents' => true] ];
             }
 
-            return $this->elasticsearchMgr->customSearchPage(
+            return $this->elsMgr->customSearchPage(
                 $query,
                 $start,
                 $limit,
@@ -266,7 +276,7 @@ class PageManager
 
         unset($criteria['page_uid']);
         if (1 === count($criteria) && isset($criteria['title'])) {
-            return $this->elasticsearchMgr->searchPage(str_replace('%', '', $criteria['title']), $start, $limit);
+            return $this->elsMgr->searchPage(str_replace('%', '', $criteria['title']), $start, $limit);
         }
 
         $qb = $this
@@ -343,7 +353,7 @@ class PageManager
             $this->handleRedirections($page, (array) $redirections);
         }
 
-        $this->elasticsearchMgr->indexPage($page);
+        $this->elsMgr->indexPage($page);
         $this->currentPage = null;
 
         return $page;
@@ -441,7 +451,7 @@ class PageManager
         $this->entyMgr->flush();
         $this->entyMgr->commit();
 
-        $this->elasticsearchMgr->indexPage($copy);
+        $this->elsMgr->indexPage($copy);
         $this->currentPage = null;
 
         return $copy;
@@ -454,7 +464,7 @@ class PageManager
      */
     public function getPagesWithDraftContents()
     {
-        return $this->elasticsearchMgr->customSearchPage([
+        return $this->elsMgr->customSearchPage([
             'query' => [
                 'bool' => [
                     'must' => [
