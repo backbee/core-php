@@ -1,222 +1,369 @@
+# Application listeners
 
 bbapplication.init:
-  listeners:
-    - [BackBeeCloud\Listener\CoreListener, onApplicationInit, 200]
-
-file_upload.validation:
-  listeners:
-    - [BackBeeCloud\Listener\FileUploadListener, onFileUploadEvent]
+    listeners:
+        - [BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit, -8000]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit]
+        - [BackBee\Renderer\Listener\TwigListener, onApplicationReady]
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CoreListener, onApplicationInit, 200]
 
 bbapplication.start:
-  listeners:
-    - [BackBeeCloud\Listener\HAuthListener, onApplicationStart]
-    - [BackBeeCloud\Listener\CoreListener, onApplicationStart, -50]
-    - [BackBeeCloud\Listener\MultiLangListener, onApplicationStart, -100]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\HAuthListener, onApplicationStart]
+        - [BackBeeCloud\Listener\CoreListener, onApplicationStart, -50]
+        - [BackBeeCloud\Listener\MultiLangListener, onApplicationStart, -100]
+
+bbapplication.stop:
+    listeners:
+        - [BackBee\Bundle\Listener\BundleListener, onApplicationStop]
+
+# Config listeners
+
+service.tagged.config_per_site:
+    listeners:
+        - [@config.configurator, onGetServiceConfig]
+
+
+# Kernel listeners
 
 kernel.request:
-  listeners:
-    - [BackBeeCloud\Listener\RequestListener, onKernelRequest]
+    listeners:
+        - [@profiler.listener, onKernelRequest]
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\RequestListener, onKernelRequest]
 
 kernel.exception:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100]
-    - [@cloud.disqus_listener, onDisqusControlledException, 100]
-    - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
-    - [BackBeeCloud\Listener\MultiLangListener, onMultiLangException, 100]
-    - [BackBeeCloud\Listener\CoreListener, onKernelException, 50]
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100]
+    listeners:
+        - [@rest.listener.exception, onKernelException]
+        - [@exception.listener, onKernelException]
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100]
+        - [@cloud.disqus_listener, onDisqusControlledException, 100]
+        - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
+        - [BackBeeCloud\Listener\MultiLangListener, onMultiLangException, 100]
+        - [BackBeeCloud\Listener\CoreListener, onKernelException, 50]
+        - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100]
 
-nestednode.page.render:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onPageRender]
+kernel.controller:
+    listeners:
+        - [@rest.listener.param_converter, onKernelController]
+        - [@rest.listener.security, onKernelController]
+        - [@rest.listener.validation, onKernelController]
+        - [@rest.listener.pagination, onKernelController]
 
-nestednode.page.onflush:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onFlush]
-    - [BackBeeCloud\Listener\PageListener, handleUriCollisionOnFlushPage]
+kernel.response:
+    listeners:
+        - [@profiler.toolbar.listener, onKernelResponse]
+        - [@profiler.listener, onKernelResponse]
 
-nestednode.page.postpersist:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onPagePostChange]
+# ClassContent listeners
 
-nestednode.page.postupdate:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onPagePostChange]
+classcontent.include:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onInclude]
 
-nestednode.page.postremove:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onPagePostChange]
+classcontent.postload:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onPostload]
 
-nestednode.page.postrender:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onPagePostRender]
+classcontent.update:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onUpdate]
 
-backbeecloud.entity.pagetype.postload:
-  listeners:
-    - [BackBeeCloud\Listener\PageTypeListener, onPostload]
+element.file.postremove:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onRemoveElementFile]
 
-rest.controller.classcontentcontroller.postaction.precall:
-  listeners:
-    - [@cloud.disqus_listener, onCreateContent]
+classcontent.onflush:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onFlushContent]
+        - [BackBee\ClassContent\Listener\RevisionListener, onFlushContent]
 
-backbeecloud.api.controller.contentcontroller.delete.precall:
-  listeners:
-    - [@cloud.disqus_listener, onDeleteContent]
+classcontent.prerender:
+    listeners:
+        - [BackBee\ClassContent\Listener\RevisionListener, onPrerenderContent]
 
-rest.controller.classcontentcontroller.postaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall]
-
-rest.controller.classcontentcontroller.putaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall]
-
-backbeecloud.api.controller.contentcontroller.delete.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall]
-
-rest.controller.classcontentcontroller.getaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\HighlightContentListener, onPostCall]
-    - [BackBeeCloud\Listener\ContentAutoblockListener, onPostCall]
-
-rest.controller.securitycontroller.deletesessionaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onLogoutPostCall]
-
-rest.controller.securitycontroller.authenticateaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onAuthenticationPostCall]
-
-rest.controller.classcontentcontroller.getcategorycollectionaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\PageTypeListener, onGetCategoryPostCall]
-    - [@content.category_listener, onGetCategoryPostCall]
-    - [BackBeeCloud\Listener\CacheListener, onGetCategoryPostCall]
-
-rest.controller.pagecontroller.deleteaction.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
-    - [BackBeeCloud\Elasticsearch\ElasticsearchListener, onPageDeletePostcall]
-    - [BackBeeCloud\Listener\PageListener, onPageDeletePostcall]
-
-rest.controller.resourcecontroller.uploadaction.postcall:
-  listeners:
-    - [@cloud.image_listener, onUploadPostCall]
-
-backbeecloud.api.controller.pagecontroller.put.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
-
-backbeecloud.api.controller.tagcontroller.put.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
-
-backbeecloud.api.controller.tagcontroller.delete.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
-
-backbeecloud.api.controller.contentcontroller.publish.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onPublishPostCall]
-
-backbeecloud.api.controller.contentcontroller.publishall.postcall:
-  listeners:
-    - [BackBeeCloud\Listener\CacheListener, onPublishAllPostCall]
-
-controller.frontcontroller.rssaction.precall:
-  listeners:
-    - [BackBeeCloud\Listener\PageListener, onRssActionPreCall]
-
-rest.user.creation:
-  listeners:
-    - [BackBeeCloud\Listener\Api\UserListener, onRestUserCreationEvent]
-
-controller.frontcontroller.defaultaction.precall:
-  listeners:
-    - [BackBeeCloud\Listener\MultiLangListener, onHomePreCall, 100]
-
-backbeecloud.controller.contactcontroller.send.precall:
-  listeners:
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
-
-backbeecloud.controller.newslettercontroller.send.precall:
-  listeners:
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
-
-# ClassContents listeners
-
-basic.searchresult.render:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\SearchResultListener, onRender]
+revision.postload:
+    listeners:
+        - [BackBee\ClassContent\Listener\RevisionListener, onPostLoad]
 
 revision.onflush:
-  listeners:
-    - [@cloud.image_listener, onImageRevisionFlush]
-    - [BackBeeCloud\Listener\ClassContent\VideoListener, onVideoRevisionFlush]
+    listeners:
+        - [BackBee\ClassContent\Listener\RevisionListener, onFlushElementFile]
+        # BackBee Cloud listeners
+        - [@cloud.image_listener, onImageRevisionFlush]
+        - [BackBeeCloud\Listener\ClassContent\VideoListener, onVideoRevisionFlush]
+
+basic.searchresult.render:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\SearchResultListener, onRender]
 
 media.video.render:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\VideoListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\VideoListener, onRender]
 
 media.soundcloud.render:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\SoundcloudListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\SoundcloudListener, onRender]
 
 social.tweet.render:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\TweetListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\TweetListener, onRender]
 
 article.articletitle.render:
-  listeners:
-    - [BackBeeCloud\Listener\ArticleTitleListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ArticleTitleListener, onRender]
 
 basic.menu.prepersist:
-  listeners:
-    - [BackBeeCloud\Listener\MultiLangListener, onMenuPrePersist, 100]
-    - [BackBeeCloud\Listener\MenuListener, onPrePersist]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\MultiLangListener, onMenuPrePersist, 100]
+        - [BackBeeCloud\Listener\MenuListener, onPrePersist]
 
 basic.menu.render:
-  listeners:
-    - [BackBeeCloud\Listener\MenuListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\MenuListener, onRender]
 
 media.image.render:
-  listeners:
-    - [@cloud.image_listener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [@cloud.image_listener, onRender]
 
 contentautoblock.render:
-  listeners:
-    - [BackBeeCloud\Listener\ContentAutoblockListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ContentAutoblockListener, onRender]
 
 content.highlightcontent.render:
-  listeners:
-    - [BackBeeCloud\Listener\HighlightContentListener, onRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\HighlightContentListener, onRender]
 
 media.image.onflush:
-  listeners:
-    - [@cloud.image_listener, onImageFlush]
+    listeners:
+        # BackBee Cloud listeners
+        - [@cloud.image_listener, onImageFlush]
 
 basic.slider.prepersist:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\ContentListener, onSliderPrePersist]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\ContentListener, onSliderPrePersist]
 
 content.duplicate.presave:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\ContentListener, onContentDuplicatePreSave]
-
-bundle.hauth.started:
-  listeners:
-    - [BackBeeCloud\Listener\HAuthListener, onBundleStart]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\ContentListener, onContentDuplicatePreSave]
 
 cloudcontentset.render:
-  listeners:
-    - [BackBeeCloud\Listener\ClassContent\ContentListener, onCloudContentSetRender]
-    - [@cloud.image_listener, onCloudContentSetRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\ContentListener, onCloudContentSetRender]
+        - [@cloud.image_listener, onCloudContentSetRender]
 
 basic.contact.render:
-  listeners:
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
 
 basic.newsletter.render:
-  listeners:
-    - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
+
+
+# Controller listeners
+
+rest.controller.classcontentcontroller.getaction.postcall:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onPostCall]
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\HighlightContentListener, onPostCall]
+        - [BackBeeCloud\Listener\ContentAutoblockListener, onPostCall]
+
+frontcontroller.request:
+    listeners:
+        - [@rest.listener.body, onRequest]
+
+rest.controller.classcontentcontroller.postaction.precall:
+    listeners:
+        # BackBee Cloud listeners
+        - [@cloud.disqus_listener, onCreateContent]
+
+rest.controller.classcontentcontroller.postaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall]
+
+rest.controller.classcontentcontroller.putaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall]
+
+rest.controller.securitycontroller.deletesessionaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onLogoutPostCall]
+
+rest.controller.securitycontroller.authenticateaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onAuthenticationPostCall]
+
+rest.controller.classcontentcontroller.getcategorycollectionaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageTypeListener, onGetCategoryPostCall]
+        - [@content.category_listener, onGetCategoryPostCall]
+        - [BackBeeCloud\Listener\CacheListener, onGetCategoryPostCall]
+
+rest.controller.pagecontroller.deleteaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
+        - [BackBeeCloud\Elasticsearch\ElasticsearchListener, onPageDeletePostcall]
+        - [BackBeeCloud\Listener\PageListener, onPageDeletePostcall]
+
+rest.controller.resourcecontroller.uploadaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [@cloud.image_listener, onUploadPostCall]
+
+controller.frontcontroller.rssaction.precall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onRssActionPreCall]
+
+controller.frontcontroller.defaultaction.precall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\MultiLangListener, onHomePreCall, 100]
+
+backbeecloud.api.controller.contentcontroller.delete.precall:
+    listeners:
+        # BackBee Cloud listeners
+        - [@cloud.disqus_listener, onDeleteContent]
+
+backbeecloud.api.controller.contentcontroller.delete.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall]
+
+backbeecloud.api.controller.pagecontroller.put.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
+
+backbeecloud.api.controller.tagcontroller.put.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
+
+backbeecloud.api.controller.tagcontroller.delete.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
+
+backbeecloud.api.controller.contentcontroller.publish.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onPublishPostCall]
+
+backbeecloud.api.controller.contentcontroller.publishall.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onPublishAllPostCall]
+
+backbeecloud.controller.contactcontroller.send.precall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
+
+backbeecloud.controller.newslettercontroller.send.precall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
+
+# Page and Section listeners
+
+nestednode.page.postload:
+    listeners:
+        - [@nestednode.page_listener, onPostLoad]
+
+nestednode.section.preupdate:
+     listeners:
+         - [BackBee\Event\Listener\PageListener, onPreUpdate]
+
+nestednode.page.preupdate:
+    listeners:
+        - [BackBee\Event\Listener\PageListener, onPreUpdate]
+        - [BackBee\Workflow\Listener\PageListener, onPreUpdate]
+
+nestednode.page.onflush:
+    listeners:
+        - [BackBee\Event\Listener\PageListener, onFlushPage]
+        - [BackBee\Event\Listener\RewritingListener, onFlushPage]
+        - [BackBee\MetaData\Listener\MetaDataListener, onFlushPage, -100]
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onFlush]
+        - [BackBeeCloud\Listener\PageListener, handleUriCollisionOnFlushPage]
+
+# PageType listeners
+
+backbeecloud.entity.pagetype.postload:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageTypeListener, onPostload]
+
+nestednode.page.postpersist:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onPagePostChange]
+
+nestednode.page.postupdate:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onPagePostChange]
+
+nestednode.page.postremove:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onPagePostChange]
+
+nestednode.page.render:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\PageListener, onPageRender]
+
+nestednode.page.postrender:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onPagePostRender]
+
+# File upload listeners
+
+file_upload.validation:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\FileUploadListener, onFileUploadEvent]
+
+# HAuthBundle listeners
+
+bundle.hauth.started:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\HAuthListener, onBundleStart]
+
+# User listeners
+
+rest.user.creation:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\Api\UserListener, onRestUserCreationEvent]
