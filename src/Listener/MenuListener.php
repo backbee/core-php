@@ -69,16 +69,18 @@ class MenuListener
                 $item['is_current'] = $renderer->getCurrentPage() === $page;
 
                 $validChildren = [];
-                foreach ((array) $item['children'] as $child) {
-                    if (
-                        false != $item['id']
-                        && null !== $page = self::getPageByUid($child['id'], $app)
-                    ) {
-                        $child['url'] = $page->getUrl();
-                        $child['label'] = $page->getTitle();
-                        $child['is_online'] = $page->isOnline();
-                        $child['is_current'] = $renderer->getCurrentPage() === $page;
-                        $validChildren[] = $child;
+                if (isset($item['children'])) {
+                    foreach ((array) $item['children'] as $child) {
+                        if (
+                            false != $item['id']
+                            && null !== $page = self::getPageByUid($child['id'], $app)
+                        ) {
+                            $child['url'] = $page->getUrl();
+                            $child['label'] = $page->getTitle();
+                            $child['is_online'] = $page->isOnline();
+                            $child['is_current'] = $renderer->getCurrentPage() === $page;
+                            $validChildren[] = $child;
+                        }
                     }
                 }
 
