@@ -39,7 +39,11 @@ class TagController extends AbstractController
             return $response;
         }
 
-        $tags = $this->tagMgr->getBy($this->request->query->get('term', ''));
+        $tags = $this->tagMgr->getBy(
+            $this->request->query->get('term', ''),
+            $start,
+            $limit
+        );
 
         $end = null;
         $max = null;
