@@ -99,16 +99,8 @@ class ContentBuilder
                     }
 
                     $this->hydrateContent($content, $itemData);
-                    if ($token) {
-                        $this->hydrateDraft($content, $token);
-                    }
-
                     $colContentSet->push($content);
                 }
-            }
-
-            if ($token) {
-                $this->hydrateDraft($cloudContentSet, $token);
             }
         }
     }

@@ -79,7 +79,6 @@ element.file.postremove:
 classcontent.onflush:
     listeners:
         - [BackBee\ClassContent\Listener\ClassContentListener, onFlushContent]
-        - [BackBee\ClassContent\Listener\RevisionListener, onFlushContent]
 
 classcontent.prerender:
     listeners:
