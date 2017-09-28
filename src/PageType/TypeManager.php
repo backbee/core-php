@@ -137,23 +137,17 @@ class TypeManager
                     $callback($content, $page);
                 }
 
-                $this->contentMgr->hydrateDraft($content, $token);
-
                 $colcontainer = new ColContentSet();
                 $colcontainer->push($content);
-                $this->contentMgr->hydrateDraft($colcontainer, $token);
                 $this->entyMgr->persist($colcontainer);
 
                 $container = new CloudContentSet();
                 $container->push($colcontainer);
-                $this->contentMgr->hydrateDraft($container, $token);
                 $this->entyMgr->persist($container);
 
                 $mainContainer->push($container);
             }
         }
-
-        $this->contentMgr->hydrateDraft($mainContainer, $token);
     }
 
     private function initTemplateTypes(Container $dic)

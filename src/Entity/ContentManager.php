@@ -232,7 +232,7 @@ class ContentManager
         $result = $qb
             ->update(AbstractClassContent::class, 'c')
             ->set('c._state', AbstractClassContent::STATE_NORMAL)
-            ->where($qb->expr()->in('c._uid', $this->getUidsFromPage($page, $bbtoken)))
+            ->where($qb->expr()->in('c._uid', $this->getUidsFromPage($page, $token)))
             ->getQuery()
             ->execute()
         ;
