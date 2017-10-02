@@ -50,7 +50,7 @@ Newsletter:
     button_color:
       type: color
       label: yaml_block_newsletter_color
-      value: color2
+      value: color6
       tab: yaml_block_newsletter_button
       group:
         id: color

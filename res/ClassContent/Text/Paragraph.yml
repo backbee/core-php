@@ -11,11 +11,11 @@ Paragraph:
       type: selectButton
       label: yaml_block_text_bg_color
       buttons:
-        color1: {'icon': 'icon-text', 'bgcolor': 'pink'}
-        color2: {'icon': 'icon-text', 'bgcolor': 'color2'}
-        color3: {'icon': 'icon-text', 'bgcolor': 'color3'}
-        color4: {'icon': 'icon-ban', 'bgcolor': 'default'}
-      value: 'color4'
+        color5: {'icon': 'icon-text', 'bgcolor': 'color5'}
+        color6: {'icon': 'icon-text', 'bgcolor': 'color6'}
+        color7: {'icon': 'icon-text', 'bgcolor': 'color7'}
+        color8: {'icon': 'icon-ban', 'bgcolor': 'default'}
+      value: 'color8'
       group:
         id: bg
     transparency:
