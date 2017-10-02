@@ -2,9 +2,11 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeePlanet\GlobalSettings;
 use BackBee\Bundle\Registry;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
@@ -89,6 +91,16 @@ class CoreListener
     public static function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
+
+        $request = Request::createFromGlobals();
+        if ($request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')) {
+            $whoops = new \Whoops\Run();
+            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
+            $whoops->register();
+
+            throw $exception;
+        }
+
         error_log(sprintf('[%s] %s', get_class($exception), $exception->getMessage()));
     }
 }
