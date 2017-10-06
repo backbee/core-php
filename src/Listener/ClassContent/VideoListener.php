@@ -62,6 +62,10 @@ class VideoListener
             return;
         }
 
+        if (!VideoHelper::isSupportedUrl($videoUrl)) {
+            return;
+        }
+
         $filename = md5($videoUrl);
         $thumbnailDraft = $entyMgr->getRepository(Revision::class)->getDraft(
             $revision->thumbnail,
