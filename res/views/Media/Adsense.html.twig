@@ -2,13 +2,24 @@
 {% if client_id.value == false or ad_slot.value == false %}
     {% include 'common/missing_config_block.html.twig' %}
 {% else %}
-    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-    <ins class="adsbygoogle"
-    style="display:block;height:{{height.value}}px"
-    data-ad-client="{{ client_id.value }}"
-    data-ad-slot="{{ ad_slot.value }}"></ins>
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+    {% if bb.token != null %}
+        <div class="missing-config-wrapper">
+          <div class="missing-config">
+            <i class="icon icon-info"></i>
+            <p>
+              <span data-cloud-trans="adsense_connected_message">Adsense block</span>
+            </p>
+          </div>
+        </div>
+    {% else %}
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <ins class="adsbygoogle"
+        style="display:block;height:{{height.value}}px"
+        data-ad-client="{{ client_id.value }}"
+        data-ad-slot="{{ ad_slot.value }}"></ins>
+        <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    {% endif %}
 {% endif %}
 </div>
