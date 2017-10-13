@@ -15,12 +15,18 @@
         </div>
         <div class="col-md-8">
             <h3 {% if reduce_title_size %}class="reduce-title"{% endif %}>
-                <a {% block data_item_title_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
-                {% if title_max_length > 0 %}
-                    {{this.perfectTruncate(title, title_max_length)}}
-                {% else %}
-                    {{title|striptags|raw}}
-                {% endif %}
+                <a
+                    {% block data_item_title_attributes %}{% endblock %}
+                    href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"
+                    {% if is_online == false %} title="This page is offline"{% endif %}
+                >
+                    <span class="{{is_online == false ? 'offline autoblock-item' : ''}}">
+                        {% if title_max_length > 0 %}
+                            {{this.perfectTruncate(title, title_max_length)}}
+                        {% else %}
+                            {{title|striptags|raw}}
+                        {% endif %}
+                    </span>
                 </a>
             </h3>
             {% if display_published_at %}

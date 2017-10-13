@@ -4,7 +4,7 @@
         {% if item.is_clickable is not defined or item.is_clickable == true %} href="{{item.url}}"{% endif %}
         {% if item.is_online == false %} title="This page is offline"{% endif %}
     >
-        <span class="{{item.is_online == false ? 'offline': ''}}">{{item.label}}</span>
+        <span class="{{item.is_online == false ? 'offline menu-item' : ''}}">{{item.label}}</span>
     </a>
 	{% if item.children %}
     <div class="submenu">
