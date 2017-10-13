@@ -11,9 +11,9 @@
 {% set linkValue = link.value %}
 
 {% if path != null and bb.token == null and linkValue.link == 'lightbox' %}<a href="{{this.getCdnImageUrl(path)|raw}}" data-lightbox="lightbox">{% endif %}
+{% if path != null and bb.token == null and linkValue.link == 'image_link' %}<a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>{% endif %}
 <figure
   {{this.bbcontent(null, {class: 'content figure ' ~ resizeClass ~ autoSizeClass ~ ' media-image'})|raw}}
-  {% if path != null and bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
   data-forbidden-plugins="click"
   {% set ratio = this.getObject().getParamValue('ratio') %}
   {% if ratio %}style="padding-top: {{ratio}}%;"{% endif %}
@@ -75,5 +75,5 @@
   </div>
 
 </figure>
-{% if path != null and bb.token == null and linkValue.link == 'lightbox' %}</a>{% endif %}
+{% if path != null and bb.token == null and (linkValue.link == 'lightbox' or linkValue.link == 'image_link') %}</a>{% endif %}
 {% endif %}
