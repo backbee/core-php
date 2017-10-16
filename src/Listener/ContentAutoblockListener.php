@@ -116,12 +116,20 @@ class ContentAutoblockListener
             ];
         }
 
+        $sortCriteria = ['modified_at:desc'];
+        if ('published_at' === $block->getParamValue('order_by')) {
+            $sortCriteria = [
+                'is_online:asc',
+                'published_at:desc',
+            ];
+        }
+
         // Requesting Elasticsearch to get result
         $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
             $esQuery,
             $start,
             $limit + 1,
-            ['modified_at:desc'],
+            $sortCriteria,
             false
         );
 

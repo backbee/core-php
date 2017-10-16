@@ -30,6 +30,14 @@ ContentAutoblock:
       label: yaml_block_page_list_of_pages_ignore_x_first_pages
       value: 0
       tab: yaml_block_page_list_of_pages_list
+    order_by:
+      type: select
+      label: yaml_block_page_list_of_pages_order_by_label
+      options:
+        published_at: yaml_block_page_list_of_pages_order_by_published_at
+        modified_at: yaml_block_page_list_of_pages_order_by_modified_at
+      value: published_at
+      tab: yaml_block_page_list_of_pages_list
     format:
       type: selectButton
       label: yaml_block_page_list_of_pages_image_text_position
