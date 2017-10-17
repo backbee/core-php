@@ -53,9 +53,21 @@ class PageController extends AbstractController
         }
 
         $criteria = $this->request->query->all();
+        $sort = [];
+        if (isset($criteria['sort'])) {
+            $desc = explode(',', $this->request->query->get('desc', ''));
+            foreach (explode(',', $criteria['sort']) as $attrName) {
+                $sort[$attrName] = 'asc';
+                if (in_array($attrName, $desc)) {
+                    $sort[$attrName] = 'desc';
+                }
+            }
+        }
+
+        unset($criteria['sort'], $criteria['desc']);
 
         try {
-            $pages = $this->pageMgr->getBy($criteria, $start, $limit);
+            $pages = $this->pageMgr->getBy($criteria, $start, $limit, $sort);
 
             $end = null;
             $max = null;
