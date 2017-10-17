@@ -30,6 +30,8 @@ ContentAutoblock:
       label: yaml_block_page_list_of_pages_ignore_x_first_pages
       value: 0
       tab: yaml_block_page_list_of_pages_list
+      group:
+        id: startgroup
     order_by:
       type: select
       label: yaml_block_page_list_of_pages_order_by_label
