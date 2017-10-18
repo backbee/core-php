@@ -160,6 +160,10 @@ class ContentController extends AbstractController
             $page->setPublishing(new \DateTime());
         }
 
+        if (0 < $commitedCount) {
+            $page->setModified(new \DateTime());
+        }
+
         $this->entyMgr->flush($page);
         $this->elasticsearchMgr->indexPage($page);
 
