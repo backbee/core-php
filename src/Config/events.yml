@@ -290,6 +290,16 @@ backbeecloud.controller.newslettercontroller.send.precall:
         # BackBee Cloud listeners
         - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall]
 
+backbeecloud.api.controller.userpreferencecontroller.put.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
+
+backbeecloud.api.controller.userpreferencecontroller.delete.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CacheListener, onChangePostCall]
+
 # Page and Section listeners
 
 nestednode.page.postload:
