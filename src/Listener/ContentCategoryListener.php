@@ -25,10 +25,10 @@ class ContentCategoryListener
         'block_category_pages' => [
             'pos' => 1,
         ],
-        'block_category_social'   => [
+        'block_category_social' => [
             'pos' => 2,
         ],
-        'block_category_more'     => [
+        'block_category_more' => [
             'pos' => 3,
         ],
     ];
@@ -58,6 +58,16 @@ class ContentCategoryListener
                     $data['contents'] = $contents;
                 }
 
+                $filteredContents = [];
+                $processedTypes = [];
+                foreach ($data['contents'] as $content) {
+                    if (!in_array($content['type'], $processedTypes)) {
+                        $filteredContents[] = $content;
+                        $processedTypes[] = $content['type'];
+                    }
+                }
+
+                $data['contents'] = $filteredContents;
                 $result[$config['pos']] = $data;
             }
         }
