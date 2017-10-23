@@ -76,8 +76,44 @@
       <div style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
         {% if this.userAgentHelper.isDesktop() %}
           <div class="bg-video-wrapper embed-responsive embed-responsive-16by9">
-            <iframe id="bg_video_{{bg_video_id}}" src="{{bg_video_url}}" frameborder="0" allowfullscreen autoplay controls="0"></iframe>
-            <!-- <iframe frameborder="0" width="480" height="270" src="//www.dailymotion.com/embed/video/x5yho03" allowfullscreen></iframe> -->
+            <div id ="bg_video_{{bg_video_id}}"></div>
+            <script>
+              var tag = document.createElement('script');
+              tag.src = "https://www.youtube.com/iframe_api";
+              var firstScriptTag = document.getElementsByTagName('script')[0];
+              firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+              var player;
+              function onYouTubeIframeAPIReady() {
+                player = new YT.Player('bg_video_{{bg_video_id}}', {
+                  videoId: '{{bg_video_id}}',
+                  events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                  },
+                  playerVars: {
+                      playlist: '{{bg_video_id}}',
+                      color: 'white',
+                      loop: '1',
+                      showinfo: '0',
+                      autoplay: '1'
+                  },
+                });
+              }
+
+              function onPlayerReady(event) {
+                event.target.setVolume(0);
+                event.target.playVideo();
+              }
+
+              function onPlayerStateChange(event) {
+                if (event.data == YT.PlayerState.PLAYING) {
+                  $('.bg-video-wrapper').css('opacity', '1');
+                } else {
+                  $('.bg-video-wrapper').css('opacity', '0');
+                }
+              }
+            </script>
           </div>
         {% endif %}
         <div class="{{ width.value }}">
