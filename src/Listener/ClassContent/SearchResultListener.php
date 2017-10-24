@@ -2,11 +2,12 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
+use BackBeeCloud\Elasticsearch\SearchEvent;
 use BackBee\BBApplication;
 use BackBee\ClassContent\Article\ArticleAbstract;
+use BackBee\ClassContent\Basic\SearchResult;
 use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Revision;
-use BackBee\ClassContent\Basic\SearchResult;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Security\Token\BBUserToken;
@@ -17,17 +18,18 @@ use Doctrine\ORM\EntityManager;
  */
 class SearchResultListener
 {
+    const SEARCHRESULT_PRE_SEARCH_EVENT = 'content.searchresult.presearch';
     const RESULT_PER_PAGE = 10;
 
     public static function onRender(RendererEvent $event)
     {
-        $block = $event->getTarget();
-        $renderer = $event->getRenderer();
         $app = $event->getApplication();
         $query = $app->getRequest()->query->get('q');
         $page = (int) $app->getRequest()->query->get('page', 1);
+
         $contents = [];
         $pages = [];
+        $esQuery = [];
         if (is_string($query) && 0 < strlen(trim($query))) {
             $esQuery = [
                 'query' => [
@@ -50,15 +52,24 @@ class SearchResultListener
                     ],
                 ],
             ];
+        }
 
-            $mustClauses = [
-                [ 'match' => ['is_pullable' => true] ],
-            ];
-            if (null === $app->getBBUserToken()) {
-                $mustClauses[] = [ 'match' => ['is_online' => true] ];
+        $searchEvent = new SearchEvent($esQuery);
+        $app->getEventDispatcher()->dispatch(self::SEARCHRESULT_PRE_SEARCH_EVENT, $searchEvent);
+        $esQuery = $searchEvent->getQueryBody()->getArrayCopy();
+        if (false != $esQuery) {
+            if (!isset($esQuery['query']['bool'])) {
+                $esQuery['query']['bool'] = [];
             }
 
-            $esQuery['query']['bool']['must'] = $mustClauses;
+            if (!isset($esQuery['query']['bool']['must'])) {
+                $esQuery['query']['bool']['must'] = [];
+            }
+
+            $esQuery['query']['bool']['must'][] = [ 'match' => ['is_pullable' => true] ];
+            if (null === $app->getBBUserToken()) {
+                $esQuery['query']['bool']['must'][] = [ 'match' => ['is_online' => true] ];
+            }
 
             if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
                 $esQuery['query']['bool']['must'][]['prefix'] = [
@@ -79,9 +90,9 @@ class SearchResultListener
             }
         }
 
-        $renderer->assign('query', $query);
-        $renderer->assign('pages', $pages);
-        $renderer->assign('contents', $contents);
+        $event->getRenderer()->assign('query', $query);
+        $event->getRenderer()->assign('pages', $pages);
+        $event->getRenderer()->assign('contents', $contents);
     }
 
     protected static function renderPageFromRawData(SearchResult $block, array $pageRawData, BBApplication $app)
