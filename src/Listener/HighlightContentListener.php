@@ -170,6 +170,7 @@ class HighlightContentListener
         return $app->getRenderer()->partial(sprintf('ContentAutoblock/item%s.html.twig', $mode), [
             'title'                => $pageRawData['_source']['title'],
             'abstract'             => (string) $abstract,
+            'tags'                 => array_map('ucfirst', $pageRawData['_source']['tags']),
             'url'                  => $pageRawData['_source']['url'],
             'is_online'            => $pageRawData['_source']['is_online'],
             'publishing'           => $pageRawData['_source']['published_at']
