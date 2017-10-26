@@ -13,6 +13,7 @@
 {% if path != null and bb.token == null and linkValue.link == 'lightbox' %}<a href="{{this.getCdnImageUrl(path)|raw}}" data-lightbox="lightbox">{% endif %}
 {% if path != null and bb.token == null and linkValue.link == 'image_link' %}<a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>{% endif %}
 <figure
+  {% block data_item_attributes %}{% endblock %}
   {{this.bbcontent(null, {class: 'content figure ' ~ resizeClass ~ autoSizeClass ~ ' media-image'})|raw}}
   data-forbidden-plugins="click"
   {% set ratio = this.getObject().getParamValue('ratio') %}
@@ -44,7 +45,7 @@
 
     {% if linkValue.link == 'with_button' %}
       <div class="buttonwrapper">
-        <a {% block data_item_attributes %}{% endblock %} href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}}">
+        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}}">
           {{linkValue.options.title|default('Button title')|raw}}
         </a>
       </div>

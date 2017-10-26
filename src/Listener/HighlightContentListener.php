@@ -188,6 +188,7 @@ class HighlightContentListener
                 ? ContentAutoblockListener::getAutoblockId($wrapper)
                 : null
             ,
+            'wrapper'              => $wrapper,
         ]);
     }
 
