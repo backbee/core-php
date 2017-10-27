@@ -50,6 +50,7 @@ class MultiLangListener
 
         $entyMgr = $app->getEntityManager();
         foreach ($app->getRequest()->getLanguages() as $langId) {
+            $langId = substr($langId, 0, 2);
             if (2 === strlen($langId) && $lang = $entyMgr->find(Lang::class, $langId)) {
                 if (!$lang->isActive()) {
                     continue;
@@ -71,7 +72,10 @@ class MultiLangListener
             $lang = $multilangMgr->getLang($fallback->getLang());
         }
 
-        if (null !== $lang && false === $lang['is_active']) {
+        if (
+            null === $lang
+            || (null !== $lang && false === $lang['is_active'])
+        ) {
             $lang = $multilangMgr->getDefaultLang();
         }
 
