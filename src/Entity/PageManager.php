@@ -215,7 +215,7 @@ class PageManager
      *
      * @return array
      */
-    public function getBy(array $criteria = [], $start, $limit)
+    public function getBy(array $criteria = [], $start, $limit, array $sort = [])
     {
         $hasDraftOnly = isset($criteria['has_draft_only'])
             ? (bool) $criteria['has_draft_only']
@@ -229,8 +229,15 @@ class PageManager
             $lang = $page ? $this->multilangMgr->getLangByPage($page) : null;
         }
 
-        unset($criteria['lang'], $criteria['page_uid']);
+        $tags = [];
+        $rawTags = isset($criteria['tags']) ? explode(',', $criteria['tags']) : [];
+        foreach ($rawTags as $tag) {
+            if (null !== $tag = $this->entyMgr->getRepository(KeyWord::class)->exists($tag)) {
+                $tags[] = $tag;
+            }
+        }
 
+        unset($criteria['tags'], $criteria['lang'], $criteria['page_uid']);
         if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title']))) {
             $query = [
                 'query' => [
@@ -245,6 +252,12 @@ class PageManager
                 $query['query']['bool']['must_not'] = [
                     [ 'match' => ['url' => '/' ] ],
                 ];
+            }
+
+            if ($tags) {
+                $query['query']['bool']['must'] = array_map(function ($tag) {
+                    return [ 'match' => ['tags' => $tag->getKeyWord()] ];
+                }, $tags);
             }
 
             if ($lang) {
@@ -266,12 +279,30 @@ class PageManager
                 $query['query']['bool']['must'][] = [ 'match' => ['has_draft_contents' => true] ];
             }
 
-            return $this->elsMgr->customSearchPage(
-                $query,
-                $start,
-                $limit,
-                0 === count($criteria) ? ['modified_at:desc'] : []
-            );
+            $sortValidAttrNames = ['modified_at', 'created_at'];
+            $sortValidOrder = ['asc', 'desc'];
+
+            $formattedSort = [];
+            $sort = 0 === count($criteria) && false != $sort ? $sort : ['modified_at' => 'desc'];
+            foreach ($sort as $attr => $order) {
+                if (!in_array($attr, $sortValidAttrNames)) {
+                    throw new \InvalidArgumentException(sprintf(
+                        "Pages are not sortable by '%s'.",
+                        $attr
+                    ));
+                }
+
+                if (!in_array($order, $sortValidOrder)) {
+                    throw new \InvalidArgumentException(sprintf(
+                        "'%s' is not a valid order direction.",
+                        $order
+                    ));
+                }
+
+                $formattedSort[] = $attr . ':' . $order;
+            }
+
+            return $this->elsMgr->customSearchPage($query, $start, $limit, $formattedSort);
         }
 
         unset($criteria['page_uid']);
