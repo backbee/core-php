@@ -162,8 +162,7 @@ class PageManager
                     'label' => $keyword->getKeyWord(),
                 ];
             }, $this->getPageTag($page)->getTags()->toArray()),
-            'modified'   => $page->getModified()->format('d-m-Y H:i:s'),
-            'seo'        => [
+            'seo' => [
                 'title'       => null !== $metadatabag && $metadatabag->get('title')
                     ? $metadatabag->get('title')->getAttribute('content', '')
                     : ''
@@ -178,6 +177,11 @@ class PageManager
                 ,
             ],
             'lang' => $this->multilangMgr->getLangByPage($page),
+            'modified' => $page->getModified()->format('Y-m-d H:i:s'),
+            'published_at' => $page->getPublishing()
+                ? $page->getPublishing()->format('Y-m-d H:i:s')
+                : null
+            ,
         ];
     }
 
