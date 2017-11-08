@@ -23,10 +23,6 @@ class RequestListener
     public static function onKernelRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();
-        if (1 !== preg_match('#^/api/#', $request->getPathInfo())) {
-            return;
-        }
-
         self::runConvertJsonContent($event, $request);
         self::runConvertRange($event, $request);
     }
@@ -38,10 +34,14 @@ class RequestListener
         }
 
         if ('json' !== $request->getContentType()) {
-            $event->setResponse(new JsonResponse([
-                'error'  => 'not_acceptable',
-                'reason' => 'Expected json as request content type',
-            ], Response::HTTP_NOT_ACCEPTABLE));
+            if (1 === preg_match('#^/api/#', $request->getPathInfo())) {
+                $event->setResponse(new JsonResponse([
+                    'error'  => 'not_acceptable',
+                    'reason' => 'Expected json as request content type',
+                ], Response::HTTP_NOT_ACCEPTABLE));
+            }
+
+            return;
         }
 
         $data = json_decode($request->getContent(), true);
@@ -57,6 +57,10 @@ class RequestListener
 
     protected static function runConvertRange(GetResponseEvent $event, Request $request)
     {
+        if (1 !== preg_match('#^/api/#', $request->getPathInfo())) {
+            return;
+        }
+
         if (!$request->query->has('range')) {
             return;
         }
