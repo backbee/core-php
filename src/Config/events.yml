@@ -235,6 +235,11 @@ rest.controller.resourcecontroller.uploadaction.postcall:
         # BackBee Cloud listeners
         - [@cloud.image_listener, onUploadPostCall]
 
+rest.controller.bundlecontroller.getcollectionaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\BundleListener, onGetCollectionPostCall]
+
 controller.frontcontroller.rssaction.precall:
     listeners:
         # BackBee Cloud listeners
