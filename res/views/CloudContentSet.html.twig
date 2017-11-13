@@ -71,62 +71,60 @@
   {% endif %}
 
   {% if bg_video_url %}
-    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass})|raw}}>
+    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass})|raw}} style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
 
-      <div style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
-        {% if this.userAgentHelper.isDesktop() %}
-          <div class="bg-video-wrapper embed-responsive embed-responsive-16by9">
-            <div id ="bg_video_{{bg_video_id}}"></div>
-            <script>
-              var tag = document.createElement('script');
-              tag.src = "https://www.youtube.com/iframe_api";
-              var firstScriptTag = document.getElementsByTagName('script')[0];
-              firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      {% if this.userAgentHelper.isDesktop() %}
+        <div class="bg-video-wrapper embed-responsive embed-responsive-16by9">
+          <div id ="bg_video_{{bg_video_id}}"></div>
+          <script>
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-              var player;
-              function onYouTubeIframeAPIReady() {
-                player = new YT.Player('bg_video_{{bg_video_id}}', {
-                  videoId: '{{bg_video_id}}',
-                  events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                  },
-                  playerVars: {
-                      playlist: '{{bg_video_id}}',
-                      color: 'white',
-                      loop: '1',
-                      showinfo: '0',
-                      autoplay: '1'
-                  },
-                });
+            var player;
+            function onYouTubeIframeAPIReady() {
+              player = new YT.Player('bg_video_{{bg_video_id}}', {
+                videoId: '{{bg_video_id}}',
+                events: {
+                  'onReady': onPlayerReady,
+                  'onStateChange': onPlayerStateChange
+                },
+                playerVars: {
+                    playlist: '{{bg_video_id}}',
+                    color: 'white',
+                    loop: '1',
+                    showinfo: '0',
+                    autoplay: '1'
+                },
+              });
+            }
+
+            function onPlayerReady(event) {
+              event.target.setVolume(0);
+              event.target.playVideo();
+            }
+
+            function onPlayerStateChange(event) {
+              if (event.data == YT.PlayerState.PLAYING) {
+                $('.bg-video-wrapper').css('opacity', '1');
+              } else {
+                $('.bg-video-wrapper').css('opacity', '0');
               }
-
-              function onPlayerReady(event) {
-                event.target.setVolume(0);
-                event.target.playVideo();
-              }
-
-              function onPlayerStateChange(event) {
-                if (event.data == YT.PlayerState.PLAYING) {
-                  $('.bg-video-wrapper').css('opacity', '1');
-                } else {
-                  $('.bg-video-wrapper').css('opacity', '0');
-                }
-              }
-            </script>
+            }
+          </script>
+        </div>
+      {% endif %}
+      <div class="{{ width.value }}">
+        <div class="row {% if remove_gutter.value %}no-gutter{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
+        {% for key, content in data %}
+          {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
+          {% set colsize = colsize ? colsize : default_colsize %}
+          {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
+          <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
+          {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
-        {% endif %}
-        <div class="{{ width.value }}">
-          <div class="row {% if remove_gutter.value %}no-gutter{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
-          {% for key, content in data %}
-            {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
-            {% set colsize = colsize ? colsize : default_colsize %}
-            {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
-            <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
-            {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
-            </div>
-          {% endfor %}
-          </div>
+        {% endfor %}
         </div>
       </div>
     </div>
