@@ -172,6 +172,11 @@ basic.contact.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
 
+basic.pagebytagresult.render:
+    listeners:
+        # BackBeeCloud listeners
+        - [BackBeeCloud\Listener\ClassContent\PageByTagResultListener, onRender]
+
 basic.newsletter.render:
     listeners:
         # BackBee Cloud listeners
@@ -328,6 +333,11 @@ nestednode.page.onflush:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\PageListener, onFlush]
         - [BackBeeCloud\Listener\PageListener, handleUriCollisionOnFlushPage]
+
+nestednode.page.postremove:
+    listeners:
+        # BackBee Cloud Listener
+        - [BackBeeCloud\Listener\PageListener, onPostRemove]
 
 # PageType listeners
 

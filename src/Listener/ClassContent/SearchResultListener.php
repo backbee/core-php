@@ -3,15 +3,8 @@
 namespace BackBeeCloud\Listener\ClassContent;
 
 use BackBeeCloud\Elasticsearch\SearchEvent;
-use BackBee\BBApplication;
-use BackBee\ClassContent\Article\ArticleAbstract;
-use BackBee\ClassContent\Basic\SearchResult;
-use BackBee\ClassContent\Media\Image;
-use BackBee\ClassContent\Revision;
-use BackBee\ClassContent\Text\Paragraph;
+use BackBeeCloud\Search\ResultItemHtmlFormatter;
 use BackBee\Renderer\Event\RendererEvent;
-use BackBee\Security\Token\BBUserToken;
-use Doctrine\ORM\EntityManager;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -24,8 +17,10 @@ class SearchResultListener
     public static function onRender(RendererEvent $event)
     {
         $app = $event->getApplication();
-        $query = $app->getRequest()->query->get('q');
-        $page = (int) $app->getRequest()->query->get('page', 1);
+        $request = $app->getRequest();
+
+        $query = $request->query->get('q', '');
+        $page = $request->query->getInt('page', 1);
 
         $contents = [];
         $pages = [];
@@ -85,67 +80,19 @@ class SearchResultListener
                 false
             );
 
+            $formatter = new ResultItemHtmlFormatter(
+                $app->getEntityManager(),
+                $app->getRenderer(),
+                $app->getBBUserToken()
+            );
             foreach ($pages->collection() as $page) {
-                $contents[] = self::renderPageFromRawData($event->getTarget(), $page, $app);
+                $contents[] = $formatter->renderItemFromRawData($event->getTarget(), $page);
             }
         }
 
-        $event->getRenderer()->assign('query', $query);
-        $event->getRenderer()->assign('pages', $pages);
-        $event->getRenderer()->assign('contents', $contents);
-    }
-
-    protected static function renderPageFromRawData(SearchResult $block, array $pageRawData, BBApplication $app)
-    {
-        $abstract = null;
-        $entyMgr = $app->getEntityManager();
-        $bbtoken = $app->getBBUserToken();
-        if (false != $abstractUid = $pageRawData['_source']['abstract_uid']) {
-            $abstract = self::getContentWithDraft(ArticleAbstract::class, $abstractUid, $entyMgr, $bbtoken);
-            $abstract = $abstract ?: self::getContentWithDraft(Paragraph::class, $abstractUid, $entyMgr, $bbtoken);
-            if (null !== $abstract) {
-                $abstract = trim(preg_replace('#\s\s+#', ' ', preg_replace('#<[^>]+>#', ' ', $abstract->value)));
-            }
-        }
-
-        $imageData = [];
-        if (false != $imageUid = $pageRawData['_source']['image_uid']) {
-            $image = self::getContentWithDraft(Image::class, $imageUid, $entyMgr, $bbtoken);
-            if (null !== $image) {
-                $imageData = [
-                    'uid'    => $image->getUid(),
-                    'url'    => $image->path,
-                    'title'  => $image->getParamValue('title'),
-                    'legend' => $image->getParamValue('description'),
-                    'stat'   => $image->getParamValue('stat'),
-                ];
-            }
-        }
-
-        return $app->getRenderer()->partial('SearchResult/page_item.html.twig', [
-            'title'                => $pageRawData['_source']['title'],
-            'abstract'             => (string) $abstract,
-            'url'                  => $pageRawData['_source']['url'],
-            'is_online'            => $pageRawData['_source']['is_online'],
-            'image'                => $imageData,
-            'publishing'           => $pageRawData['_source']['published_at']
-                ? new \DateTime($pageRawData['_source']['published_at'])
-                : null
-            ,
-            'show_image'           => $block->getParamValue('show_image'),
-            'show_abstract'        => $block->getParamValue('show_abstract'),
-            'show_published_at'    => $block->getParamValue('show_published_at'),
-        ]);
-    }
-
-    protected static function getContentWithDraft($classname, $uid, EntityManager $entyMgr, BBUserToken $bbtoken = null)
-    {
-        $content = $entyMgr->find($classname, $uid);
-        if (null !== $content && null !== $bbtoken) {
-            $draft = $entyMgr->getRepository(Revision::class)->getDraft($content, $bbtoken, false);
-            $content->setDraft($draft);
-        }
-
-        return $content;
+        $renderer = $event->getRenderer();
+        $renderer->assign('query', $query);
+        $renderer->assign('pages', $pages);
+        $renderer->assign('contents', $contents);
     }
 }

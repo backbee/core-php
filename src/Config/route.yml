@@ -123,8 +123,8 @@ cloud.import_status:
 cloud.search:
   pattern: /search
   defaults:
-    _action: search
-    _controller: search_controller
+    _action: searchAction
+    _controller: cloud.search_controller
   requirements:
     _method: GET
 
@@ -347,9 +347,28 @@ api.multilang.define_default:
 cloud.search_i18n:
   pattern: /{lang}/search
   defaults:
-    _action: search
-    _controller: search_controller
+    _action: searchAction
+    _controller: cloud.search_controller
   requirements:
     _method: GET
     lang: "[a-z]{2}"
 
+# Search pages by tag routes
+cloud.search_by_tag:
+  pattern: /pages/tag/{tagName}
+  defaults:
+    _action: searchAction
+    _controller: cloud.page_by_tag.controller
+  requirements:
+    _method: GET
+    tagName: .+
+
+cloud.search_by_tag_i18n:
+  pattern: /{lang}/pages/tag/{tagName}
+  defaults:
+    _action: searchAction
+    _controller: cloud.page_by_tag.controller
+  requirements:
+    _method: GET
+    tagName: .+
+    lang: "[a-z]{2}"

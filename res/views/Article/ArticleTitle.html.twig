@@ -1,16 +1,16 @@
-<header data-forbidden-plugins="remove" {{this.bbcontent(null, {'class': 'article-header text-center'})|raw}}>
+<header data-forbidden-plugins="remove" {{ this.bbcontent(null, {'class': 'article-header text-center'})|raw }}>
   <nav>
     <ul class="pager pager-news">
       {% if prev != null %}
         <li class="previous">
-          <a href="{{prev.url}}" title="{{prev.title}}" {% block data_prev_attributes %}{% endblock %}>
+          <a href="{{ prev.url }}" title="{{ prev.title }}" {% block data_prev_attributes %}{% endblock %}>
             <span class="icon arrow_carrot-left" aria-hidden="true"></span>
           </a>
         </li>
       {% endif %}
       {% if next != null %}
       <li class="next">
-        <a href="{{next.url}}" title="{{next.title}}" {% block data_next_attributes %}{% endblock %}>
+        <a href="{{ next.url }}" title="{{ next.title }}" {% block data_next_attributes %}{% endblock %}>
           <span class="icon arrow_carrot-right" aria-hidden="true"></span>
         </a>
       </li>
@@ -18,14 +18,16 @@
     </ul>
   </nav>
 
-  <h1 data-cloud-rte="true">{{value|raw}}</h1>
+  <h1 data-cloud-rte="true">{{ value|raw }}</h1>
   <div class="cloud-spacer"></div>
 
   {% if show_tags.value == true or show_date.value == true %}
     <p class="metadata-wrapper">
       {% if show_tags.value == true %}
+        {% set current_lang = this.getCurrentLang() %}
         {% for tag in this.getPageTags(this.getCurrentPage()) %}
-          <span class="metadata-tag">{{tag}}</span>
+          {% set route_name = 'cloud.search_by_tag' ~ (current_lang ? '_i18n' : '') %}
+          <span class="metadata-tag"><a href="{{ this.generateUrlByRouteName(route_name, {'lang': current_lang, 'tagName': tag|lower|url_encode}, null, false) }}">{{ tag }}</a></span>
         {% endfor %}
       {% endif %}
       {% if show_date.value == true %}

@@ -45,8 +45,10 @@ class MultiLangManager implements JobHandlerInterface
 
     public function getCurrentLang()
     {
+        $request = $this->app->getRequest();
+
         $page = null;
-        $pageUid = $this->app->getRequest()->query->get('page_uid', null);
+        $pageUid = $request->query->get('page_uid', null);
         if (null !== $pageUid) {
             $page = $this->entyMgr->find(Page::class, $pageUid);
         }
@@ -57,7 +59,21 @@ class MultiLangManager implements JobHandlerInterface
             ]);
         }
 
-        return $page ? $this->getLangByPage($page) : null;
+        $lang  = null;
+        if (null !== $page) {
+            $lang = $this->getLangByPage($page);
+        }
+
+        if (
+            null === $lang
+            && 1 === preg_match('~^/([a-z]{2})/~', $request->getPathInfo(), $matches)
+        ) {
+            if ($this->getLang($matches[1])) {
+                $lang = $matches[1];
+            }
+        }
+
+        return $lang;
     }
 
     public function getAllLangs()

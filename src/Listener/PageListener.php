@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Entity\PageTag;
 use BackBeeCloud\Entity\PageType;
@@ -141,6 +142,35 @@ class PageListener
     }
 
     /**
+     * Occurs on "nestednode.page.postremove" to delete associated PageType, PageTag
+     * and PageLang.
+     *
+     * @param  Event $event
+     */
+    public static function onPostRemove(Event $event)
+    {
+        $page = $event->getTarget();
+        $entyMgr = $event->getApplication()->getEntityManager();
+
+        // Delete associated PageTag
+        if (null !== $pagetag = $entyMgr->getRepository(PageTag::class)->findOneBy(['page' => $page])) {
+            $entyMgr->remove($pagetag);
+        }
+
+        // Delete associated PageType
+        if (null !== $pagetype = $entyMgr->getRepository(PageType::class)->findOneBy(['page' => $page])) {
+            $entyMgr->remove($pagetype);
+        }
+
+        // Delete associated PageLang
+        if (null !== $pagelang = $entyMgr->getRepository(PageLang::class)->findOneBy(['page' => $page])) {
+            $entyMgr->remove($pagelang);
+        }
+
+        $entyMgr->flush();
+    }
+
+    /**
      * Occurs on:
      *     - rest.controller.classcontentcontroller.postaction.precall
      *     - rest.controller.classcontentcontroller.putaction.precall
@@ -251,16 +281,6 @@ class PageListener
         }
 
         $entyMgr = $app->getEntityManager();
-        $pagetype = $entyMgr->getRepository(PageType::class)->findOneBy(['page' => $page]);
-        if (null !== $pagetype) {
-            $entyMgr->remove($pagetype);
-        }
-
-        $pageTag = $entyMgr->getRepository(PageTag::class)->findOneBy(['page' => $page]);
-        if (null !== $pageTag) {
-            $entyMgr->remove($pageTag);
-        }
-
         $bbtoken = $app->getBBUserToken();
         foreach ($entyMgr->getRepository(Menu::class)->findAll() as $menu) {
             $originalDraft = $menu->getDraft();
