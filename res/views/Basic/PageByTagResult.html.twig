@@ -1,0 +1,41 @@
+<div {{ this.bbcontent()|raw }} data-forbidden-plugins="remove">
+  <h2>{{ this.getObject().getParamValue('result_label') }} <strong>{{ tag|capitalize }}</strong></h2>
+
+  <ul class="list-unstyled list-result">
+    {% for content in contents %}
+      <li>{{ content|raw }}</li>
+    {% else %}
+      <li><em>{{ this.getObject().getParamValue('no_results_message') }}</em></li>
+    {% endfor %}
+  </ul>
+
+  {% if pages.maxPagination() > 1 %}
+    <nav class="text-center">
+      <ul class="pagination">
+        {% if pages.currentPagination() != 1 and pages.currentPagination() > 0 %}
+          <li>
+            <a href="?page={{ pages.currentPagination() - 1 }}" aria-label="Previous">
+              <span class="arrow_carrot-left" aria-hidden="true"></span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% for i in 1..pages.maxPagination() %}
+          <li {% if pages.currentPagination() == i %}class="active"{% endif %}>
+            <a href="?page={{ i }}">{{ i }}</a>
+          </li>
+        {% endfor %}
+
+        {% if pages.maxPagination() > pages.currentPagination() %}
+          <li>
+            <a href="?page={{ pages.currentPagination() + 1 }}" aria-label="Next">
+              <span class="arrow_carrot-right" aria-hidden="true"></span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+
+

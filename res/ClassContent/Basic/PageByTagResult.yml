@@ -1,0 +1,12 @@
+PageByTagResult:
+  extends: \BackBee\ClassContent\Basic\BaseSearchResult
+  properties:
+    name: yaml_block_page_by_tag_result
+    description: ~
+    category: [!block_category_basics]
+  parameters:
+    result_label:
+      type: text
+      label: yaml_block_search_result_result_label
+      value: Results for tag
+      tab: yaml_block_general_tab

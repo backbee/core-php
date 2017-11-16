@@ -53,9 +53,13 @@ services:
     arguments: [@renderer, @user_preference.manager]
 
   # Search service
-  search_controller:
+  cloud.search_manager:
+    class: BackBeeCloud\Search\SearchManager
+    arguments: ["@cloud.page_manager", "@cloud.content_manager", "@em"]
+
+  cloud.search_controller:
     class: BackBeeCloud\Controller\SearchController
-    arguments: [@bbapp]
+    arguments: ["@cloud.search_manager", "@multilang_manager", "@routing", "@renderer"]
 
   # API services
   cloud.api.user_controller:
@@ -208,3 +212,17 @@ services:
   cloud.api.acl_controller:
     class: BackBeeCloud\Api\Controller\AclController
     arguments: [@bbapp]
+
+  # Search pages by tag services
+  cloud.page_by_tag.manager:
+    class: BackBeeCloud\Search\PageByTagManager
+    arguments: ["@cloud.page_manager", "@cloud.content_manager", "@em"]
+
+  cloud.page_by_tag.controller:
+    class: BackBeeCloud\Controller\PageByTagController
+    arguments: ["@cloud.page_by_tag.manager", "@multilang_manager", "@routing", "@renderer"]
+
+  cloud.page_type.page_by_tag_result_type:
+    class: BackBeeCloud\PageType\PageByTagResultType
+    tags:
+      - { name: page.type, dispatch_event: false }
