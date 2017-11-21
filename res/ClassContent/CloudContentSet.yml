@@ -21,6 +21,8 @@ CloudContentSet:
       value: false
     bg_parallax:
       value: false
+    bg_blur:
+      value: false
     bg_image_position_y:
       value: '0%'
     responsive_mobile:
