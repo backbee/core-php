@@ -6,6 +6,7 @@ bbapplication.init:
         - [BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit]
         - [BackBee\Renderer\Listener\TwigListener, onApplicationReady]
         # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CoreListener, forceClassContentLoadOnApplicationInit, -7999]
         - [BackBeeCloud\Listener\CoreListener, onApplicationInit, 200]
 
 bbapplication.start:
