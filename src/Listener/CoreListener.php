@@ -24,8 +24,6 @@ class CoreListener
     public static function onApplicationInit(Event $event)
     {
         $app = $event->getTarget();
-        $container = $app->getContainer();
-        $entyMgr = $app->getEntityManager();
 
         $baseDir = $app->getBundle('core')->getBaseDirectory();
         $resDir = realpath($baseDir . '/../res');
@@ -33,6 +31,26 @@ class CoreListener
         $app->getRenderer()->addScriptDir($resDir . DIRECTORY_SEPARATOR . 'views');
         $app->getRenderer()->addHelperDir($resDir . DIRECTORY_SEPARATOR . 'helpers');
 
+        if ($app->isRestored()) {
+            return;
+        }
+
+        $app->unshiftClassContentDir($resDir . DIRECTORY_SEPARATOR . 'ClassContent');
+    }
+
+    /**
+     * Called on `bbapplication.init` event to force load of ClassContent class
+     * metadata into EntityManager.
+     *
+     * It **MUST** occur before service container dump.
+     *
+     * @param  Event  $event
+     */
+    public static function forceClassContentLoadOnApplicationInit(Event $event)
+    {
+        $app = $event->getTarget();
+        $container = $app->getContainer();
+        $entyMgr = $app->getEntityManager();
         if ($app->isRestored()) {
             if ($container->hasParameter('all_classcontents_classnames')) {
                 $metadata = $entyMgr->getClassMetadata(AbstractClassContent::class);
@@ -43,8 +61,6 @@ class CoreListener
 
             return;
         }
-
-        $app->unshiftClassContentDir($resDir . DIRECTORY_SEPARATOR . 'ClassContent');
 
         $metadata = [];
         $classnames = [];
