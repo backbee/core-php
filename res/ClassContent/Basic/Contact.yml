@@ -59,13 +59,19 @@ Contact:
       tab: yaml_block_contact_button
       group:
         id: color
-    button_style:
-      type: radio
-      inline: true
-      options:
-        btn-full: yaml_block_contact_full_color
-        btn-border: yaml_block_contact_line_color
-      value: btn-full
+    button_form:
+      type: switch
+      label: yaml_block_button_line_color
+      label_selected: yaml_block_button_full_color
+      value: true
+      tab: yaml_block_contact_button
+      group:
+        id: color
+    button_radius:
+      type: switch
+      label: yaml_block_button_square
+      label_selected: yaml_block_button_rounded
+      value: true
       tab: yaml_block_contact_button
       group:
         id: color
