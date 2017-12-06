@@ -35,7 +35,8 @@ class seoMetadata extends AbstractHelper
             'description' => '',
         ]);
 
-        foreach ($page->getMetaData() as $attr => $metadata) {
+        $bag = $page->getMetaData() ?: [];
+        foreach ($bag as $attr => $metadata) {
             if ($metadata->getAttribute('name') === $attr) {
                 if ($value = $metadata->getAttribute('content')) {
                     $result[$attr] = $value;
