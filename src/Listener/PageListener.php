@@ -183,12 +183,14 @@ class PageListener
         $app = $event->getApplication();
         $querybag = $app->getRequest()->query;
         if ($querybag->has('page_uid')) {
-            $page = $app
-                ->getEntityManager()
-                ->find('BackBee\NestedNode\Page', $querybag->get('page_uid'))
-            ;
+            $page = $app->getEntityManager()->find(
+                Page::class,
+                $querybag->get('page_uid')
+            );
 
-            $app->getContainer()->get('elasticsearch.manager')->indexPage($page);
+            if ($page) {
+                $app->getContainer()->get('elasticsearch.manager')->indexPage($page);
+            }
         }
     }
 
