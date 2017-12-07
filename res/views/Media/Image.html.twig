@@ -45,7 +45,7 @@
 
     {% if linkValue.link == 'with_button' %}
       <div class="buttonwrapper">
-        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}}">
+        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} {{ linkValue.options.radius == false ? 'no-radius' : '' }}">
           {{linkValue.options.title|default('Button title')|raw}}
         </a>
       </div>
