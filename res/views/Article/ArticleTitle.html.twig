@@ -18,11 +18,11 @@
     </ul>
   </nav>
 
-  <h1 data-cloud-rte="true">{{ value|raw }}</h1>
+  <h1 data-cloud-rte="true" class="text-{{align.value}}">{{ value|raw }}</h1>
   <div class="cloud-spacer"></div>
 
   {% if show_tags.value == true or show_date.value == true %}
-    <p class="metadata-wrapper">
+    <p class="metadata-wrapper text-{{align.value}}">
       {% if show_tags.value == true %}
         {% set current_lang = this.getCurrentLang() %}
         {% for tag in this.getPageTags(this.getCurrentPage()) %}
