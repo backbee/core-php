@@ -28,7 +28,7 @@
             <button
                 {% block data_button_attributes %}{% endblock %}
                 type="button"
-                class="btn btn-{{button_color.value}} btn-{{button_size.value}} btn-{{ button_form.value == false ? 'border' : 'full' }} {{ button_radius.value == false ? 'no-radius' : '' }}"
+                class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_font.value}} btn-{{ button_form.value == false ? 'border' : 'full' }} {{ button_radius.value == false ? 'no-radius' : '' }}"
             >
                 {{ button_title.value }}
             </button>
