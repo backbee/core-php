@@ -39,8 +39,8 @@
     {% set imgWidth = this.getObject().getParamValue('width') ? (' width:' ~ this.getObject().getParamValue('width') ~ '%') : '' %}
     <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %} alt="{{img_alt}}" style="top:{{top}}%; left:{{left}}%;{{ imgWidth }}" />
 
-    {% if display_overlay.value == true %}
-      <span class="image-overlay"></span>
+    {% if display_overlay.value %}
+      <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
     {% endif %}
 
     {% if linkValue.link == 'with_button' %}
@@ -53,19 +53,19 @@
 
     {% set picto = this.getObject().getParamValue('picto') %}
     {% if picto != '' %}
-      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto">
+      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto{% if display_text_hover.value %} hover-display{% endif %}">
     {% endif %}
 
-    {% if display_title.value == true or display_description.value == true %}
-    <div class="textwrapper">
+    {% if display_title.value or display_description.value %}
+    <div class="textwrapper text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}">
 
-      {% if display_title.value == true %}
+      {% if display_title.value %}
       <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="is-h3 lead">
         {{ this.getObject().getParamValue('title')|raw }}
       </div>
       {% endif %}
 
-      {% if display_description.value == true %}
+      {% if display_description.value %}
       <figcaption data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="is-h3 lead hidden-xs">
         {{ this.getObject().getParamValue('description')|raw }}
       </figcaption>

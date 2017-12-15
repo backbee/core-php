@@ -21,6 +21,8 @@ Image:
       label: yaml_block_image_stretch
       value: false
       tab: yaml_block_image_style
+      group:
+        id: image
     stretch_state:
       value: false
     auto_height:
@@ -38,6 +40,8 @@ Image:
       label: yaml_block_image_display_title
       value: false
       tab: yaml_block_image_style
+      group:
+        id: title
     description:
       value: ''
     display_description:
@@ -45,9 +49,27 @@ Image:
       label: yaml_block_image_display_description
       value: false
       tab: yaml_block_image_style
+      group:
+        id: title
+    text_position:
+      type: select
+      label: yaml_block_image_text_position
+      options:
+        top: yaml_block_image_text_position_top
+        middle: yaml_block_image_text_position_middle
+        bottom: yaml_block_image_text_position_bottom
+      value: bottom
+      tab: yaml_block_image_style
+      group:
+        id: title
     display_overlay:
       type: switch
       label: yaml_block_image_overlay
+      value: false
+      tab: yaml_block_image_style
+    display_text_hover:
+      type: switch
+      label: yaml_block_image_display_text_hover
       value: false
       tab: yaml_block_image_style
     link:
