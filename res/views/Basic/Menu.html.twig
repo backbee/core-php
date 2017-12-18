@@ -35,5 +35,28 @@
         </select>
       </li>
     {% endif %}
+    {% if button_title.value%}
+      <div class="button">
+        <a href="{{button_url.value}}"
+        {% block data_attributes %}{% endblock %}
+        {% if button_target_blank.value == true %}target="_blank"{% endif %}
+        class="btn btn-{{ button_color.value }} btn-xs btn-{{ button_form.value == false ? 'border' : 'full' }} {{ button_font.value }} {{ button_radius.value == false ? 'no-radius' : '' }}"
+        >
+          {{button_title.value|raw}}
+        </a>
+      </div>
+      <script type="text/javascript">
+        var init = function() {
+          $('.navbar-header').find('.button').remove();
+          $('.navbar-toggle').after($('#navbar-primary').find('.button').clone());
+        }
+
+        if (window.$) {
+          init();
+        } else {
+          document.addEventListener('DOMContentLoaded', init, true);
+        }
+      </script>
+    {% endif %}
   </ul>
 </nav>
