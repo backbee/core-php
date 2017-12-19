@@ -16,3 +16,11 @@ ArticleTitle:
       label: yaml_block_article_title_show_publication_date
       type: switch
       value: true
+    align:
+      type: selectButton
+      label: yaml_block_button_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'center'
