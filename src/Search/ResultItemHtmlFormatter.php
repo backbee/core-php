@@ -50,7 +50,7 @@ class ResultItemHtmlFormatter
         $abstract = null;
         if (false != $abstractUid = $pageRawData['_source']['abstract_uid']) {
             $abstract = $this->getContentWithDraft(ArticleAbstract::class, $abstractUid);
-            if (null !== $abstract) {
+            if (null === $abstract) {
                 $abstract = $this->getContentWithDraft(Paragraph::class, $abstractUid);
             }
 
