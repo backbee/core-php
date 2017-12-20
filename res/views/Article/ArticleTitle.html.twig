@@ -18,22 +18,24 @@
     </ul>
   </nav>
 
-  <h1 data-cloud-rte="true" class="text-{{align.value}}">{{ value|raw }}</h1>
-  <div class="cloud-spacer"></div>
+  <div class="article-title">
+    <h1 data-cloud-rte="true" class="text-{{align.value}}">{{ value|raw }}</h1>
+    <div class="cloud-spacer"></div>
 
-  {% if show_tags.value == true or show_date.value == true %}
-    <p class="metadata-wrapper text-{{align.value}}">
-      {% if show_tags.value == true %}
-        {% set current_lang = this.getCurrentLang() %}
-        {% for tag in this.getPageTags(this.getCurrentPage()) %}
-          {% set route_name = 'cloud.search_by_tag' ~ (current_lang ? '_i18n' : '') %}
-          <span class="metadata-tag"><a href="{{ this.generateUrlByRouteName(route_name, {'lang': current_lang, 'tagName': tag|lower|url_encode}, null, false) }}">{{ tag }}</a></span>
-        {% endfor %}
-      {% endif %}
-      {% if show_date.value == true %}
-        {% set publishing = this.getCurrentPage().getPublishing() %}
-        {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d - H:i') ~ '</time>' : '<em class="metadata-time" data-cloud-trans="not_yet_published">Not yet published</em>')|raw}}
-      {% endif %}
-    </p>
-  {% endif %}
+    {% if show_tags.value == true or show_date.value == true %}
+      <p class="metadata-wrapper text-{{align.value}}">
+        {% if show_tags.value == true %}
+          {% set current_lang = this.getCurrentLang() %}
+          {% for tag in this.getPageTags(this.getCurrentPage()) %}
+            {% set route_name = 'cloud.search_by_tag' ~ (current_lang ? '_i18n' : '') %}
+            <span class="metadata-tag"><a href="{{ this.generateUrlByRouteName(route_name, {'lang': current_lang, 'tagName': tag|lower|url_encode}, null, false) }}">{{ tag }}</a></span>
+          {% endfor %}
+        {% endif %}
+        {% if show_date.value == true %}
+          {% set publishing = this.getCurrentPage().getPublishing() %}
+          {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d - H:i') ~ '</time>' : '<em class="metadata-time" data-cloud-trans="not_yet_published">Not yet published</em>')|raw}}
+        {% endif %}
+      </p>
+    {% endif %}
+  </div>
 </header>
