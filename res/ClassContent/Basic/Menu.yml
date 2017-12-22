@@ -10,6 +10,70 @@ Menu:
       type: switch
       label: yaml_block_menu_burger
       value: false
+      tab: yaml_block_menu_page
     items:
       type: menu
       value: []
+      tab: yaml_block_menu_page
+    button_title:
+      type: text
+      label: yaml_block_button_title
+      value: ''
+      tab: yaml_block_menu_button
+      group:
+        id: text
+    button_url:
+      type: text
+      label: yaml_block_button_url
+      value: ''
+      format: URL
+      tab: yaml_block_menu_button
+      group:
+        id: text
+    button_target_blank:
+      type: switch
+      label: yaml_block_button_open_in_tab
+      value: false
+      tab: yaml_block_menu_button
+    button_hide_on_mobile:
+      type: switch
+      label: yaml_block_menu_button_hide_on_mobile
+      value: false
+      tab: yaml_block_menu_button
+    button_font:
+      type: select
+      label: yaml_block_button_font
+      options:
+        'default': 'Default'
+        'arial': 'Arial/Arial, Helvetica, sans-serif'
+        'comic': 'Comic Sans MS/Comic Sans MS, cursive'
+        'courier': 'Courier New/Courier New, Courier, monospace'
+        'georgia': 'Georgia/Georgia, serif'
+        'lucida': 'Lucida Sans Unicode/Lucida Sans Unicode, Lucida Grande, sans-serif'
+        'tahoma': 'Tahoma/Tahoma, Geneva, sans-serif'
+        'times-new-roman': 'Times New Roman/Times New Roman, Times, serif'
+        'trebuchet': 'Trebuchet MS/Trebuchet MS, Helvetica, sans-serif'
+        'verdana': 'Verdana/Verdana, Geneva, sans-serif'
+      value: 'default'
+      tab: yaml_block_menu_button
+      group:
+        id: color
+    button_color:
+      type: color
+      label: yaml_block_button_color
+      value: color6
+      tab: yaml_block_menu_button
+      group:
+        id: color
+    button_form:
+      type: switch
+      label: yaml_block_button_line_color
+      label_selected: yaml_block_button_full_color
+      value: true
+      tab: yaml_block_menu_button
+    button_radius:
+      type: switch
+      label: yaml_block_button_square
+      label_selected: yaml_block_button_rounded
+      value: true
+      tab: yaml_block_menu_button
