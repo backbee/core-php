@@ -25,6 +25,10 @@
   </div>
   {% endif %}
 
+  {% if bb.token == null and autoplay.value %}
+    {% set autoplayOn = true %}
+  {% endif %}
+
 
   <script>
     setTimeout(function () {
@@ -41,7 +45,7 @@
             mouseDrag: false,
             items: 1,
             loop: true,
-            autoplay: {{ this.getObject().getParamValue('autoplay') ? 'true' : 'false' }},
+            autoplay: {{ autoplayOn ? 'true' : 'false' }},
             itemsDesktop: [1199,3],
             itemsDesktopSmall: [979,2],
             itemsTablet: [768,2],
@@ -82,7 +86,11 @@
         slider.owlCarousel(config);
 
         slider.on('click', '.owl-item', function (e) {
-          slider.trigger('to.owl.carousel', [$(e.currentTarget).find('> .slider-item').data('index'), duration, true]);
+          var index = $(e.currentTarget).find('> .slider-item').data('index');
+
+          if (index !== undefined) {
+            slider.trigger('to.owl.carousel', [index, duration, true]);
+          }
         });
 
         if (slider.hasClass('slider-thumbnail')) {
