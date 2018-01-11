@@ -4,53 +4,60 @@ parameters:
   error.404: error_404.html.twig
   error.500: error_500.html.twig
   error.default: error_default.html.twig
+  cloud.default.ordered.categories: []
+  cloud.override.default.categories: false
+  cloud.strictly.default.categories: true
 
 services:
   cloud.page_manager:
     class: BackBeeCloud\Entity\PageManager
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.content_manager:
     class: BackBeeCloud\Entity\ContentManager
-    arguments: [@em, @classcontent.manager, @event.dispatcher]
+    arguments: ["@em", "@classcontent.manager", "@event.dispatcher"]
 
   cloud.tag_manager:
     class: BackBeeCloud\Entity\TagManager
-    arguments: [@em, @elasticsearch.manager]
+    arguments: ["@em", "@elasticsearch.manager"]
 
   cloud.image_listener:
     class: BackBeeCloud\Listener\ImageListener
-    arguments: [@cloud.file_handler]
+    arguments: ["@cloud.file_handler"]
 
   cloud.file_handler:
     class: BackBeeCloud\ImageFilesystemHandler
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   user_preference.manager:
     class: BackBeeCloud\UserPreference\UserPreferenceManager
-    arguments: [@em]
+    arguments: ["@em"]
 
   site_option.manager:
     class: BackBeeCloud\SiteOption\OptionManager
-    arguments: [@em]
+    arguments: ["@em"]
 
   content.category_listener:
     class: BackBeeCloud\Listener\ContentCategoryListener
+    arguments: 
+      - "%cloud.default.ordered.categories%"
+      - "%cloud.override.default.categories%"
+      - "%cloud.strictly.default.categories%"
 
   # Contact service
   contact_controller:
     class: BackBeeCloud\Controller\ContactController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   # Newsletter service
   newsletter_controller:
     class: BackBeeCloud\Controller\NewsletterController
-    arguments: [@em]
+    arguments: ["@em"]
 
   # Search Engine service
   search_engine_controller:
     class: BackBeeCloud\Controller\SearchEngineController
-    arguments: [@renderer, @user_preference.manager]
+    arguments: ["@renderer", "@user_preference.manager"]
 
   # Search service
   cloud.search_manager:
@@ -64,40 +71,40 @@ services:
   # API services
   cloud.api.user_controller:
     class: BackBeeCloud\Api\Controller\UserController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.user_preference_controller:
     class: BackBeeCloud\Api\Controller\UserPreferenceController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.import_status_controller:
     class: BackBeeCloud\Api\Controller\ImportStatusController
-    arguments: [@em]
+    arguments: ["@em"]
 
   cloud.api.mailchimp_controller:
     class: BackBeeCloud\Api\Controller\MailchimpController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.page_controller:
     class: BackBeeCloud\Api\Controller\PageController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.content_controller:
     class: BackBeeCloud\Api\Controller\ContentController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.page_type_controller:
     class: BackBeeCloud\Api\Controller\PageTypeController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.tag_controller:
     class: BackBeeCloud\Api\Controller\TagController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   # Page type services
   cloud.page_type.manager:
     class: BackBeeCloud\PageType\TypeManager
-    arguments: [@service_container, @cloud.structure.schema_parser]
+    arguments: ["@service_container", "@cloud.structure.schema_parser"]
 
   cloud.page_type.home_type:
     class: BackBeeCloud\PageType\HomeType
@@ -121,24 +128,24 @@ services:
 
   cloud.disqus_listener:
     class: BackBeeCloud\Listener\ClassContent\DisqusListener
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   elasticsearch.manager:
     class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
     tags:
       - { name: worker.job_handler, dispatch_event: false }
 
   # MultiLang service
   multilang_manager:
     class: BackBeeCloud\MultiLang\MultiLangManager
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
     tags:
       - { name: worker.job_handler, dispatch_event: false }
 
   api.multilang_controller:
     class: BackBeeCloud\Api\Controller\MultiLangController
-    arguments: [@multilang_manager, @bbapp]
+    arguments: ["@multilang_manager", "@bbapp"]
 
   # Structure's services
   cloud.structure.schema_parser:
@@ -146,15 +153,15 @@ services:
 
   cloud.structure.content_builder:
     class: BackBeeCloud\Structure\ContentBuilder
-    arguments: [@service_container, @em]
+    arguments: ["@service_container", "@em"]
 
   cloud.structure_builder:
     class: BackBeeCloud\Structure\StructureBuilder
-    arguments: [@bbapp, @cloud.structure.schema_parser]
+    arguments: ["@bbapp", "@cloud.structure.schema_parser"]
 
   yaml_structure_dumper.manager:
     class: BackBeeCloud\Structure\YamlStructureDumperManager
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
     tags:
       - { name: worker.job_handler, dispatch_event: false }
 
@@ -170,13 +177,13 @@ services:
 
   structure.image_handler:
     class: BackBeeCloud\Structure\ContentHandler\ImageHandler
-    arguments: [@cloud.file_handler]
+    arguments: ["@cloud.file_handler"]
     tags:
       - { name: structure.content_handler, dispatch_event: false }
 
   structure.slider_handler:
     class: BackBeeCloud\Structure\ContentHandler\SliderHandler
-    arguments: [@structure.image_handler, @structure.parameter_handler]
+    arguments: ["@structure.image_handler", "@structure.parameter_handler"]
     tags:
       - { name: structure.content_handler, dispatch_event: false }
 
@@ -187,7 +194,7 @@ services:
 
   structure.contact_handler:
     class: BackBeeCloud\Structure\ContentHandler\ContactHandler
-    arguments: [@em]
+    arguments: ["@em"]
     tags:
       - { name: structure.content_handler, dispatch_event: false }
 
@@ -198,20 +205,20 @@ services:
 
   cloud.global_content_factory:
     class: BackBeeCloud\Structure\GlobalContentFactory
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.hauth.controller:
     class: BackBeeCloud\Controller\HAuthController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   # Security services
   security.voter.sudo:
     class: BackBeeCloud\Security\Authorization\Voter\SudoVoter
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   cloud.api.acl_controller:
     class: BackBeeCloud\Api\Controller\AclController
-    arguments: [@bbapp]
+    arguments: ["@bbapp"]
 
   # Search pages by tag services
   cloud.page_by_tag.manager:
