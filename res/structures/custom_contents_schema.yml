@@ -519,7 +519,6 @@ schema:
                     button_title: 'GET IN TOUCH'
                     button_align: center
                     button_color: color2
-                    button_style: btn-border
                     button_size: md
         -
           data:
