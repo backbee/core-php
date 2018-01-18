@@ -1,0 +1,101 @@
+Image:
+  properties:
+    name: yaml_block_image
+    description: ~
+    iconized-by: path
+    category: [block_category_basics]
+    rte:
+      placeholder: "Your text here"
+    form_width: 430
+  elements:
+    image:
+      type: BackBee\ClassContent\Element\Image
+      maxentry: 1
+  parameters:
+    # focus feature parameters
+    ratio:
+      value: ''
+    width:
+      value: ''
+    position:
+      value: []
+    focus:
+      value: []
+
+    # stretch feature parameters
+    stretch:
+      type: switch
+      label: yaml_block_image_stretch
+      value: false
+      tab: yaml_block_image_style
+      group:
+        id: image
+    stretch_state:
+      value: false
+    auto_height:
+      value: false
+
+    display_title:
+      type: switch
+      label: yaml_block_image_display_title
+      value: false
+      tab: yaml_block_image_style
+      group:
+        id: title
+    title:
+      value: ''
+
+    display_description:
+      type: switch
+      label: yaml_block_image_display_description
+      value: false
+      tab: yaml_block_image_style
+      group:
+        id: title
+    description:
+      value: ''
+
+    text_position:
+      type: select
+      label: yaml_block_image_text_position
+      options:
+        top: yaml_block_image_text_position_top
+        middle: yaml_block_image_text_position_middle
+        bottom: yaml_block_image_text_position_bottom
+      value: bottom
+      tab: yaml_block_image_style
+      group:
+        id: title
+
+    display_overlay:
+      type: switch
+      label: yaml_block_image_overlay
+      value: false
+      tab: yaml_block_image_style
+    display_text_hover:
+      type: switch
+      label: yaml_block_image_display_text_hover
+      value: false
+      tab: yaml_block_image_style
+
+    link:
+      type: imageLink
+      value: {}
+      tab: yaml_block_image_link
+
+    picto:
+      type: upload
+      label: yaml_block_image_picto
+      value: ''
+      tab: yaml_block_image_picto
+
+    alt:
+      type: text
+      label: yaml_block_image_title
+      value: ''
+      tab: yaml_block_image_seo_title
+
+    image_small:
+      value: {}
+    image_medium:
+      value: {}
