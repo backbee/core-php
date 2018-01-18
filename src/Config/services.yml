@@ -233,3 +233,6 @@ services:
     class: BackBeeCloud\PageType\PageByTagResultType
     tags:
       - { name: page.type, dispatch_event: false }
+
+  cloud.user_manager:
+    class: BackBeeCloud\User\UserManager
