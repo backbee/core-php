@@ -21,9 +21,6 @@ class ArticleTitleListener
     public static function onRender(RendererEvent $event)
     {
         $app = $event->getApplication();
-        if (null !== $app->getBBUserToken()) {
-            return;
-        }
 
         $autoblock = null;
         $context = $app->getRequest()->query->get('context', '');
