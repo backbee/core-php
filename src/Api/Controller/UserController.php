@@ -71,6 +71,13 @@ class UserController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        if ($newPassword !== $confirmPassword) {
+            return new JsonResponse([
+                'error'  => 'bad_request',
+                'reason' => 'New password and confirm password must be equals',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         if (!$this->validatePassword($newPassword)) {
             return new JsonResponse([
                 'error'  => 'bad_request',
@@ -82,13 +89,6 @@ class UserController extends AbstractController
                     'one digit',
                     'one symbol'
                 ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        if ($newPassword !== $confirmPassword) {
-            return new JsonResponse([
-                'error'  => 'bad_request',
-                'reason' => 'New password and confirm password must be equals',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -116,7 +116,6 @@ class UserController extends AbstractController
             8 <= strlen($password)
             && 1 === preg_match('/[A-Z]+/', $password)
             && 1 === preg_match('/[a-z]+/', $password)
-            && 1 === preg_match('/[0-9]+/', $password)
             && 1 === preg_match('/[`~\!@#\$%\^\&\*\(\)\-_\=\+\[\{\}\]\\\|;:\'",<.>\/\?]+/', $password)
         ;
     }
