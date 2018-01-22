@@ -1,7 +1,7 @@
 ArticleAbstract:
   extends: \BackBee\ClassContent\Element\Text
   properties:
-    name: Article's abstract
+    name: yaml_block_article_abstract
     description: ~
     category: [!Article]
     forbidden_plugins: ['parameter']
