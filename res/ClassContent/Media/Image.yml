@@ -81,6 +81,7 @@ Image:
     image_medium:
       value: {}
     picto:
+      description: picto_explanation
       type: upload
       label: yaml_block_image_picto
       value: ''
