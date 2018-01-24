@@ -43,36 +43,43 @@
       <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
     {% endif %}
 
-    {% if linkValue.link == 'with_button' %}
-      <div class="buttonwrapper">
-        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.style}} {{linkValue.options.font}} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} {{ linkValue.options.radius == false ? 'no-radius' : '' }}">
-          {{linkValue.options.title|default('Button title')|raw}}
-        </a>
-      </div>
-    {% endif %}
-
     {% set picto = this.getObject().getParamValue('picto') %}
     {% if picto != '' %}
       <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto{% if display_text_hover.value %} hover-display{% endif %}">
     {% endif %}
 
-    {% if display_title.value or display_description.value %}
-    <div class="textwrapper text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}">
+    {% set imageBtnLink = linkValue.options.url %}
+    {% set imageBtnTitle = linkValue.options.title %}
+    {% set imageTitle = this.getObject().getParamValue('title') %}
+    {% set imageDescription = this.getObject().getParamValue('description') %}
 
-      {% if display_title.value %}
-      <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="is-h3 lead">
-        {{ this.getObject().getParamValue('title')|raw }}
-      </div>
+    <div class="above-content-wrapper text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} hidden{% endif %}">
+      {% if display_title.value or display_description.value %}
+        <div class="textwrapper">
+
+          {% if display_title.value %}
+          <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="is-h3 lead{% if display_text_hover.value %} hover-display{% endif %}">
+            {{ imageTitle|raw }}
+          </div>
+          {% endif %}
+
+          {% if display_description.value %}
+          <figcaption data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="is-h3 lead hidden-xs{% if display_text_hover.value %} hover-display{% endif %}">
+            {{ imageDescription|raw }}
+          </figcaption>
+          {% endif %}
+
+        </div>
       {% endif %}
 
-      {% if display_description.value %}
-      <figcaption data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="is-h3 lead hidden-xs">
-        {{ this.getObject().getParamValue('description')|raw }}
-      </figcaption>
+      {% if linkValue.link == 'with_button' %}
+        <div class="buttonwrapper text-center{% if display_text_hover.value %} hover-display{% endif %}">
+          <a href="{{imageBtnLink}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.font}} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} {{ linkValue.options.radius == false ? 'no-radius' : '' }}">
+            {{imageBtnTitle|default('Button title')|raw}}
+          </a>
+        </div>
       {% endif %}
-
     </div>
-    {% endif %}
   </div>
 
 </figure>

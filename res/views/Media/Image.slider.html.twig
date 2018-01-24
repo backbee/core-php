@@ -9,7 +9,7 @@
 
 <div data-editable="false"
  {{ this.bbcontent(null, {'class': 'slider-item'})|raw }}
- data-forbidden-plugins="upload"
+ data-forbidden-plugins="upload,resize"
  {% if bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
 >
 
@@ -22,27 +22,32 @@
   </figure>
 
   {% if display_overlay.value == true %}
-    <span class="image-overlay"></span>
+    <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
   {% endif %}
 
-  <div class="slider-content text-center">
+  {% set imageTitle = this.getObject().getParamValue('title') %}
+  {% set imageDescription = this.getObject().getParamValue('description') %}
+  {% set imageBtnLink = linkValue.options.url %}
+  {% set imageBtnTitle = linkValue.options.title %}
+
+  <div class="slider-content text-center text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} hidden{% endif %}">
 
     {% if display_title.value == true %}
-      <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="content paragraph">
-        {{ this.getObject().getParamValue('title')|raw }}
+      <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="content paragraph is-h3 lead{% if display_text_hover.value %} hover-display{% endif %}">
+        {{ imageTitle|raw }}
       </div>
     {% endif %}
 
     {% if display_description.value == true %}
-      <div data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="content paragraph hidden-xs">
-        {{ this.getObject().getParamValue('description')|raw }}
+      <div data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="content paragraph is-h3 lead hidden-xs{% if display_text_hover.value %} hover-display{% endif %}">
+        {{ imageDescription|raw }}
       </div>
     {% endif %}
 
     {% if linkValue.link == 'with_button' %}
-      <div class="content button">
-        <a href="{{linkValue.options.url}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}}" {% if bb.token != null %}onclick="return false;"{% endif %}>
-          {{linkValue.options.title|default('Button title')|raw}}
+      <div class="content button{% if display_text_hover.value %} hover-display{% endif %}">
+        <a href="{{imageBtnLink}}" class="btn btn-{{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.font}} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} {{ linkValue.options.radius == false ? 'no-radius' : '' }}" {% if bb.token != null %}onclick="return false;"{% endif %}>
+          {{imageBtnTitle|default('Button title')|raw}}
         </a>
       </div>
     {% endif %}
