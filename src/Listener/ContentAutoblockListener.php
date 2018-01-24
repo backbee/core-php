@@ -13,7 +13,7 @@ use BackBee\Renderer\Event\RendererEvent;
 class ContentAutoblockListener
 {
     const AUTOBLOCK_ID_LENGTH = 7;
-    const MAX_PAGE = 10;
+    const MAX_PAGE = 5;
 
     public static function onPostCall(Event $event)
     {
@@ -159,18 +159,32 @@ class ContentAutoblockListener
             $nbPage = ceil(($count ?: 1) / $limit);
             $startPagination = 1;
 
-            if ($nbPage > self::MAX_PAGE) {
-                $startPagination = $currentPaginationPage > self::MAX_PAGE / 2
-                    ? $currentPaginationPage - (self::MAX_PAGE / 2) + 1
-                    : 1
-                ;
-                $nbPage = $nbPage - $currentPaginationPage > self::MAX_PAGE / 2
-                    ? $currentPaginationPage + (self::MAX_PAGE / 2)
-                    : $nbPage
-                ;
+            $refNum = self::MAX_PAGE % 2 === 0
+                ? self::MAX_PAGE / 2
+                : (self::MAX_PAGE - 1) / 2
+            ;
+            $midNum = self::MAX_PAGE % 2 === 0
+                ? $refNum - 1
+                : $refNum
+            ;
 
-                if ($nbPage - $startPagination < self::MAX_PAGE - 1) {
-                    $nbPage = $nbPage + self::MAX_PAGE - $nbPage;
+            if ($nbPage > self::MAX_PAGE) {
+                if ($nbPage - $currentPaginationPage > $refNum) {
+                    $startPagination = $currentPaginationPage > $refNum
+                        ? $currentPaginationPage - $midNum
+                        : 1
+                    ;
+                } else {
+                    $startPagination = $nbPage - self::MAX_PAGE + 1;
+                }
+
+                if ($currentPaginationPage > $refNum) {
+                    $nbPage = $nbPage - $currentPaginationPage > $refNum
+                        ? $currentPaginationPage + $refNum
+                        : $nbPage
+                    ;
+                } else {
+                    $nbPage = self::MAX_PAGE;
                 }
             }
 
