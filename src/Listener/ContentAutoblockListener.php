@@ -2,8 +2,9 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBee\Event\Event;
 use BackBee\ClassContent\ContentAutoblock;
+use BackBee\Controller\Exception\FrontControllerException;
+use BackBee\Event\Event;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\Renderer\Event\RendererEvent;
 
@@ -105,7 +106,11 @@ class ContentAutoblockListener
         // Pagination data process
         $start = (int) $block->getParamValue('start');
         $limit = (int) $block->getParamValue('limit');
-        $currentPaginationPage = $request->get('page_' . substr($block->getUid(), 0, 5), 1);
+        $currentPaginationPage = (int) $request->get('page_' . substr($block->getUid(), 0, 5), 1);
+        if ($currentPaginationPage <= 0) {
+            throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
+        }
+
         if ($block->getParamValue('pagination')) {
             $start = ($currentPaginationPage * $limit) - $limit;
         }
@@ -132,6 +137,10 @@ class ContentAutoblockListener
             $sortCriteria,
             false
         );
+
+        if (0 === $pages->count() && $pages->start() >= $pages->countMax()) {
+            throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
+        }
 
         $contents = [];
         $currentpage = $event->getRenderer()->getCurrentPage();
