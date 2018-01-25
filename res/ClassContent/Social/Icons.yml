@@ -12,6 +12,8 @@ Icons:
                 center: {'icon': 'icon-align-center'}
                 right: {'icon': 'icon-align-right'}
             value: 'left'
+            group:
+                id: position
         social:
             type: social
             label: yaml_block_socials
