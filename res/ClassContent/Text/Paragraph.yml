@@ -31,5 +31,3 @@ Paragraph:
         full-color: yaml_block_text_full_color
         bordered: yaml_block_text_line_color
       value: full-color
-      group:
-        id: color
