@@ -4,7 +4,7 @@ namespace BackBeeCloud\Search;
 
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Basic\BaseSearchResult;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\Renderer\Renderer;
@@ -69,10 +69,10 @@ class ResultItemHtmlFormatter
             if (null !== $image) {
                 $imageData = [
                     'uid'    => $image->getUid(),
-                    'url'    => $image->path,
+                    'url'    => $image->image->path,
                     'title'  => $image->getParamValue('title'),
                     'legend' => $image->getParamValue('description'),
-                    'stat'   => $image->getParamValue('stat'),
+                    'stat'   => $image->image->getParamValue('stat'),
                 ];
             }
         }

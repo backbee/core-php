@@ -39,10 +39,14 @@ services:
 
   content.category_listener:
     class: BackBeeCloud\Listener\ContentCategoryListener
-    arguments: 
+    arguments:
       - "%cloud.default.ordered.categories%"
       - "%cloud.override.default.categories%"
       - "%cloud.strictly.default.categories%"
+
+  site_status.manager:
+    class: BackBeeCloud\SiteStatusManager
+    arguments: ["@em"]
 
   # Contact service
   contact_controller:
@@ -100,6 +104,10 @@ services:
   cloud.api.tag_controller:
     class: BackBeeCloud\Api\Controller\TagController
     arguments: ["@bbapp"]
+
+  cloud.api.site_controller:
+    class: BackBeeCloud\Api\Controller\SiteController
+    arguments: ["@site_status.manager"]
 
   # Page type services
   cloud.page_type.manager:
@@ -236,3 +244,10 @@ services:
 
   cloud.user_manager:
     class: BackBeeCloud\User\UserManager
+
+  # Migrations services
+  media_image.migration:
+    class: BackBeeCloud\Migration\MediaImageMigration
+    arguments: ["@em", "@site_status.manager", "@elasticsearch.manager"]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }

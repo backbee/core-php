@@ -14,7 +14,6 @@ bbapplication.start:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\HAuthListener, onApplicationStart]
         - [BackBeeCloud\Listener\CoreListener, onApplicationStart, -50]
-        - [BackBeeCloud\Listener\MultiLangListener, onApplicationStart, -100]
 
 bbapplication.stop:
     listeners:
@@ -132,11 +131,6 @@ basic.menu.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\MenuListener, onRender]
 
-media.image.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [@cloud.image_listener, onRender]
-
 contentautoblock.render:
     listeners:
         # BackBee Cloud listeners
@@ -147,7 +141,7 @@ content.highlightcontent.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\HighlightContentListener, onRender]
 
-media.image.onflush:
+element.image.onflush:
     listeners:
         # BackBee Cloud listeners
         - [@cloud.image_listener, onImageFlush]

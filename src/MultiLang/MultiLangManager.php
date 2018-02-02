@@ -12,7 +12,6 @@ use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
 use BackBeePlanet\RedisManager;
 use BackBee\BBApplication;
-use BackBee\Bundle\Registry;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
 
@@ -40,6 +39,7 @@ class MultiLangManager implements JobHandlerInterface
     {
         $this->app = $app;
         $this->entyMgr = $app->getEntityManager();
+        $this->siteStatusMgr = $app->getContainer()->get('site_status.manager');
         $this->availables = (new GlobalSettings())->langs();
     }
 
@@ -136,7 +136,7 @@ class MultiLangManager implements JobHandlerInterface
         }
 
         (new JobManager())->pushJob(new MultiLangJob($this->getSite()->getLabel(), $id));
-        $this->lockSite();
+        $this->siteStatusMgr->lock();
     }
 
     public function updateLang($id, $newIsActive)
@@ -249,6 +249,20 @@ class MultiLangManager implements JobHandlerInterface
         ]);
     }
 
+    public function getLangByPage(Page $page)
+    {
+        $association = $this->getAssociation($page);
+
+        return $association ? $association->getLang()->getLang() : null;
+    }
+
+    public function getRootByLang(Lang $lang)
+    {
+        return $this->entyMgr->getRepository(Page::class)->findOneBy([
+            '_url' => sprintf('/%s/', $lang->getLang()),
+        ]);
+    }
+
     /**
      * Handles the provided job.
      *
@@ -259,14 +273,14 @@ class MultiLangManager implements JobHandlerInterface
     {
         if (null !== $this->getDefaultLang()) {
             $writer->write(sprintf('Default lang of site "%s" is already defined.', $job->siteId()));
-            $this->unlockSite();
+            $this->siteStatusMgr->unlock();
 
             return;
         }
 
         // ensure that lang is activated
         $this->updateLang($job->lang(), true);
-        $this->updateWorkPercent(10);
+        $this->siteStatusMgr->updateLockProgressPercent(10);
         $this->app->getContainer()->get('cloud.global_content_factory')->duplicateMenuForLang($job->lang());
 
         // define lang as default
@@ -283,7 +297,7 @@ class MultiLangManager implements JobHandlerInterface
         $writer->write(sprintf('Defined "%s" as default lang.', $job->lang()));
         $writer->write('');
 
-        $this->updateWorkPercent(15);
+        $this->siteStatusMgr->updateLockProgressPercent(15);
         $this->entyMgr->clear();
 
         // update all pages URLs
@@ -314,13 +328,13 @@ class MultiLangManager implements JobHandlerInterface
             }
 
             $pagesCount++;
-            $this->updateWorkPercent(15 + (int) (((($pagesCount / $maxPages) * 100 * 84) / 100)));
+            $this->siteStatusMgr->updateLockProgressPercent(15 + (int) (((($pagesCount / $maxPages) * 100 * 84) / 100)));
         }
 
-        $this->updateWorkPercent(100);
+        $this->siteStatusMgr->updateLockProgressPercent(100);
         $writer->write('');
 
-        $this->unlockSite();
+        $this->siteStatusMgr->unlock();
 
         $writer->write('');
         $writer->write('This job has been successfully done.');
@@ -335,70 +349,6 @@ class MultiLangManager implements JobHandlerInterface
     public function supports(JobInterface $job)
     {
         return $job instanceof MultiLangJob;
-    }
-
-    public function getLangByPage(Page $page)
-    {
-        $association = $this->getAssociation($page);
-
-        return $association ? $association->getLang()->getLang() : null;
-    }
-
-    public function getRootByLang(Lang $lang)
-    {
-        return $this->entyMgr->getRepository(Page::class)->findOneBy([
-            '_url' => sprintf('/%s/', $lang->getLang()),
-        ]);
-    }
-
-    public function getWorkProgress()
-    {
-        if (null === $lock = $this->getLock()) {
-            throw new \LogicException('Cannot find any work in progress.');
-        }
-
-        return (int) $lock->getValue();
-    }
-
-    private function getLock()
-    {
-        return $this->entyMgr->getRepository(Registry::class)->findOneBy([
-            'scope' => 'GLOBAL',
-            'type'  => 'site_status',
-            'key'   => 'work_in_progress',
-        ]);
-    }
-
-    private function updateWorkPercent($percent)
-    {
-        if (null === $lock = $this->getLock()) {
-            throw new \LogicException('Cannot find any work in progress.');
-        }
-
-        $lock->setValue((int) $percent);
-        $this->entyMgr->flush($lock);
-    }
-
-    private function lockSite()
-    {
-        if (null === $this->getLock()) {
-            $lock = new Registry();
-            $lock->setScope('GLOBAL');
-            $lock->setType('site_status');
-            $lock->setKey('work_in_progress');
-            $lock->setValue(0);
-
-            $this->entyMgr->persist($lock);
-            $this->entyMgr->flush($lock);
-        }
-    }
-
-    private function unlockSite()
-    {
-        if (null !== $lock = $this->getLock()) {
-            $this->entyMgr->remove($lock);
-            $this->entyMgr->flush($lock);
-        }
     }
 
     private function getSite()

@@ -8,7 +8,7 @@ use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\AbstractContent;
 use BackBee\ClassContent\Basic\Title;
 use BackBee\ClassContent\Content\HighlightContent;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
@@ -39,12 +39,12 @@ class ContentListener
         $dic = $event->getApplication()->getContainer();
         $content = $event->getContent();
 
-        if ($content instanceof Image && false != $content->path) {
+        if ($content instanceof Image && false != $content->image->path) {
             $mediaDir = $event->getApplication()->getMediaDir();
-            if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->path)) {
-                $sourcepath = str_replace('/img/', $mediaDir . '/', $content->path);
+            if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->image->path)) {
+                $sourcepath = str_replace('/img/', $mediaDir . '/', $content->image->path);
                 if (is_readable($sourcepath)) {
-                    $content->path = $dic->get('cloud.file_handler')->upload(
+                    $content->image->path = $dic->get('cloud.file_handler')->upload(
                         sprintf('%s.%s', $content->getUid(), explode('.', basename($sourcepath))[1]),
                         $sourcepath,
                         false

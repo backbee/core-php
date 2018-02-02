@@ -100,8 +100,8 @@ class UpdateTaskScheduler
     protected function getRegistryEntity()
     {
         return $this->entyMgr->getRepository(Registry::class)->findOneBy([
-            'scope' => 'UPDATE_SCHEDULER',
-            'key'   => 'current_version',
+            'scope' => self::REGISTRY_SCOPE,
+            'key'   => self::REGISTRY_KEY,
         ]);
     }
 }

@@ -5,7 +5,7 @@ Slider:
     category: [block_category_basics]
   elements:
     images:
-      type: \BackBee\ClassContent\Media\Image
+      type: \BackBee\ClassContent\Basic\Image
       maxentry: 0
   parameters:
     image:

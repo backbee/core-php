@@ -1,4 +1,4 @@
-{% if bb.token != null or path != null %}
+{% if bb.token != null or image.path != null %}
 
 {% set resizeClass = 'image-fullwidth' %}
 {% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %}
@@ -10,8 +10,8 @@
 
 {% set linkValue = link.value %}
 
-{% if path != null and bb.token == null and linkValue.link == 'lightbox' %}<a href="{{this.getCdnImageUrl(path)|raw}}" data-lightbox="lightbox">{% endif %}
-{% if path != null and bb.token == null and linkValue.link == 'image_link' %}<a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>{% endif %}
+{% if image.path != null and bb.token == null and linkValue.link == 'lightbox' %}<a href="{{this.getCdnImageUrl(image.path)|raw}}" data-lightbox="lightbox">{% endif %}
+{% if image.path != null and bb.token == null and linkValue.link == 'image_link' %}<a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>{% endif %}
 <figure
   {% block data_item_attributes %}{% endblock %}
   {{this.bbcontent(null, {class: 'content figure ' ~ resizeClass ~ autoSizeClass ~ ' media-image'})|raw}}
@@ -37,7 +37,7 @@
     {% set left = coord['left'] ? coord['left'] : 0 %}
     {% set top = coord['top'] ? coord['top'] : 0 %}
     {% set imgWidth = this.getObject().getParamValue('width') ? (' width:' ~ this.getObject().getParamValue('width') ~ '%') : '' %}
-    <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %} alt="{{img_alt}}" style="top:{{top}}%; left:{{left}}%;{{ imgWidth }}" />
+    <img draggable="false" {% if image.path != false %}src="{{this.getCdnImageUrl(image.path)|raw}}"{% endif %} alt="{{img_alt}}" style="top:{{top}}%; left:{{left}}%;{{ imgWidth }}" />
 
     {% if display_overlay.value %}
       <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
@@ -83,5 +83,5 @@
   </div>
 
 </figure>
-{% if path != null and bb.token == null and (linkValue.link == 'lightbox' or linkValue.link == 'image_link') %}</a>{% endif %}
+{% if image.path != null and bb.token == null and (linkValue.link == 'lightbox' or linkValue.link == 'image_link') %}</a>{% endif %}
 {% endif %}

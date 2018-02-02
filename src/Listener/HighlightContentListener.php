@@ -5,9 +5,9 @@ namespace BackBeeCloud\Listener;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Content\HighlightContent;
-use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Text\Paragraph;
@@ -150,10 +150,10 @@ class HighlightContentListener
             $image = null;
             $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $entyMgr, $bbtoken);
             if ($media instanceof Video) {
-                $image = $media->thumbnail;
+                $image = $media->thumbnail->image;
                 $imageData['is_video_thumbnail'] = true;
             } elseif ($media instanceof Image) {
-                $image = $media;
+                $image = $media->image;
             }
 
             if (null !== $image) {

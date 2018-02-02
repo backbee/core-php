@@ -13,6 +13,6 @@
   href="{{this.getHomeUrl()}}"
 >
   <span class="logo navbar-brand">
-    <img draggable="false" {% if path != false %}src="{{this.getCdnImageUrl(path)|raw}}"{% endif %}>
+    <img draggable="false" {% if image.path != false %}src="{{this.getCdnImageUrl(image.path)|raw}}"{% endif %}>
   </span>
 </{{tag}}>

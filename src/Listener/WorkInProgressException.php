@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBeeCloud\MultiLang;
+namespace BackBeeCloud\Listener;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>

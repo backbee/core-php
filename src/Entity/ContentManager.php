@@ -151,7 +151,7 @@ class ContentManager
     {
         return $this->entyMgr->getRepository(Revision::class)->findBy([
             '_owner'   => UserSecurityIdentity::fromToken($this->uniqToken),
-            '_state'   => [Revision::STATE_ADDED, Revision::STATE_MODIFIED],
+            '_state'   => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
             '_content' => array_merge(
                 $this->getGlobalContentsUids(),
                 $this->getUidsFromPage($page, $token)
@@ -344,13 +344,26 @@ class ContentManager
      */
     protected function getGlobalContentsUids()
     {
-        return array_filter(array_map(function (GlobalContent $globalcontent) {
-            if (null === $globalcontent->getContent()) {
-                return null;
-            }
+        return array_merge(...array_filter(
+            array_map(
+                function (GlobalContent $globalcontent) {
+                    $uids = [];
+                    if (null === $content = $globalcontent->getContent()) {
+                        return $uids;
+                    }
 
-            return $globalcontent->getContent()->getUid();
-        }, $this->entyMgr->getRepository(GlobalContent::class)->findAll()));
+                    $uids[] = $content->getUid();
+                    foreach ($content->getData() as $element) {
+                        if ($element instanceof AbstractClassContent) {
+                            $uids[] = $element->getUid();
+                        }
+                    }
+
+                    return $uids;
+                },
+                $this->entyMgr->getRepository(GlobalContent::class)->findAll()
+            )
+        ));
     }
 
     protected function getDraftStageToDelete(Page $page, BBUserToken $token)

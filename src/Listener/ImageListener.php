@@ -4,7 +4,7 @@ namespace BackBeeCloud\Listener;
 
 use BackBeeCloud\ImageHandlerInterface;
 use BackBeeCloud\UserAgentHelper;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
@@ -39,28 +39,8 @@ class ImageListener
         $response->setContent(json_encode($data));
     }
 
-    public function onRender(RendererEvent $event)
-    {
-        $app = $event->getApplication();
-        $renderer = $event->getRenderer();
-
-        $block = $event->getTarget();
-        $imageSmall = $block->getParamValue('image_small');
-        $imageMedium = $block->getParamValue('image_medium');
-
-        if (UserAgentHelper::isDesktop()) {
-            return;
-        }
-
-        if (UserAgentHelper::isMobile() && $imageSmall !== null && isset($imageSmall['path'])) {
-            $renderer->assign('path', $imageSmall['path']);
-        } elseif (UserAgentHelper::isTablet() && $imageMedium !== null && isset($imageMedium['path'])) {
-            $renderer->assign('path', $imageMedium['path']);
-        }
-    }
-
     /**
-     * Occurs on 'media.image.onflush'. If a new image is uploaded, this listener
+     * Occurs on 'element.image.onflush'. If a new image is uploaded, this listener
      * will remove the old image from AWS S3 bucket.
      *
      * @param  Event  $event
@@ -80,7 +60,7 @@ class ImageListener
                 $paths[] = $revision->path;
             }
 
-            foreach (array_filter($paths) as $path) {
+            foreach (array_unique(array_filter($paths)) as $path) {
                 $this->imgHandler->delete($path);
             }
 
@@ -94,6 +74,7 @@ class ImageListener
 
         $oldData = $changeset['_data'][0];
         $newData = $changeset['_data'][1];
+
         if ($oldData['path'] === $newData['path']) {
             return;
         }
@@ -126,10 +107,10 @@ class ImageListener
         if ($reload) {
             $revision->setParam('width', '0');
 
-            $revision->setParam('focus', array(
+            $revision->setParam('focus', [
                 'left' => 50,
-                'top' => 50
-            ));
+                'top' => 50,
+            ]);
 
             $entyMgr->getUnitOfWork()->recomputeSingleEntityChangeSet(
                 $entyMgr->getClassMetadata(Revision::class),

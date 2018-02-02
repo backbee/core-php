@@ -7,6 +7,8 @@ Image:
     rte:
       placeholder: "Your text here"
     form_width: 430
+    is_image: true
+    file_element: image
   elements:
     image:
       type: BackBee\ClassContent\Element\Image

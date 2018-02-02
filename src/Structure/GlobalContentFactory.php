@@ -6,8 +6,8 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Footer;
 use BackBee\ClassContent\Basic\Header;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Basic\Menu;
-use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Site\Site;
 
@@ -67,7 +67,7 @@ class GlobalContentFactory
     }
 
     /**
-     * Returns an unique instance of header logo (classcontent: BackBee\ClassContent\Media\Image).
+     * Returns an unique instance of header logo (classcontent: BackBee\ClassContent\Basic\Image).
      *
      * @return Image
      */
@@ -77,7 +77,7 @@ class GlobalContentFactory
     }
 
     /**
-     * Returns an unique instance of footer logo (classcontent: BackBee\ClassContent\Media\Image).
+     * Returns an unique instance of footer logo (classcontent: BackBee\ClassContent\Basic\Image).
      *
      * @return Image
      */

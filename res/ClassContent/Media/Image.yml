@@ -4,7 +4,7 @@ Image:
     name: yaml_block_image
     description: ~
     iconized-by: path
-    category: [block_category_basics]
+    category: [!block_category_basics]
     rte:
       placeholder: "Your text here"
     form_width: 430

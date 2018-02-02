@@ -12,8 +12,8 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Article\ArticleTitle;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Basic\Title;
-use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\KeyWord as Tag;
@@ -415,7 +415,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
 
         if ($media instanceof Video) {
             $image = $media->thumbnail;
-            if (false == $image->path || AbstractClassContent::STATE_NORMAL !== $image->getState()) {
+            if (false == $image->image->path || AbstractClassContent::STATE_NORMAL !== $image->getState()) {
                 $contentUids = array_filter($contentUids, function ($uid) use ($image) {
                     return $uid !== $image->getUid();
                 });

@@ -5,7 +5,7 @@ Video:
     category: [block_category_basics]
   elements:
     thumbnail:
-      type: \BackBee\ClassContent\Media\Image
+      type: \BackBee\ClassContent\Basic\Image
       maxentry: 1
   parameters:
     video_url:
