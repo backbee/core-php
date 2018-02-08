@@ -138,7 +138,7 @@ class ContentAutoblockListener
             false
         );
 
-        if (0 === $pages->count() && $pages->start() >= $pages->countMax()) {
+        if (0 === $pages->count() && $pages->start() >= $pages->countMax() && $currentPaginationPage !== 1) {
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
         }
 
