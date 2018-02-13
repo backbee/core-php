@@ -2,7 +2,7 @@
   <a href="{{url.value}}"
     {% block data_attributes %}{% endblock %}
     {% if target_blank.value == true %}target="_blank"{% endif %}
-    class="btn btn-{{color.value}} btn-{{size.value}} btn-{{ form.value == false ? 'border' : 'full' }} {{font.value}} {{ radius.value == false ? 'no-radius' : '' }}"
+    class="btn color-primary {{color.value}} btn-{{size.value}} btn-{{ form.value == false ? 'outline' }} {{ font.value }} btn-{{ style.value }}"
   >
     {{title.value|default('Hello')|raw}}
   </a>

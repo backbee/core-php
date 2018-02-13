@@ -12,7 +12,6 @@ Soundcloud:
       type: select
       label: yaml_block_soundcloud_player_size
       options:
-        150: yaml_block_soundcloud_small
-        225: yaml_block_soundcloud_medium
-        500: yaml_block_soundcloud_large
-      value: 150
+        130: yaml_block_soundcloud_small
+        180: yaml_block_soundcloud_large
+      value: 130

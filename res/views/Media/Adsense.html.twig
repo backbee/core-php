@@ -1,4 +1,4 @@
-<div {{ this.bbcontent(null)|raw }}>
+<div {{ this.bbcontent(null, {'class': 'content adsense'})|raw }}>
 {% if client_id.value == false or ad_slot.value == false %}
     {% include 'common/missing_config_block.html.twig' %}
 {% else %}

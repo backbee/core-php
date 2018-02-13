@@ -1,7 +1,7 @@
 <div class="text-image-vertical">
     <div class="row">
         <div class="col-md-8">
-            <h3 {% if reduce_title_size %}class="reduce-title"{% endif %}>
+            <h4 class="autoblock-title{% if reduce_title_size %} reduce-title{% endif %}">
                 <a
                     {% block data_item_title_attributes %}{% endblock %}
                     href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"
@@ -15,13 +15,13 @@
                         {% endif %}
                     </span>
                 </a>
-            </h3>
+            </h4>
             {% if display_published_at %}
             <p class="metadata-wrapper">
                 {{(publishing ? '<time class="time metadata-time" pubdate="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d') ~ '</time>' : '<em>Not yet published.</em>')|raw}}
             </p>
             {% endif %}
-            <p>
+            <p class="abstract">
             {% if display_abstract %}
                 {% if abstract_max_length > 0 %}
                   {{this.perfectTruncate(abstract, abstract_max_length)}}
@@ -33,15 +33,17 @@
         </div>
         <div class="col-md-4">
             {% if image.url != false %}
-            <figure class="figure push-image">
-                <div class="contentwrapper border-top">
-                    {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-                    <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive" alt="{{img_alt}}" /></a>
-                    {% if image.is_video_thumbnail %}
-                        <span class="picto-video"><i></i></span>
-                    {% endif %}
-                </div>
-            </figure>
+            <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
+                <figure class="figure push-image" style="background-image: url({{this.getCdnImageUrl(image.url)}})">
+                    <div class="contentwrapper">
+                        {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
+                        <img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive d-none" alt="{{img_alt}}" />
+                        {% if image.is_video_thumbnail %}
+                            <span class="picto-video"><i></i></span>
+                        {% endif %}
+                    </div>
+                </figure>
+            </a>
             {% endif %}
         </div>
     </div>

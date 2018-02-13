@@ -5,22 +5,22 @@
         <nav class="text-center">
             <ul class="pagination">
                 {% if pagination_data.current_page != 1 and pagination_data.current_page > 0 %}
-                    <li>
-                        <a href="?{{urlPart}}={{ pagination_data.current_page - 1 }}" aria-label="Previous">
+                    <li class="page-item">
+                        <a class="page-link" href="?{{urlPart}}={{ pagination_data.current_page - 1 }}" aria-label="Previous">
                             <span class="arrow_carrot-left" aria-hidden="true"></span>
                         </a>
                     </li>
                 {% endif %}
 
                 {% for i in pagination_data.start_pagination..pagination_data.nb_page %}
-                    <li {% if pagination_data.current_page == i %}class="active"{% endif %}>
-                        <a href="?{{urlPart}}={{ i }}">{{i}}</a>
+                    <li class="page-item{% if pagination_data.current_page == i %} active{% endif %}">
+                        <a class="page-link" href="?{{urlPart}}={{ i }}">{{i}}</a>
                     </li>
                 {% endfor %}
 
                 {% if pagination_data.nb_page != pagination_data.current_page %}
-                    <li>
-                        <a href="?{{urlPart}}={{ pagination_data.current_page + 1 }}" aria-label="Next">
+                    <li class="page-item">
+                        <a class="page-link" href="?{{urlPart}}={{ pagination_data.current_page + 1 }}" aria-label="Next">
                             <span class="arrow_carrot-right" aria-hidden="true"></span>
                         </a>
                     </li>

@@ -1,30 +1,30 @@
 <div class="row">
     {% if show_image %}
-    <div class="col-md-3">
-        <figure class="figure">
+    <div class="col-md-4">
+        <figure class="figure{% if image.url %} push-image{% endif %}"{% if image.url %} style="background-image: url({{this.getCdnImageUrl(image.url)}});"{% endif %}>
             <div class="contentwrapper">
             {% if image.url != false %}
                 {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-                <a href="{{url}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive" alt="{{img_alt}}" /></a>
+                <a href="{{url}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive d-none" alt="{{img_alt}}" /></a>
             {% else %}
-                <a href="{{url}}"><img src="{{this.getCdnUri('/static/img/img_placeholder.png')}}" class="img-responsive" /></a>
+                <a href="{{url}}"><span class="image-placeholder"></span></a>
             {% endif %}
             </div>
         </figure>
     </div>
     {% endif %}
 
-    <div class="col-md-{{show_image ? 9 : 12}}">
-        <h3><a href="{{url}}">{{title|striptags|raw}}</a></h3>
+    <div class="col-md-{{show_image ? 8 : 12}}">
+        <h4 class="autoblock-title"><a href="{{url}}">{{title|striptags|raw}}</a></h4>
 
         {% if show_published_at %}
-        <p class="metadata-wrapper border-top">
+        <p class="metadata-wrapper">
             {{(publishing ? '<time class="time metadata-time" pubdate="' ~ publishing.format('Y-m-d H:i') ~ '">' ~ publishing.format('Y.m.d') ~ '</time>' : '<em>Not yet published.</em>')|raw}}
         </p>
         {% endif %}
 
         {% if show_abstract %}
-        <p>{{this.perfectTruncate(abstract, 144)}}</p>
+        <p class="abstract">{{this.perfectTruncate(abstract, 144)}}</p>
         {% endif %}
     </div>
 </div>

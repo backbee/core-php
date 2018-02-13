@@ -11,11 +11,12 @@ Paragraph:
       type: selectButton
       label: yaml_block_text_bg_color
       buttons:
-        color5: {'icon': 'icon-text', 'bgcolor': 'color5'}
-        color6: {'icon': 'icon-text', 'bgcolor': 'color6'}
-        color7: {'icon': 'icon-text', 'bgcolor': 'color7'}
-        color8: {'icon': 'icon-ban', 'bgcolor': 'default'}
-      value: 'color8'
+        color-primary: {'icon': 'icon-text', 'bgcolor': 'color-primary'}
+        color-secondary: {'icon': 'icon-text', 'bgcolor': 'color-secondary'}
+        color-text: {'icon': 'icon-text', 'bgcolor': 'color-text'}
+        color-background: {'icon': 'icon-text', 'bgcolor': 'color-background'}
+        color-5: {'icon': 'icon-ban', 'bgcolor': 'default'}
+      value: 'color-5'
       group:
         id: bg
     transparency:
@@ -23,7 +24,7 @@ Paragraph:
       value: false
       label: yaml_block_text_transparency
       group:
-        id: transparency
+        id: style
     style:
       type: radio
       inline: true
@@ -31,3 +32,5 @@ Paragraph:
         full-color: yaml_block_text_full_color
         bordered: yaml_block_text_line_color
       value: full-color
+      group:
+        id: style

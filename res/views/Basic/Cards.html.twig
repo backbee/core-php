@@ -1,0 +1,17 @@
+<div data-mobile-edit="false" {{this.bbcontent(null, {class: 'content card-block'})|raw}}>
+  {% if button_description.value == null and url.value != null %}<a href="{{ url.value }}"{% if target_blank.value %} target="_blank" {% endif %}>{% endif %}
+  <div class="card has-sub-elements">
+    {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd,parameter'})|raw }}
+
+    <div class="card-body text-{{ align.value }}">
+      <p class="card-text" data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true">
+        {{ this.getObject().getParamValue('description')|raw }}
+      </p>
+
+      {% if button_description.value %}
+        <a href="{{ url.value }}" class="btn btn-{{color.value}} btn-{{ form.value == false ? 'outline' }} btn-{{style.value}}" {% if target_blank.value %} target="_blank" {% endif %}>{{ button_description.value }}</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if button_description.value == null and url.value != null %}</a>{% endif %}
+</div>

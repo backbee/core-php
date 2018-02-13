@@ -1,5 +1,7 @@
-<ul data-mobile-edit="false" {{ this.bbcontent(null, {'class': 'list-inline term-list'})|raw }}>
-  {% for item in items %}
-    {% include 'Basic/Menu.item.html.twig' with {'item': item} %}
-  {% endfor %}
-</ul>
+<div data-mobile-edit="false" {{ this.bbcontent(null, {'class': 'navbar-expand ml-md-auto'})|raw }}>
+  <ul class="navbar-nav float-md-right">
+    {% for item in items %}
+      {% include 'Basic/Menu.item.html.twig' with {'item': item} %}
+    {% endfor %}
+  </ul>
+</div>

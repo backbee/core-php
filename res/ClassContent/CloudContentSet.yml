@@ -37,3 +37,5 @@ CloudContentSet:
       value: false
     remove_gutter:
       value: false
+    vertical_align:
+      value: false

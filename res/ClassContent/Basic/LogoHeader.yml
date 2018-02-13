@@ -1,0 +1,11 @@
+LogoHeader:
+  properties:
+    name: Logo_header
+    description: ~
+    category: ['!Common']
+    forbidden_plugins: ['remove', 'dnd', 'click', 'resize', 'focus']
+  parameters:
+    text:
+      type: switch
+      label: yaml_block_menu_text
+      value: false

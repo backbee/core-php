@@ -61,7 +61,7 @@ Menu:
     button_color:
       type: color
       label: yaml_block_button_color
-      value: color6
+      value: ''
       tab: yaml_block_menu_button
       group:
         id: color
@@ -71,9 +71,12 @@ Menu:
       label_selected: yaml_block_button_full_color
       value: true
       tab: yaml_block_menu_button
-    button_radius:
-      type: switch
-      label: yaml_block_button_square
-      label_selected: yaml_block_button_rounded
-      value: true
+    button_style:
+      type: select
+      label: yaml_block_button_style
+      options:
+        square: yaml_block_button_square
+        radius: yaml_block_button_radius
+        rounded: yaml_block_button_rounded
+      value: radius
       tab: yaml_block_menu_button

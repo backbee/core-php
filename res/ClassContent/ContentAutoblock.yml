@@ -23,7 +23,7 @@ ContentAutoblock:
       label: yaml_block_page_list_of_pages_use_pagination
       tab: yaml_block_page_list_of_pages_list
       group:
-        id: pagination
+        id: autoblock-pager
       forbiddenElementsOnSwitchOn: ['start']
     start:
       type: text

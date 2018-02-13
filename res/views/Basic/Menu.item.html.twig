@@ -1,5 +1,6 @@
-<li class="{% if item.is_current %}active{% endif %}{% if item.children %} has-children{% endif %}">
+<li class="nav-item {% if item.is_current %}active{% endif %}{% if item.children %} has-children{% endif %}">
     <a
+        class="nav-link"
         {% block data_item_attributes %}{% endblock %}
         {% if item.is_clickable is not defined or item.is_clickable == true %} href="{{item.url}}"{% endif %}
         {% if item.is_online == false %} title="This page is offline"{% endif %}
@@ -8,7 +9,7 @@
     </a>
 	{% if item.children %}
     <div class="submenu">
-		<ul>
+		<ul class="list-unstyled">
 		{% for link in item.children %}
 			<li><a href="{{link.url}}" {% if link.is_online == false %} title="This page is offline"{% endif %}><span class="{{link.is_online == false ? 'offline': ''}}">{{link.label|escape}}</span></a></li>
 		{% endfor %}

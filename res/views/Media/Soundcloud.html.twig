@@ -1,4 +1,4 @@
-<div {{ this.bbcontent(null)|raw }} {% block data_attributes %}{% endblock %}>
+<div {{ this.bbcontent(null, {'class': 'content soundcloud'})|raw }} {% block data_attributes %}{% endblock %}>
     {% if url.value is empty or valid_url == false %}
       {% include 'common/missing_config_block.html.twig' %}
     {% else %}

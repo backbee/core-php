@@ -7,7 +7,7 @@
 <div
     {% block data_attributes %}{% endblock %}
     data-cloud-rte="true"
-    {{this.bbcontent(null, {class: style.value ~ ' ' ~transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' bg bg-' ~ bg_color.value)})|raw}}
+    {{this.bbcontent(null, {class: style.value ~ ' ' ~transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' has-bg-color ' ~ bg_color.value)})|raw}}
 >
   {{value|raw}}
 </div>

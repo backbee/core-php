@@ -68,7 +68,12 @@
 
   {% set noPaddingClass = '' %}
   {% if remove_padding.value == true %}
-    {% set noPaddingClass = 'no-padding' %}
+    {% set noPaddingClass = 'p-0' %}
+  {% endif %}
+
+  {% set verticalAlignClass = '' %}
+  {% if vertical_align.value == true %}
+    {% set verticalAlignClass = 'align-item-center' %}
   {% endif %}
 
   {% set parallaxClass = '' %}
@@ -76,8 +81,18 @@
     {% set parallaxClass = 'bg-parallax' %}
   {% endif %}
 
+  {% set bgColorClass = '' %}
+  {% if bg_color.value == true %}
+    {% set bgColorClass = 'has-bg-color' %}
+  {% endif %}
+
   {% if bg_video_url %}
-    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ blurClass})|raw}} style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}>
+    <div id="{{rowId}}" 
+      {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} 
+      style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} 
+             {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"
+      {% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}
+    >
 
       {% if this.userAgentHelper.isDesktop() %}
         <div class="bg-video-wrapper">
@@ -133,13 +148,13 @@
                 var $iframeVideo = $('.bg-video-wrapper iframe');
                 var $row = $iframeVideo.parents('.background-video-row');
 
-                var w = $row.outerWidth()+200,
-                    h = $row.outerHeight()+200;
+                var w = $row.outerWidth(),
+                    h = $row.outerHeight();
 
                 if (w/h > 16/9){
                   $iframeVideo.css({'width': w, 'height': w/16*9, 'left': '0'});
                 } else {
-                  $iframeVideo.css({'width': h/9*16, 'height': h, 'left': -($iframeVideo.outerWidth()-w)/2});
+                  $iframeVideo.css({'width': h/9*16, 'height': h, 'left': -(h/9*16-w)/2});
                 }
               }
 
@@ -157,12 +172,12 @@
         </div>
       {% endif %}
       <div class="{{ width.value }}">
-        <div class="row {% if remove_gutter.value %}no-gutter{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
+        <div class="row{% if remove_gutter.value %} no-gutters{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
           {% set colsize = colsize ? colsize : default_colsize %}
           {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
-          <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
+          <div class="row-item {% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
           {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
         {% endfor %}
@@ -170,14 +185,14 @@
       </div>
     </div>
   {% else %}
-    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset bg bg-' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass ~ ' ' ~ blurClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bg-y="{{ backgroundPosition }}" data-bb-image="{{backgroundImage|raw}}"{% endif %}>
+    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bg-y="{{ backgroundPosition }}" data-bb-image="{{backgroundImage|raw}}"{% endif %}>
       <div class="{{ width.value }}">
-        <div class="row {% if remove_gutter.value %}no-gutter{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
+        <div class="row{% if remove_gutter.value %} no-gutters{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
           {% set colsize = colsize ? colsize : default_colsize %}
           {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
-          <div class="{% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
+          <div class="row-item {% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
           {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
         {% endfor %}

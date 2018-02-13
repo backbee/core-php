@@ -1,11 +1,11 @@
-<div class="row">
-  <div class="col-md-12">
-    <h3 {% if reduce_title_size %}class="reduce-title"{% endif %}>
-      <a
-        {% block data_item_title_attributes %}{% endblock %}
-        href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"
-        {% if is_online == false %} title="This page is offline"{% endif %}
-      >
+<div class="col-md-12 block only-text">
+  <h4 class="autoblock-title{% if reduce_title_size %} reduce-title{% endif %}">
+    <a
+      {% block data_item_title_attributes %}{% endblock %}
+      href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"
+      {% if is_online == false %} title="This page is offline"{% endif %}
+    >
+      {% spaceless %}
         <span class="{{is_online == false ? 'offline autoblock-item' : ''}}">
           {% if title_max_length > 0 %}
             {{this.perfectTruncate(title, title_max_length)}}
@@ -13,17 +13,25 @@
             {{title|striptags|raw}}
           {% endif %}
         </span>
-      </a>
-    </h3>
+      {% endspaceless %}
+    </a>
+  </h4>
 
-    {% if display_abstract %}
-    <p>
-    {% if abstract_max_length > 0 %}
-      {{this.perfectTruncate(abstract, abstract_max_length)}}
-    {% else %}
-      {{abstract|striptags|raw}}
-    {% endif %}
+  {% if display_published_at %}
+    <p class="metadata-wrapper">
+        {{(publishing ? '<time class="time metadata-time" pubdate="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d') ~ '</time>' : '<em>Not yet published.</em>')|raw}}
     </p>
-    {% endif %}
-  </div>
+  {% endif %}
+
+  {% if display_abstract %}
+    {% spaceless %}
+      <p class="abstract">
+      {% if abstract_max_length > 0 %}
+        {{this.perfectTruncate(abstract, abstract_max_length)}}
+      {% else %}
+        {{abstract|striptags|raw}}
+      {% endif %}
+      </p>
+    {% endspaceless %}
+  {% endif %}
 </div>

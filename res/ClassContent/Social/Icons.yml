@@ -4,16 +4,6 @@ Icons:
         description: ~
         category: [block_category_social]
     parameters:
-        align:
-            type: selectButton
-            label: yaml_block_socials_position
-            buttons:
-                left: {'icon': 'icon-align-left'}
-                center: {'icon': 'icon-align-center'}
-                right: {'icon': 'icon-align-right'}
-            value: 'left'
-            group:
-                id: position
         social:
             type: social
             label: yaml_block_socials
@@ -24,3 +14,27 @@ Icons:
                 googleplus: {'placeholder': 'https://plus.google.com/userid', 'url': '', 'enable': false}
                 linkedin: {'placeholder': 'https://www.linkedin.com/in/username-userid', 'url': '', 'enable': false}
                 flickr: {'placeholder': 'https://www.flickr.com/photos/userid', 'url': '', 'enable': false}
+        align:
+            type: selectButton
+            label: yaml_block_socials_position
+            buttons:
+                left: {'icon': 'icon-align-left'}
+                center: {'icon': 'icon-align-center'}
+                right: {'icon': 'icon-align-right'}
+            value: 'center'
+            tab: yaml_block_socials_style
+            group:
+                id: position
+        color:
+          type: color
+          label: yaml_block_social_color
+          value: color-1
+          tab: yaml_block_socials_style
+          group:
+            id: color
+        form:
+          type: switch
+          label: yaml_block_social_line
+          label_selected: yaml_block_social_full
+          value: false
+          tab: yaml_block_socials_style

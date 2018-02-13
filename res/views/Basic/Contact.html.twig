@@ -1,7 +1,7 @@
 
 {% set formId = 'form_' ~ this.getObject().getUid() %}
 
-<div {{this.bbcontent(null)|raw}}>
+<div {{this.bbcontent(null, {'class': 'content contact-form'})|raw}}>
     {% if email.value is not empty %}
     <form id="{{ formId }}" class="form" data-email="{{ email.value }}">
         <p class="error-form-message" style="display:none;">{{error_message.value|nl2br}}</p>
@@ -28,7 +28,7 @@
             <button
                 {% block data_button_attributes %}{% endblock %}
                 type="button"
-                class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_font.value}} btn-{{ button_form.value == false ? 'border' : 'full' }} {{ button_radius.value == false ? 'no-radius' : '' }}"
+                class="btn color-primary {{button_color.value}} btn-{{button_size.value}} {{button_font.value}} btn-{{ button_form.value == false ? 'outline' : '' }} btn-{{ button_style.value }}"
             >
                 {{ button_title.value }}
             </button>
