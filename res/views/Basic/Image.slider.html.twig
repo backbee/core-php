@@ -1,6 +1,6 @@
 {% set imageClass = '' %}
 
-{% set path = this.getCdnImageUrl(path)|raw %}
+{% set path = this.getCdnImageUrl(image.path)|raw %}
 {% set linkValue = link.value %}
 
 {% if in_fluid == true %}

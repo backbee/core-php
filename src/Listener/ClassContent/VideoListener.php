@@ -3,7 +3,6 @@
 namespace BackBeeCloud\Listener\ClassContent;
 
 use BackBeeCloud\VideoHelper;
-use BackBee\ClassContent\Media\Image;
 use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
@@ -68,7 +67,7 @@ class VideoListener
 
         $filename = md5($videoUrl);
         $thumbnailDraft = $entyMgr->getRepository(Revision::class)->getDraft(
-            $revision->thumbnail,
+            $revision->thumbnail->image,
             $bbtoken,
             true
         );

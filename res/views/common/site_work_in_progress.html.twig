@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
-    <title>{% block title %}Site unavailable - {{this.getApplication().getSite().getLabel()}}{% endblock %}</title>
+    <title>{% block title %}Maintenance - {{this.getApplication().getSite().getLabel()}}{% endblock %}</title>
 
     <link rel="stylesheet" href="{{this.getCdnUri('/css/gen.css')}}">
     <link rel="stylesheet" href="{{this.getCdnUri('/static/css/cover.css')}}">
@@ -32,11 +32,11 @@
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
         <div class="cover-container">
-          <div class="masthead text-center">
+          {# <div class="masthead text-center">
             <nav class="navbar navbar-fixed-top" id="header">
               {{this.render(this.globalContentFactory().getHeaderLogo(), 'logo_header')|raw}}
             </nav>
-          </div>
+          </div> #}
 
           <div class="loader-wrapper">
             <img src="{{this.getCdnUri('/static/img/wip_loader.svg')}}" />
@@ -55,8 +55,8 @@
       $(document).ready(function() {
         var messages = {
           'multilang-title': {
-            'fr': 'Activation du multilangue...',
-            'en': 'Multilanguage activation...'
+            'fr': 'Mise à jour du site...',
+            'en': 'We are updating the website...'
           },
           'multilang-message': {
             'fr': 'Cela peut prendre plusieurs minutes...',
@@ -76,19 +76,23 @@
           $('span.percent').text(percent);
         }
 
-        $.get('/api/langs/work-progress')
+        {% set work_in_progress_url = this.generateUrlByRouteName('api.site.work_progress', null, null, false) %}
+
+        $.get('{{ work_in_progress_url }}')
           .done(function(result) {
             if (null !== result.work_progression) {
               updatePercent(result.work_progression);
               setInterval(function() {
-                $.get('/api/langs/work-progress').done(function(result) {
+                $.get('{{ work_in_progress_url }}').done(function(result) {
                   if (null !== result.work_progression) {
                     updatePercent(result.work_progression);
 
                     return;
                   }
 
-                  localStorage.setItem('flash-callback', '[{"type":"lang-finish"}]');
+                  if (!localStorage.getItem('flash-callback')) {
+                    localStorage.setItem('flash-callback', '[{"type":"update-finish"}]');
+                  }
 
                   window.location.reload();
                 });

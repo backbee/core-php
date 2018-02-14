@@ -5,7 +5,6 @@ namespace BackBeeCloud\Listener;
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\MultiLang\RedirectToDefaultLangHomeException;
-use BackBeeCloud\MultiLang\WorkInProgressException;
 use BackBee\Bundle\Registry;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Event\Event;
@@ -20,25 +19,6 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class MultiLangListener
 {
     const LANG_MAIN_FALLBACK = 'en';
-
-    public static function onApplicationStart(Event $event)
-    {
-        if (!$event->getApplication()->getBBUserToken()) {
-            return;
-        }
-
-        if ('/api/langs/work-progress' === $event->getApplication()->getRequest()->getPathInfo()) {
-            return;
-        }
-
-        try {
-            $event->getApplication()->getContainer()->get('multilang_manager')->getWorkProgress();
-        } catch (\LogicException $e) {
-            return;
-        }
-
-        throw new WorkInProgressException();
-    }
 
     public static function onHomePreCall(PreRequestEvent $event)
     {

@@ -4,7 +4,7 @@ namespace BackBeeCloud\PageType;
 
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Article\ArticleTitle;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\NestedNode\Page;
 use BackBee\ClassContent\Text\Paragraph;
 

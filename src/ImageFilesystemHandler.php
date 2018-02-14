@@ -6,7 +6,7 @@ use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
 use BackBeeCloud\ImageHandlerInterface;
 use BackBeePlanet\GlobalSettings;
 use BackBee\BBApplication;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -28,10 +28,10 @@ class ImageFilesystemHandler implements ImageHandlerInterface
         }
 
         $event->stopPropagation();
-        if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->path)) {
-            $sourcepath = str_replace('/img/', $this->mediaDir . '/', $content->path);
+        if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->image->path)) {
+            $sourcepath = str_replace('/img/', $this->mediaDir . '/', $content->image->path);
             if (is_readable($sourcepath)) {
-                $content->path = $this->upload(
+                $content->image->path = $this->upload(
                     sprintf('%s.%s', $content->getUid(), explode('.', basename($sourcepath))[1]),
                     $sourcepath,
                     false

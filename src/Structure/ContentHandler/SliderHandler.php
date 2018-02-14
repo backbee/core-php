@@ -3,8 +3,8 @@
 namespace BackBeeCloud\Structure\ContentHandler;
 
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Basic\Slider;
-use BackBee\ClassContent\Media\Image;
 use BackBeeCloud\Structure\ContentHandlerInterface;
 
 /**

@@ -22,7 +22,7 @@ class ContentCategoryListener
             'contents_order' => [
                 'Basic/Title'     => 0,
                 'Text/Paragraph'  => 1,
-                'Media/Image'     => 2,
+                'Basic/Image'     => 2,
                 'Text/Button'     => 3,
                 'Media/Video'     => 4,
                 'Basic/Slider'    => 5,

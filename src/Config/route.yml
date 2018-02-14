@@ -294,20 +294,22 @@ cloud.hauth.authenticate:
   requirements:
     _method: POST
 
+# Site API
+
+api.site.work_progress:
+  pattern: /api/sites/work-progress
+  defaults:
+    _action: getWorkProgress
+    _controller: cloud.api.site_controller
+  requirements:
+    _method: GET
+
 # MultiLang API
 
 api.multilang.get_collection:
   pattern: /api/langs
   defaults:
     _action: getCollection
-    _controller: api.multilang_controller
-  requirements:
-    _method: GET
-
-api.multilang.work_progress:
-  pattern: /api/langs/work-progress
-  defaults:
-    _action: getWorkProgress
     _controller: api.multilang_controller
   requirements:
     _method: GET

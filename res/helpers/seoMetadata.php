@@ -6,7 +6,7 @@ use BackBeeCloud\PageType\ArticleType;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Article\ArticleTitle;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\AbstractRenderer;
 use BackBee\Renderer\Helper\AbstractHelper;
@@ -77,7 +77,7 @@ class seoMetadata extends AbstractHelper
         if (null !== $data['image_uid']) {
             $image = $this->entyMgr->find(Image::class, $data['image_uid']);
             if (null !== $image) {
-                $result['image_url'] = $this->_renderer->getCdnImageUrl($image->path);
+                $result['image_url'] = $this->_renderer->getCdnImageUrl($image->image->path);
             }
         }
 

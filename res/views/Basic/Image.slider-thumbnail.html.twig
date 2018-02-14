@@ -1,0 +1,7 @@
+{% if image.path != false %}
+  {% set path = this.getCdnImageUrl(image.path)|raw %}
+{% else %}
+  {% set path = 'media/slide-fw.jpg' %}
+{% endif %}
+
+<div data-index="{{index}}" class="slider-item"><figure class="figure"><img src="{{path}}"></figure></div>

@@ -3,7 +3,7 @@
 namespace BackBeeCloud\Structure\ContentHandler;
 
 use BackBee\ClassContent\AbstractClassContent;
-use BackBee\ClassContent\Media\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBeeCloud\Structure\ContentHandlerInterface;
 use BackBeeCloud\ImageHandlerInterface;
 
@@ -37,12 +37,12 @@ class ImageHandler implements ContentHandlerInterface
 
         if (isset($data['path']) && false != $data['path']) {
             if (1 === preg_match('~^https?://~', $data['path'])) {
-                $content->path = $this->imgUploadHandler->uploadFromUrl($data['path']);
+                $content->image->path = $this->imgUploadHandler->uploadFromUrl($data['path']);
             } else {
-                $content->path = '/static/theme-default-resources/' . $data['path'];
+                $content->image->path = '/static/theme-default-resources/' . $data['path'];
             }
 
-            $content->originalname = basename($data['path']);
+            $content->image->originalname = basename($data['path']);
         }
     }
 
@@ -54,7 +54,7 @@ class ImageHandler implements ContentHandlerInterface
         $settings = (new GlobalSettings())->cdn();
 
         $filename = '';
-        if ($path = ltrim($content->path, '/')) {
+        if ($path = ltrim($content->image->path, '/')) {
             $filename = $config['uploadCallback']($settings['image_domain'] . '/' . $path);
         }
 

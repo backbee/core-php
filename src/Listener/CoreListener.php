@@ -81,7 +81,10 @@ class CoreListener
 
     public static function onApplicationStart(Event $event)
     {
-        $entyMgr = $event->getApplication()->getEntityManager();
+        $app = $event->getApplication();
+
+        // Checks that site is not suspended
+        $entyMgr = $app->getEntityManager();
         $isSuspended = null !== $entyMgr->getRepository(Registry::class)->findOneBy([
             'scope' => 'GLOBAL',
             'type'  => 'site',
@@ -91,6 +94,21 @@ class CoreListener
         if ($isSuspended) {
             throw new SiteSuspendedException();
         }
+
+        // Checks that no update is in progress
+        $request = $app->getRequest();
+        $route = $app->getRouting()->get('api.site.work_progress');
+        if ($route->getPath() === $request->getPathInfo()) {
+            return;
+        }
+
+        try {
+            $app->getContainer()->get('site_status.manager')->getLockProgress();
+        } catch (\LogicException $e) {
+            return;
+        }
+
+        throw new WorkInProgressException();
     }
 
     public static function onAuthenticationException(GetResponseForExceptionEvent $event)
@@ -109,7 +127,8 @@ class CoreListener
         $exception = $event->getException();
 
         $request = Request::createFromGlobals();
-        if ($request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')) {
+        $isDevMode = (new GlobalSettings())->isDevMode();
+        if ($isDevMode || $request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')) {
             $whoops = new \Whoops\Run();
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
             $whoops->register();
