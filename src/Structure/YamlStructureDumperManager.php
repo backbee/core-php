@@ -242,7 +242,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
     protected function getHeaderLogo()
     {
         $headerLogo = $this->globalContentFactory->getHeaderLogo();
-        $path = ltrim($headerLogo->path, '/');
+        $path = ltrim($headerLogo->image->path, '/');
 
         $filename = $this->uploadImage($this->cdnFilePath . '/' . $path);
 
@@ -257,7 +257,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
     protected function getFooterLogo()
     {
         $footerLogo = $this->globalContentFactory->getFooterLogo();
-        $path = ltrim($footerLogo->path, '/');
+        $path = ltrim($footerLogo->image->path, '/');
 
         $filename = $this->uploadImage($this->cdnFilePath . '/' . $path);
 
