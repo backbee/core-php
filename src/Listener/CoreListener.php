@@ -6,6 +6,7 @@ use BackBeePlanet\GlobalSettings;
 use BackBee\Bundle\Registry;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
+use BackBee\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -98,7 +99,7 @@ class CoreListener
         // Checks that no update is in progress
         $request = $app->getRequest();
         $route = $app->getRouting()->get('api.site.work_progress');
-        if ($route->getPath() === $request->getPathInfo()) {
+        if ($route instanceof Route && $route->getPath() === $request->getPathInfo()) {
             return;
         }
 
