@@ -28,14 +28,14 @@ Image:
     stretch:
       type: switch
       label: yaml_block_image_stretch
-      value: false
+      value: true
       tab: yaml_block_image_style
       group:
         id: image
     stretch_state:
-      value: false
+      value: true
     auto_height:
-      value: false
+      value: true
 
     display_title:
       type: switch
