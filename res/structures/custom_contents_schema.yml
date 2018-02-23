@@ -22,7 +22,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -43,7 +46,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -65,7 +71,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -77,6 +86,10 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\"><span style=\"font-size:22px\">This the description of your gallery</span></p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
         -
           data:
             parameters:
@@ -88,7 +101,10 @@ schema:
                 - 4
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -97,88 +113,79 @@ schema:
           columns:
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
         -
           data:
             parameters:
@@ -189,7 +196,10 @@ schema:
                 - 4
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -198,87 +208,78 @@ schema:
           columns:
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
         -
           data:
             parameters:
@@ -291,7 +292,10 @@ schema:
                 - 3
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -300,116 +304,104 @@ schema:
           columns:
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link:
                       link: lightbox
                       options: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
     -
       menu: none
       title: Contact
@@ -427,7 +419,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -448,7 +443,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -470,7 +468,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile:
                 nb_item: '1'
@@ -486,15 +487,23 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\"><span style=\"font-size:22px\">Write a good description here otherwise people won't contact you</span></p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
         -
           data:
             parameters:
               width: 'container container-small'
               height: 0
-              blocksize: {  }
+              blocksize:
+                - 12
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile:
                 nb_item: '1'
@@ -510,7 +519,7 @@ schema:
                 type: Basic/Contact
                 data:
                   parameters:
-                    email: ~
+                    email: toto
                     name_placeholder: 'Votre nom'
                     email_address_placeholder: 'Votre adresse email'
                     message_placeholder: Message
@@ -518,7 +527,10 @@ schema:
                     confirmation_message: 'Votre message a bien été envoyé. Merci pour votre temps.'
                     button_title: 'GET IN TOUCH'
                     button_align: center
+                    button_font: default
                     button_color: color2
+                    button_form: true
+                    button_radius: true
                     button_size: md
         -
           data:
@@ -528,7 +540,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -558,7 +573,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -579,7 +597,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -601,7 +622,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -613,6 +637,10 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\"><span style=\"font-size:24px\">This is the abstract zone. Write the summary of your page&nbsp;down here!</span></p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
         -
           data:
             parameters:
@@ -623,7 +651,10 @@ schema:
                 - 3
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -632,68 +663,74 @@ schema:
           columns:
             -
               -
-                type: Media/Image
+                type: Basic/Image
                 data:
-                  path: ~
+                  path: ''
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p>\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
             -
               -
                 type: Text/Paragraph
                 data:
                   text: "<h3><span style=\"font-size:20px\">Title of the second column</span></h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p>\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
     -
       menu: none
       title: '3 columns'
@@ -711,7 +748,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -732,7 +772,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -754,7 +797,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile:
                 nb_item: '1'
@@ -770,6 +816,10 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\"><span style=\"font-size:24px\">This is the abstract zone. Write the summary of your page down here!</span></p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
         -
           data:
             parameters:
@@ -781,7 +831,10 @@ schema:
                 - 4
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -793,103 +846,118 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">First content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"&nbsp;</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
             -
               -
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">Second content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
             -
               -
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">Third content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
     -
       menu: none
       title: '4 columns'
@@ -907,7 +975,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -928,7 +999,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -950,7 +1024,10 @@ schema:
               blocksize: {  }
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile:
                 nb_item: '1'
@@ -966,6 +1043,10 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\"><span style=\"font-size:24px\">This is the abstract zone. Write the summary of your page down here!</span></p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
         -
           data:
             parameters:
@@ -978,7 +1059,10 @@ schema:
                 - 3
               bg_color: default
               bg_image: ''
+              bg_video: ''
               bg_overlay: false
+              bg_parallax: false
+              bg_blur: false
               bg_image_position_y: 0%
               responsive_mobile: {  }
               responsive_tablet: {  }
@@ -990,134 +1074,154 @@ schema:
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">First content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"&nbsp;</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
             -
               -
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">Second content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
             -
               -
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">Third content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
             -
               -
                 type: Text/Paragraph
                 data:
                   text: "<h3 style=\"text-align:center\">Fourth content title</h3>\n"
-              -
-                type: Media/Image
-                data:
-                  path: ~
                   parameters:
-                    title: ''
-                    alt: ''
-                    stretch: false
-                    stretch_state: false
-                    auto_height: false
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
+              -
+                type: Basic/Image
+                data:
+                  path: ''
+                  parameters:
                     ratio: ''
                     width: ''
                     position: {  }
                     focus: {  }
+                    stretch: false
+                    stretch_state: false
+                    auto_height: false
                     display_title: false
-                    description: ''
+                    title: ''
                     display_description: false
+                    description: ''
+                    text_position: bottom
                     display_overlay: false
+                    display_text_hover: false
                     link: {  }
-                    image_small: {  }
-                    image_medium: {  }
                     picto: ''
-                    height: null
-                    crop: null
-                    stat: null
+                    alt: ''
               -
                 type: Text/Paragraph
                 data:
                   text: "<p style=\"text-align:center\">\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.\"</p>\n"
+                  parameters:
+                    bg_color: color1
+                    transparency: false
+                    style: full-color
