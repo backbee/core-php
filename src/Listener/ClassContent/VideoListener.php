@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Listener\ClassContent;
 
 use BackBeeCloud\VideoHelper;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
@@ -42,46 +43,43 @@ class VideoListener
             return;
         }
 
+        $entityManager = $event->getApplication()->getEntityManager();
+        $unitOfWork = $entityManager->getUnitOfWork();
         $revision = $event->getTarget();
-        if (!($revision->getContent() instanceof Video)) {
+        if (
+            $unitOfWork->isScheduledForDelete($revision)
+            || Revision::STATE_TO_DELETE === $revision->getState()
+            || !($revision->getContent() instanceof Video)
+        ) {
             return;
         }
 
-        if (false == $videoUrl = $revision->getParamValue('video_url')) {
+        $videoUrl = $revision->getParamValue('video_url');
+        if (
+            false == $videoUrl
+            || false == filter_var($videoUrl, \FILTER_VALIDATE_URL)
+            || !VideoHelper::isSupportedUrl($videoUrl)
+        ) {
             return;
         }
 
-        $entyMgr = $event->getApplication()->getEntityManager();
-        $uow = $entyMgr->getUnitOfWork();
-        if ($uow->isScheduledForDelete($revision)) {
-            return;
-        }
+        $content = $revision->getContent();
+        $thumbnail = $entityManager->find(Image::class, $content->thumbnail->getUid());
+        $image = $thumbnail->image;
 
-        if (Revision::STATE_TO_DELETE === $revision->getState()) {
-            return;
-        }
+        $imageDraft = $entityManager->getRepository(Revision::class)->getDraft($image, $bbtoken);
+        if (null === $imageDraft) {
+            $imageDraft = $entityManager->getRepository(Revision::class)->checkout($image, $bbtoken);
+            $entityManager->persist($imageDraft);
 
-        if (!VideoHelper::isSupportedUrl($videoUrl)) {
-            return;
+            $unitOfWork->computeChangeSet(
+                $entityManager->getClassMetadata(Revision::class),
+                $imageDraft
+            );
         }
 
         $filename = md5($videoUrl);
-        $thumbnailDraft = $entyMgr->getRepository(Revision::class)->getDraft(
-            $revision->thumbnail->image,
-            $bbtoken,
-            true
-        );
-
-        if (false !== strpos($thumbnailDraft->path, $filename)) {
-            $method = $uow->isScheduledForInsert($thumbnailDraft)
-                ? 'computeChangeSet'
-                : 'recomputeSingleEntityChangeSet'
-            ;
-            $uow->$method(
-                $entyMgr->getClassMetadata(Revision::class),
-                $thumbnailDraft
-            );
-
+        if (false !== strpos($imageDraft->path, $filename)) {
             return;
         }
 
@@ -89,23 +87,28 @@ class VideoListener
             return;
         }
 
-        $tmpfilepath = tempnam(sys_get_temp_dir(), '');
-        file_put_contents($tmpfilepath, file_get_contents($thumbnailUrl));
-        $filename .= '.' . pathinfo($thumbnailUrl, PATHINFO_EXTENSION);
+        $rawContent = @file_get_contents($thumbnailUrl);
+        if (false === $rawContent) {
+            return;
+        }
 
-        $thumbnailDraft->path = $app->getContainer()->get('cloud.file_handler')->upload(
+        $tmpfilepath = tempnam(sys_get_temp_dir(), '');
+        file_put_contents($tmpfilepath, $rawContent);
+        $filename .= '.'.pathinfo($thumbnailUrl, PATHINFO_EXTENSION);
+
+        $imageDraft->path = $app->getContainer()->get('cloud.file_handler')->upload(
             $filename,
             $tmpfilepath,
             true
         );
 
-        $method = $uow->isScheduledForInsert($thumbnailDraft)
+        $method = $unitOfWork->isScheduledForInsert($imageDraft)
             ? 'computeChangeSet'
             : 'recomputeSingleEntityChangeSet'
         ;
-        $uow->$method(
-            $entyMgr->getClassMetadata(Revision::class),
-            $thumbnailDraft
+        $unitOfWork->$method(
+            $entityManager->getClassMetadata(Revision::class),
+            $imageDraft
         );
     }
 

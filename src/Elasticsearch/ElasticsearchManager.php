@@ -414,10 +414,10 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         );
 
         if ($media instanceof Video) {
-            $image = $media->thumbnail;
-            if (false == $image->image->path || AbstractClassContent::STATE_NORMAL !== $image->getState()) {
-                $contentUids = array_filter($contentUids, function ($uid) use ($image) {
-                    return $uid !== $image->getUid();
+            $media = $media->thumbnail;
+            if (false == $media->image->path || AbstractClassContent::STATE_NORMAL !== $media->getState()) {
+                $contentUids = array_filter($contentUids, function ($uid) use ($media) {
+                    return $uid !== $media->getUid();
                 });
                 $media = $this->getRealFirstContentByUid(
                     $this->entyMgr->getRepository(Image::class)->findBy([
