@@ -67,15 +67,17 @@ class VideoListener
         $thumbnail = $entityManager->find(Image::class, $content->thumbnail->getUid());
         $image = $thumbnail->image;
 
+        $isNewDraft = false;
         $imageDraft = $entityManager->getRepository(Revision::class)->getDraft($image, $bbtoken);
         if (null === $imageDraft) {
             $imageDraft = $entityManager->getRepository(Revision::class)->checkout($image, $bbtoken);
             $entityManager->persist($imageDraft);
-
             $unitOfWork->computeChangeSet(
                 $entityManager->getClassMetadata(Revision::class),
                 $imageDraft
             );
+
+            $isNewDraft = true;
         }
 
         $filename = md5($videoUrl);
@@ -102,7 +104,7 @@ class VideoListener
             true
         );
 
-        $method = $unitOfWork->isScheduledForInsert($imageDraft)
+        $method = $unitOfWork->isScheduledForInsert($imageDraft) && !$isNewDraft
             ? 'computeChangeSet'
             : 'recomputeSingleEntityChangeSet'
         ;
