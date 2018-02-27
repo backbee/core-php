@@ -4,7 +4,9 @@ namespace BackBeeCloud\Listener;
 
 use BackBee\BBApplication;
 use BackBee\ClassContent\ContentAutoblock;
+use BackBee\ClassContent\Revision;
 use BackBee\NestedNode\KeyWord as Tag;
+use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Renderer\Renderer;
 
@@ -13,6 +15,9 @@ use BackBee\Renderer\Renderer;
  */
 class ArticleTitleListener
 {
+    const ORDER_BY_PUBLISH_DATE = 'published_at';
+    const ORDER_BY_MODIFICATION_DATE = 'modified_at';
+
     /**
      * Called on `article.articletitle.render` event.
      *
@@ -21,11 +26,11 @@ class ArticleTitleListener
     public static function onRender(RendererEvent $event)
     {
         $app = $event->getApplication();
+        $entyMgr = $app->getEntityManager();
 
         $autoblock = null;
         $context = $app->getRequest()->query->get('context', '');
         if (ContentAutoblockListener::AUTOBLOCK_ID_LENGTH === strlen($context)) {
-            $entyMgr = $app->getEntityManager();
             $qb = $entyMgr->getRepository(ContentAutoblock::class)->createQueryBuilder('c');
             $autoblock = $qb
                 ->where($qb->expr()->like('c._uid', ':uid_like'))
@@ -35,48 +40,37 @@ class ArticleTitleListener
             ;
         }
 
+        $renderer = $event->getRenderer();
+        if (null === $currentPage = $renderer->getCurrentPage()) {
+            return;
+        }
+
         if (null === $autoblock) {
-            self::computeSimpleSiblings($event->getRenderer());
+            self::computeSimpleSiblings($renderer, $currentPage);
 
             return;
         }
 
-        self::computeContextualSiblings($autoblock, $event->getRenderer());
-    }
-
-    protected static function computeSimpleSiblings(Renderer $renderer)
-    {
-        $baseQuery = [
-            'query' => [
-                'bool' => [],
-            ],
-        ];
-
-        // Building must clause
-        $mustClauses = [
-            [ 'match' => [ 'type' => 'article' ] ],
-        ];
-        if (null === $renderer->getApplication()->getBBUserToken()) {
-            $mustClauses[] = [ 'match' => [ 'is_online' => true ] ];
+        if (null !== $bbtoken = $app->getBBUserToken()) {
+            $draft = $entyMgr->getRepository(Revision::class)->getDraft($autoblock, $bbtoken, false);
+            $autoblock->setDraft($draft);
         }
 
-        $baseQuery['query']['bool']['must'] = $mustClauses;
+        self::computeContextualSiblings($autoblock, $renderer, $currentPage);
+    }
+
+    protected static function computeSimpleSiblings(Renderer $renderer, Page $currentPage)
+    {
         $app = $renderer->getApplication();
-        if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
-            $baseQuery['query']['bool']['must'][]['prefix'] = [
-                'url' => sprintf('/%s/', $currentLang),
-            ];
-        }
-
-        $esMgr = $renderer->getApplication()->getContainer()->get('elasticsearch.manager');
-        $prevQuery = $nextQuery = $baseQuery;
+        $prevQuery = $nextQuery = self::getBaseElasticsearchQuery($app, $currentPage);
+        $esMgr = $app->getContainer()->get('elasticsearch.manager');
 
         // get previous article
         $prev = null;
         $prevQuery['query']['bool']['must'][] = [
             'range' => [
                 'modified_at' => [
-                    'lt' => $renderer->getCurrentPage()->getModified()->format('Y-m-d H:i:s'),
+                    'lt' => $currentPage->getModified()->format('Y-m-d H:i:s'),
                 ],
             ],
         ];
@@ -91,7 +85,7 @@ class ArticleTitleListener
         $nextQuery['query']['bool']['must'][] = [
             'range' => [
                 'modified_at' => [
-                    'gt' => $renderer->getCurrentPage()->getModified()->format('Y-m-d H:i:s'),
+                    'gt' => $currentPage->getModified()->format('Y-m-d H:i:s'),
                 ],
             ],
         ];
@@ -105,65 +99,21 @@ class ArticleTitleListener
         $renderer->assign('next', $next);
     }
 
-    protected static function computeContextualSiblings(ContentAutoblock $autoblock, Renderer $renderer)
+    protected static function computeContextualSiblings(ContentAutoblock $autoblock, Renderer $renderer, Page $currentPage)
     {
-        $esMgr = $renderer->getApplication()->getContainer()->get('elasticsearch.manager');
-        $prevQuery = $nextQuery = self::getBaseElasticsearchQuery($autoblock, $renderer->getApplication());
+        $orderBy = $autoblock->getParamValue('order_by');
+        if (!in_array($orderBy, [self::ORDER_BY_MODIFICATION_DATE, self::ORDER_BY_PUBLISH_DATE])) {
+            error_log($orderBy.' value for ContentAutoblock "order_by" parameter is not supported');
 
-        // get previous article
-        $prev = null;
-        $prevQuery['query']['bool']['must'][] = [
-            'range' => [
-                'modified_at' => [
-                    'lt' => $renderer->getCurrentPage()->getModified()->format('Y-m-d H:i:s'),
-                ],
-            ]
-        ];
-        $result = $esMgr->customSearchPage($prevQuery, null, 1, ['modified_at:desc'], false);
-        if (0 < $result->count()) {
-            $collection = $result->collection();
-            $prev = array_pop($collection)['_source'];
-            $prev['url'] = sprintf('%s?context=%s', $prev['url'], ContentAutoblockListener::getAutoblockId($autoblock));
+            return;
         }
 
-        // get next article
-        $next = null;
-        $nextQuery['query']['bool']['must'][] = [
-            'range' => [
-                'modified_at' => [
-                    'gt' => $renderer->getCurrentPage()->getModified()->format('Y-m-d H:i:s'),
-                ],
-            ]
-        ];
-        $result = $esMgr->customSearchPage($nextQuery, null, 1, ['modified_at:asc'], false);
-        if (0 < $result->count()) {
-            $collection = $result->collection();
-            $next = array_pop($collection)['_source'];
-            $next['url'] = sprintf('%s?context=%s', $next['url'], ContentAutoblockListener::getAutoblockId($autoblock));
+        if (self::ORDER_BY_PUBLISH_DATE === $orderBy && !$currentPage->isOnline()) {
+            return;
         }
 
-        $renderer->assign('prev', $prev);
-        $renderer->assign('next', $next);
-    }
-
-    protected static function getBaseElasticsearchQuery(ContentAutoblock $autoblock, BBApplication $app)
-    {
-        $esQuery = [
-            'query' => [
-                'bool' => [],
-            ],
-        ];
-
-        // Building must clause
-        $mustClauses = [
-            [ 'match' => [ 'type' => 'article' ] ],
-        ];
-
-        if (null === $app->getBBUserToken()) {
-            $mustClauses[] = [ 'match' => [ 'is_online' => true ] ];
-        }
-
-        $esQuery['query']['bool']['must'] = $mustClauses;
+        $app = $renderer->getApplication();
+        $baseQuery = self::getBaseElasticsearchQuery($app, $currentPage);
 
         // Building should clause
         $validTags = [];
@@ -190,9 +140,81 @@ class ArticleTitleListener
         }
 
         if (false != $shouldClauses) {
-            $esQuery['query']['bool']['should'] = $shouldClauses;
-            $esQuery['query']['bool']['minimum_should_match'] = 1;
+            $baseQuery['query']['bool']['should'] = $shouldClauses;
+            $baseQuery['query']['bool']['minimum_should_match'] = 1;
         }
+
+        $prevQuery = $nextQuery = $baseQuery;
+        $esMgr = $app->getContainer()->get('elasticsearch.manager');
+
+        $getDateMethod = self::ORDER_BY_PUBLISH_DATE === $orderBy
+            ? 'getPublishing'
+            : 'getModified';
+
+        // get previous article
+        $prev = null;
+        $prevQuery['query']['bool']['must'][] = [
+            'range' => [
+                $orderBy => [
+                    'lt' => $currentPage->$getDateMethod()->format('Y-m-d H:i:s'),
+                ],
+            ]
+        ];
+
+        $result = $esMgr->customSearchPage($prevQuery, null, 1, ['modified_at:desc'], false);
+        if (0 < $result->count()) {
+            $collection = $result->collection();
+            $prev = array_pop($collection)['_source'];
+            $prev['url'] = sprintf('%s?context=%s', $prev['url'], ContentAutoblockListener::getAutoblockId($autoblock));
+        }
+
+        // get next article
+        $next = null;
+        $nextQuery['query']['bool']['must'][] = [
+            'range' => [
+                $orderBy => [
+                    'gt' => $currentPage->$getDateMethod()->format('Y-m-d H:i:s'),
+                ],
+            ]
+        ];
+        $result = $esMgr->customSearchPage($nextQuery, null, 1, ['modified_at:asc'], false);
+        if (0 < $result->count()) {
+            $collection = $result->collection();
+            $next = array_pop($collection)['_source'];
+            $next['url'] = sprintf('%s?context=%s', $next['url'], ContentAutoblockListener::getAutoblockId($autoblock));
+        }
+
+        $renderer->assign('prev', $prev);
+        $renderer->assign('next', $next);
+    }
+
+    protected static function getBaseElasticsearchQuery(BBApplication $app, Page $page)
+    {
+        $esQuery = [
+            'query' => [
+                'bool' => [],
+            ],
+        ];
+
+        // Building must clause
+        $typeUniqueName = '';
+        if ($page) {
+            $pageTypeManager = $app->getContainer()->get('cloud.page_type.manager');
+            $typeUniqueName = $pageTypeManager->findByPage($page)->uniqueName();
+        }
+
+        $mustClauses = [];
+        if ($typeUniqueName) {
+            $mustClauses = [
+                [ 'match' => [ 'type' => $typeUniqueName ] ],
+            ];
+        }
+
+        if (null === $app->getBBUserToken()) {
+            $mustClauses[] = [ 'match' => [ 'is_online' => true ] ];
+        }
+
+        $esQuery['query']['bool']['must'] = $mustClauses;
 
         if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
             $esQuery['query']['bool']['must'][]['prefix'] = [
