@@ -9,12 +9,16 @@
     {% if latlng is empty %}
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}
-        <div class="google-map embed-size-{{ size }} embed-align-{{ position }}" id="map"></div>
+        <div class="google-map embed-size-{{ size }} embed-align-{{ position }}" id="map_{{uid}}"></div>
         <script>
             (function () {
                 var script = document.createElement('script'),
                     scriptId = 'google-map-lib',
                     callback;
+
+                if (window.googleMapLoaded === undefined) {
+                    window.googleMapLoaded = false;
+                }
 
                 callback = function () {
                     var latLng,
@@ -26,7 +30,7 @@
                     latLng = {lat: {{ latlng.lat }}, lng: {{ latlng.lng}} };
 
                     // Create a map object and specify the DOM element for display.
-                    map = new google.maps.Map(document.getElementById('map'), {
+                    map = new google.maps.Map(document.getElementById('map_{{uid}}'), {
                       center: latLng,
                       scrollwheel: false,
                       zoom: 13,
@@ -44,15 +48,24 @@
                     });
                 };
 
-                if (null === document.getElementById(scriptId)) {
+                var script = document.getElementById(scriptId);
+                if (null === script) {
+                    script = document.createElement('script')
                     script.src = 'https://maps.googleapis.com/maps/api/js?key={{ mapParam.api_key }}';
                     script.id = scriptId;
 
-                    script.addEventListener('load', callback, false);
+                    script.addEventListener('load', function() {
+                        window.googleMapLoaded = true;
+                        callback();
+                    }, false);
 
                     document.getElementsByTagName('head')[0].appendChild(script);
                 } else {
-                    callback();
+                    if (!window.googleMapLoaded) {
+                        script.addEventListener('load', callback, false);
+                    } else {
+                        callback();
+                    }
                 }
             })()
         </script>
