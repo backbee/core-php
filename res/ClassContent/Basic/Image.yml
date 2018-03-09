@@ -9,6 +9,7 @@ Image:
     form_width: 430
     is_image: true
     file_element: image
+    accepted_files: 'image/*'
   elements:
     image:
       type: BackBee\ClassContent\Element\Image
@@ -88,6 +89,7 @@ Image:
     picto:
       type: upload
       label: yaml_block_image_picto
+      acceptedFiles: "image/*"
       value: ''
       tab: yaml_block_image_picto
 
