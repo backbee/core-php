@@ -371,13 +371,6 @@ nestednode.page.postrender:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\CacheListener, onPagePostRender]
 
-# File upload listeners
-
-file_upload.validation:
-    listeners:
-        # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\FileUploadListener, onFileUploadEvent]
-
 # HAuthBundle listeners
 
 bundle.hauth.started:
