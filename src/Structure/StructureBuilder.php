@@ -132,7 +132,9 @@ class StructureBuilder
 
             $page = $this->pageMgr->create($pageData);
             $page->setState(Page::STATE_ONLINE);
-            $page->setPublishing($randomDatetime);
+            if (null === $page->getPublishing()) {
+                $page->setPublishing($randomDatetime);
+            }
         } else {
             $site = $this->entyMgr->getRepository(Site::class)->findOneBy([]);
             $page = $this->entyMgr->getRepository(Page::class)->getRoot($site);
@@ -141,7 +143,10 @@ class StructureBuilder
             ], false);
         }
 
-        $page->setModified($randomDatetime);
+        if (!isset($pageData['modified_at'])) {
+            $page->setModified($randomDatetime);
+        }
+
         $this->handlePageWithMenu($page, $menu);
         $this->contentBuilder->hydrateContents($page, $contents);
 
