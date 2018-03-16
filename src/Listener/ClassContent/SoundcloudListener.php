@@ -26,8 +26,12 @@ class SoundcloudListener
             return;
         }
 
+        $isValidUrl = false;
         $urlData = parse_url($url);
+        if (isset($urlData['host']) && isset($urlData['path'])) {
+            $isValidUrl = $urlData['host'] === 'soundcloud.com' && $urlData['path'] != false;
+        }
 
-        $renderer->assign('valid_url', $urlData['host'] === 'soundcloud.com' && $urlData['path'] != false);
+        $renderer->assign('valid_url', $isValidUrl);
     }
 }
