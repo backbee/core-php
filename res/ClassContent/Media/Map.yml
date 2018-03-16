@@ -3,16 +3,19 @@ Map:
     name: yaml_block_map
     description: ~
     category: [block_category_more]
+    resizable: true
   parameters:
     map:
         type: 'map'
         label: yaml_block_map_search_location
         api_key: 'AIzaSyAXyVyUKiAEpjChO5vWIgKdeHoXA2i0UoU'
         value: {}
+        tab: yaml_block_map
     colors:
       label: yaml_block_map_choose_skin
       type: 'select'
       value: 'default'
+      tab: style
       options:
         'default': 'Default'
         'silver': 'Silver'
@@ -254,19 +257,5 @@ Map:
               featureType: 'water'
               elementType: 'labels.text.fill'
               stylers: [{color: '#92998d'}]
-    position:
-      type: selectButton
-      label: yaml_block_map_position
-      buttons:
-        left: {'icon': 'icon-align-left'}
-        center: {'icon': 'icon-align-center'}
-        right: {'icon': 'icon-align-right'}
-      value: left
-    size:
-      type: select
-      label: yaml_block_map_size
-      options:
-        100: yaml_block_map_auto
-        50: yaml_block_map_small
-        75: yaml_block_map_medium
-      value: '100'
+    height:
+      value: ~

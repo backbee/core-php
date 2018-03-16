@@ -3,6 +3,7 @@ Slider:
     name: yaml_block_slider
     description: ~
     category: [block_category_basics]
+    resizable: true
   elements:
     images:
       type: \BackBee\ClassContent\Basic\Image
@@ -46,3 +47,5 @@ Slider:
         shownavonhover: yaml_block_slider_shownavonhover
       value: shownavonhover
       tab: yaml_block_slider_style
+    height:
+      value: ~
