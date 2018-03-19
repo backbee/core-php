@@ -12,8 +12,6 @@ use BackBee\Config\Config;
 class EntryPoint extends AbstractBundle
 {
     /**
-     *
-     *
      * @param  BBApplication $app
      * @param  Config        $config
      */
