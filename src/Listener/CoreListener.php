@@ -25,17 +25,15 @@ class CoreListener
     public static function onApplicationInit(Event $event)
     {
         $app = $event->getTarget();
+        if ($app->isRestored()) {
+            return;
+        }
 
         $baseDir = $app->getBundle('core')->getBaseDirectory();
         $resDir = realpath($baseDir . '/../res');
         $app->getRenderer()->addLayoutDir($resDir . DIRECTORY_SEPARATOR . 'Layout');
         $app->getRenderer()->addScriptDir($resDir . DIRECTORY_SEPARATOR . 'views');
         $app->getRenderer()->addHelperDir($resDir . DIRECTORY_SEPARATOR . 'helpers');
-
-        if ($app->isRestored()) {
-            return;
-        }
-
         $app->unshiftClassContentDir($resDir . DIRECTORY_SEPARATOR . 'ClassContent');
     }
 
