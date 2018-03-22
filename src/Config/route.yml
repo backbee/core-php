@@ -346,6 +346,55 @@ api.multilang.define_default:
   requirements:
     _method: PUT
 
+# Color Panel
+api.theme_color.get_all_themes:
+  pattern: /api/theme-colors
+  defaults:
+    _action: getAllThemesAction
+    _controller: cloud.api.theme_color.controller
+  requirements:
+    _method: GET
+
+api.color_panel.change_theme_color:
+  pattern: /api/color-panel/change-theme
+  defaults:
+    _action: changeThemeColorAction
+    _controller: cloud.api.color_panel.controller
+  requirements:
+    _method: PUT
+
+api.color_panel.get:
+  pattern: /api/color-panel
+  defaults:
+    _action: getAction
+    _controller: cloud.api.color_panel.controller
+  requirements:
+    _method: GET
+
+api.color_panel.get_all_colors:
+  pattern: /api/color-panel/colors
+  defaults:
+    _action: getAllColorsAction
+    _controller: cloud.api.color_panel.controller
+  requirements:
+    _method: GET
+
+api.color_panel.get_color_panel_css:
+  pattern: /css/color_panel_{hash}.css
+  defaults:
+    _action: getColorPanelCssAction
+    _controller: cloud.color_panel_css_genrator.controller
+  requirements:
+    _method: GET
+
+api.color_panel.put:
+  pattern: /api/color-panel
+  defaults:
+    _action: putAction
+    _controller: cloud.api.color_panel.controller
+  requirements:
+    _method: PUT
+
 cloud.search_i18n:
   pattern: /{lang}/search
   defaults:

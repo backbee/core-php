@@ -18,61 +18,82 @@
       }
     }
 
-    cloud.mediator.subscribe('on:form:render', function(form) {
-      if (form.hasOwnProperty('content') && form.content.type === 'Basic/Cards') {
-        $showButtonParameters = form.$.find('.element_add_button');
-        $groupButtonStyle = form.$.find('.group.button_style');
+    cloud.mediator.subscribe('after:form:render', function(form) {
+      if (!form.hasOwnProperty('content') || form.content.type !== 'Basic/Cards') {
+        return;
+      }
 
-        if (!$showButtonParameters.find('input')[0].checked) {
-          $groupButtonStyle.addClass('d-none');
-        }
+      $showButtonParameters = form.$.find('.element_add_button');
+      $groupButtonStyle = form.$.find('.group.button_style');
 
-        $showButtonParameters.find('label.cloud-form-control').on('change', function() {
-          $showButtonParameters.find('input')[0].checked ? $groupButtonStyle.removeClass('d-none') : $groupButtonStyle.addClass('d-none');
+      if (!$showButtonParameters.find('input')[0].checked) {
+        $groupButtonStyle.addClass('d-none');
+      }
+
+      $showButtonParameters.find('label.cloud-form-control').on('change', function() {
+        $showButtonParameters.find('input')[0].checked ? $groupButtonStyle.removeClass('d-none') : $groupButtonStyle.addClass('d-none');
+      });
+    });
+
+    cloud.mediator.subscribe('after:form:render', function(form) {
+      if (!form.hasOwnProperty('content') || form.content.type !== 'Basic/Menu') {
+        return;
+      }
+
+      $showButton = form.$.find('.element_add_button');
+      $buttonParameters = form.$.find('.group.text, .element_button_target_blank, .element_button_hide_on_mobile, .group.color, .element_button_form');
+
+      if (!$showButton.find('input')[0].checked) {
+        $buttonParameters.each(function() {
+          jQuery(this).addClass('d-none');
         });
       }
 
-      if (form.hasOwnProperty('content') && form.content.type === 'Basic/Menu') {
-        $showButton = form.$.find('.element_add_button');
-        $buttonParameters = form.$.find('.group.text, .element_button_target_blank, .element_button_hide_on_mobile, .group.color, .element_button_form');
-
-        if (!$showButton.find('input')[0].checked) {
+      $showButton.find('label.cloud-form-control').on('change', function() {
+        $showButton.find('input')[0].checked ?
           $buttonParameters.each(function() {
+            jQuery(this).removeClass('d-none');
+          }) : $buttonParameters.each(function() {
             jQuery(this).addClass('d-none');
           });
-        }
+      });
+    });
 
-        $showButton.find('label.cloud-form-control').on('change', function() {
-          $showButton.find('input')[0].checked ?
-            $buttonParameters.each(function() {
-              jQuery(this).removeClass('d-none');
-            }) : $buttonParameters.each(function() {
-              jQuery(this).addClass('d-none');
-            });
-        });
+    cloud.mediator.subscribe('after:form:render', function(form) {
+      if (!form.hasOwnProperty('content') || form.content.type !== 'Text/Paragraph') {
+        return;
       }
 
-      if (form.hasOwnProperty('content') && form.content.type === 'Text/Paragraph') {
-        $blockPictoText = form.$.find('.tab.cloud-yaml_block_text_picto_tab');
-        $groupAlign = $blockPictoText.find('.group.align');
-        $elementPictoSize = $blockPictoText.find('.element_picto_size');
-        $pictoGroup = $blockPictoText.find('.group.picto');
+      $blockPictoText = form.$.find('.tab.cloud-yaml_block_text_picto_tab');
+      $groupAlign = $blockPictoText.find('.group.align');
+      $elementPictoSize = $blockPictoText.find('.element_picto_size');
+      $pictoGroup = $blockPictoText.find('.group.picto');
+      $buttonWrapper = form.$.find('.element_bg_color');
+      $groupStyle = form.$.find('.group.style');
 
-        if ($pictoGroup.find('.btn-remove').length !== 1) {
-          $groupAlign.addClass('d-none');
-          $elementPictoSize.addClass('d-none');
-        }
-
-        form.afterPictoUpload = function() {
-          $groupAlign.removeClass('d-none');
-          $elementPictoSize.removeClass('d-none');
-        }
-
-        form.afterRemove = function() {
-          $groupAlign.addClass('d-none');
-          $elementPictoSize.addClass('d-none');
-        }
+      if ($buttonWrapper.find('button.selected').attr('data-value') === '') {
+        $groupStyle.addClass('d-none');
       }
+
+      if ($pictoGroup.find('.btn-remove').length !== 1) {
+        $groupAlign.addClass('d-none');
+        $elementPictoSize.addClass('d-none');
+      }
+
+      form.afterPictoUpload = function() {
+        $groupAlign.removeClass('d-none');
+        $elementPictoSize.removeClass('d-none');
+      };
+
+      form.afterRemove = function() {
+        $groupAlign.addClass('d-none');
+        $elementPictoSize.addClass('d-none');
+      };
+
+      $buttonWrapper.find('button').on('click', function() {
+        let $current = jQuery(this);
+        $groupStyle[$current.attr('data-value') === '' ? 'addClass' : 'removeClass']('d-none');
+      });
     });
   });
 </script>

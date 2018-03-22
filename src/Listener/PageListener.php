@@ -324,9 +324,9 @@ class PageListener
     }
 
     /**
-     * Called on "nestnode.page.postrender" event.
+     * Called on "nestednode.page.postrender" event.
      *
-     * @param RendererEvent $event
+     * @param  RendererEvent $event
      */
     public static function onPostRender(RendererEvent $event)
     {

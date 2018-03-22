@@ -41,7 +41,14 @@ class CacheLayer
             preg_match('~/(bp[0-9]+)\.~', $basedir, $matches);
             $key = sprintf('%s:%s[%s]', $matches[1], $request->getRequestUri(), UserAgentHelper::getDeviceType());
             if (false != $result = $redisClient->get($key)) {
-                $response = new Response($result);
+                $contentType = 'text/html';
+                if (1 === preg_match('~\.css$~', $request->getRequestUri())) {
+                    $contentType = 'text/css';
+                }
+
+                $response = new Response($result, Response::HTTP_OK, [
+                    'Content-Type' => $contentType,
+                ]);
             }
         }
 

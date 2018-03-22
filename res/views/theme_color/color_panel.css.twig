@@ -1,0 +1,167 @@
+body {
+  background-color: {{ background_color }};
+  color: {{ text_color }};
+}
+
+a,
+a:hover,
+.navbar-header .navbar-nav a.nav-link,
+.paragraph,
+.chapo,
+.lead,
+.metadata-wrapper,
+.search-btn i,
+ul.pager li a {
+  color: {{ text_color }};
+}
+
+.metadata-wrapper .metadata-tag a,
+.pagination .page-item .page-link,
+.pagination .page-item .page-link span {
+  color: {{ primary_color }};
+}
+
+.pagination .page-item.active .page-link {
+  background-color: {{ primary_color }};
+  border-color: {{ primary_color }};
+  color: {{ primary_text_color }};
+}
+
+ul.pager li a:hover,
+.owl-carousel .owl-dots .owl-dot span {
+  background-color: {{ secondary_color }};
+}
+
+.navbar-header,
+.footer,
+.cloud-liner:after,
+.form-control,
+.search-btn,
+.image-text-vertical:not(:last-of-type),
+.text-image-vertical:not(:last-of-type),
+.image-text-horizontal:not(:last-of-type),
+.only-text:not(:last-of-type),
+.autoblock-vertical .only-text,
+.highlight > .row:not(:last-of-type) .image-text-vertical,
+.pagination {
+  border-color: {{ secondary_color }};
+}
+
+.navbar-header .navbar-toggler .icon-bar,
+.navbar-header .navbar-toggler .icon-bar:after,
+.navbar-header .navbar-toggler .icon-bar:before {
+  background-color: {{ text_color }};
+}
+
+.image-text-vertical h4.autoblock-title a,
+.image-text-vertical h4.autoblock-title a:hover,
+.text-image-vertical h4.autoblock-title a,
+.text-image-vertical h4.autoblock-title a:hover,
+.image-text-horizontal h4.autoblock-title a,
+.image-text-horizontal h4.autoblock-title a:hover,
+.only-text h4.autoblock-title a,
+.only-text h4.autoblock-title a:hover {
+  color: {{ text_color }};
+}
+
+.owl-carousel .owl-dots .owl-dot.active span,
+.owl-carousel .owl-dots .owl-dot:hover span {
+  background-color: {{ primary_color }};
+}
+
+.owl-carousel.slider-thumbnail .current .slider-item {
+  border-color: {{ primary_color }};
+}
+
+@media (max-width: 991.98px) {
+  .autoblock-horizontal .row {
+    border-color: {{ secondary_color }};
+  }
+}
+
+{% for color in colors %}
+  .has-bg-color.{{ color.id }} {
+    background-color: {{ color.color }};
+    color: {{ color.text_color }};
+  }
+
+  .has-bg-color.{{ color.id }} * {
+    color: {{ color.text_color }};
+  }
+
+  .bordred.has-bg-color.{{ color.id }} {
+    border-color: {{ color.color }};
+    color: {{ color.text_color }};
+  }
+
+  .bordred.has-bg-color.{{ color.id }} * {
+    color: {{ color.text_color }};
+  }
+{% endfor %}
+
+{% for color in colors %}
+  .has-bg-color.paragraph.{{ color.id }} {
+    background-color: {{ color.color }};
+    color: {{ color.text_color }};
+  }
+
+  .has-bg-color.paragraph.{{ color.id }} * {
+    color: {{ color.text_color }};
+  }
+
+  .bordred.has-bg-color.paragraph.{{ color.id }} {
+    border-color: {{ color.color }};
+    color: {{ color.text_color }};
+  }
+
+  .bordred.has-bg-color.paragraph.{{ color.id }} * {
+    color: {{ color.text_color }};
+  }
+{% endfor %}
+
+{% for color in colors %}
+  .btn.{{ color.id }} {
+    background-color: {{ color.color }};
+    border-color: {{ color.color }};
+    color: {{ color.text_color }};
+  }
+
+  .btn.{{ color.id }}:hover,
+  .btn.{{ color.id }}:focus,
+  .btn.{{ color.id }}:active {
+    background-color: {{ color.color_darken10 }};
+    border-color: {{ color.color_darken10 }};
+    color: {{ color.text_color }};
+  }
+
+  .btn.{{ color.id }} *,
+  .btn.{{ color.id }}:hover *,
+  .btn.{{ color.id }}:focus *,
+  .btn.{{ color.id }}:active * {
+    color: {{ color.text_color }};
+  }
+
+  .btn-outline.btn.{{ color.id }} {
+    color: {{ color.color }};
+    border-color: {{ color.color }};
+  }
+
+  .btn-outline.btn.{{ color.id }}:hover,
+  .btn-outline.btn.{{ color.id }}:focus,
+  .btn-outline.btn.{{ color.id }}:active {
+    background-color: {{ color.color }};
+    border-color: {{ color.color }};
+    color: {{ color.text_color }};
+  }
+
+  .btn-outline.btn.{{ color.id }} * {
+    color: {{ color.color }};
+  }
+{% endfor %}
+
+{% for color in colors %}
+  .text-{{ color.id }},
+  .text-{{ color.id }} * {
+    color: {{ color.color }} !important;
+  }
+{% endfor %}

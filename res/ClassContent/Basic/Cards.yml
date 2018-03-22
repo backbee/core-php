@@ -47,7 +47,8 @@ Cards:
     color:
       type: color
       label: yaml_block_cards_color
-      value: ''
+      value: 'color-primary'
+      disable_transparent: true
       tab: yaml_block_cards_button
       group:
         id: button_style

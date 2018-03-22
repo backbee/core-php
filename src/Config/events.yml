@@ -367,6 +367,7 @@ nestednode.page.render:
     listeners:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\PageListener, onPageRender]
+        - [BackBeeCloud\Listener\ThemeColorListener, onPageRender]
 
 nestednode.page.postrender:
     listeners:

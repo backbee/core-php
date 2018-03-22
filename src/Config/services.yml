@@ -264,3 +264,37 @@ services:
     class: BackBeeCloud\Listener\ClassContentOverriderListener
     arguments:
       - "@cloud.classcontent_overrider"
+
+  # ThemeColor services
+  cloud.theme_color.manager:
+    class: BackBeeCloud\ThemeColor\ThemeColorManager
+    factory: ["BackBeeCloud\ThemeColor\ThemeColorManagerFactory", createThemeColorManager]
+    arguments: ["@service_container"]
+
+  cloud.theme_color.default:
+    class: BackBeeCloud\ThemeColor\DefaultThemeColor
+    tags:
+      - { name: theme_color, dispatch_event: false }
+
+  cloud.api.theme_color.controller:
+    class: BackBeeCloud\Api\Controller\ThemeColorController
+    arguments: ["@cloud.theme_color.manager", "@bbapp"]
+
+  cloud.color_panel.manager:
+    class: BackBeeCloud\ThemeColor\ColorPanelManager
+    factory: ["BackBeeCloud\ThemeColor\ColorPanelManagerFactory", createColorPanelManager]
+    arguments:
+        - "@em"
+        - "@cloud.theme_color.manager"
+
+  cloud.api.color_panel.controller:
+    class: BackBeeCloud\Api\Controller\ColorPanelController
+    arguments: ["@cloud.color_panel.manager", "@bbapp"]
+
+  cloud.color_panel.css_generator:
+    class: BackBeeCloud\ThemeColor\ColorPanelCssGenerator
+    arguments: ["@cloud.color_panel.manager", "@renderer"]
+
+  cloud.color_panel_css_genrator.controller:
+    class: BackBeeCloud\Controller\ColorPanelController
+    arguments: ["@cloud.color_panel.css_generator", "@em"]

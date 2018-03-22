@@ -8,17 +8,13 @@ Paragraph:
       placeholder: yaml_block_text_rte_placeholder
   parameters:
     bg_color:
-      type: selectButton
       label: yaml_block_text_bg_color
-      buttons:
-        color-primary: {'icon': 'icon-text', 'bgcolor': 'color-primary'}
-        color-secondary: {'icon': 'icon-text', 'bgcolor': 'color-secondary'}
-        color-text: {'icon': 'icon-text', 'bgcolor': 'color-text'}
-        color-background: {'icon': 'icon-text', 'bgcolor': 'color-background'}
-        color-5: {'icon': 'icon-ban', 'bgcolor': 'default'}
-      value: 'color-5'
+      type: color
+      label: yaml_block_button_color
+      value: ''
+      disable_transparent: false
       group:
-        id: bg
+        id: color
     transparency:
       type: switch
       value: false
