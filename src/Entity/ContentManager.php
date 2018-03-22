@@ -301,6 +301,20 @@ class ContentManager
     }
 
     /**
+     * Returns true if there is at least one global content with active draft (state added, modified or
+     * to delete), else false.
+     *
+     * @return bool
+     */
+    public function hasGlobalContentDraft()
+    {
+        return null !== $this->entyMgr->getRepository(Revision::class)->findOneBy([
+            '_content' => $this->getGlobalContentsUids(),
+            '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
+        ]);
+    }
+
+    /**
      * Gathers recursively uids of every content and subcontent of the provided content.
      *
      * @param  AbstractClassContent $content
