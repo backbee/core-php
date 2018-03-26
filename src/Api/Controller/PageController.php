@@ -43,7 +43,7 @@ class PageController extends AbstractController
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse($this->pageMgr->format($page, $this->bbtoken));
+        return new JsonResponse($this->pageMgr->format($page));
     }
 
     public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM)
@@ -84,7 +84,7 @@ class PageController extends AbstractController
             $end = $end >= 0 ? $end : 0;
 
             return new JsonResponse(
-                $this->pageMgr->formatCollection($pages, $this->bbtoken),
+                $this->pageMgr->formatCollection($pages, true),
                 null !== $max
                     ? ($max > $count ? Response::HTTP_PARTIAL_CONTENT : Response::HTTP_OK)
                     : Response::HTTP_OK,

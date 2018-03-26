@@ -130,10 +130,13 @@ class PageManager
     /**
      * Returns formatted data of provided page.
      *
-     * @param  Page   $page The page to format its data
+     * @param Page $page            The page to format
+     * @param bool $strictDraftMode If false, it will perform additional check
+     *                              on global contents to determine if page is drafted
+     *
      * @return array
      */
-    public function format(Page $page)
+    public function format(Page $page, $strictDraftMode = false)
     {
         $metadatabag = $page->getMetaData();
         $type = $this->typeMgr->findByPage($page);
@@ -147,6 +150,10 @@ class PageManager
         $isDrafted = $result['found'] && isset($result['_source']['has_draft_contents'])
             ? $result['_source']['has_draft_contents']
             : false;
+
+        if (false === $strictDraftMode && !$isDrafted) {
+            $isDrafted = $this->contentMgr->hasGlobalContentDraft();
+        }
 
         return [
             'id'         => $page->getUid(),
@@ -190,14 +197,16 @@ class PageManager
      *
      * @see ::format()
      *
-     * @param  mixed $collection
+     * @param mixed $collection
+     * @param bool  $strictDraftMode
+     *
      * @return array
      */
-    public function formatCollection($collection)
+    public function formatCollection($collection, $strictDraftMode)
     {
         $result = [];
         foreach ($collection as $page) {
-            $result[] = $this->format($page);
+            $result[] = $this->format($page, $strictDraftMode);
         }
 
         return $result;
