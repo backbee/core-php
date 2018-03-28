@@ -13,6 +13,12 @@ use BackBee\ClassContent\Basic\Image;
  */
 class ImageFilesystemHandler implements ImageHandlerInterface
 {
+    const MEDIA_BASE_URI = '/img/';
+    const MEDIA_URI_REGEX = '~^' . self::MEDIA_BASE_URI . '[a-f0-9]{32}\.~';
+
+    /**
+     * @var string
+     */
     protected $mediaDir;
 
     public function __construct(BBApplication $app)
@@ -28,8 +34,8 @@ class ImageFilesystemHandler implements ImageHandlerInterface
         }
 
         $event->stopPropagation();
-        if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->image->path)) {
-            $sourcepath = str_replace('/img/', $this->mediaDir . '/', $content->image->path);
+        if (1 === preg_match(static::MEDIA_URI_REGEX, (string) $content->image->path)) {
+            $sourcepath = str_replace(static::MEDIA_BASE_URI, $this->mediaDir . '/', $content->image->path);
             if (is_readable($sourcepath)) {
                 $content->image->path = $this->upload(
                     sprintf('%s.%s', $content->getUid(), explode('.', basename($sourcepath))[1]),
@@ -78,7 +84,7 @@ class ImageFilesystemHandler implements ImageHandlerInterface
      */
     public function delete($path, $throwException = false)
     {
-        $filepath = str_replace('/img/', $this->mediaDir . '/', str_replace(['\\/', '"'], ['/', ''], $path));
+        $filepath = str_replace(static::MEDIA_BASE_URI, $this->mediaDir . '/', str_replace(['\\/', '"'], ['/', ''], $path));
         if (file_exists($filepath)) {
             unlink($filepath);
         }
@@ -107,6 +113,6 @@ class ImageFilesystemHandler implements ImageHandlerInterface
             unlink($filepath);
         }
 
-        return '/img/' . $filename;
+        return static::MEDIA_BASE_URI . $filename;
     }
 }
