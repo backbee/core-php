@@ -6,6 +6,7 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\Comment\Disqus;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PreRequestEvent;
+use BackBee\Site\Site;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -16,10 +17,12 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class DisqusListener
 {
     protected $app;
+    protected $entyMgr;
 
     public function __construct(BBApplication $app)
     {
         $this->app = $app;
+        $this->entyMgr = $app->getEntityManager();
     }
 
     /**
@@ -38,16 +41,15 @@ class DisqusListener
             return;
         }
 
-        $entyMgr = $this->app->getEntityManager();
         $uid = $this->getDisqusUid();
-        if (null === $disqus = $entyMgr->find(Disqus::class, $uid)) {
+        if (null === $disqus = $this->entyMgr->find(Disqus::class, $uid)) {
             $disqus = new Disqus($uid);
-            $entyMgr->persist($disqus);
-            $draft = $entyMgr->getRepository(Revision::class)->checkout($disqus, $this->app->getBBUserToken());
+            $this->entyMgr->persist($disqus);
+            $draft = $this->entyMgr->getRepository(Revision::class)->checkout($disqus, $this->app->getBBUserToken());
             $disqus->setDraft($draft);
         }
 
-        $entyMgr->flush();
+        $this->entyMgr->flush();
 
         throw new DisqusControlledException();
     }
@@ -104,8 +106,8 @@ class DisqusListener
         $event->setResponse($response);
     }
 
-    protected function getDisqusUid()
+    public function getDisqusUid()
     {
-        return md5('disqus_' . $this->app->getSite()->getLabel());
+        return md5('disqus_' . $this->entyMgr->getRepository(Site::class)->findOneBy([])->getLabel());
     }
 }

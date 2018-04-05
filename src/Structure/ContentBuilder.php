@@ -88,7 +88,7 @@ class ContentBuilder
                 $cloudContentSet->push($colContentSet);
 
                 foreach ($items as $item) {
-                    $content = $this->createContent($item['type'], $token);
+                    $content = $this->createContent($item['type'], $token, isset($item['uid']) ? $item['uid'] : null);
                     $itemData = isset($item['data']) ? $item['data'] : [];
                     if ($content instanceof Title) {
                         $itemData['text'] = str_replace(
@@ -112,10 +112,14 @@ class ContentBuilder
      * @param  string $name
      * @return AbstractClassContent
      */
-    protected function createContent($type, BBUserToken $token = null)
+    protected function createContent($type, BBUserToken $token = null, $uid = null)
     {
         $classname = $this->getClassnameFromType($type);
-        $content = new $classname();
+        if ($uid && $content = $this->entyMgr->find($classname, $uid)) {
+            return $content;
+        }
+
+        $content = new $classname($uid);
         if (null === $token) {
             $this->putContentOnline($content);
         }
