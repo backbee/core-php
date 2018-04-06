@@ -1,15 +1,18 @@
 {% set uid = this.getObject().getUid() %}
 {% set mapParam = this.getObject().getParam('map') %}
 {% set latlng = this.getObject().getParamValue('map') %}
-{% set position = this.getObject().getParamValue('position') %}
-{% set size = this.getObject().getParamValue('size') %}
 {% set color = this.getObject().getParamValue('colors') %}
+
+{% set height = this.getObject().getParamValue('height') %}
+{% if height is not null %}
+    {% set height = height ~ 'px' %}
+{% endif %}
 
 <div {{ this.bbcontent(null)|raw }}>
     {% if latlng is empty %}
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}
-        <div class="google-map embed-size-{{ size }} embed-align-{{ position }}" id="map_{{uid}}"></div>
+        <div class="google-map resize-element" id="map_{{uid}}" {% if height is not null %}style="height: {{height}};"{% endif %}></div>
         <script>
             (function () {
                 var script = document.createElement('script'),

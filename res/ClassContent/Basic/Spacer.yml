@@ -4,6 +4,7 @@ Spacer:
     description: ~
     category: [block_category_more]
     forbidden_plugins: ['parameter']
+    resizable: true
   parameters:
     height:
       value: 40
