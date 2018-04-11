@@ -26,14 +26,6 @@ class HomeType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function isDefault()
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function isDuplicable()
     {
         return false;
