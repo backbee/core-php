@@ -29,6 +29,14 @@ class BlankType extends AbstractType
     /**
      * {@inheritdoc}
      */
+    public function isDefault()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function defaultContents()
     {
         return [
