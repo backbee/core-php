@@ -251,3 +251,16 @@ services:
     arguments: ["@em", "@site_status.manager", "@elasticsearch.manager"]
     tags:
       - { name: worker.job_handler, dispatch_event: false }
+
+  # ClassContentOverrider
+  cloud.classcontent_overrider:
+    class: BackBeeCloud\ClassContent\ClassContentOverrider
+    factory: ["BackBeeCloud\ClassContent\ClassContentOverriderFactory", createClassContentOverrider]
+    arguments:
+      - "@service_container"
+      - "@bbapp"
+
+  cloud.classcontent_overrider.listener:
+    class: BackBeeCloud\Listener\ClassContentOverriderListener
+    arguments:
+      - "@cloud.classcontent_overrider"
