@@ -19,6 +19,7 @@ use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Site\Site;
+use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -53,33 +54,41 @@ class PageListener
 
         $pages = [];
 
-        $entityManager = $app->getEntityManager();
-        $site = $entityManager->getRepository(Site::class)->findOneBy([]);
-        $rootPage = $app->getEntityManager()->getRepository(Page::class)->getRoot($site);
-        if (null !== $rootPage) {
-            $pages[] = $rootPage;
-        }
+        try {
+            $entityManager = $app->getEntityManager();
+            $site = $entityManager->getRepository(Site::class)->findOneBy([]);
+            $rootPage = $app->getEntityManager()->getRepository(Page::class)->getRoot($site);
+            if (null !== $rootPage) {
+                $pages[] = $rootPage;
+            }
 
-        $multilangManager = $app->getContainer()->get('multilang_manager');
-        if (null !== $multilangManager->getDefaultLang()) {
-            foreach ($multilangManager->getAllLangs() as $lang) {
-                if (null !== $page = $multilangManager->getRootByLang(new Lang($lang['id']))) {
-                    $pages[] = $page;
+            $multilangManager = $app->getContainer()->get('multilang_manager');
+            if (null !== $multilangManager->getDefaultLang()) {
+                foreach ($multilangManager->getAllLangs() as $lang) {
+                    if (null !== $page = $multilangManager->getRootByLang(new Lang($lang['id']))) {
+                        $pages[] = $page;
+                    }
                 }
             }
-        }
 
-        $homePageType = new HomeType();
-        $pageTypeManager = $app->getContainer()->get('cloud.page_type.manager');
-        foreach ($pages as $page) {
-            if (null !== $pageTypeManager->getAssociation($page)) {
-                continue;
+            $homePageType = new HomeType();
+            $pageTypeManager = $app->getContainer()->get('cloud.page_type.manager');
+            foreach ($pages as $page) {
+                if (null !== $pageTypeManager->getAssociation($page)) {
+                    continue;
+                }
+
+                $association = $pageTypeManager->associate($page, $homePageType);
+                $entityManager->flush($association);
+            }
+        } catch (DBALException $exception) {
+            if (1 === preg_match('/42S02/i', $exception->getMessage())) {
+                // database is not installed yet, end of process
+                return;
             }
 
-            $association = $pageTypeManager->associate($page, $homePageType);
-            $entityManager->flush($association);
+            throw $exception;
         }
-
     }
 
     public static function handleUriCollisionOnFlushPage(Event $event)
