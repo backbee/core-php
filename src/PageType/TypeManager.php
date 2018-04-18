@@ -153,7 +153,7 @@ class TypeManager
     private function initTemplateTypes(Container $dic)
     {
         $cache = $dic->get('cache.control');
-        if ($result = $cache->load(self::CACHE_KEY)) {
+        if ($dic->isRestored() && $result = $cache->load(self::CACHE_KEY)) {
             $this->types = unserialize($result);
             foreach ($this->types as $type) {
                 if ($type->isDefault()) {
