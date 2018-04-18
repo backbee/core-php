@@ -8,6 +8,7 @@ bbapplication.init:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\CoreListener, forceClassContentLoadOnApplicationInit, -7999]
         - [BackBeeCloud\Listener\CoreListener, onApplicationInit, 200]
+        - [BackBeeCloud\Listener\PageListener, onApplicationInit]
 
 bbapplication.start:
     listeners:

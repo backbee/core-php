@@ -154,10 +154,14 @@ class TypeManager
     {
         $cache = $dic->get('cache.control');
         if ($result = $cache->load(self::CACHE_KEY)) {
-            list(
-                $this->types,
-                $this->defaultType
-            ) = unserialize($result);
+            $this->types = unserialize($result);
+            foreach ($this->types as $type) {
+                if ($type->isDefault()) {
+                    $this->defaultType = $type;
+
+                    break;
+                }
+            }
 
             return;
         }
@@ -192,9 +196,6 @@ class TypeManager
             $this->types[$customType->uniqueName()] = $customType;
         }
 
-        $cache->save(self::CACHE_KEY, serialize([
-            $this->types,
-            $this->defaultType,
-        ]));
+        $cache->save(self::CACHE_KEY, serialize($this->types));
     }
 }

@@ -96,7 +96,7 @@ abstract class AbstractType implements TypeInterface
      */
     public function serialize()
     {
-        return serialize([]);
+        return '';
     }
 
     /**

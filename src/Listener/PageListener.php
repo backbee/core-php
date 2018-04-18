@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Entity\PageTag;
@@ -17,6 +18,7 @@ use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
+use BackBee\Site\Site;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -35,6 +37,50 @@ class PageListener
      * @var array
      */
     protected static $toDelete = [];
+
+    /**
+     * Listens to "bbapplication.init" to ensures that home page is associated to
+     * "home" page type. It runs its process only if the application is not restored.
+     *
+     * @param  Event  $event
+     */
+    public static function onApplicationInit(Event $event)
+    {
+        $app = $event->getApplication();
+        if ($app->isRestored()) {
+            return;
+        }
+
+        $pages = [];
+
+        $entityManager = $app->getEntityManager();
+        $site = $entityManager->getRepository(Site::class)->findOneBy([]);
+        $rootPage = $app->getEntityManager()->getRepository(Page::class)->getRoot($site);
+        if (null !== $rootPage) {
+            $pages[] = $rootPage;
+        }
+
+        $multilangManager = $app->getContainer()->get('multilang_manager');
+        if (null !== $multilangManager->getDefaultLang()) {
+            foreach ($multilangManager->getAllLangs() as $lang) {
+                if (null !== $page = $multilangManager->getRootByLang(new Lang($lang['id']))) {
+                    $pages[] = $page;
+                }
+            }
+        }
+
+        $homePageType = new HomeType();
+        $pageTypeManager = $app->getContainer()->get('cloud.page_type.manager');
+        foreach ($pages as $page) {
+            if (null !== $pageTypeManager->getAssociation($page)) {
+                continue;
+            }
+
+            $association = $pageTypeManager->associate($page, $homePageType);
+            $entityManager->flush($association);
+        }
+
+    }
 
     public static function handleUriCollisionOnFlushPage(Event $event)
     {
