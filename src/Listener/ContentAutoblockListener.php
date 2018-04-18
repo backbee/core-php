@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeeCloud\Listener\ClassContent\ContentAutoblockElasticsearchPreQueryEvent;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Event\Event;
@@ -58,11 +59,11 @@ class ContentAutoblockListener
         $request = $app->getRequest();
         $block = $event->getTarget();
 
-        $esQuery = [
+        $esQuery = new \ArrayObject([
             'query' => [
                 'bool' => [],
             ],
-        ];
+        ]);
 
         // Building must clause
         $mustClauses = [
@@ -129,9 +130,15 @@ class ContentAutoblockListener
             ];
         }
 
+
+        $app->getEventDispatcher()->dispatch(
+            ContentAutoblockElasticsearchPreQueryEvent::EVENT_NAME,
+            new ContentAutoblockElasticsearchPreQueryEvent($block, $esQuery)
+        );
+
         // Requesting Elasticsearch to get result
         $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
-            $esQuery,
+            $esQuery->getArrayCopy(),
             $start,
             $limit + 1,
             $sortCriteria,
