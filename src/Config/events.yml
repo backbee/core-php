@@ -9,7 +9,7 @@ bbapplication.init:
         - [BackBeeCloud\Listener\CoreListener, forceClassContentLoadOnApplicationInit, -7999]
         - [BackBeeCloud\Listener\CoreListener, onApplicationInit, 200]
         - [BackBeeCloud\Listener\PageListener, onApplicationInit]
-        - ["@cloud.classcontent_overrider.listener", onApplicationInit]
+        - ["@cloud.classcontent_overrider.listener", onApplicationInit, -7998]
 
 bbapplication.start:
     listeners:
