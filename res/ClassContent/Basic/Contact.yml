@@ -37,7 +37,7 @@ Contact:
     button_title:
       type: text
       label: yaml_block_contact_title
-      value: ''
+      value: 'OK'
       tab: yaml_block_contact_button
       group:
         id: text
@@ -73,7 +73,7 @@ Contact:
     button_color:
       type: color
       label: yaml_block_contact_color
-      value: color6
+      value: ''
       tab: yaml_block_contact_button
       group:
         id: color
@@ -85,19 +85,20 @@ Contact:
       tab: yaml_block_contact_button
       group:
         id: color
-    button_radius:
-      type: switch
-      label: yaml_block_button_square
-      label_selected: yaml_block_button_rounded
-      value: true
+    button_style:
+      type: select
+      label: yaml_block_button_style
+      options:
+        square: yaml_block_button_square
+        radius: yaml_block_button_radius
+        rounded: yaml_block_button_rounded
+      value: radius
       tab: yaml_block_contact_button
-      group:
-        id: color
     button_size:
       type: select
       label: yaml_block_contact_size
       options:
-        xs: yaml_block_contact_small
+        sm: yaml_block_contact_small
         md: yaml_block_contact_medium
         lg: yaml_block_contact_large
       value: md

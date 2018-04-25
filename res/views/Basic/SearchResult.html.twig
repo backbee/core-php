@@ -2,8 +2,12 @@
   <div class="form-group">
     {% set current_lang = this.getCurrentLang() %}
     <form action="{{ current_lang ? '/' ~ current_lang : '' }}/search" method="get" class="searchbar-wrapper">
-      <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="{{this.getObject().getParamValue('input_placeholder')}}" />
-      <i class="icon_search"></i>
+      <div class="input-group">
+        <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="{{this.getObject().getParamValue('input_placeholder')}}" />
+        <div class="input-group-append">
+          <button class="btn search-btn" type="submit"><i class="icon_search"></i></botton>
+        </div>
+      </div>
     </form>
   </div>
 
@@ -11,7 +15,7 @@
   <h2>{{ this.getObject().getParamValue('result_label') }} <strong>{{ query }}</strong></h2>
   {% endif %}
 
-  <ul class="list-unstyled list-result">
+  <ul class="list-unstyled list-result image-text-vertical">
   {% for content in contents %}
     <li>{{ content|raw }}</li>
   {% else %}

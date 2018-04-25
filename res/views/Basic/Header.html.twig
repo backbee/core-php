@@ -1,19 +1,12 @@
 {% set header_menu = this.globalContentFactory().getHeaderMenu() %}
-<nav class="navbar navbar-fixed-top{% if header_menu.getParamValue('burger') %} nav-burger{% endif %}{% if header_menu.getParamValue('button_hide_on_mobile') %} button-hide-on-mobile{% endif %}" id="header">
+
+<nav class="navbar navbar-header fixed-top{% if not header_menu.getParamValue('burger') %} navbar-expand-lg{% endif %}">
   <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-primary" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-
       {{this.render(this.globalContentFactory().getHeaderLogo(), 'logo_header')|raw}}
-    </div>
+    <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar-primary" aria-controls="navbar-primary" aria-expanded="false">
+      <span class="icon-bar"></span>
+    </button>
 
-    <div class="collapse navbar-collapse" id="navbar-primary">
-      {{this.render(this.globalContentFactory().getHeaderMenu(), 'menu_header')|raw}}
-    </div>
+    {{this.render(this.globalContentFactory().getHeaderMenu(), 'menu_header')|raw}}
   </div>
 </nav>

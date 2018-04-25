@@ -1,0 +1,43 @@
+Cards:
+  properties:
+    name: yaml_block_cards
+    description: ~
+    category: [block_category_basics]
+    rte:
+      placeholder: "Your text here"
+  elements:
+    image:
+      type: \BackBee\ClassContent\Basic\Image
+      maxentry: 1
+  parameters:
+    button_description:
+      type: text
+      label: yaml_block_cards_button_link_title
+      value: ''
+    url:
+      type: text
+      label: yaml_block_cards_url
+      value: ''
+      format: URL
+    target_blank:
+      type: switch
+      label: yaml_block_cards_open_in_tab
+      value: false
+    align:
+      type: selectButton
+      label: yaml_block_cards_button_position
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'center'
+    color:
+      type: color
+      label: yaml_block_cards_color
+      value: color-1
+    form:
+      type: switch
+      label: yaml_block_cards_button_full_color
+      value: true
+    description:
+      value: ''

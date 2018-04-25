@@ -1,15 +1,15 @@
 {% set sliderId = "slider_" ~ this.getObject().getUid() %}
 
 {% if images != null and images is not iterable %}
-{% set images = [images] %}
+  {% set images = [images] %}
 {% endif %}
 
 {% set height = this.getObject().getParamValue('height') %}
 {% if height is not null %}
-    {% set height = height ~ 'px' %}
+  {% set height = height ~ 'px' %}
 {% endif %}
 
-<div data-forbidden-plugins="click" {{this.bbcontent(null)|raw}}>
+<div data-forbidden-plugins="click" {{this.bbcontent(null, {'class': 'content block-slider'})|raw}}>
   {% if images|length == 0 %}
   {% include 'common/missing_config_block.html.twig' %}
   {% else %}

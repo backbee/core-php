@@ -1,3 +1,5 @@
+{% if value or bb.token %}
 <p {% block data_attributes %}{% endblock %} data-mobile-edit="false" data-forbidden-plugins="dnd,parameter,remove" data-cloud-rte="true" {{this.bbcontent(null, {class: 'copyright'})|raw}}>
-  {{value|raw}}
+  {{value|striptags('<em><span><a><strong>')|raw}}
 </p>
+{% endif %}

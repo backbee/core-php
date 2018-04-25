@@ -27,6 +27,7 @@ class ContentCategoryListener
                 'Media/Video'     => 4,
                 'Basic/Slider'    => 5,
                 'Basic/Searchbar' => 6,
+                'Basic/Cards'     => 7,
             ]
         ],
         'block_category_pages' => [

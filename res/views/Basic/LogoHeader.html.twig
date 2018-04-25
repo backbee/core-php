@@ -1,13 +1,13 @@
 <div
-  {{this.bbcontent(null, {class: 'media-image cloud-logo navbar-brand'})|raw}}
+  {{this.bbcontent(null, {class: 'media-image cloud-logo'})|raw}}
   {% block data_attributes %}{% endblock %}
   data-img-quality="100"
   data-mobile-edit="false"
-  data-forbidden-plugins="dnd,parameter,remove,resize,focus"
+  data-forbidden-plugins="dnd,remove,resize,focus"
 >
   {# <a class="navbar-brand" href="{{this.getHomeUrl()}}">BackBee</a> #}
   <a href="{{this.getHomeUrl()}}">
-    <span class="logo">
+    <span class="logo navbar-brand">
       <img class="h-100" draggable="false"{% if image.path != false %} src="{{this.getCdnImageUrl(image.path)|raw}}"{% endif %}>
     </span>
   </a>

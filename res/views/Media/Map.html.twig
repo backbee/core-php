@@ -8,7 +8,7 @@
     {% set height = height ~ 'px' %}
 {% endif %}
 
-<div {{ this.bbcontent(null)|raw }}>
+<div {{ this.bbcontent(null, {'class': 'content map-wrapper'})|raw }}>
     {% if latlng is empty %}
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}
@@ -37,7 +37,7 @@
                       center: latLng,
                       scrollwheel: false,
                       zoom: 13,
-                      zoomControl: false,
+                      zoomControl: false
                     });
 
                     colors = JSON.parse("{{ colors['colors']|json_encode() }}".replace(/&quot;/g,'"'));

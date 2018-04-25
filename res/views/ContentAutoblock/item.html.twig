@@ -6,7 +6,7 @@
   </div>
   <div class="col-md-9">
 
-    <h3 {% if reduce_title_size %}class="reduce-title"{% endif %}>
+    <h4 class="autoblock-title{% if reduce_title_size %} reduce-title{% endif %}">
       <a
         {% block data_item_title_attributes %}{% endblock %}
         href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"
@@ -20,7 +20,7 @@
           {% endif %}
         </span>
       </a>
-    </h3>
+    </h4>
 
     <p>
     {% if abstract_max_length > 0 %}

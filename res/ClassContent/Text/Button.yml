@@ -57,7 +57,7 @@ Button:
     color:
       type: color
       label: yaml_block_button_color
-      value: color6
+      value: ''
       tab: yaml_block_button_style
       group:
         id: color
@@ -67,17 +67,20 @@ Button:
       label_selected: yaml_block_button_full_color
       value: true
       tab: yaml_block_button_style
-    radius:
-      type: switch
-      label: yaml_block_button_square
-      label_selected: yaml_block_button_rounded
-      value: true
+    style:
+      type: select
+      label: yaml_block_button_style
+      options:
+        square: yaml_block_button_square
+        radius: yaml_block_button_radius
+        rounded: yaml_block_button_rounded
+      value: radius
       tab: yaml_block_button_style
     size:
       type: select
       label: yaml_block_button_size
       options:
-        xs: yaml_block_button_small
+        sm: yaml_block_button_small
         md: yaml_block_button_medium
         lg: yaml_block_button_large
       value: md

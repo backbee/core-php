@@ -1,5 +1,5 @@
-<nav {{this.bbcontent(null)|raw}} itemscope itemtype="//schema.org/SiteNavigationElement">
-  <ul class="nav navbar-nav navbar-right">
+<div id="navbar-primary" {{this.bbcontent(null, {class: 'collapse navbar-collapse navbar-primary'})|raw}} itemscope itemtype="//schema.org/SiteNavigationElement">
+  <ul class="navbar-nav {{ nav_position_left.value == false ? 'ml-auto' : 'mr-auto' }}">
     {% for item in items %}
       {% include 'Basic/Menu.item.html.twig' with {'item': item} %}
     {% endfor %}
@@ -8,23 +8,23 @@
     {% set actives_lang = this.getActiveLangs() %}
     {% if current_lang and actives_lang|length > 1 %}
       {# Langs selector for desktop #}
-      <li class="dropdown hidden-xs langs-dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <li class="dropdown langs-dropdown">
+        <a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
           {{current_lang|upper}}
           <span class="caret"></span>
         </a>
 
-        <ul class="dropdown-menu">
+        <div class="dropdown-menu">
           {% for lang in actives_lang %}
           {% if current_lang != lang.id %}
-            <li><a href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a></li>
+            <a class="dropdown-item" href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a>
           {% endif %}
           {% endfor %}
-        </ul>
+        </div>
       </li>
 
       {# Langs selector for mobile #}
-      <li class="hidden-sm hidden-md hidden-lg">
+      <li class="d-none">
         <select class="langs-selector">
           <option disabled selected>{{current_lang|upper}}</option>
           {% for lang in actives_lang %}
@@ -35,28 +35,30 @@
         </select>
       </li>
     {% endif %}
-    {% if button_title.value%}
-      <div class="button">
-        <a href="{{button_url.value}}"
+  </ul>
+  {% if button_title.value%}
+    <form class="btn-menu form-inline my-2 my-lg-0">
+      <a href="{{button_url.value}}"
+        role="button"
         {% block data_attributes %}{% endblock %}
         {% if button_target_blank.value == true %}target="_blank"{% endif %}
-        class="btn btn-{{ button_color.value }} btn-xs btn-{{ button_form.value == false ? 'border' : 'full' }} {{ button_font.value }} {{ button_radius.value == false ? 'no-radius' : '' }}"
-        >
-          {{button_title.value|raw}}
-        </a>
-      </div>
-      <script type="text/javascript">
-        var init = function() {
-          $('.navbar-header').find('.button').remove();
-          $('.navbar-toggle').after($('#navbar-primary').find('.button').clone());
-        }
+        class="my-2 my-sm-0 btn color-primary btn-{{ button_color.value }} btn-{{button_style.value}} btn{{ button_form.value == false ? '-outline' : '' }} {{ button_font.value }}"
+      >
+        {{button_title.value|raw}}
+      </a>
+    </form>
+    <script type="text/javascript">
+      var init = function() {
+        $('.btn-menu-wrapper').find('.btn-menu').remove();
+        $('.navbar-toggler').before($('#navbar-primary').find('.btn-menu').clone());
+        $('.navbar-toggler').prev('.btn-menu').wrap('<div class="btn-menu-wrapper ml-auto mr-3"></div>');
+      }
 
-        if (window.$) {
-          init();
-        } else {
-          document.addEventListener('DOMContentLoaded', init, true);
-        }
-      </script>
-    {% endif %}
-  </ul>
-</nav>
+      if (window.$) {
+        init();
+      } else {
+        document.addEventListener('DOMContentLoaded', init, true);
+      }
+    </script>
+  {% endif %}
+</div>

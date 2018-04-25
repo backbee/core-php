@@ -1,7 +1,7 @@
 <div {{ this.bbcontent()|raw }} data-forbidden-plugins="remove">
   <h2>{{ this.getObject().getParamValue('result_label') }} <strong>{{ tag|capitalize }}</strong></h2>
 
-  <ul class="list-unstyled list-result">
+  <ul class="list-unstyled list-result image-text-vertical">
     {% for content in contents %}
       <li>{{ content|raw }}</li>
     {% else %}

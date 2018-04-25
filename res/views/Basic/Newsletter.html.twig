@@ -1,4 +1,4 @@
-<div {{this.bbcontent(null, {'class': 'newsletter text-' ~ btn_align.value})|raw}} id="newsletter_{{ this.getObject().getUid() }}">
+<div {{this.bbcontent(null, {'class': 'content newsletter text-' ~ btn_align.value})|raw}} id="newsletter_{{ this.getObject().getUid() }}">
     {% if connector.value.mailchimp.token and connector.value.mailchimp.current_list != "0" %}
         <h2>{{ title.value }}</h2>
         <p>{{ description.value }}</p>

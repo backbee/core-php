@@ -1,4 +1,4 @@
-<div {{this.bbcontent(null, {'class': 'text-' ~ align.value})|raw}}>
+<div {{this.bbcontent(null, {'class': 'content text-' ~ align.value})|raw}}>
     {% if url.value is empty or html is not defined %}
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}

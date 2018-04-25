@@ -5,11 +5,11 @@
 {% if contents == false %}
   {% include 'common/missing_config_block.html.twig' %}
 {% else %}
-  <div class="autoblock-horizontal">
+  <div class="autoblock-horizontal highlight">
   {% if contents|length > 0 %}
     {% for content in contents %}
       {% if loop.index == 1 %}
-        <div class="row">
+        <div class="row justify-content-center">
       {% endif %}
 
       <div class="col-md-{{col}}">

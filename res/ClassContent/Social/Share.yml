@@ -16,7 +16,7 @@ Share:
       type: selectButton
       label: yaml_block_share_position
       buttons:
-        left: {'icon': 'icon-align-left'}
+        start: {'icon': 'icon-align-left'}
         center: {'icon': 'icon-align-center'}
-        right: {'icon': 'icon-align-right'}
+        end: {'icon': 'icon-align-right'}
       value: 'center'
