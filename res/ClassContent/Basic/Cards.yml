@@ -10,10 +10,6 @@ Cards:
       type: \BackBee\ClassContent\Basic\Image
       maxentry: 1
   parameters:
-    button_description:
-      type: text
-      label: yaml_block_cards_button_link_title
-      value: ''
     url:
       type: text
       label: yaml_block_cards_url
@@ -31,13 +27,20 @@ Cards:
         center: {'icon': 'icon-align-center'}
         right: {'icon': 'icon-align-right'}
       value: 'center'
+    button_description:
+      type: text
+      label: yaml_block_cards_button_link_title
+      value: ''
+      tab: yaml_block_cards_button
     color:
       type: color
       label: yaml_block_cards_color
-      value: color-1
+      value: ''
+      tab: yaml_block_cards_button
     form:
       type: switch
       label: yaml_block_cards_button_full_color
       value: true
     description:
       value: ''
+      tab: yaml_block_cards_button

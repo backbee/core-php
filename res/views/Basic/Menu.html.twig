@@ -1,4 +1,4 @@
-<div id="navbar-primary" {{this.bbcontent(null, {class: 'collapse navbar-collapse navbar-primary'})|raw}} itemscope itemtype="//schema.org/SiteNavigationElement">
+<div id="navbar-primary" {{this.bbcontent(null, {class: 'collapse navbar-collapse navbar-primary navigation-default'})|raw}} itemscope itemtype="//schema.org/SiteNavigationElement">
   <ul class="navbar-nav {{ nav_position_left.value == false ? 'ml-auto' : 'mr-auto' }}">
     {% for item in items %}
       {% include 'Basic/Menu.item.html.twig' with {'item': item} %}
