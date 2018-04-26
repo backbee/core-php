@@ -27,8 +27,8 @@
     "require": {
         "php": ">=5.6.0",
         "backbee/backbee-php": "~1.3",
-        "backbee/cloud-toolbar-bundle": "~2.0",
-        "backbee-planet/common-components": "~2.0",
+        "backbee/cloud-toolbar-bundle": "^2.19",
+        "backbee-planet/common-components": "^2.19",
         "lp-digital/hauth-bundle": "~0.1.0",
         "lp-digital/sitemap-bundle": "~0.3.0",
         "guzzlehttp/guzzle": "~6.0",
