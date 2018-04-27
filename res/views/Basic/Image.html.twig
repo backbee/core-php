@@ -4,6 +4,9 @@
 {% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %}
 {% set autoSizeClass = this.getObject().getParamValue('stretch') ? ' image-auto-width' : autoSizeClass %}
 {% set dataForbidden = forbiddenPlugins ? forbiddenPlugins : 'click' %}
+{% if image.path == false %}
+  {% set dataForbidden = forbiddenPlugins ~ ',parameter' %}
+{% endif %}
 
 {% if multi_column == true %}
   {% set resizeClass = 'image-resize' %}
