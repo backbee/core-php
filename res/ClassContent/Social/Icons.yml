@@ -28,7 +28,7 @@ Icons:
         color:
           type: color
           label: yaml_block_social_color
-          value: color-1
+          value: color-primary
           tab: yaml_block_socials_style
           group:
             id: color

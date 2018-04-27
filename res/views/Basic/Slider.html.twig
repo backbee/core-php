@@ -14,7 +14,7 @@
   {% include 'common/missing_config_block.html.twig' %}
   {% else %}
   <div id="{{ sliderId }}"
-      class="owl-carousel resize-element slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('navigation') }} slider-{{ this.getObject().getParamValue('format') }} slider{% if thumbnail %} slider-main{% endif %}"
+      class="owl-carousel{% if height is not null %} resized-slider{% endif %} resize-element slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('navigation') }} slider-{{ this.getObject().getParamValue('format') }} slider{% if thumbnail %} slider-main{% endif %}"
       {% if height is not null %}style="height: {{height}};"{% endif %}
   >
   {% for image in images %}
