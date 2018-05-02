@@ -34,3 +34,31 @@ Paragraph:
       value: full-color
       group:
         id: style
+    picto:
+      type: upload
+      label: yaml_block_text_picto_label
+      value: ''
+      tab: yaml_block_text_picto_tab
+      group:
+        id: picto
+    picto_direction:
+      type: selectButton
+      label: yaml_block_text_picto_direction_label
+      buttons:
+        left: {'icon': 'icon-align-left'}
+        center: {'icon': 'icon-align-center'}
+        right: {'icon': 'icon-align-right'}
+      value: 'left'
+      tab: yaml_block_text_picto_tab
+      group:
+        id: align
+    picto_size:
+      type: select
+      label: yaml_block_text_picto_size_label
+      options:
+        24 : 24px
+        32 : 32px
+        64 : 64px
+        96 : 96px
+      value: '32'
+      tab: yaml_block_text_picto_tab

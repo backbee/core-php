@@ -372,6 +372,7 @@ nestednode.page.postrender:
     listeners:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\CacheListener, onPagePostRender]
+        - [BackBeeCloud\Listener\PageListener, onPostRender]
 
 # HAuthBundle listeners
 

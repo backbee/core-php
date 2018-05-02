@@ -324,6 +324,25 @@ class PageListener
     }
 
     /**
+     * Called on "nestnode.page.postrender" event.
+     *
+     * @param RendererEvent $event
+     */
+    public static function onPostRender(RendererEvent $event)
+    {
+        if ($event->getApplication()->getBBUserToken() === null) {
+            return;
+        }
+
+        $renderer = $event->getRenderer();
+        $renderer->setRender(str_replace(
+            '</body>',
+            $renderer->partial('common/hook_form.js.twig') . '</body>',
+            $renderer->getRender()
+        ));
+    }
+
+    /**
      * Occurs on `rest.controller.pagecontroller.deleteaction.postcall` to hard
      * delete the page.
      *

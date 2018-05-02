@@ -1,4 +1,5 @@
 {% set transparencyClass = '' %}
+{% set picto = this.getObject().getParamValue('picto') %}
 
 {% if transparency.value %}
     {% set transparencyClass = 'transparency' %}
@@ -6,8 +7,15 @@
 
 <div
     {% block data_attributes %}{% endblock %}
-    data-cloud-rte="true"
-    {{this.bbcontent(null, {class: style.value ~ ' ' ~transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' has-bg-color ' ~ bg_color.value)})|raw}}
+    {{this.bbcontent(null, {
+        class: style.value ~ ' ' ~ transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' has-bg-color ' ~ bg_color.value)~ (picto != '' ? ' with-picto d-flex' : '') ~ (picto_direction != '' ? ' picto-' ~  picto_direction.value : '')
+    })|raw}}
 >
-  {{value|raw}}
+    {% if picto != '' %}
+        <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto picto-{{picto_size.value}}">
+    {% endif %}
+
+    <div class="rte-text" data-cloud-rte="true">
+        {{value|raw}}
+    </div>
 </div>

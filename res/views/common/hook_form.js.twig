@@ -1,0 +1,28 @@
+<script>
+  document.addEventListener('cloudReady', function() {
+    cloud.mediator.subscribe('on:form:render', function(form) {
+
+      if (form.content && form.content.type && form.content.type === 'Text/Paragraph') {
+        $blockPictoText = form.$.find('.tab.cloud-yaml_block_text_picto_tab');
+        $groupAlign = $blockPictoText.find('.group.align');
+        $elementPictoSize = $blockPictoText.find('.element_picto_size');
+        $pictoGroup = $blockPictoText.find('.group.picto');
+
+        if ($pictoGroup.find('.btn-remove').length !== 1) {
+          $groupAlign.addClass('d-none');
+          $elementPictoSize.addClass('d-none');
+        }
+
+        form.afterPictoUpload = function() {
+          $groupAlign.removeClass('d-none');
+          $elementPictoSize.removeClass('d-none');
+        }
+
+        form.afterRemove = function() {
+          $groupAlign.addClass('d-none');
+          $elementPictoSize.addClass('d-none');
+        }
+      }
+    });
+  });
+</script>
