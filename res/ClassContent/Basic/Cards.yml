@@ -13,12 +13,14 @@ Cards:
     url:
       type: text
       label: yaml_block_cards_url
-      value: ''
+      value: '/'
       format: URL
+      tab: yaml_block_general_tab
     target_blank:
       type: switch
       label: yaml_block_cards_open_in_tab
       value: false
+      tab: yaml_block_general_tab
     align:
       type: selectButton
       label: yaml_block_cards_button_position
@@ -27,6 +29,9 @@ Cards:
         center: {'icon': 'icon-align-center'}
         right: {'icon': 'icon-align-right'}
       value: 'center'
+      tab: yaml_block_general_tab
+      group:
+        id: position
     button_description:
       type: text
       label: yaml_block_cards_button_link_title
@@ -37,10 +42,11 @@ Cards:
       label: yaml_block_cards_color
       value: ''
       tab: yaml_block_cards_button
+    description:
+      value: ''
+      tab: yaml_block_cards_button
     form:
       type: switch
       label: yaml_block_cards_button_full_color
       value: true
-    description:
-      value: ''
       tab: yaml_block_cards_button

@@ -31,15 +31,6 @@ Slider:
       label: yaml_block_slider_autoplay
       value: true
       tab: yaml_block_slider_style
-    format:
-      type: select
-      label: yaml_block_slider_format
-      options:
-        square: yaml_block_slider_square
-        landscape: yaml_block_slider_landscape
-        banner: yaml_block_slider_banner
-      value: landscape
-      tab: yaml_block_slider_style
     navigation:
       type: select
       label: yaml_block_slider_navigation
