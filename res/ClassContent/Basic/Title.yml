@@ -4,6 +4,7 @@ Title:
     name: yaml_block_title
     description: ~
     category: [block_category_basics]
+    unique_per_page: true
     rte:
       placeholder: yaml_block_title_rte_placeholder
   parameters:
