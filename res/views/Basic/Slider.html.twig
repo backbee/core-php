@@ -14,7 +14,7 @@
   {% include 'common/missing_config_block.html.twig' %}
   {% else %}
   <div id="{{ sliderId }}"
-      class="owl-carousel{% if height is not null %} resized-slider{% endif %} resize-element slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('navigation') }} slider-{{ this.getObject().getParamValue('format') }} slider{% if thumbnail %} slider-main{% endif %}"
+      class="owl-carousel{% if height is not null %} resized-slider{% endif %} resize-element slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('navigation') }} slider{% if thumbnail %} slider-main{% endif %}"
       {% if height is not null %}style="height: {{height}};"{% endif %}
   >
   {% for image in images %}
@@ -39,79 +39,85 @@
 
 
   <script>
-    setTimeout(function () {
-      var sliders = $('#{{ sliderId }}, #{{ sliderId }}-thumb');
 
-      var navLeft = '<i {% block data_left_attributes %}{% endblock %} class="arrow_carrot-left"></i>';
-      var navRight = '<i {% block data_right_attributes %}{% endblock %} class="arrow_carrot-right"></i>';
+    (function() {
+      var callback = function () {
+        var sliders = $('#{{ sliderId }}, #{{ sliderId }}-thumb');
+        var navLeft = '<i {% block data_left_attributes %}{% endblock %} class="arrow_carrot-left"></i>';
+        var navRight = '<i {% block data_right_attributes %}{% endblock %} class="arrow_carrot-right"></i>';
 
-      sliders.each(function(){
-        var slider = $(this),
-          duration = 300,
-          config = {
-            touchDrag: false,
-            mouseDrag: false,
-            items: 1,
-            loop: true,
-            autoplay: {{ autoplayOn ? 'true' : 'false' }},
-            itemsDesktop: [1199,3],
-            itemsDesktopSmall: [979,2],
-            itemsTablet: [768,2],
-            itemsMobile: [479,1],
-            nav : !$(this).hasClass('slider-hidenav'),
-            navText: ["<i class=\"arrow_carrot-left\"></i>","<i class=\"arrow_carrot-right\"></i>"],
-            dots : {{ this.getObject().getParamValue('dots') ? 'true' : 'false' }},
-            onInitialized: function (element) {
-              $(element.target).removeClass('slider-loader');
+        sliders.each(function(){
+          var slider = $(this),
+            duration = 300,
+            config = {
+              touchDrag: false,
+              mouseDrag: false,
+              items: 1,
+              loop: true,
+              autoplay: {{ autoplayOn ? 'true' : 'false' }},
+              itemsDesktop: [1199,3],
+              itemsDesktopSmall: [979,2],
+              itemsTablet: [768,2],
+              itemsMobile: [479,1],
+              nav : !$(this).hasClass('slider-hidenav'),
+              navText: ["<i class=\"arrow_carrot-left\"></i>","<i class=\"arrow_carrot-right\"></i>"],
+              dots : {{ this.getObject().getParamValue('dots') ? 'true' : 'false' }},
+              onInitialized: function (element) {
+                $(element.target).removeClass('slider-loader');
+              }
+            },
+            configThumbnail = {
+              items: 4,
+              itemsCustom: [[320,3],[480,4]],
+              dots: false,
+              nav: true,
+              margin: 10,
+              responsiveRefreshRate: 100,
+              onInitialized: function (element) {
+                var current = $(element.target).find('.owl-item.active').eq(0);
+                current.addClass('current');
+              }
+          };
+
+          if (slider.hasClass('slider-thumbnail')) {
+            config.linked = slider.prev();
+            $.extend(config, configThumbnail);
+          } else if (slider.hasClass('slider-main')) {
+            config.linked = slider.next();
+          }
+
+          //$('.slider-fw').masterHead({'bottom': 100});
+
+          if (slider.children().length < 1) {
+            return;
+          }
+
+          slider.owlCarousel(config);
+
+          slider.on('click', '.owl-item', function (e) {
+            var index = $(e.currentTarget).find('> .slider-item').data('index');
+
+            if (index !== undefined) {
+              slider.trigger('to.owl.carousel', [index, duration, true]);
             }
-          },
-          configThumbnail = {
-            items: 4,
-            itemsCustom: [[320,3],[480,4]],
-            dots: false,
-            nav: true,
-            margin: 10,
-            responsiveRefreshRate: 100,
-            onInitialized: function (element) {
-              var current = $(element.target).find('.owl-item.active').eq(0);
+          });
+
+          if (slider.hasClass('slider-thumbnail')) {
+            slider.on('initialized.owl.carousel linked.to.owl.carousel', function() {
+              slider.find('.owl-item.current').removeClass('current');
+              var current = slider.find('.owl-item.active.center').length ? slider.find('.owl-item.active.center') : slider.find('.owl-item.active').eq(0);
               current.addClass('current');
-            }
-        };
-
-        if (slider.hasClass('slider-thumbnail')) {
-          config.linked = slider.prev();
-          $.extend(config, configThumbnail);
-        } else if (slider.hasClass('slider-main')) {
-          config.linked = slider.next();
-        }
-
-        //$('.slider-fw').masterHead({'bottom': 100});
-
-        if (slider.children().length < 2) {
-          return;
-        }
-
-        slider.owlCarousel(config);
-
-        slider.on('click', '.owl-item', function (e) {
-          var index = $(e.currentTarget).find('> .slider-item').data('index');
-
-          if (index !== undefined) {
-            slider.trigger('to.owl.carousel', [index, duration, true]);
+            });
           }
         });
+      };
 
-        if (slider.hasClass('slider-thumbnail')) {
-          slider.on('initialized.owl.carousel linked.to.owl.carousel', function() {
-            slider.find('.owl-item.current').removeClass('current');
-            var current = slider.find('.owl-item.active.center').length ? slider.find('.owl-item.active.center') : slider.find('.owl-item.active').eq(0);
-            current.addClass('current');
-          });
-        }
-
-      });
-
-    }, 500);
+      if (window.$) {
+        callback();
+      } else {
+        document.addEventListener('DOMContentLoaded', callback, false);
+      }
+    })()
   </script>
 {% endif %}
 </div>
