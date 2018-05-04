@@ -32,21 +32,34 @@ Cards:
       tab: yaml_block_general_tab
       group:
         id: position
+    add_button:
+      type: switch
+      label: yaml_block_cards_add_button
+      value: false
+      tab: yaml_block_cards_button
     button_description:
       type: text
       label: yaml_block_cards_button_link_title
       value: ''
       tab: yaml_block_cards_button
+      group:
+        id: button_style
     color:
       type: color
       label: yaml_block_cards_color
       value: ''
       tab: yaml_block_cards_button
+      group:
+        id: button_style
     description:
       value: ''
       tab: yaml_block_cards_button
+      group:
+        id: button_style
     form:
       type: switch
       label: yaml_block_cards_button_full_color
       value: true
       tab: yaml_block_cards_button
+      group:
+        id: button_style

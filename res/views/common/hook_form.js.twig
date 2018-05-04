@@ -1,8 +1,58 @@
 <script>
   document.addEventListener('cloudReady', function() {
-    cloud.mediator.subscribe('on:form:render', function(form) {
+    var cloud = window.cloud;
+    var form_parameters = {
+      'fr': {
+        'yaml_block_cards_add_button' : 'Ajouter un bouton',
+        'yaml_block_menu_add_button': 'Ajouter un bouton',
+      },
+      'en': {
+        'yaml_block_cards_add_button' : 'Add a button',
+        'yaml_block_menu_add_button': 'Add a button',
+      }
+    };
 
-      if (form.content && form.content.type && form.content.type === 'Text/Paragraph') {
+    for (var parameter in form_parameters) {
+      if (form_parameters.hasOwnProperty(parameter)) {
+        cloud.translator.addTransKeys(form_parameters[parameter], parameter);
+      }
+    }
+
+    cloud.mediator.subscribe('on:form:render', function(form) {
+      if (form.hasOwnProperty('content') && form.content.type === 'Basic/Cards') {
+        $showButtonParameters = form.$.find('.element_add_button');
+        $groupButtonStyle = form.$.find('.group.button_style');
+
+        if (!$showButtonParameters.find('input')[0].checked) {
+          $groupButtonStyle.addClass('d-none');
+        }
+
+        $showButtonParameters.find('label.cloud-form-control').on('change', function() {
+          $showButtonParameters.find('input')[0].checked ? $groupButtonStyle.removeClass('d-none') : $groupButtonStyle.addClass('d-none');
+        });
+      }
+
+      if (form.hasOwnProperty('content') && form.content.type === 'Basic/Menu') {
+        $showButton = form.$.find('.element_add_button');
+        $buttonParameters = form.$.find('.group.text, .element_button_target_blank, .element_button_hide_on_mobile, .group.color, .element_button_form');
+
+        if (!$showButton.find('input')[0].checked) {
+          $buttonParameters.each(function() {
+            jQuery(this).addClass('d-none');
+          });
+        }
+
+        $showButton.find('label.cloud-form-control').on('change', function() {
+          $showButton.find('input')[0].checked ?
+            $buttonParameters.each(function() {
+              jQuery(this).removeClass('d-none');
+            }) : $buttonParameters.each(function() {
+              jQuery(this).addClass('d-none');
+            });
+        });
+      }
+
+      if (form.hasOwnProperty('content') && form.content.type === 'Text/Paragraph') {
         $blockPictoText = form.$.find('.tab.cloud-yaml_block_text_picto_tab');
         $groupAlign = $blockPictoText.find('.group.align');
         $elementPictoSize = $blockPictoText.find('.element_picto_size');
