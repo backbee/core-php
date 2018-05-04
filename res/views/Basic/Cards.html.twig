@@ -4,9 +4,9 @@
     {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd,parameter'})|raw }}
 
     <div class="card-body text-{{ align.value }}">
-      <p class="card-text" data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true">
+      <div class="card-text" data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true">
         {{ this.getObject().getParamValue('description')|raw }}
-      </p>
+      </div>
 
       {% if button_description.value %}
         <a href="{{ url.value }}" class="btn color-primary {{color.value}} btn-rounded mt-3" {% if target_blank.value %} target="_blank" {% endif %}>{{ button_description.value }}</a>
