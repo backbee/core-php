@@ -8,7 +8,7 @@
         {{ this.getObject().getParamValue('description')|raw }}
       </div>
 
-      {% if button_description.value %}
+      {% if add_button.value and (button_description.value or bb.token != null) %}
         <a href="{{ url.value }}" class="btn color-primary {{color.value}} btn-rounded mt-3" {% if target_blank.value %} target="_blank" {% endif %}>{{ button_description.value }}</a>
       {% endif %}
     </div>

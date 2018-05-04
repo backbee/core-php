@@ -36,29 +36,31 @@
       </li>
     {% endif %}
   </ul>
-  {% if button_title.value%}
-    <form class="btn-menu form-inline my-2 my-lg-0">
-      <a href="{{button_url.value}}"
-        role="button"
-        {% block data_attributes %}{% endblock %}
-        {% if button_target_blank.value == true %}target="_blank"{% endif %}
-        class="my-2 my-sm-0 btn color-primary btn-{{ button_color.value }} btn-{{button_style.value}} btn{{ button_form.value == false ? '-outline' : '' }} {{ button_font.value }}"
-      >
-        {{button_title.value|raw}}
-      </a>
-    </form>
-    <script type="text/javascript">
-      var init = function() {
-        $('.btn-menu-wrapper').find('.btn-menu').remove();
-        $('.navbar-toggler').before($('#navbar-primary').find('.btn-menu').clone());
-        $('.navbar-toggler').prev('.btn-menu').wrap('<div class="btn-menu-wrapper ml-auto mr-3"></div>');
-      }
+  {% if button_hide_on_mobile.value == false or this.userAgentHelper().isMobile() == false %}
+    {% if add_button.value and (button_title.value or bb.token != null) %}
+      <form class="btn-menu form-inline my-2 my-lg-0">
+        <a href="{{button_url.value}}"
+          role="button"
+          {% block data_attributes %}{% endblock %}
+          {% if button_target_blank.value == true %}target="_blank"{% endif %}
+          class="my-2 my-sm-0 btn color-primary btn-{{ button_color.value }} btn-{{button_style.value}} btn{{ button_form.value == false ? '-outline' : '' }} {{ button_font.value }}"
+        >
+          {{button_title.value|raw}}
+        </a>
+      </form>
+      <script type="text/javascript">
+        var init = function() {
+          $('.btn-menu-wrapper').find('.btn-menu').remove();
+          $('.navbar-toggler').before($('#navbar-primary').find('.btn-menu').clone());
+          $('.navbar-toggler').prev('.btn-menu').wrap('<div class="btn-menu-wrapper ml-auto mr-3"></div>');
+        }
 
-      if (window.$) {
-        init();
-      } else {
-        document.addEventListener('DOMContentLoaded', init, true);
-      }
-    </script>
+        if (window.$) {
+          init();
+        } else {
+          document.addEventListener('DOMContentLoaded', init, true);
+        }
+      </script>
+    {% endif %}
   {% endif %}
 </div>
