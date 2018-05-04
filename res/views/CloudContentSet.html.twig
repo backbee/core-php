@@ -171,7 +171,7 @@
           </script>
         </div>
       {% endif %}
-      <div class="{{ width.value }}">
+      <div class="{{ width.value }}{% if remove_gutter.value %} px-0{% endif %}">
         <div class="row{% if remove_gutter.value %} no-gutters{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
@@ -186,7 +186,7 @@
     </div>
   {% else %}
     <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bg-y="{{ backgroundPosition }}" data-bb-image="{{backgroundImage|raw}}"{% endif %}>
-      <div class="{{ width.value }}">
+      <div class="{{ width.value }}{% if remove_gutter.value %} px-0{% endif %}">
         <div class="row{% if remove_gutter.value %} no-gutters{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
