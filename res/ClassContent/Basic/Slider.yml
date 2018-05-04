@@ -14,8 +14,6 @@ Slider:
       target_element: images
       value: []
       tab: yaml_block_slider_image
-    height:
-      value: ~
     thumbnail:
       type: switch
       label: yaml_block_slider_display_thumbnails
