@@ -73,7 +73,8 @@ Contact:
     button_color:
       type: color
       label: yaml_block_contact_color
-      value: ''
+      value: 'color-primary'
+      disable_transparent: true
       tab: yaml_block_contact_button
       group:
         id: color

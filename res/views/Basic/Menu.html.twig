@@ -43,7 +43,7 @@
           role="button"
           {% block data_attributes %}{% endblock %}
           {% if button_target_blank.value == true %}target="_blank"{% endif %}
-          class="my-2 my-sm-0 btn color-primary btn-{{ button_color.value }} btn-{{button_style.value}} btn{{ button_form.value == false ? '-outline' : '' }} {{ button_font.value }}"
+          class="my-2 my-sm-0 btn color-primary {{ button_color.value }}{{ button_form.value == false ? ' btn-outline' }}"
         >
           {{button_title.value|raw}}
         </a>

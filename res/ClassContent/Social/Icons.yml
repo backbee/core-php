@@ -28,7 +28,8 @@ Icons:
         color:
           type: color
           label: yaml_block_social_color
-          value: color-primary
+          value: 'color-primary'
+          disable_transparent: true
           tab: yaml_block_socials_style
           group:
             id: color

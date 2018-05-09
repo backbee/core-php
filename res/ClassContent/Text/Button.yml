@@ -58,6 +58,7 @@ Button:
       type: color
       label: yaml_block_button_color
       value: ''
+      disable_transparent: true
       tab: yaml_block_button_style
       group:
         id: color

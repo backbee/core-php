@@ -87,9 +87,9 @@
   {% endif %}
 
   {% if bg_video_url %}
-    <div id="{{rowId}}" 
-      {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} 
-      style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} 
+    <div id="{{rowId}}"
+      {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}}
+      style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %}
              {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"
       {% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}
     >
