@@ -261,7 +261,7 @@ class PageManager
                 ],
             ];
 
-            if (null !== $this->multilangMgr->getDefaultLang()) {
+            if ($this->multilangMgr->isActive()) {
                 $query['query']['bool']['must_not'] = [
                     [ 'match' => ['url' => '/' ] ],
                 ];
@@ -331,7 +331,7 @@ class PageManager
             ->setMaxResults($limit)
         ;
 
-        if (null !== $this->multilangMgr->getDefaultLang()) {
+        if ($this->multilangMgr->isActive()) {
             $qb
                 ->where($qb->expr()->neq('p._url', ':url'))
                 ->setParameter('url', '/')
@@ -801,6 +801,11 @@ class PageManager
             $this->multilangMgr->associate($page, $this->currentLang);
             $this->currentLang = null;
         }
+    }
+
+    protected function runSetUrl(Page $page, $value)
+    {
+        $page->setUrl($value);
     }
 
     /**

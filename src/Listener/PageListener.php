@@ -167,7 +167,7 @@ class PageListener
         $container->get('elasticsearch.manager')->indexPage($page);
         if ($container->get('cloud.page_type.manager')->findByPage($page) instanceof HomeType) {
             $changes = $uow->getEntityChangeSet($page);
-            if (1 !== preg_match('~/$~', $page->getUrl()) && isset($changes['_url'])) {
+            if (isset($changes['_url'])) {
                 $page->setUrl($changes['_url'][0]);
                 $uow->recomputeSingleEntityChangeSet($entyMgr->getClassMetadata(Page::class), $page);
                 $container->get('elasticsearch.manager')->indexPage($page);
