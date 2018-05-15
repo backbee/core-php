@@ -43,6 +43,11 @@ class MultiLangManager implements JobHandlerInterface
         $this->availables = (new GlobalSettings())->langs();
     }
 
+    public function isActive()
+    {
+        return null !== $this->getDefaultLang();
+    }
+
     public function getCurrentLang()
     {
         $request = $this->app->getRequest();
@@ -194,14 +199,14 @@ class MultiLangManager implements JobHandlerInterface
             $root = $this->app->getContainer()->get('cloud.page_manager')->duplicate(
                 $this->entyMgr->getRepository(Page::class)->getRoot($this->getSite()),
                 [
-                    'title'              => 'Home',
-                    'lang'               => $lang->getLang(),
+                    'title' => 'Home',
+                    'url' => $rootUrl,
+                    'lang' => $lang->getLang(),
                     'put_content_online' => true,
                 ]
             );
             $root->setState(Page::STATE_ONLINE);
             $this->entyMgr->getRepository(Page::class)->saveWithSection($root, $root->getSection());
-            $root->setUrl($rootUrl);
             $this->entyMgr->flush();
 
             $pageRedirection = $this->entyMgr->getRepository(PageRedirection::class)->findOneBy([
