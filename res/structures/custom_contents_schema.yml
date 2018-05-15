@@ -530,7 +530,6 @@ schema:
                     button_font: default
                     button_color: color2
                     button_form: true
-                    button_radius: true
                     button_size: md
         -
           data:
