@@ -298,3 +298,11 @@ services:
   cloud.color_panel_css_genrator.controller:
     class: BackBeeCloud\Controller\ColorPanelController
     arguments: ["@cloud.color_panel.css_generator", "@em"]
+
+  # Design services
+  cloud.design.font.manager:
+    class: BackBeeCloud\Design\FontManager
+
+  cloud.api.design.font.controller:
+    class: BackBeeCloud\Api\Controller\DesignFontController
+    arguments: ["@cloud.design.font.manager", "@bbapp"]
