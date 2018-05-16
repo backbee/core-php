@@ -179,6 +179,11 @@ basic.newsletter.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender]
 
+basic.cards.render:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\CardListener, onRender]
+
 
 # Controller listeners
 

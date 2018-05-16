@@ -10,6 +10,11 @@ Cards:
       type: \BackBee\ClassContent\Basic\Image
       maxentry: 1
   parameters:
+    image_stretch:
+      type: switch
+      value: false
+      label: yaml_block_cards_image_stretch
+      tab: yaml_block_general_tab
     url:
       type: text
       label: yaml_block_cards_url
