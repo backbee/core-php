@@ -1,20 +1,23 @@
 <script>
   document.addEventListener('cloudReady', function() {
     var cloud = window.cloud;
-    var form_parameters = {
+
+    var translations = {
       'fr': {
-        'yaml_block_cards_add_button' : 'Ajouter un bouton',
+        'yaml_block_cards_add_button': 'Ajouter un bouton',
+        'yaml_block_cards_image_stretch': 'Etirer l\'image',
         'yaml_block_menu_add_button': 'Ajouter un bouton',
       },
       'en': {
-        'yaml_block_cards_add_button' : 'Add a button',
+        'yaml_block_cards_add_button': 'Add a button',
+        'yaml_block_cards_image_stretch': 'Stretch image',
         'yaml_block_menu_add_button': 'Add a button',
       }
     };
 
-    for (var parameter in form_parameters) {
-      if (form_parameters.hasOwnProperty(parameter)) {
-        cloud.translator.addTransKeys(form_parameters[parameter], parameter);
+    for (var lang in translations) {
+      if (translations.hasOwnProperty(lang)) {
+        cloud.translator.addTransKeys(translations[lang], lang);
       }
     }
 
