@@ -404,6 +404,15 @@ cloud.search_i18n:
     _method: GET
     lang: "[a-z]{2}"
 
+# Design API routes
+api.design.font.get_all:
+  pattern: /api/design/fonts
+  defaults:
+    _action: getAllAction
+    _controller: cloud.api.design.font.controller
+  requirements:
+    _method: GET
+
 # Search pages by tag routes
 cloud.search_by_tag:
   pattern: /pages/tag/{tagName}
