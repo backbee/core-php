@@ -2,13 +2,14 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
 use BackBeeCloud\ImageHandlerInterface;
 use BackBeeCloud\UserAgentHelper;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
-use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Event\Event;
+use BackBee\Renderer\Event\RendererEvent;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
