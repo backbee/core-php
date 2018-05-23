@@ -13,6 +13,7 @@ interface ImageHandlerInterface
      * @param  string  $filename
      * @param  string  $filepath
      * @param  boolean $removeFile
+     *
      * @return null|string
      */
     public function upload($filename, $filepath, $removeFile = true);
@@ -24,6 +25,7 @@ interface ImageHandlerInterface
      *
      * @param  string      $url
      * @param  string|null $filename
+     *
      * @return null|string
      */
     public function uploadFromUrl($url, $filename = null);
@@ -34,4 +36,12 @@ interface ImageHandlerInterface
      * @param  string $path
      */
     public function delete($path, $throwException = false);
+
+    /**
+     * @param  string $path
+     * @param  string $newName
+     *
+     * @return null|string
+     */
+    public function duplicate($path, $newName);
 }

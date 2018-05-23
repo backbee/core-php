@@ -5,11 +5,9 @@ namespace BackBeeCloud\Listener\ClassContent;
 use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
 use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
-use BackBee\ClassContent\AbstractContent;
 use BackBee\ClassContent\Basic\Title;
 use BackBee\ClassContent\Content\HighlightContent;
-use BackBee\ClassContent\Basic\Image;
-use BackBee\Controller\Event\PreRequestEvent;
+use BackBee\ClassContent\Element\File;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
@@ -39,18 +37,11 @@ class ContentListener
         $dic = $event->getApplication()->getContainer();
         $content = $event->getContent();
 
-        if ($content instanceof Image && false != $content->image->path) {
-            $mediaDir = $event->getApplication()->getMediaDir();
-            if (1 === preg_match('~^/img/[a-f0-9]{32}\.~', (string) $content->image->path)) {
-                $sourcepath = str_replace('/img/', $mediaDir . '/', $content->image->path);
-                if (is_readable($sourcepath)) {
-                    $content->image->path = $dic->get('cloud.file_handler')->upload(
-                        sprintf('%s.%s', $content->getUid(), explode('.', basename($sourcepath))[1]),
-                        $sourcepath,
-                        false
-                    );
-                }
-            }
+        if ($content instanceof File && false != $content->path) {
+            $content->path = $event->getApplication()->getContainer()->get('cloud.file_handler')->duplicate(
+                $content->path,
+                sprintf('%s.%s', $content->getUid(), explode('.', basename($content->path))[1])
+            );
         } elseif ($content instanceof Title) {
             if (null !== $page = $dic->get('cloud.page_manager')->getCurrentPage()) {
                 $content->value = $page->getTitle();

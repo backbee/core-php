@@ -84,10 +84,33 @@ class ImageFilesystemHandler implements ImageHandlerInterface
      */
     public function delete($path, $throwException = false)
     {
-        $filepath = str_replace(static::MEDIA_BASE_URI, $this->mediaDir . '/', str_replace(['\\/', '"'], ['/', ''], $path));
+        $filepath = str_replace(
+            static::MEDIA_BASE_URI,
+            $this->mediaDir . '/',
+            str_replace(['\\/', '"'], ['/', ''], $path)
+        );
         if (file_exists($filepath)) {
             unlink($filepath);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function duplicate($path, $newName)
+    {
+        $filepath = str_replace(
+            static::MEDIA_BASE_URI,
+            $this->mediaDir . '/',
+            str_replace(['\\/', '"'], ['/', ''], $path)
+        );
+        if (!file_exists($filepath)) {
+            return null;
+        }
+
+        copy($filepath, $this->mediaDir . DIRECTORY_SEPARATOR . $newName);
+
+        return static::MEDIA_BASE_URI . $newName;
     }
 
     /**

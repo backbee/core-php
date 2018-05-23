@@ -98,8 +98,3 @@ Image:
       label: yaml_block_image_title
       value: ''
       tab: yaml_block_image_seo_title
-
-    image_small:
-      value: {}
-    image_medium:
-      value: {}
