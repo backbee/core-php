@@ -178,7 +178,7 @@
           {% set colsize = colsize ? colsize : default_colsize %}
           {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
           <div class="row-item {% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
-          {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+          {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value, 'colsize': colsize}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
         {% endfor %}
         </div>
@@ -193,7 +193,7 @@
           {% set colsize = colsize ? colsize : default_colsize %}
           {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
           <div class="row-item {% if mobileNbItem != null %}col-xs-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }} {% if key >= mobileMaxItem %}hidden-xs{% endif %} {% if key >= tabletMaxItem %}hidden-sm{% endif %}">
-          {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value}, null, this.getIgnoreIfNotAvailable())|raw}}
+          {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value, 'colsize': colsize}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
         {% endfor %}
         </div>
