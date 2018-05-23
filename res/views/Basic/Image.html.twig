@@ -79,7 +79,11 @@
 
         {% if linkValue.link == 'with_button' %}
           <div class="buttonwrapper text-center{% if display_text_hover.value %} hover-display{% endif %}">
-            <a href="{{imageBtnLink}}" class="btn color-primary {{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.font}} btn-{{ linkValue.options.form == false ? 'outline' }} btn-{{ linkValue.options.style}}">
+            <a href="{{imageBtnLink}}"
+              class="btn color-primary {{linkValue.options.color}} btn-{{linkValue.options.size}} {{linkValue.options.font}} btn-{{ linkValue.options.form == false ? 'outline' }} btn-{{ linkValue.options.style}}"
+              {% if bb.token != null %} onclick="return false;"{% endif %}
+              {% if linkValue.options.btn_link_target_blank %} target="_blank"{% endif %}
+            >
               {{imageBtnTitle|default('Button title')|raw}}
             </a>
           </div>
