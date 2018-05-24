@@ -4,6 +4,8 @@
 {% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %}
 {% set autoSizeClass = this.getObject().getParamValue('stretch') ? ' image-auto-width' : autoSizeClass %}
 {% set dataForbidden = forbiddenPlugins ? forbiddenPlugins : 'click' %}
+{% set image_full_width_path = image_full_width_path is defined ? image_full_width_path : '' %}
+
 {% if image.path == false %}
   {% set dataForbidden = forbiddenPlugins ~ ',parameter' %}
 {% endif %}
@@ -33,8 +35,13 @@
     {% endif %}
   >
 
-  {% if image.path != null and bb.token == null and linkValue.link == 'image_link' %}<a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>{% endif %}
-  {% if image.path != null and bb.token == null and linkValue.link == 'lightbox' %}<a href="{{this.getCdnImageUrl(image.path)|raw}}" data-lightbox="lightbox">{% endif %}
+  {% if image.path != null and bb.token == null %}
+    {% if linkValue.link == 'image_link' %}
+      <a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>
+    {% elseif linkValue.link == 'lightbox' %}
+      <a href="{{ this.getCdnImageUrl(image_full_width_path ?: image.path)|raw }}" data-lightbox="lightbox">
+    {% endif %}
+  {% endif %}
 
     <div class="contentwrapper{% if this.userAgentHelper().isDesktop() == false %} hover-none{% endif %}">
       {% set img_alt = description.value != false ? description.value|striptags : '' %}
