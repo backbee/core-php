@@ -32,7 +32,7 @@ abstract class AbstractController
         if (null === $this->bbtoken) {
             $response = new JsonResponse([
                 'error'  => 'unauthorized',
-                'reason' => 'You must be authenticated complete the action.',
+                'reason' => 'You must be authenticated to complete this action.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 

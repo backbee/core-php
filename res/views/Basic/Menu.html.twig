@@ -17,7 +17,13 @@
         <div class="dropdown-menu">
           {% for lang in actives_lang %}
           {% if current_lang != lang.id %}
-            <a class="dropdown-item" href="{{this.getHomeUrl(lang.id)}}">{{lang.id|upper}}</a>
+            {% set page_url = multilang_equivalent_pages[lang.id] is defined
+              ? multilang_equivalent_pages[lang.id].getUrl()
+              : this.getHomeUrl(lang.id)
+            %}
+            <a class="dropdown-item" href="{{ page_url }}">
+              {{ lang.id|upper }}
+            </a>
           {% endif %}
           {% endfor %}
         </div>

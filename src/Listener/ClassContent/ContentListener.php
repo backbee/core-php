@@ -38,6 +38,10 @@ class ContentListener
         $content = $event->getContent();
 
         if ($content instanceof File && false != $content->path) {
+            if (false !== strpos($content->path, 'theme-default-resources')) {
+                return;
+            }
+
             $content->path = $event->getApplication()->getContainer()->get('cloud.file_handler')->duplicate(
                 $content->path,
                 sprintf('%s.%s', $content->getUid(), explode('.', basename($content->path))[1])

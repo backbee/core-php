@@ -155,13 +155,26 @@ services:
     class: BackBeeCloud\Api\Controller\MultiLangController
     arguments: ["@multilang_manager", "@bbapp"]
 
+  api.multilang.listener:
+    class: BackBeeCloud\Listener\MultiLangListener
+    arguments:
+      - "@multilang_manager"
+      - "@cloud.multilang.page_association.manager"
+      - "@em"
+
   cloud.multilang.page_association.controller:
     class: BackBeeCloud\Api\Controller\PageAssociationController
-    arguments: ["@bbapp"]
+    arguments:
+      - "@bbapp"
+      - "@cloud.multilang.page_association.manager"
+      - "@cloud.page_manager"
 
   cloud.multilang.page_association.manager:
     class: BackBeeCloud\MultiLang\PageAssociationManager
-    arguments: ["@bbapp"]
+    arguments:
+      - "@em"
+      - "@multilang_manager"
+      - "@elasticsearch.manager"
 
   # Structure's services
   cloud.structure.schema_parser:

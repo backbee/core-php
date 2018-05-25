@@ -1,25 +1,31 @@
 {% set page = this.getCurrentPage() %}
 {% set title = (metadata.title != false ? metadata.title : page.getTitle()) ~ ' - ' ~ this.sitename() %}
 
-<title>{{title}}</title>
+<title>{{ title }}</title>
 
-<meta name="title" content="{{title}}" />
+<meta name="title" content="{{ title }}" />
 {% if metadata.description != false %}
-<meta name="description" content="{{metadata.description}}" />
+  <meta name="description" content="{{ metadata.description }}" />
 {% endif %}
 
-<meta property="og:title" content="{{title}}" />
+<meta property="og:title" content="{{ title }}" />
 {% if metadata.description != false %}
-<meta property="og:description" content="{{metadata.description}}" />
+  <meta property="og:description" content="{{ metadata.description }}" />
 {% endif %}
-<meta property="og:type" content="website" />
-<meta property="og:url" content="{{this.getUri(page.getUrl(), false)}}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ this.getUri(page.getUrl(), false) }}" />
 {% if metadata.image_url != false %}
-<meta property="og:image" content="{{metadata.image_url}}" />
-<meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:image" content="{{ metadata.image_url }}" />
+  <meta name="twitter:card" content="summary_large_image" />
 {% endif %}
 {% if metadata.locale != false %}
-<meta property="og:locale" content="{{metadata.locale}}" />
+  <meta property="og:locale" content="{{ metadata.locale }}" />
 {% endif %}
-<meta property="og:site_name" content="{{this.sitename()}}" />
-<meta name="twitter:title" content="{{title}}" />
+<meta property="og:site_name" content="{{ this.sitename() }}" />
+<meta name="twitter:title" content="{{ title }}" />
+
+{% if multilang_equivalent_pages is defined %}
+  {% for lang, page in multilang_equivalent_pages %}
+    <link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ lang }}" />
+  {% endfor %}
+{% endif %}

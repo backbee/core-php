@@ -46,7 +46,7 @@ class PageAssociation
         return $this->id;
     }
 
-    public function setId()
+    public function updateId(PageLang $id)
     {
         $this->id = $id;
     }
@@ -54,10 +54,5 @@ class PageAssociation
     public function getPage()
     {
         return $this->page;
-    }
-
-    public function setPage(PageLang $page)
-    {
-        $this->page = $page;
     }
 }

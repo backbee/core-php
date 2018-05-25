@@ -4,12 +4,17 @@ namespace BackBeeCloud\Listener;
 
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageLang;
+use BackBeeCloud\MultiLang\MultiLangManager;
+use BackBeeCloud\MultiLang\PageAssociationManager;
 use BackBeeCloud\MultiLang\RedirectToDefaultLangHomeException;
 use BackBee\Bundle\Registry;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
+use BackBee\Renderer\Event\RendererEvent;
+use BackBee\Security\Token\BBUserToken;
 use BackBee\Utils\StringUtils;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
@@ -20,43 +25,69 @@ class MultiLangListener
 {
     const LANG_MAIN_FALLBACK = 'en';
 
-    public static function onHomePreCall(PreRequestEvent $event)
+    /**
+     * @var MultiLangManager
+     */
+    protected $multilangManager;
+
+    /**
+     * @var PageAssociationManager
+     */
+    protected $pageAssociationManager;
+
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
+    public function __construct(
+        MultiLangManager $multilangManager,
+        PageAssociationManager $pageAssociationManager,
+        EntityManager $entityManager
+    ) {
+        $this->multilangManager = $multilangManager;
+        $this->pageAssociationManager = $pageAssociationManager;
+        $this->entityManager = $entityManager;
+    }
+
+    public function onHomePreCall(PreRequestEvent $event)
     {
-        $app = $event->getApplication();
-        $multilangMgr = $app->getContainer()->get('multilang_manager');
-        if ('/' !== $event->getTarget()->getPathInfo() || null === $multilangMgr->getDefaultLang()) {
+        if (
+            '/' !== $event->getTarget()->getPathInfo()
+            || !$this->multilangManager->isActive()
+        ) {
             return;
         }
 
-        $entyMgr = $app->getEntityManager();
-        foreach ($app->getRequest()->getLanguages() as $langId) {
+        $request = $event->getRequest();
+        foreach ($request->getLanguages() as $langId) {
             $langId = substr($langId, 0, 2);
-            if (2 === strlen($langId) && $lang = $entyMgr->find(Lang::class, $langId)) {
+            if (2 === strlen($langId) && $lang = $this->entityManager->find(Lang::class, $langId)) {
                 if (!$lang->isActive()) {
                     continue;
                 }
 
-                $queryString = http_build_query($event->getTarget()->query->all());
+                $queryString = http_build_query($request->query->all());
 
                 throw new RedirectToDefaultLangHomeException(sprintf(
                     '%s%s',
-                    $multilangMgr->getRootByLang($lang)->getUrl(),
+                    $this->multilangManager->getRootByLang($lang)->getUrl(),
                     $queryString ? '?' . $queryString : ''
                 ));
             }
         }
 
         $lang = null;
-        $fallback = $entyMgr->find(Lang::class, self::LANG_MAIN_FALLBACK);
+        $fallback = $this->entityManager->find(Lang::class, self::LANG_MAIN_FALLBACK);
         if ($fallback) {
-            $lang = $multilangMgr->getLang($fallback->getLang());
+            $lang = $this->multilangManager->getLang($fallback->getLang());
         }
 
         if (
             null === $lang
             || (null !== $lang && false === $lang['is_active'])
         ) {
-            $lang = $multilangMgr->getDefaultLang();
+            $lang = $this->multilangManager->getDefaultLang();
         }
 
         if (null === $lang) {
@@ -64,7 +95,7 @@ class MultiLangListener
         }
 
         $rootUrl = sprintf('/%s/', $lang['id']);
-        $rootPage = $entyMgr->getRepository(Page::class)->findOneBy([
+        $rootPage = $this->entityManager->getRepository(Page::class)->findOneBy([
             '_url'   => $rootUrl,
             '_state' => Page::STATE_ONLINE,
         ]);
@@ -74,10 +105,9 @@ class MultiLangListener
         }
 
         throw new RedirectToDefaultLangHomeException($rootUrl);
-
     }
 
-    public static function onMultiLangException(GetResponseForExceptionEvent $event)
+    public function onMultiLangException(GetResponseForExceptionEvent $event)
     {
         if (!($event->getException() instanceof RedirectToDefaultLangHomeException)) {
             return;
@@ -86,10 +116,9 @@ class MultiLangListener
         $event->setResponse(new RedirectResponse($event->getException()->getRedirectTo()));
     }
 
-    public static function onMenuPrePersist(Event $event)
+    public function onMenuPrePersist(Event $event)
     {
-        $multilangMgr = $event->getApplication()->getContainer()->get('multilang_manager');
-        if (null === $multilangMgr->getDefaultLang()) {
+        if (!$this->multilangManager->isActive()) {
             return;
         }
 
@@ -101,12 +130,12 @@ class MultiLangListener
             return;
         }
 
-        if (null === $currentLang = $multilangMgr->getCurrentLang()) {
+        if (null === $currentLang = $this->multilangManager->getCurrentLang()) {
             return;
         }
 
-        $lang = $event->getApplication()->getEntityManager()->find(Lang::class, $currentLang);
-        $homepage = $multilangMgr->getRootByLang($lang);
+        $lang = $this->entityManager->find(Lang::class, $currentLang);
+        $homepage = $this->multilangManager->getRootByLang($lang);
 
         $menu->setParam('items', [
             [
@@ -115,5 +144,51 @@ class MultiLangListener
                 'label' => $homepage->getTitle(),
             ],
         ]);
+    }
+
+    public function onPageRender(RendererEvent $event)
+    {
+        if (!$this->multilangManager->isActive()) {
+            return;
+        }
+
+        $event->getRenderer()->assign(
+            'multilang_equivalent_pages',
+            $this->getEquivalentPagesData(
+                $event->getTarget(),
+                $event->getApplication()->getBBUserToken()
+            )
+        );
+    }
+
+    public function onMenuRender(RendererEvent $event)
+    {
+        if (!$this->multilangManager->isActive()) {
+            return;
+        }
+
+        if (null === $currentPage = $event->getRenderer()->getCurrentPage()) {
+            return;
+        }
+
+        $event->getRenderer()->assign(
+            'multilang_equivalent_pages',
+            $this->getEquivalentPagesData(
+                $currentPage,
+                $event->getApplication()->getBBUserToken()
+            )
+        );
+    }
+
+    protected function getEquivalentPagesData(Page $currentPage, BBUserToken $bbtoken = null)
+    {
+        $equivalentPages = [];
+        foreach ($this->pageAssociationManager->getAssociatedPages($currentPage) as $lang => $page) {
+            if ($page->isOnline() || null !== $bbtoken) {
+                $equivalentPages[$lang] = $page;
+            }
+        }
+
+        return $equivalentPages;
     }
 }

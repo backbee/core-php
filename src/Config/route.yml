@@ -435,30 +435,38 @@ cloud.search_by_tag_i18n:
 
 # Page association API
 api.multilang.get_associated_pages:
-    pattern: /api/multilang/associated-pages/{pageuid}
-    defaults:
-        _action: getAssociatedPagesAction
-        _controller: cloud.multilang.page_association.controller
-    requirements:
-        _method: GET
-        pageuid: "[a-f0-9]{32}"
-        
-api.multilang.get_associated_page:
-    pattern: /api/multilang/associated-page/{pageuid}/{lang}
-    defaults:
-        _action: getAssociatedPageAction
-        _controller: cloud.multilang.page_association.controller
-    requirements:
-        _method: GET
-        pageuid: "[a-f0-9]{32}"
-        lang: "[a-z]{2}"
-        
-api.multilang.set_associated_page:
-    pattern: /api/multilang/associate-pages/{pageuid}
-    defaults:
-        _action: setAssociatedPageAction
-        _controller: cloud.multilang.page_association.controller
-    requirements:
-        _method: PUT
-        pageuid: "[a-f0-9]{32}"
-        
+  pattern: /api/multilang/associated-pages/{pageuid}
+  defaults:
+    _action: getAssociatedPagesAction
+    _controller: cloud.multilang.page_association.controller
+  requirements:
+    _method: GET
+    pageuid: "[a-f0-9]{32}"
+
+api.multilang.associated_pages_search:
+  pattern: /api/multilang/associated-pages/custom-search-page/{pageuid}
+  defaults:
+    _action: customSearchPageAction
+    _controller: cloud.multilang.page_association.controller
+  requirements:
+    _method: GET
+    pageuid: "[a-f0-9]{32}"
+
+api.multilang.associate_pages:
+  pattern: /api/multilang/associated-pages/{pageuid}
+  defaults:
+    _action: associatePagesAction
+    _controller: cloud.multilang.page_association.controller
+  requirements:
+    _method: PUT
+    pageuid: "[a-f0-9]{32}"
+
+api.multilang.delete_page_association:
+  pattern: /api/multilang/associated-pages/{pageuid}
+  defaults:
+    _action: deletePageAssociationAction
+    _controller: cloud.multilang.page_association.controller
+  requirements:
+    _method: DELETE
+    pageuid: "[a-f0-9]{32}"
+

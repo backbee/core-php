@@ -102,6 +102,20 @@ class MultiLangManager implements JobHandlerInterface
         return $result;
     }
 
+    public function getActiveLangs()
+    {
+        return array_filter($this->getAllLangs(), function (array $lang) {
+            return $lang['is_active'];
+        });
+    }
+
+    public function isLangActive($lang)
+    {
+        $lang = $lang instanceof Lang ? $lang->getLang() : $lang;
+
+        return in_array($lang, array_column($this->getActiveLangs(), 'id'));
+    }
+
     public function getLang($id)
     {
         $result = null;

@@ -2,9 +2,11 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBeeCloud\Entity\PageManager;
+use BackBeeCloud\MultiLang\PageAssociationManager;
 use BackBee\BBApplication;
-use BackBee\NestedNode\Page;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -13,103 +15,120 @@ use Symfony\Component\HttpFoundation\Response;
 class PageAssociationController extends AbstractController
 {
     /**
-     * @var BBApplication
-     */
-    protected $app;
-
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $entyMgr;
-
-    /**
-     * @var \BackBeeCloud\PageAssociationManager;
+     * @var PageAssociationManager
      */
     protected $pageAssociationMgr;
 
     /**
-     * @var \BackBeeCloud\Entity\PageManager;
+     * @var PageManager
      */
     protected $pageMgr;
 
-    public function __construct(BBApplication $app)
+    public function __construct(BBApplication $app, PageAssociationManager $pageAssociationMgr, PageManager $pageMgr)
     {
         parent::__construct($app);
 
-        $this->app                = $app;
-        $this->entyMgr            = $app->getEntityManager();
-        $this->pageAssociationMgr = $app->getContainer()->get('cloud.multilang.page_association.manager');
-        $this->pageMgr            = $app->getContainer()->get('cloud.page_manager');
+        $this->pageAssociationMgr = $pageAssociationMgr;
+        $this->pageMgr = $pageMgr;
+    }
+
+    public function customSearchPageAction($pageuid, Request $request)
+    {
+        if ($response = $this->getResponseOnAnonymousUser()) {
+            return $response;
+        }
+
+        if (null === $page = $this->pageMgr->get($pageuid)) {
+            return $this->getPageNotFoundResponse($pageuid);
+        }
+
+        $pages = $this->pageAssociationMgr->customSearchPages($page, $request->query->get('term', ''));
+
+        return new JsonResponse($this->pageMgr->formatCollection($pages, true));
     }
 
     public function getAssociatedPagesAction($pageuid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
+        if ($response = $this->getResponseOnAnonymousUser()) {
             return $response;
         }
 
-        $page = $this->entyMgr->find(Page::class, $pageuid);
-        if (false == $page) {
+        if (null === $page = $this->pageMgr->get($pageuid)) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
         $associatedPages = $this->pageAssociationMgr->getAssociatedPages($page);
 
         return new JsonResponse(
-            $this->formatCollection($associatedPages, true), Response::HTTP_OK
+            $this->pageMgr->formatCollection($associatedPages, true)
         );
     }
 
     public function getAssociatedPageAction($pageuid, $lang)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
+        if ($response = $this->getResponseOnAnonymousUser()) {
             return $response;
         }
 
-        $page = $this->entyMgr->find(Page::class, $pageuid);
+        $page = $this->pageMgr->get($pageuid);
         if (false == $page) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
-        $associatedPage = $this->pageAssociationMgr->getAssociatedPage($page,
-            $lang);
+        $associatedPage = $this->pageAssociationMgr->getAssociatedPage($page, $lang);
 
         return new JsonResponse(
-            $associatedPage ? $this->pageMgr->format($associatedPage, true) : null,
-            Response::HTTP_OK
+            $associatedPage ? $this->pageMgr->format($associatedPage, true) : null
         );
     }
 
-    public function setAssociatedPageAction($pageuid)
+    public function associatePagesAction($pageuid, Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
+        if ($response = $this->getResponseOnAnonymousUser()) {
             return $response;
         }
 
-        $page = $this->entyMgr->find(Page::class, $pageuid);
-        if (false == $page) {
+        if (null === $page = $this->pageMgr->get($pageuid)) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
-        $request       = $this->app->getRequest();
-        $targetpageuid = $request->request->get('targetpageuid');
-        $targetPage    = $this->entyMgr->find(Page::class, $targetpageuid);
-        if (false == $targetPage) {
-            return $this->getPageNotFoundResponse($targetpageuid);
+        $targetPageUid = $request->request->get('targetpageuid');
+        if (null === $targetPage = $this->pageMgr->get($targetPageUid)) {
+            return $this->getPageNotFoundResponse($targetPageUid);
         }
 
         try {
-            $result = $this->pageAssociationMgr->setAssociatedPage($page,
-                $targetPage);
+            $this->pageAssociationMgr->associatePages($page, $targetPage);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'error' => 'bad_request',
                 'reason' => $e->getMessage(),
-                ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_BAD_REQUEST);
         }
-        return new JsonResponse(
-            null, Response::HTTP_OK
-        );
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    public function deletePageAssociationAction($pageuid)
+    {
+        if ($response = $this->getResponseOnAnonymousUser()) {
+            return $response;
+        }
+
+        if (null === $page = $this->pageMgr->get($pageuid)) {
+            return $this->getPageNotFoundResponse($pageuid);
+        }
+
+        try {
+            $this->pageAssociationMgr->deleteAssociatedPage($page);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'bad_request',
+                'reason' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 
     protected function getPageNotFoundResponse($pageuid)
@@ -117,26 +136,6 @@ class PageAssociationController extends AbstractController
         return new JsonResponse([
             'error' => 'not_found',
             'reason' => "Page with uid `{$pageuid}` does not exist.",
-            ], Response::HTTP_NOT_FOUND);
-    }
-
-    /**
-     * Applies ::format() on every item of the provided collection.
-     *
-     * @see ::format()
-     *
-     * @param mixed $collection
-     * @param bool  $strictDraftMode
-     *
-     * @return array
-     */
-    public function formatCollection($collection, $strictDraftMode)
-    {
-        $result = [];
-        foreach ($collection as $key => $page) {
-            $result[$key] = $this->pageMgr->format($page, $strictDraftMode);
-        }
-
-        return $result;
+        ], Response::HTTP_NOT_FOUND);
     }
 }
