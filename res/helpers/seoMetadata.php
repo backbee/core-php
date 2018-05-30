@@ -17,15 +17,24 @@ use Elasticsearch\Common\Exceptions\Missing404Exception;
  */
 class seoMetadata extends AbstractHelper
 {
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
     protected $entyMgr;
+
+    /**
+     * @var \BackBeeCloud\Elasticsearch\ElasticsearchManager
+     */
     protected $elasticsearchMgr;
 
     public function __construct(AbstractRenderer $renderer)
     {
         parent::__construct($renderer);
 
-        $this->entyMgr = $renderer->getApplication()->getEntityManager();
-        $this->elasticsearchMgr = $renderer->getApplication()->getContainer()->get('elasticsearch.manager');
+        $app = $renderer->getApplication();
+
+        $this->entyMgr = $app->getEntityManager();
+        $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
     }
 
     public function __invoke(Page $page)

@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <link rel="canonical" href="{{ bb.routing.getUri(this.getCurrentPage().getUrl(), '', this.getCurrentSite()) }}" />
 
-    {{this.seoMetadata(this.getCurrentPage())|raw}}
-
+    {{ this.seoMetadata(this.getCurrentPage())|raw }}
 
     {% if favicon_data is defined %}
       {% if favicon_data.url_144x144 is defined and favicon_data.url_144x144 != '' %}

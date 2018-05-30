@@ -44,7 +44,7 @@ kernel.exception:
         - [BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100]
         - [@cloud.disqus_listener, onDisqusControlledException, 100]
         - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
-        - [BackBeeCloud\Listener\MultiLangListener, onMultiLangException, 100]
+        - ["@api.multilang.listener", onMultiLangException, 100]
         - [BackBeeCloud\Listener\CoreListener, onKernelException, 50]
         - [BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100]
 
@@ -125,13 +125,14 @@ article.articletitle.render:
 basic.menu.prepersist:
     listeners:
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\MultiLangListener, onMenuPrePersist, 100]
+        - ["@api.multilang.listener", onMenuPrePersist, 100]
         - [BackBeeCloud\Listener\MenuListener, onPrePersist]
 
 basic.menu.render:
     listeners:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\MenuListener, onRender]
+        - ["@api.multilang.listener", onMenuRender]
 
 contentautoblock.render:
     listeners:
@@ -255,7 +256,7 @@ controller.frontcontroller.rssaction.precall:
 controller.frontcontroller.defaultaction.precall:
     listeners:
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\MultiLangListener, onHomePreCall, 100]
+        - ["@api.multilang.listener", onHomePreCall, 100]
 
 backbeecloud.api.controller.contentcontroller.delete.precall:
     listeners:
@@ -373,6 +374,7 @@ nestednode.page.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\PageListener, onPageRender]
         - [BackBeeCloud\Listener\ThemeColorListener, onPageRender]
+        - ["@api.multilang.listener", onPageRender]
 
 nestednode.page.postrender:
     listeners:
