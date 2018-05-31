@@ -19,7 +19,7 @@
   >
   {% for image in images %}
     {% if image != false %}
-    {{ this.render(image, 'slider', {'in_fluid': in_fluid})|raw }}
+    {{ this.render(image, 'slider', {'in_fluid': in_fluid, 'colsize': colsize})|raw }}
     {% endif %}
   {% endfor %}
   </div>

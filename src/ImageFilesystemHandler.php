@@ -26,26 +26,6 @@ class ImageFilesystemHandler implements ImageHandlerInterface
         $this->mediaDir = $app->getMediaDir();
     }
 
-    public function onImageDuplicatePreSave(ContentDuplicatePreSaveEvent $event)
-    {
-        $content = $event->getContent();
-        if (!($content instanceof Image)) {
-            return;
-        }
-
-        $event->stopPropagation();
-        if (1 === preg_match(static::MEDIA_URI_REGEX, (string) $content->image->path)) {
-            $sourcepath = str_replace(static::MEDIA_BASE_URI, $this->mediaDir . '/', $content->image->path);
-            if (is_readable($sourcepath)) {
-                $content->image->path = $this->upload(
-                    sprintf('%s.%s', $content->getUid(), explode('.', basename($sourcepath))[1]),
-                    $sourcepath,
-                    false
-                );
-            }
-        }
-    }
-
     /**
      * {@inheritdoc}
      */
