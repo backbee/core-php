@@ -9,9 +9,24 @@ use Jenssegers\Agent\Agent;
  */
 class UserAgentHelper
 {
+    /**
+     * @var Agent
+     */
     protected static $agent;
+
+    /**
+     * @var bool
+     */
     protected static $isDesktop;
+
+    /**
+     * @var bool
+     */
     protected static $isMobile;
+
+    /**
+     * @var bool
+     */
     protected static $isTablet;
 
     public static function isDesktop()
@@ -64,7 +79,7 @@ class UserAgentHelper
 
     public static function getDeviceType()
     {
-        return self::isDesktop() ? 'desktop' : (self::isMobile() ? 'mobile' : 'tablet');
+        return self::isDesktop() ? 'desktop' : (self::isTablet() ? 'tablet' : 'mobile');
     }
 
     protected static function getAgent()
