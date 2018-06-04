@@ -327,6 +327,21 @@ services:
   cloud.design.font.manager:
     class: BackBeeCloud\Design\FontManager
 
+  cloud.design.button.manager:
+    class: BackBeeCloud\Design\ButtonManager
+    factory: ["BackBeeCloud\Design\ButtonManagerFactory", createButtonManager]
+    arguments:
+      - "@em"
+      - "@cloud.design.font.manager"
+
   cloud.api.design.font.controller:
     class: BackBeeCloud\Api\Controller\DesignFontController
-    arguments: ["@cloud.design.font.manager", "@bbapp"]
+    arguments:
+      - "@cloud.design.font.manager"
+      - "@bbapp"
+
+  cloud.api.design.button.controller:
+    class: BackBeeCloud\Api\Controller\DesignButtonController
+    arguments:
+      - "@cloud.design.button.manager"
+      - "@bbapp"

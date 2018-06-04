@@ -1,5 +1,5 @@
-
 {% set formId = 'form_' ~ this.getObject().getUid() %}
+{% set button_settings = this.getDesignSettings('button') %}
 
 <div {{this.bbcontent(null, {'class': 'content contact-form'})|raw}}>
     {% if email.value is not empty %}
@@ -18,7 +18,7 @@
             <label class="form-label sr-only" for="formMessage">{{ message_placeholder.value }}</label>
             <textarea name="message" class="form-control" id="formMessage" rows="3" placeholder="{{ message_placeholder.value }}"></textarea>
         </div>
-        <div class="form-action text-{{button_align.value}}">
+        <div class="form-action text-{{ button_align.value }}">
             {% if recaptcha_sitekey is defined and bb.token == null %}
                 <div class="g-recaptcha" data-sitekey="{{ recaptcha_sitekey }}"></div>
                 <p class="recaptcha-error error-form-message"></p>
@@ -28,7 +28,8 @@
             <button
                 {% block data_button_attributes %}{% endblock %}
                 type="button"
-                class="btn color-primary {{button_color.value}} btn-{{button_size.value}} {{button_font.value}} btn-{{ button_form.value == false ? 'outline' : '' }} btn-{{ button_style.value }}"
+                class="btn color-primary {{ button_color.value }} btn-{{ button_size.value }} btn-{{ button_form.value == false ? 'outline' : '' }} btn-{{ button_settings.shape }}"
+                {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
             >
                 {{ button_title.value }}
             </button>

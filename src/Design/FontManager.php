@@ -46,4 +46,9 @@ class FontManager
     {
         return $this->fonts;
     }
+
+    public function hasValue($value)
+    {
+        return in_array($value, array_column($this->fonts, 'value'));
+    }
 }
