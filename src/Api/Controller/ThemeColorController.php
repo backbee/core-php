@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBeeCloud\ThemeColor\ThemeColorManager;
+use BackBeeCloud\ThemeColor\ColorPanelManager;
 use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,11 +19,17 @@ class ThemeColorController extends AbstractController
      */
     protected $themeColorManager;
 
-    public function __construct(ThemeColorManager $themeColorManager, BBApplication $app)
+    /**
+     * @var ColorPanelManager
+     */
+    protected $colorPanelManager;
+
+    public function __construct(ThemeColorManager $themeColorManager, ColorPanelManager $colorPanelManager, BBApplication $app)
     {
         parent::__construct($app);
 
         $this->themeColorManager = $themeColorManager;
+        $this->colorPanelManager = $colorPanelManager;
     }
 
     public function getAllThemesAction()
@@ -32,5 +39,12 @@ class ThemeColorController extends AbstractController
         }
 
         return new JsonResponse($this->themeColorManager->all());
+    }
+
+    public function getCurrentThemeAction()
+    {
+        return new JsonResponse(
+            $this->themeColorManager->getByColorPanel($this->colorPanelManager->getColorPanel())
+        );
     }
 }

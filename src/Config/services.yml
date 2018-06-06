@@ -299,7 +299,10 @@ services:
 
   cloud.api.theme_color.controller:
     class: BackBeeCloud\Api\Controller\ThemeColorController
-    arguments: ["@cloud.theme_color.manager", "@bbapp"]
+    arguments:
+      - "@cloud.theme_color.manager"
+      - "@cloud.color_panel.manager"
+      - "@bbapp"
 
   cloud.color_panel.manager:
     class: BackBeeCloud\ThemeColor\ColorPanelManager

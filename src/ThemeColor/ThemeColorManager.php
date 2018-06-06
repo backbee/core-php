@@ -51,4 +51,22 @@ class ThemeColorManager
 
         return $this->themes[$uniqueName];
     }
+
+    public function getByColorPanel(ColorPanel $colorPanel)
+    {
+        $result = null;
+        foreach ($this->themes as $theme) {
+            if (
+                $theme->getColorPanel()->getSecondaryColor()->isEqualTo($colorPanel->getSecondaryColor())
+                && $theme->getColorPanel()->getTextColor()->isEqualTo($colorPanel->getTextColor())
+                && $theme->getColorPanel()->getBackgroundColor()->isEqualTo($colorPanel->getBackgroundColor())
+            ) {
+                $result = $theme;
+
+                break;
+            }
+        }
+
+        return $result ?: $this->getDefault();
+    }
 }
