@@ -355,6 +355,14 @@ api.theme_color.get_all_themes:
   requirements:
     _method: GET
 
+api.theme_color.get_current_theme:
+  pattern: /api/current-theme
+  defaults:
+    _action: getCurrentThemeAction
+    _controller: cloud.api.theme_color.controller
+  requirements:
+    _method: GET
+
 api.color_panel.change_theme_color:
   pattern: /api/color-panel/change-theme
   defaults:

@@ -88,6 +88,11 @@ class Color implements \JsonSerializable
         return $this->color;
     }
 
+    public function isEqualTo(Color $color)
+    {
+        return $this->id === $color->getId() && $this->color === $color->getColor();
+    }
+
     /**
      * {@inheritdoc}
      */
