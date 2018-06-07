@@ -44,14 +44,18 @@
   </ul>
   {% if button_hide_on_mobile.value == false or this.userAgentHelper().isMobile() == false %}
     {% if add_button.value and (button_title.value or bb.token != null) %}
+      {% set button_settings = this.getDesignSettings('button') %}
+
       <form class="btn-menu form-inline my-2 my-lg-0">
-        <a href="{{button_url.value}}"
+        <a
+          href="{{ button_url.value }}"
           role="button"
           {% block data_attributes %}{% endblock %}
           {% if button_target_blank.value == true %}target="_blank"{% endif %}
-          class="my-2 my-sm-0 btn color-primary {{ button_color.value }}{{ button_form.value == false ? ' btn-outline' }}"
+          class="my-2 my-sm-0 btn color-primary {{ button_color.value }}{{ button_form.value == false ? ' btn-outline' }} btn-{{ button_settings.shape }}"
+          {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
         >
-          {{button_title.value|raw}}
+          {{ button_title.value|raw }}
         </a>
       </form>
       <script type="text/javascript">

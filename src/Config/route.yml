@@ -421,6 +421,30 @@ api.design.font.get_all:
   requirements:
     _method: GET
 
+api.design.button.get_settings:
+  pattern: /api/design/button-settings
+  defaults:
+    _action: getSettingsAction
+    _controller: cloud.api.design.button.controller
+  requirements:
+    _method: GET
+
+api.design.button.get_shape_values:
+  pattern: /api/design/button-settings/shapes
+  defaults:
+    _action: getShapeValuesAction
+    _controller: cloud.api.design.button.controller
+  requirements:
+    _method: GET
+
+api.design.button.update_settings:
+  pattern: /api/design/button-settings
+  defaults:
+    _action: updateSettingsAction
+    _controller: cloud.api.design.button.controller
+  requirements:
+    _method: PUT
+
 # Search pages by tag routes
 cloud.search_by_tag:
   pattern: /pages/tag/{tagName}

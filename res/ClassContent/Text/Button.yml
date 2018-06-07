@@ -36,28 +36,10 @@ Button:
       tab: yaml_block_button_style
       group:
         id: align
-    font:
-      type: select
-      label: yaml_block_button_font
-      options:
-        'default': 'Default'
-        'arial': 'Arial/Arial, Helvetica, sans-serif'
-        'comic': 'Comic Sans MS/Comic Sans MS, cursive'
-        'courier': 'Courier New/Courier New, Courier, monospace'
-        'georgia': 'Georgia/Georgia, serif'
-        'lucida': 'Lucida Sans Unicode/Lucida Sans Unicode, Lucida Grande, sans-serif'
-        'tahoma': 'Tahoma/Tahoma, Geneva, sans-serif'
-        'times-new-roman': 'Times New Roman/Times New Roman, Times, serif'
-        'trebuchet': 'Trebuchet MS/Trebuchet MS, Helvetica, sans-serif'
-        'verdana': 'Verdana/Verdana, Geneva, sans-serif'
-      value: 'default'
-      tab: yaml_block_button_style
-      group:
-        id: color
     color:
       type: color
       label: yaml_block_button_color
-      value: ''
+      value: 'color-primary'
       disable_transparent: true
       tab: yaml_block_button_style
       group:
@@ -67,15 +49,6 @@ Button:
       label: yaml_block_button_line_color
       label_selected: yaml_block_button_full_color
       value: true
-      tab: yaml_block_button_style
-    style:
-      type: select
-      label: yaml_block_button_style
-      options:
-        square: yaml_block_button_square
-        radius: yaml_block_button_radius
-        rounded: yaml_block_button_rounded
-      value: radius
       tab: yaml_block_button_style
     size:
       type: select

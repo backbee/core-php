@@ -52,24 +52,6 @@ Contact:
       tab: yaml_block_contact_button
       group:
         id: align
-    button_font:
-      type: select
-      label: yaml_block_contact_font
-      options:
-        'default': 'Default'
-        'arial': 'Arial/Arial, Helvetica, sans-serif'
-        'comic': 'Comic Sans MS/Comic Sans MS, cursive'
-        'courier': 'Courier New/Courier New, Courier, monospace'
-        'georgia': 'Georgia/Georgia, serif'
-        'lucida': 'Lucida Sans Unicode/Lucida Sans Unicode, Lucida Grande, sans-serif'
-        'tahoma': 'Tahoma/Tahoma, Geneva, sans-serif'
-        'times-new-roman': 'Times New Roman/Times New Roman, Times, serif'
-        'trebuchet': 'Trebuchet MS/Trebuchet MS, Helvetica, sans-serif'
-        'verdana': 'Verdana/Verdana, Geneva, sans-serif'
-      value: 'default'
-      tab: yaml_block_contact_button
-      group:
-        id: color
     button_color:
       type: color
       label: yaml_block_contact_color
@@ -86,15 +68,6 @@ Contact:
       tab: yaml_block_contact_button
       group:
         id: color
-    button_style:
-      type: select
-      label: yaml_block_button_style
-      options:
-        square: yaml_block_button_square
-        radius: yaml_block_button_radius
-        rounded: yaml_block_button_rounded
-      value: radius
-      tab: yaml_block_contact_button
     button_size:
       type: select
       label: yaml_block_contact_size
