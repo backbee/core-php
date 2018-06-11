@@ -1,12 +1,16 @@
 {% set header_menu = this.globalContentFactory().getHeaderMenu() %}
+{% set global_content_settings = this.getDesignSettings('global_content') %}
+{% if global_content_settings['header_background_color'] is defined and global_content_settings['header_background_color'] %}
+  {% set background_color_id = global_content_settings['header_background_color'] %}
+{% endif %}
 
-<nav class="navbar navbar-header fixed-top{% if not header_menu.getParamValue('burger') %} navbar-expand-lg{% endif %}">
+<nav class="navbar navbar-header fixed-top{% if not header_menu.getParamValue('burger') %} navbar-expand-lg{% endif %} {% if background_color_id is defined %} has-bg-color {{ background_color_id }} {% endif %}">
   <div class="container">
-      {{this.render(this.globalContentFactory().getHeaderLogo(), 'logo_header')|raw}}
+      {{ this.render(this.globalContentFactory().getHeaderLogo(), 'logo_header')|raw }}
     <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar-primary" aria-controls="navbar-primary" aria-expanded="false">
       <span class="icon-bar"></span>
     </button>
 
-    {{this.render(this.globalContentFactory().getHeaderMenu(), 'menu_header')|raw}}
+    {{ this.render(this.globalContentFactory().getHeaderMenu(), 'menu_header')|raw }}
   </div>
 </nav>

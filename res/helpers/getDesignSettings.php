@@ -29,6 +29,7 @@ class getDesignSettings extends AbstractHelper
 
         $this->settings = [
             'button' => $this->computeButtonSettings($container->get('cloud.design.button.manager')->getSettings()),
+            'global_content' => $this->computeButtonSettings($container->get('cloud.design.global.content.manager')->getSettings()),
         ];
     }
 

@@ -1,5 +1,13 @@
+{% set global_content_settings = this.getDesignSettings('global_content') %}
+{% if global_content_settings['footer_background_color'] is defined and global_content_settings['footer_background_color'] %}
+  {% set footer_background_color_id = global_content_settings['footer_background_color'] %}
+{% endif %}
+{% if global_content_settings['copyright_background_color'] is defined and global_content_settings['copyright_background_color'] %}
+  {% set copyright_background_color_id = global_content_settings['copyright_background_color'] %}
+{% endif %}
+
 <footer id="footer" class="footer footer-wrapper" role="contentinfo">
-  <div class="footer-main">
+  <div class="footer-main {% if footer_background_color_id is defined %} has-bg-color {{ footer_background_color_id }} {% endif %}">
     <div class="container">
       <div class="row">
         <div class="col-md-12 text-center">
@@ -18,7 +26,7 @@
       </div>
     </div>
   </div>
-  <div class="footer-copyright">
+  <div class="footer-copyright {% if copyright_background_color_id is defined %} has-bg-color {{ copyright_background_color_id }} {% endif %}">
     <div class="container">
       <div class="row">
         <div class="footer-copyright-left mr-lg-auto pr-sm-5">

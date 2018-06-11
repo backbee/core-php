@@ -32,8 +32,6 @@ ul.pager li a:hover,
   background-color: {{ secondary_color }};
 }
 
-.navbar-header,
-.footer,
 .cloud-liner:after,
 .form-control,
 .search-btn,
@@ -47,10 +45,12 @@ ul.pager li a:hover,
   border-color: {{ secondary_color }};
 }
 
-.navbar-header .navbar-toggler .icon-bar,
-.navbar-header .navbar-toggler .icon-bar:after,
-.navbar-header .navbar-toggler .icon-bar:before {
-  background-color: {{ text_color }};
+.navbar-header {
+  background-color: {{ background_color }};
+}
+
+.navbar-header .navbar-primary {
+  background-color: {{ background_color }};
 }
 
 .image-text-vertical h4.autoblock-title a,
@@ -85,6 +85,14 @@ ul.pager li a:hover,
     color: {{ color.text_color }};
   }
 
+  .navbar.has-bg-color.{{ color.id }} .navbar-primary {
+    background-color: {{ color.color }};
+  }
+
+  .navbar.has-bg-color.{{ color.id }} .navbar-primary * {
+    color: {{ color.text_color }};
+  }
+
   .has-bg-color.{{ color.id }} * {
     color: {{ color.text_color }};
   }
@@ -96,6 +104,46 @@ ul.pager li a:hover,
 
   .bordred.has-bg-color.{{ color.id }} * {
     color: {{ color.text_color }};
+  }
+
+  .navbar-header.has-bg-color.{{ color.id }} .navbar-toggler .icon-bar,
+  .navbar-header.has-bg-color.{{ color.id }} .navbar-toggler .icon-bar:after,
+  .navbar-header.has-bg-color.{{ color.id }} .navbar-toggler .icon-bar:before {
+    background-color: {{ color.text_color }};
+  }
+
+  .navbar-header.has-bg-color.{{ color.id }},
+  .footer-main.has-bg-color.{{ color.id }} {
+    border-color: {{ color.color_darken15 }};
+  }
+
+  .navbar-header.has-bg-color.{{ color.id }} .dropdown-menu {
+    background-color: {{ color.color }};
+  }
+
+  .navbar-header.has-bg-color.{{ color.id }} .dropdown-menu:hover {
+    background-color: {{ color.color_darken10 }};
+  }
+
+  .navbar-header.has-bg-color.{{ color.id }} .submenu {
+    background-color: {{ color.color }};
+  }
+
+  .navbar-header.has-bg-color.{{ color.id }} .submenu:hover,
+  .navbar-header.has-bg-color.{{ color.id }} .submenu:focus,
+  .navbar-header.has-bg-color.{{ color.id }} .submenu:active,
+  .navbar-header.has-bg-color.{{ color.id }} .submenu.active,
+  .navbar-header.has-bg-color.{{ color.id }} .dropdown-item.active,
+  .navbar-header.has-bg-color.{{ color.id }} .dropdown-item:active,
+  .navbar-header.has-bg-color.{{ color.id }} .dropdown-item:hover,
+  .navbar-header.has-bg-color.{{ color.id }} .dropdown-item:focus {
+    background-color: {{ color.color_darken10 }};
+  }
+
+  @media (min-width: 576px) {
+    .navbar-header.navbar-expand-lg ul.navbar-nav > li .submenu {
+      border-color: {{ color.color_darken15 }};
+    }
   }
 {% endfor %}
 
@@ -123,7 +171,7 @@ ul.pager li a:hover,
   .btn.{{ color.id }} {
     background-color: {{ color.color }};
     border-color: {{ color.color }};
-    color: {{ color.text_color }};
+    color: {{ color.text_color }} !important;
   }
 
   .btn.{{ color.id }}:hover,
