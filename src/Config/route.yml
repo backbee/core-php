@@ -346,7 +346,7 @@ api.multilang.define_default:
   requirements:
     _method: PUT
 
-# Color Panel
+# Color Panel API
 api.theme_color.get_all_themes:
   pattern: /api/theme-colors
   defaults:
@@ -442,6 +442,22 @@ api.design.button.update_settings:
   defaults:
     _action: updateSettingsAction
     _controller: cloud.api.design.button.controller
+  requirements:
+    _method: PUT
+
+api.design.global.content.get_background_colors:
+  pattern: /api/design/global-content-settings
+  defaults:
+    _action: getGlobalContentSettingsAction
+    _controller: cloud.api.design.global.content.controller
+  requirements:
+    _method: GET
+
+api.design.global.content.update_background_colors:
+  pattern: /api/design/global-content-settings
+  defaults:
+    _action: updateGlobalContentSettingsAction
+    _controller: cloud.api.design.global.content.controller
   requirements:
     _method: PUT
 

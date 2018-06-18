@@ -345,3 +345,16 @@ services:
     arguments:
       - "@cloud.design.button.manager"
       - "@bbapp"
+
+  cloud.design.global.content.manager:
+    class: BackBeeCloud\Design\GlobalContentManager
+    factory: ["BackBeeCloud\Design\GlobalContentManagerFactory", createGlobalContentManager]
+    arguments:
+      - "@em"
+      - "@cloud.color_panel.manager"
+
+  cloud.api.design.global.content.controller:
+    class: BackBeeCloud\Api\Controller\DesignGlobalContentController
+    arguments:
+      - "@cloud.design.global.content.manager"
+      - "@bbapp"
