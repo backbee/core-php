@@ -152,8 +152,10 @@
               window.onPlayerStateChange = function (event) {
                 if (event.data == YT.PlayerState.PLAYING) {
                   $('.bg-video-wrapper').css('opacity', '1');
+                  $('.bg-video-wrapper iframe').css('opacity', '1');
                 } else {
                   $('.bg-video-wrapper').css('opacity', '0');
+                  $('.bg-video-wrapper iframe').css('opacity', '0');
                 }
               }
 
@@ -171,9 +173,16 @@
                 }
               }
 
-              $(window).on('load resize', function(){
-                videoResize();
-              });
+
+                $(window).on('load resize', function(){
+                  var loop = setInterval(function () {
+                    var height = $('.bg-video-wrapper iframe').css('height');
+                    if (height) {
+                      videoResize();
+                      window.clearInterval(loop);
+                    }
+                  }, 1000);
+                });
             };
 
             if (window.$) {
