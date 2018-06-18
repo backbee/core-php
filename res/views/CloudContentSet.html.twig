@@ -96,7 +96,7 @@
 
       {% if this.userAgentHelper.isDesktop() %}
         <div class="bg-video-wrapper">
-          <div data-id="{{bg_video_id}}"></div>
+          <div data-id="{{ bg_video_id }}"></div>
           <script type="text/javascript">
             var init = function() {
               if (typeof(YT) == 'undefined') {
@@ -111,22 +111,35 @@
 
               var player;
               window.onYouTubeIframeAPIReady = function() {
-                var players = document.querySelectorAll('.bg-video-wrapper div');
+                var players = $('[data-id="{{ bg_video_id }}"]');
+                var playerVars = {
+                  color: 'white',
+                  loop: '1',
+                  showinfo: '0',
+                  controls: '0',
+                  autoplay: '1',
+                };
+                var videoStartAt = {{ bg_video_start_at ?: 'false' }};
+                var videoEndAt = {{ bg_video_end_at ?: 'false' }};
+
+                if (videoStartAt) {
+                  playerVars.start = videoStartAt;
+                }
+
+                if (videoEndAt) {
+                  playerVars.end = videoEndAt;
+                }
+
                 for (var i = 0; i < players.length; i++) {
+                  playerVars.playlist = players[i].dataset.id;
+
                   new YT.Player(players[i], {
                     videoId: players[i].dataset.id,
                     events: {
                       'onReady': onPlayerReady,
                       'onStateChange': onPlayerStateChange
                     },
-                    playerVars: {
-                        playlist: players[i].dataset.id,
-                        color: 'white',
-                        loop: '1',
-                        showinfo: '0',
-                        controls: '0',
-                        autoplay: '1'
-                    }
+                    playerVars: playerVars
                   });
                 }
               }

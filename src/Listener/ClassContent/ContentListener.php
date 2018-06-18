@@ -17,7 +17,7 @@ use BackBee\Renderer\Event\RendererEvent;
  */
 class ContentListener
 {
-    const YOUTUBE_URL_REGEX = '(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"\'>]+)';
+    const YOUTUBE_URL_REGEX = '(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"\'>]+)(&start=([0-9]+))?(&end=([0-9]+))?';
     const YOUTUBE_EMBED_BASE_URL = 'https://www.youtube.com/embed/';
 
     private static $imgCdnHost;
@@ -88,12 +88,23 @@ class ContentListener
         $content = $event->getTarget();
         if (false != $bgVideoUrl = $content->getParamValue('bg_video')) {
             $videoId = null;
+            $start = false;
+            $end = false;
             if (1 === preg_match('~' . self::YOUTUBE_URL_REGEX . '~', $bgVideoUrl, $matches)) {
                 $videoId = $matches[5];
+                if (isset($matches[7])) {
+                    $start = $matches[7];
+                }
+
+                if (isset($matches[9])) {
+                    $end = $matches[9];
+                }
             }
 
             if ($videoId) {
                 $event->getRenderer()->assign('bg_video_id', $videoId);
+                $event->getRenderer()->assign('bg_video_start_at', $start);
+                $event->getRenderer()->assign('bg_video_end_at', $end);
                 $event->getRenderer()->assign(
                     'bg_video_url',
                     self::YOUTUBE_EMBED_BASE_URL . $videoId . '?' . http_build_query([
