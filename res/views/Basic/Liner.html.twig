@@ -6,4 +6,4 @@
     {% set height = height ~ 'px' %}
 {% endif %}
 
-<div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-liner'})|raw}} style="height: {{height}};"></div>
+<div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-liner ' ~ style.value})|raw}} style="height: {{height}};"></div>
