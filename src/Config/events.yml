@@ -164,6 +164,7 @@ cloudcontentset.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\ClassContent\ContentListener, onCloudContentSetRender]
         - [@cloud.image_listener, onCloudContentSetRender]
+        - [BackBeeCloud\Listener\ClassContent\CardListener, onCloudContentSetRender]
 
 basic.contact.render:
     listeners:

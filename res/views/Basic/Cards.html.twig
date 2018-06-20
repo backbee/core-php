@@ -5,8 +5,8 @@
   <div class="card has-sub-elements">
     {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd,parameter', class: 'mb-0'})|raw }}
 
-    <div class="card-body text-{{ align.value }}">
-      <div class="card-text" data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true">
+    <div class="card-body text-{{ align.value }}{% if add_button.value %} has-btn{% endif %}">
+      <div class="card-text paragraph" data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true">
         {{ this.getObject().getParamValue('description')|raw }}
       </div>
 
