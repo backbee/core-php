@@ -179,13 +179,20 @@
 
 
                 $(window).on('load resize', function(){
-                  var loop = setInterval(function () {
+                  var loop;
+                  var callback = function () {
                     var height = $('.bg-video-wrapper iframe').css('height');
                     if (height) {
                       videoResize();
-                      window.clearInterval(loop);
+
+                      if (loop) {
+                        window.clearInterval(loop);
+                      }
                     }
-                  }, 1000);
+                  };
+
+                  callback();
+                  loop = setInterval(callback, 1000);
                 });
             };
 
