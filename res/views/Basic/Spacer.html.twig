@@ -6,4 +6,12 @@
     {% set height = height ~ 'px' %}
 {% endif %}
 
-<div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-spacer d-none d-lg-block w-100'})|raw}} style="height: {{height}};"></div>
+{% if not this.userAgentHelper.isDesktop() %}
+    {% if show_on_mobile.value == true %}
+        <div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-spacer w-100'})|raw}} style="height: {{height / 2}}px; min-height: 20px"></div>
+    {% else %}
+        <div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-spacer w-100'})|raw}} style="display:none;"></div>
+    {% endif %}
+{% else %}
+    <div data-mobile-edit="false" {{this.bbcontent(null, {'class': 'cloud-spacer w-100'})|raw}} style="height: {{height}};"></div>
+{% endif %}

@@ -3,8 +3,11 @@ Spacer:
     name: yaml_block_spacer
     description: ~
     category: [block_category_more]
-    forbidden_plugins: ['parameter']
     resizable: true
   parameters:
     height:
       value: 40
+    show_on_mobile:
+      type: switch
+      label: yaml_block_spacer_show_on_mobile
+      value: true
