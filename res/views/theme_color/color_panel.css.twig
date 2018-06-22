@@ -179,18 +179,17 @@ ul.pager li a:hover,
   .btn.{{ color.id }}:active {
     background-color: {{ color.color_darken10 }};
     border-color: {{ color.color_darken10 }};
-    color: {{ color.text_color }};
   }
 
   .btn.{{ color.id }} *,
   .btn.{{ color.id }}:hover *,
   .btn.{{ color.id }}:focus *,
   .btn.{{ color.id }}:active * {
-    color: {{ color.text_color }};
+    color: {{ color.text_color }} !important;
   }
 
   .btn-outline.btn.{{ color.id }} {
-    color: {{ color.color }};
+    color: {{ color.color }} !important;
     border-color: {{ color.color }};
   }
 
@@ -199,11 +198,11 @@ ul.pager li a:hover,
   .btn-outline.btn.{{ color.id }}:active {
     background-color: {{ color.color }};
     border-color: {{ color.color }};
-    color: {{ color.text_color }};
+    color: {{ color.text_color }} !important;
   }
 
   .btn-outline.btn.{{ color.id }} * {
-    color: {{ color.color }};
+    color: {{ color.color }} !important;
   }
 {% endfor %}
 
