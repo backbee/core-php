@@ -358,3 +358,10 @@ services:
     arguments:
       - "@cloud.design.global.content.manager"
       - "@bbapp"
+
+  # Translator override
+  translator:
+    class: Symfony\Component\Translation
+    factory: ["BackBeeCloud\Translation\TranslatorFactory", getTranslator]
+    arguments:
+      - "@service_container"
