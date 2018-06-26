@@ -365,3 +365,7 @@ services:
     factory: ["BackBeeCloud\Translation\TranslatorFactory", getTranslator]
     arguments:
       - "@service_container"
+
+  # CSRF Security
+  app.csrf_token.manager:
+    class: Symfony\Component\Security\Csrf\CsrfTokenManager

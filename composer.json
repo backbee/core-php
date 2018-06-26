@@ -35,7 +35,8 @@
         "jenssegers/agent": "~2.5.0",
         "google/recaptcha": "~1.1",
         "drewm/mailchimp-api": "^2.4",
-        "filp/whoops": "^2.1"
+        "filp/whoops": "^2.1",
+        "symfony/security-csrf": "v2.7.*"
     },
     "autoload": {
         "psr-4": {
