@@ -6,11 +6,11 @@ Map:
     resizable: true
   parameters:
     map:
-        type: 'map'
-        label: yaml_block_map_search_location
-        api_key: 'AIzaSyAXyVyUKiAEpjChO5vWIgKdeHoXA2i0UoU'
-        value: {}
-        tab: yaml_block_map
+      type: 'map'
+      label: yaml_block_map_search_location
+      api_key: 'AIzaSyAXyVyUKiAEpjChO5vWIgKdeHoXA2i0UoU'
+      value: {}
+      tab: yaml_block_map
     colors:
       label: yaml_block_map_choose_skin
       type: 'select'
@@ -259,3 +259,11 @@ Map:
               stylers: [{color: '#92998d'}]
     height:
       value: ~
+    picto:
+      type: upload
+      value: ''
+      tab: yaml_block_text_picto_tab
+      acceptedFiles: 'image/png'
+      group:
+        id: picto
+        title: yaml_block_map_icon_text
