@@ -1,7 +1,8 @@
 {% set uid = this.getObject().getUid() %}
 {% set mapParam = this.getObject().getParam('map') %}
-{% set latlng = this.getObject().getParamValue('map') %}
+{% set positions = this.getObject().getParamValue('map') %}
 {% set color = this.getObject().getParamValue('colors') %}
+{% set picto = this.getObject().getParamValue('picto') %}
 
 {% set height = this.getObject().getParamValue('height') %}
 {% if height is not null %}
@@ -9,10 +10,17 @@
 {% endif %}
 
 <div {{ this.bbcontent(null, {'class': 'content map-wrapper'})|raw }}>
-    {% if latlng is empty %}
+    {% if positions is empty %}
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}
-        <div class="google-map resize-element" id="map_{{uid}}" {% if height is not null %}style="height: {{height}};"{% endif %}></div>
+        {% set map_id = 'map_' ~ uid %}
+        {% set icon_img = this.getCdnImageUrl(picto)|raw %}
+        <div
+            id="{{ map_id }}"
+            class="google-map resize-element"
+            data-positions="{{ positions|json_encode|e('html_attr') }}"
+            {% if height is not null %}style="height: {{height}};"{% endif %}
+        ></div>
         <script>
             (function () {
                 var script = document.createElement('script'),
@@ -23,32 +31,59 @@
                     window.googleMapLoaded = false;
                 }
 
+
                 callback = function () {
                     var latLng,
                         map,
                         colors,
                         color,
-                        marker;
+                        bounds,
+                        marker,
+                        iconImg;
 
-                    latLng = {lat: {{ latlng.lat }}, lng: {{ latlng.lng}} };
+                    var allowedImg = /(\.png)$/i;
+                    var positions = $('#{{ map_id }}').data('positions');
+
+                    if (allowedImg.exec('{{ icon_img }}')) {
+                        iconImg = '{{ icon_img }}';
+                    }
+
+                    bounds = new google.maps.LatLngBounds();
 
                     // Create a map object and specify the DOM element for display.
-                    map = new google.maps.Map(document.getElementById('map_{{uid}}'), {
-                      center: latLng,
-                      scrollwheel: false,
-                      zoom: 13,
-                      zoomControl: false
+                    var mapConfig = {};
+
+                    if (positions.length === 1) {
+                        mapConfig = {
+                          center: {lat: positions[0].lat, lng: positions[0].lng},
+                          zoom: 13,
+                        };
+                    }
+
+                    map = new google.maps.Map(document.getElementById('{{ map_id }}'), mapConfig);
+
+                    positions.forEach((position)=> {
+                        marker = new google.maps.Marker({
+                          map: map,
+                          position: {lat: position.lat, lng: position.lng},
+                          icon: iconImg,
+                        });
+
+                        if (positions.length > 1) {
+                            bounds.extend({lat:position.lat, lng:position.lng});
+                        }
                     });
+
+                    if (positions.length > 1) {
+                        map.fitBounds(bounds);
+                        map.panToBounds(bounds);
+                    }
 
                     colors = JSON.parse("{{ colors['colors']|json_encode() }}".replace(/&quot;/g,'"'));
                     color = colors["{{ color }}"];
 
-                    map.setOptions({styles: color });
 
-                    marker = new google.maps.Marker({
-                      map: map,
-                      position: latLng
-                    });
+                    map.setOptions({styles: color });
                 };
 
                 var script = document.getElementById(scriptId);
