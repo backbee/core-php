@@ -44,6 +44,10 @@
                     var allowedImg = /(\.png)$/i;
                     var positions = $('#{{ map_id }}').data('positions');
 
+                    if (typeof(positions) === 'object') {
+                        positions = [positions];
+                    }
+
                     if (allowedImg.exec('{{ icon_img }}')) {
                         iconImg = '{{ icon_img }}';
                     }
@@ -99,7 +103,7 @@
 
                     document.getElementsByTagName('head')[0].appendChild(script);
                 } else {
-                    if (!window.googleMapLoaded) {
+                    if (!window.$) {
                         script.addEventListener('load', callback, false);
                     } else {
                         callback();
