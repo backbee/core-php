@@ -204,6 +204,12 @@ ul.pager li a:hover,
   .btn-outline.btn.{{ color.id }} * {
     color: {{ color.color }} !important;
   }
+
+  .btn-outline.btn.{{ color.id }}:hover *,
+  .btn-outline.btn.{{ color.id }}:focus *,
+  .btn-outline.btn.{{ color.id }}:active * {
+    color: {{ color.text_color }} !important;
+  }
 {% endfor %}
 
 {% for color in colors %}
