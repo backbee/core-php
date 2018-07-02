@@ -186,6 +186,10 @@ basic.cards.render:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\ClassContent\CardListener, onRender]
 
+contentset.render:
+    listeners:
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\ClassContent\ContentSetListener, onRender]
 
 # Controller listeners
 
