@@ -31,7 +31,6 @@
                     window.googleMapLoaded = false;
                 }
 
-
                 callback = function () {
                     var latLng,
                         map,
@@ -42,11 +41,20 @@
                         iconImg;
 
                     var allowedImg = /(\.png)$/i;
-                    var positions = $('#{{ map_id }}').data('positions');
-
-                    if (typeof(positions) === 'object') {
+                    var positions = JSON.parse(document.querySelector('#{{ map_id }}').dataset.positions);
+                    if (!Array.isArray(positions)) {
                         positions = [positions];
                     }
+
+                    var cleanPositions = [];
+                    positions.forEach(function(position) {
+                        if (!position.hasOwnProperty('lat') || !position.hasOwnProperty('lng')) {
+                            return;
+                        }
+
+                        cleanPositions.push(position);
+                    });
+                    positions = cleanPositions;
 
                     if (allowedImg.exec('{{ icon_img }}')) {
                         iconImg = '{{ icon_img }}';
@@ -66,7 +74,7 @@
 
                     map = new google.maps.Map(document.getElementById('{{ map_id }}'), mapConfig);
 
-                    positions.forEach((position)=> {
+                    positions.forEach(function(position) {
                         marker = new google.maps.Marker({
                           map: map,
                           position: {lat: position.lat, lng: position.lng},
