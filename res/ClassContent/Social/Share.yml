@@ -12,6 +12,10 @@ Share:
       type: switch
       label: yaml_block_share_enable_tweet
       value: true
+    enable_linkedin:
+      type: switch
+      label: yaml_block_share_enable_linkedin
+      value: true
     align:
       type: selectButton
       label: yaml_block_share_position
