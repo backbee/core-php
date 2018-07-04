@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud;
 
+use BackBeeCloud\Translation\HasTranslatableResourceInterface;
 use BackBee\BBApplication;
 use BackBee\Bundle\AbstractBundle;
 use BackBee\Config\Config;
@@ -9,7 +10,7 @@ use BackBee\Config\Config;
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
-class EntryPoint extends AbstractBundle
+class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterface
 {
     /**
      * @param  BBApplication $app
@@ -41,5 +42,10 @@ class EntryPoint extends AbstractBundle
     public function stop()
     {
         return $this;
+    }
+
+    public function getTranslationDirectory()
+    {
+        return realpath($this->getBaseDirectory() . '/../res/translations');
     }
 }

@@ -1,5 +1,7 @@
 {% if hide_content is not defined %}
   {% set rowId = "row_" ~ this.getObject().getUid() %}
+  {% set containerId = "container_" ~ this.getObject().getUid() %}
+
 
   {% set data = this.getObject().getData() %}
   {% set default_colsize = data|length ? 12 / data|length : '12' %}
@@ -89,6 +91,8 @@
   {% if row_extra_css_classes is not defined %}
     {% set row_extra_css_classes = '' %}
   {% endif %}
+
+  {% set settings = this.getDesignSettings('button') %}
 
   {% if bg_video_url %}
     <div id="{{rowId}}"
@@ -204,7 +208,7 @@
           </script>
         </div>
       {% endif %}
-      <div class="{{ width.value }}{% if remove_gutter.value %} px-0{% endif %}">
+      <div id="{{containerId}}" class="{{ width.value }}{% if button_collapse_enable.value %} collapse fade{% if bb.token != null %} show{% endif %}{% endif %}{% if remove_gutter.value %} px-0{% endif %}">
         <div class="row{% if remove_gutter.value %} no-gutters{% endif %}{% if row_extra_css_classes %} {{ row_extra_css_classes }}{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
@@ -216,10 +220,28 @@
         {% endfor %}
         </div>
       </div>
+      {% if button_collapse_enable.value %}
+      <div class="{{ width.value }}">
+        <div class="row text-center my-3">
+          <div class="col-12">
+            <button class="btn button-collapse color-primary {{ button_collapse_color.value }} btn-{{ button_collapse_size.value }} btn-{{ button_collapse_form_solid.value == false ? 'outline' }} btn-{{ settings.shape }}"
+              data-toggle="collapse" data-target="#{{containerId}}" data-strat-open="{{ this.trans('button.collapse.open') }}" data-strat-close="{{ this.trans('button.collapse.close') }}"
+              {% if settings.font %}style="font-family: {{ settings.font }}"{% endif %}
+            >
+              {% if bb.token == null %}
+                {{ this.trans('button.collapse.close') }}
+              {% else %}
+                {{ this.trans('button.collapse.open') }}
+              {% endif %}
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   {% else %}
     <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bg-y="{{ backgroundPosition }}" data-bb-image="{{backgroundImage|raw}}"{% endif %}>
-      <div class="{{ width.value }}{% if remove_gutter.value %} px-0{% endif %}">
+      <div id="{{containerId}}" class="{{ width.value }}{% if button_collapse_enable.value %} collapse fade{% if bb.token != null %} show{% endif %}{% endif %}{% if remove_gutter.value %} px-0{% endif %}">
         <div class="row{% if remove_gutter.value %} no-gutters{% endif %}{% if row_extra_css_classes %} {{ row_extra_css_classes }}{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
@@ -231,6 +253,24 @@
         {% endfor %}
         </div>
       </div>
+      {% if button_collapse_enable.value %}
+      <div class="{{ width.value }}">
+        <div class="row text-center my-3">
+          <div class="col-12">
+            <button class="btn button-collapse color-primary {{ button_collapse_color.value }} btn-{{ button_collapse_size.value }} btn-{{ button_collapse_form_solid.value == false ? 'outline' }} btn-{{ settings.shape }}"
+              data-toggle="collapse" data-target="#{{containerId}}" data-strat-open="{{ this.trans('button.collapse.open') }}" data-strat-close="{{ this.trans('button.collapse.close') }}"
+              {% if settings.font %}style="font-family: {{ settings.font }}"{% endif %}
+            >
+              {% if bb.token == null %}
+                {{ this.trans('button.collapse.close') }}
+              {% else %}
+                {{ this.trans('button.collapse.open') }}
+              {% endif %}
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   {% endif %}
 {% endif %}
