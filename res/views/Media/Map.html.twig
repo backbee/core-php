@@ -4,12 +4,22 @@
 {% set color = this.getObject().getParamValue('colors') %}
 {% set picto = this.getObject().getParamValue('picto') %}
 
-{% set height = this.getObject().getParamValue('height') %}
-{% if height is not null %}
-    {% set height = height ~ 'px' %}
+{% set force_auto_height = force_auto_height is defined ? force_auto_height.value : false %}
+{% if force_auto_height == false %}
+    {% set height = this.getObject().getParamValue('height') %}
+    {% if height is not null %}
+        {% set height = height ~ 'px' %}
+    {% endif %}
 {% endif %}
 
-<div {{ this.bbcontent(null, {'class': 'content map-wrapper'})|raw }}>
+{% set autoHeightClass = force_auto_height ? ' set-auto-height' : '' %}
+
+<div {{ this.bbcontent(null, {'class': 'content map-wrapper' ~ resizeClass ~ autoHeightClass})|raw }}
+    {% if force_auto_height %}
+        data-forbidden-plugins = "resize"
+        id="{{ uid }}"
+    {% endif %}
+>
     {% if positions is empty %}
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}
@@ -119,5 +129,30 @@
                 }
             })()
         </script>
+        {% if force_auto_height == true %}
+            <script>
+                (function () {
+                    var init = function () {
+                    $(window).on('load resize', function() {
+                        const $rowItemWithMap = $('#{{ uid }}.set-auto-height').parents('.row-item');
+                        const $mapRowItems = $rowItemWithMap.siblings('.row-item');
+                        var mapMaxHeight = 40;
+
+                        $mapRowItems.each(function() {
+                            mapMaxHeight = mapMaxHeight > $(this).height() ? mapMaxHeight : $(this).height();
+                        });
+
+                        $rowItemWithMap.height(mapMaxHeight);
+                    });
+                    };
+
+                    if (document.readyState === 'complete' || document.readyState === 'loaded') {
+                        init();
+                    } else {
+                        document.addEventListener('DOMContentLoaded', init);
+                    }
+                })();
+            </script>
+        {% endif %}
     {% endif %}
 </div>
