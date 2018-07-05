@@ -87,6 +87,9 @@ class ImageListener
         $this->imgHandler->delete($oldData['path'][0]['scalar']);
     }
 
+    /**
+     * @todo to remove if it's not necessary anymore, not used at moment.
+     */
     public function onImageRevisionFlush(Event $event)
     {
         $revision = $event->getTarget();
