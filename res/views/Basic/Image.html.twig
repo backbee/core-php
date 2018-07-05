@@ -1,7 +1,7 @@
 {% if bb.token != null or image.path != null %}
   {% set uid = this.getObject().getUid() %}
   {% set resizeClass = 'image-fullwidth' %}
-  {# {% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %} #}
+  {% set autoSizeClass = this.getObject().getParamValue('auto_height') ? ' image-auto-height' : '' %}
   {% set autoSizeClass = this.getObject().getParamValue('stretch') ? ' image-auto-width' : autoSizeClass %}
   {% set force_auto_height = force_auto_height is defined ? force_auto_height.value : false %}
   {% set autoHeightClass = force_auto_height ? ' set-auto-height' : '' %}
