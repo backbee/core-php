@@ -39,3 +39,11 @@ CloudContentSet:
       value: false
     vertical_align:
       value: false
+    button_collapse_enable:
+      value: false
+    button_collapse_color:
+      value: 'color-primary'
+    button_collapse_form_solid:
+      value: true
+    button_collapse_size:
+      value: 'md'

@@ -1,0 +1,4 @@
+button:
+    collapse:
+        open: 'Voir moins'
+        close: 'Voir plus'
