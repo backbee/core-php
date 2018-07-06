@@ -171,8 +171,8 @@ class ContentManager
     public function publishByPage(Page $page, BBUserToken $token)
     {
         $this->entyMgr->beginTransaction();
-
         foreach ($this->getDraftStageToDelete($page, $token) as $draft) {
+
             $content = $draft->getContent();
             $content->setDraft(null);
             if ($content instanceof ContentSet) {
@@ -385,7 +385,7 @@ class ContentManager
         return $this->entyMgr->getRepository(Revision::class)->findBy([
             '_state'   => Revision::STATE_TO_DELETE,
             '_owner'   => UserSecurityIdentity::fromToken($this->uniqToken),
-            '_content' => $this->getUidsFromPage($page, null),
+            '_content' => $this->getUidsFromPage($page, $token),
         ]);
     }
 }

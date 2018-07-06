@@ -144,6 +144,11 @@ services:
     tags:
       - { name: worker.job_handler, dispatch_event: false }
 
+  cloud.auto_height_content.listener:
+    class: BackBeeCloud\Listener\ClassContent\AutoHeightContentListener
+    arguments:
+      - "@bbapp"
+
   # MultiLang service
   multilang_manager:
     class: BackBeeCloud\MultiLang\MultiLangManager
