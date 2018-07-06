@@ -22,6 +22,11 @@ class GlobalContentManager
     protected $headerBackgroundColor;
 
     /**
+     * @var bool
+     */
+    protected $hasHeaderMargin = false;
+
+    /**
      * @var null|string
      */
     protected $footerBackgroundColor;
@@ -61,6 +66,7 @@ class GlobalContentManager
     {
         return [
             'header_background_color' => $this->headerBackgroundColor,
+            'has_header_margin' => $this->hasHeaderMargin,
             'footer_background_color' => $this->footerBackgroundColor,
             'copyright_background_color' => $this->copyrightBackgroundColor,
         ];
@@ -69,6 +75,11 @@ class GlobalContentManager
     public function getHeaderBackgroundColor()
     {
         return $this->headerBackgroundColor;
+    }
+
+    public function getHasHeaderMargin()
+    {
+        return $this->hasHeaderMargin;
     }
 
     public function getFooterBackgroundColor()
@@ -81,18 +92,23 @@ class GlobalContentManager
         $this->copyrightBackgroundColor;
     }
 
-    public function updateHeaderBackgroundColor($headerBackgroundColor = null)
+    public function updateHeaderBackgroundColor($headerBackgroundColor)
     {
-        if ($headerBackgroundColor !== null) {
-            if (!in_array($headerBackgroundColor, $this->colors)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Provided header background color: %s is not valid.',
-                    $headerBackgroundColor
-                ));
-            }
+        if (!in_array($headerBackgroundColor, $this->colors)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Provided header background color: %s is not valid.',
+                $headerBackgroundColor
+            ));
         }
 
         $this->headerBackgroundColor = $headerBackgroundColor;
+
+        $this->saveSettings();
+    }
+
+    public function updateHasHeaderMargin($hasHeaderMargin)
+    {
+        $this->hasHeaderMargin = (bool) $hasHeaderMargin;
 
         $this->saveSettings();
     }
@@ -131,12 +147,31 @@ class GlobalContentManager
 
     protected function restoreSettings()
     {
+        $parameters = [];
+
         if ($registry = $this->getRegistryEntity()) {
+            $parameters = json_decode($registry->getValue(), true);
+        }
+
+        //make compatible old sites with the header margin feature
+        if (3 === count($parameters)) {
             list(
                 $this->headerBackgroundColor,
                 $this->footerBackgroundColor,
                 $this->copyrightBackgroundColor,
-            ) = json_decode($registry->getValue(), true);
+            ) = $parameters;
+        } else {
+            list(
+                $this->headerBackgroundColor,
+                $this->hasHeaderMargin,
+                $this->footerBackgroundColor,
+                $this->copyrightBackgroundColor,
+            ) = $parameters;
+        }
+
+        //disable transparency for header
+        if (null === $this->headerBackgroundColor) {
+            $this->headerBackgroundColor = $this->colorPanel->getBackgroundColor()->getId();
         }
     }
 
@@ -145,6 +180,7 @@ class GlobalContentManager
         $registry = $this->getRegistryEntity(true);
         $registry->setValue(json_encode([
             $this->headerBackgroundColor,
+            $this->hasHeaderMargin,
             $this->footerBackgroundColor,
             $this->copyrightBackgroundColor,
         ]));

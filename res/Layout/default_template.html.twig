@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+
+{% set global_content_settings = this.getDesignSettings('global_content') %}
+{% set has_header_margin = global_content_settings['has_header_margin'] %}
+
 <html lang="{{ this.getCurrentLang() ?: 'en' }}">
   <head>
     <meta charset="utf-8">
@@ -81,7 +85,7 @@
 
     <div id="fb-root"></div>
 
-    <div id="bb-site-wrapper" class="bb-site-wrapper {{bb.token ? 'cloud-edit' : ''}}">
+    <div id="bb-site-wrapper" class="bb-site-wrapper{% if has_header_margin %} offset-main{% endif %} {{bb.token ? 'cloud-edit' : ''}}">
       <!-- JS Alert -->
       <noscript>
       <p><span lang="fr">JavaScript désactivé - Ce site requiert l'activation de JavaScript.</span><br><span lang="en">JavaScript is deactivated - This site requires JavaScript.</span></p>
