@@ -37,9 +37,12 @@ class ContactHandler implements ContentHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function handleReverse(AbstractClassContent $content)
+    public function handleReverse(AbstractClassContent $content, array $data = [])
     {
-        return [];
+        $result = $data['current_data'];
+        unset($result['parameters']['email']);
+
+        return $result;
     }
 
     /**

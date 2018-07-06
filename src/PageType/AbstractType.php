@@ -63,6 +63,14 @@ abstract class AbstractType implements TypeInterface
     /**
      * {@inheritdoc}
      */
+    public function isDumpable()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function defaultContents()
     {
         return [];

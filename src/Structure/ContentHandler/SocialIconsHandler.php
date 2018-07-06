@@ -34,7 +34,7 @@ class SocialIconsHandler implements ContentHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function handleReverse(AbstractClassContent $content)
+    public function handleReverse(AbstractClassContent $content, array $data = [])
     {
         return [];
     }

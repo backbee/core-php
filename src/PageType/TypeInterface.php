@@ -66,6 +66,13 @@ interface TypeInterface extends \JsonSerializable, \Serializable
     public function isPullable();
 
     /**
+     * Returns true if the page can be dumped, else false.
+     *
+     * @return bool
+     */
+    public function isDumpable();
+
+    /**
      * Returns an array that contains the namespace of every content
      * to include by default.
      *
