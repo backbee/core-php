@@ -76,11 +76,17 @@ class ColorPanelManager
         $this->save();
     }
 
-    public function changeThemeColor($themeUniqueName)
+    public function changeThemeColor($themeUniqueName, $conservePrimaryColor)
     {
+        $customPrimaryColor = $this->colorPanel->getPrimaryColor();
         $customColors = $this->colorPanel->getCustomColors();
+
         $this->colorPanel = $this->themeColorManager->getByUniqueName($themeUniqueName)->getColorPanel();
         $this->colorPanel->setCustomColors($customColors);
+
+        if ($conservePrimaryColor) {
+            $this->colorPanel->setPrimaryColor($customPrimaryColor);
+        }
 
         $this->save();
     }

@@ -69,10 +69,11 @@ class ColorPanelController extends AbstractController
             return $response;
         }
 
-        $uniqueName = $request->request->get('unique_name', '');
+        $uniqueName = $request->request->get('unique_name');
+        $conservePrimaryColor = $request->request->get('conserve_primary_color');
 
         try {
-            $this->colorPanelManager->changeThemeColor($uniqueName);
+            $this->colorPanelManager->changeThemeColor($uniqueName, $conservePrimaryColor);
         } catch (\Exception $exception) {
             return new JsonResponse([
                 'error'  => 'bad_request',
