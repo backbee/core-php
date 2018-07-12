@@ -9,8 +9,18 @@ use BackBeeCloud\UserAgentHelper as RealUserAgentHelper;
  */
 class userAgentHelper extends AbstractHelper
 {
+    /**
+     * @var userAgentHelper
+     */
+    protected $userAgentHelper;
+
+    public function __construct()
+    {
+        $this->userAgentHelper = new RealUserAgentHelper();
+    }
+
     public function __invoke()
     {
-        return new RealUserAgentHelper();
+        return $this->userAgentHelper;
     }
 }

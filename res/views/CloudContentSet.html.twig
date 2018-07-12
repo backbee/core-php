@@ -98,7 +98,7 @@
     <div id="{{rowId}}"
       {{this.bbcontent(null, {class: spacerClass ~ 'background-video-row cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}}
       style="{% if false != backgroundImage and true != withParallax %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %}
-             {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"
+             {% if height.value %}{% if this.userAgentHelper.isMobile() and height.value > 60 %}padding-top: {{ height.value / 2 }}px; padding-bottom: {{ height.value / 2 }}px;{% else %}padding-top: {{ height.value }}px; padding-bottom: {{ height.value }}px;{% endif %}{% endif %}"
       {% if false != backgroundImage and withParallax %} data-bb-image="{{backgroundImage|raw}}"{% endif %}
     >
 
@@ -240,7 +240,7 @@
       {% endif %}
     </div>
   {% else %}
-    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}padding-top: {{height.value}}px; padding-bottom: {{height.value}}px; {% endif %}"{% if false != backgroundImage and withParallax %} data-bg-y="{{ backgroundPosition }}" data-bb-image="{{backgroundImage|raw}}"{% endif %}>
+    <div id="{{rowId}}" {{this.bbcontent(null, {class: spacerClass ~ 'cloudcontentset ' ~ bgColorClass ~ ' ' ~ bg_color.value ~ ' ' ~ tabletClass ~ ' ' ~ mobileClass ~ ' ' ~ overlayClass ~ ' ' ~ noPaddingClass ~ ' ' ~ parallaxClass ~ ' ' ~ blurClass ~ ' ' ~ verticalAlignClass})|raw}} style="{% if false != backgroundImage %}background-image:url({{backgroundImage|raw}}); background-size:cover; background-position-y: {{ backgroundPosition }}; {% endif %} {% if height.value %}{% if this.userAgentHelper.isMobile() and height.value > 60 %}padding-top: {{ height.value / 2 }}px; padding-bottom: {{ height.value / 2 }}px;{% else %}padding-top: {{ height.value }}px; padding-bottom: {{ height.value }}px;{% endif %}{% endif %}"{% if false != backgroundImage and withParallax %} data-bg-y="{{ backgroundPosition }}" data-bb-image="{{backgroundImage|raw}}"{% endif %}>
       <div id="{{containerId}}" class="{{ width.value }}{% if button_collapse_enable.value %} collapse fade{% if bb.token != null %} show{% endif %}{% endif %}{% if remove_gutter.value %} px-0{% endif %}">
         <div class="row{% if remove_gutter.value %} no-gutters{% endif %}{% if row_extra_css_classes %} {{ row_extra_css_classes }}{% endif %}" {% if bg_video_url %}id="rowheight"{% endif %}>
         {% for key, content in data %}

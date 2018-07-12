@@ -13,7 +13,7 @@
       {% if add_button.value and (button_description.value or bb.token != null) %}
         <a
           href="{{ url.value }}"
-          class="btn color-primary {{ color.value }} btn-{{ button_settings.shape }} mt-3"
+          class="btn color-primary {{ color.value }} btn-{{ form.value == false ? 'outline' }} btn-{{ button_settings.shape }} mt-3"
           {% if target_blank.value %}target="_blank"{% endif %}
           {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
         >
