@@ -74,7 +74,7 @@
       $showButton = form.$.find('.element_add_button');
       $buttonParameters = form.$.find('.group.text, .element_button_target_blank, .element_button_hide_on_mobile, .group.color, .element_button_form');
 
-      if (!$showButton.find('input')[0].checked) {
+      if ($showButton.find('input')[0] && !$showButton.find('input')[0].checked) {
         $buttonParameters.each(function() {
           jQuery(this).addClass('d-none');
         });
