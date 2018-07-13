@@ -19,7 +19,7 @@ class GlobalContentManager
     /**
      * @var null|string
      */
-    protected $headerBackgroundColor;
+    protected $headerBackgroundColor = Color::BACKGROUND_COLOR_ID;
 
     /**
      * @var bool
@@ -115,7 +115,7 @@ class GlobalContentManager
 
     public function updateFooterBackgroundColor($footerBackgroundColor = null)
     {
-        if ($footerBackgroundColor !== null) {
+        if (null !== $footerBackgroundColor) {
             if (!in_array($footerBackgroundColor, $this->colors)) {
                 throw new \InvalidArgumentException(sprintf(
                     'Provided footer background color: %s is not valid.',
@@ -131,7 +131,7 @@ class GlobalContentManager
 
     public function updateCopyrightBackgroundColor($copyrightBackgroundColor = null)
     {
-        if ($copyrightBackgroundColor !== null) {
+        if (null !== $copyrightBackgroundColor) {
             if (!in_array($copyrightBackgroundColor, $this->colors)) {
                 throw new \InvalidArgumentException(sprintf(
                     'Provided copyright background color: %s is not valid.',
@@ -151,6 +151,10 @@ class GlobalContentManager
 
         if ($registry = $this->getRegistryEntity()) {
             $parameters = json_decode($registry->getValue(), true);
+        }
+
+        if (false == $parameters) {
+            return;
         }
 
         //make compatible old sites with the header margin feature

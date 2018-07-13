@@ -26,6 +26,10 @@ class StructureBuilder
     protected $contentBuilder;
     protected $elasticsearchMgr;
     protected $globalContentFactory;
+    protected $designButtonManager;
+    protected $designGlobalContentManager;
+    protected $designColorPanelManager;
+    protected $designThemeColorManager;
 
     public function __construct(BBApplication $app, SchemaParserInterface $schemaParser)
     {
@@ -36,6 +40,10 @@ class StructureBuilder
         $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->contentBuilder = $app->getContainer()->get('cloud.structure.content_builder');
         $this->globalContentFactory = $app->getContainer()->get('cloud.global_content_factory');
+        $this->designButtonManager = $app->getContainer()->get('cloud.design.button.manager');
+        $this->designGlobalContentManager = $app->getContainer()->get('cloud.design.global.content.manager');
+        $this->designColorPanelManager = $app->getContainer()->get('cloud.color_panel.manager');
+        $this->designThemeColorManager = $app->getContainer()->get('cloud.theme_color.manager');
     }
 
     /**
@@ -47,8 +55,32 @@ class StructureBuilder
     {
         $schema = $this->getSchema($name)['schema'];
 
-        if (isset($schema['theme'])) {
-            $this->themeCore->selectTheme($schema['theme']);
+        if (isset($schema['design_settings'])) {
+            $designSettings = $schema['design_settings'];
+
+            // update theme color
+            $this->designColorPanelManager->changeThemeColor($designSettings['theme_color']);
+
+            // update color panel
+            $this->designColorPanelManager->updateColorPanel($designSettings['color_panel']);
+
+            // update buttons settings
+            $this->designButtonManager->updateFont($designSettings['buttons']['font']);
+            $this->designButtonManager->updateShape($designSettings['buttons']['shape']);
+
+            // update global contents
+            $this->designGlobalContentManager->updateHeaderBackgroundColor(
+                $designSettings['global_contents']['header_background_color']
+            );
+            $this->designGlobalContentManager->updateHasHeaderMargin(
+                $designSettings['global_contents']['has_header_margin']
+            );
+            $this->designGlobalContentManager->updateFooterBackgroundColor(
+                $designSettings['global_contents']['footer_background_color']
+            );
+            $this->designGlobalContentManager->updateCopyrightBackgroundColor(
+                $designSettings['global_contents']['copyright_background_color']
+            );
         }
 
         if (isset($schema['logo_header'])) {
@@ -124,6 +156,7 @@ class StructureBuilder
         $page = null;
         $menu = $pageData['menu'];
         unset($pageData['menu']);
+
         $randomDatetime = new \DateTime(date('Y-m-d H:i:s', time() - rand(1, 1000)));
         if ('home' !== $pageData['type']) {
             if (!isset($pageData['uid'])) {
@@ -131,10 +164,11 @@ class StructureBuilder
             }
 
             $page = $this->pageMgr->create($pageData);
-            $page->setState(Page::STATE_ONLINE);
             if (null === $page->getPublishing()) {
                 $page->setPublishing($randomDatetime);
             }
+
+            $page->setState(Page::STATE_ONLINE);
         } else {
             $site = $this->entyMgr->getRepository(Site::class)->findOneBy([]);
             $page = $this->entyMgr->getRepository(Page::class)->getRoot($site);

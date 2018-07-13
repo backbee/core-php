@@ -48,13 +48,13 @@ class SliderHandler implements ContentHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function handleReverse(AbstractClassContent $content, $config = [])
+    public function handleReverse(AbstractClassContent $content, array $config = [])
     {
         $object = [
             'images' => [],
         ];
 
-        foreach($content->images as $image) {
+        foreach((array) $content->images as $image) {
             $object['images'][] = $this->imgHandler->handleReverse($image, $config);
         }
 

@@ -31,14 +31,23 @@ class ParagraphHandler implements ContentHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function handleReverse(AbstractClassContent $content)
+    public function handleReverse(AbstractClassContent $content, array $data = [])
     {
-        return [
-            'text' => $content->value,
-            'parameters' => array_map(function($param) {
-                return $param['value'];
-            }, $content->getAllParams())
-        ];
+        $result = isset($data['current_data']) ? $data['current_data'] : [];
+
+        $result['text'] = $content->value;
+        if (
+            !isset($result['parameters']['bg_color'])
+            || 1 !== preg_match('~^color\-[a-z0-9]+$~', $result['parameters']['bg_color'])
+        ) {
+            $result['parameters']['bg_color'] = '';
+        }
+
+        if (false == $result['parameters']['bg_color']) {
+            unset($result['parameters']['bg_color']);
+        }
+
+        return $result;
     }
 
     /**
@@ -46,19 +55,10 @@ class ParagraphHandler implements ContentHandlerInterface
      */
     public function supports(AbstractClassContent $content)
     {
-
-        if ($content instanceof Paragraph) {
-            return true;
-        }
-
-        if ($content instanceof Title) {
-            return true;
-        }
-
-        if ($content instanceof ArticleAbstract) {
-            return true;
-        }
-
-        return false;
+        return
+            $content instanceof Paragraph
+            || $content instanceof Title
+            || $content instanceof ArticleAbstract
+        ;
     }
 }

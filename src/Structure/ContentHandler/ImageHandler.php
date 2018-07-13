@@ -49,7 +49,7 @@ class ImageHandler implements ContentHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function handleReverse(AbstractClassContent $content, $config = [])
+    public function handleReverse(AbstractClassContent $content, array $config = [])
     {
         $settings = (new GlobalSettings())->cdn();
 

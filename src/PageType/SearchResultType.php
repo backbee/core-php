@@ -62,6 +62,14 @@ class SearchResultType extends AbstractType
     /**
      * {@inheritdoc}
      */
+    public function isDumpable()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function defaultContents()
     {
         return [

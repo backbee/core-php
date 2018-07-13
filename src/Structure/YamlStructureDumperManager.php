@@ -2,20 +2,18 @@
 
 namespace BackBeeCloud\Structure;
 
-use BackBeeCloud\Job\JobHandlerInterface;
-use BackBeePlanet\Job\JobInterface;
-use BackBeeCloud\Importer\SimpleWriterInterface;
-use BackBeeCloud\Job\YamlStructureDumperJob;
-
-use BackBeePlanet\GlobalSettings;
 use BackBeeCloud\Entity\PageType;
-
+use BackBeeCloud\Importer\SimpleWriterInterface;
+use BackBeeCloud\Job\JobHandlerInterface;
+use BackBeeCloud\Job\YamlStructureDumperJob;
+use BackBeeCloud\ThemeColor\Color;
+use BackBeePlanet\GlobalSettings;
+use BackBeePlanet\Job\JobInterface;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractContent;
 use BackBee\ClassContent\CloudContentSet;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
-
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -48,6 +46,26 @@ class YamlStructureDumperManager implements JobHandlerInterface
      */
     protected $globalContentFactory;
 
+    /**
+     * @var \BackBeeCloud\Design\ButtonManager
+     */
+    protected $designButtonManager;
+
+    /**
+     * @var \BackBeeCloud\Design\GlobalContentManager
+     */
+    protected $designGlobalContentManager;
+
+    /**
+     * @var \BackBeeCloud\ThemeColor\ColorPanelManager
+     */
+    protected $designColorPanelManager;
+
+    /**
+     * @var \BackBeeCloud\ThemeColor\ThemeColorManager
+     */
+    protected $designThemeColorManager;
+
     protected $folderPath;
     protected $imagePath = '/static/theme-default-resources';
     protected $imageFolderPath;
@@ -68,6 +86,10 @@ class YamlStructureDumperManager implements JobHandlerInterface
         $this->contentBuilder = $container->get('cloud.structure.content_builder');
         $this->globalContentFactory = $container->get('cloud.global_content_factory');
         $this->awsHandler = $container->get('cloud.file_handler');
+        $this->designButtonManager = $app->getContainer()->get('cloud.design.button.manager');
+        $this->designGlobalContentManager = $app->getContainer()->get('cloud.design.global.content.manager');
+        $this->designColorPanelManager = $app->getContainer()->get('cloud.color_panel.manager');
+        $this->designThemeColorManager = $app->getContainer()->get('cloud.theme_color.manager');
 
         $cdnSettings = (new GlobalSettings())->cdn();
         $this->cdnFilePath = $cdnSettings['image_domain'];
@@ -103,21 +125,38 @@ class YamlStructureDumperManager implements JobHandlerInterface
 
         $data = [
             'schema' => [
-                'theme'       => 'default',
+                'design_settings' => $this->getDesignSettings(),
                 'logo_header' => $this->getHeaderLogo(),
                 'logo_footer' => $this->getFooterLogo(),
                 'header'      => [],
-                'footer'      => [],
+                'footer'      => [
+                    'social' => $this->computeContent(
+                        $this->globalContentFactory->getFooterContent('social', 'Social/Icons')
+                    ),
+                    'address' => $this->computeContent(
+                        $this->globalContentFactory->getFooterContent('address', 'Text/Paragraph')
+                    ),
+                    'copyright' => $this->computeContent(
+                        $this->globalContentFactory->getFooterContent('copyright', 'Text/Paragraph')
+                    ),
+                ],
                 'pages'       => [],
             ]
         ];
 
-        $i = 0;
         foreach ($pagesType as $pageType) {
+            if (!$pageType->getType()->isDumpable()) {
+                continue;
+            }
+
             $page = $pageType->getPage();
             $pageObject = $this->computePage($page, $pageType);
 
             foreach($page->getContentSet()->first() as $cloudContentSet) {
+                if (!($cloudContentSet instanceof CloudContentSet)) {
+                    continue;
+                }
+
                 $cloudContentSetObject = $this->computeCloudContentSet($cloudContentSet);
 
                 $x = 0;
@@ -128,12 +167,23 @@ class YamlStructureDumperManager implements JobHandlerInterface
 
                     $x++;
                 }
+
                 $pageObject['contents'][] = $cloudContentSetObject;
             }
-            $data['schema']['pages'][$i] = $pageObject;
 
-            $i++;
+            $data['schema']['pages'][$page->getUid()] = $pageObject;
         }
+
+        $headerMenu = $this->globalContentFactory->getHeaderMenu();
+        foreach (array_reverse($headerMenu->getParamValue('items')) as $item) {
+            if (isset($data['schema']['pages'][$item['id']])) {
+                $pageData = $data['schema']['pages'][$item['id']];
+                unset($data['schema']['pages'][$item['id']]);
+                array_unshift($data['schema']['pages'], $pageData);
+            }
+        }
+
+        $data['schema']['pages'] = array_values($data['schema']['pages']);
 
         $filename = 'structure.yml';
         touch($tmpfile = sprintf('%s/%s', $this->folderPath, $filename));
@@ -162,8 +212,8 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Send mail with the package uploaded in AWS3
      *
-     * @param  String $to      [description]
-     * @param  String $fileUrl [description]
+     * @param  string $to
+     * @param  string $fileUrl
      */
     protected function sendMail($to, $fileUrl)
     {
@@ -187,8 +237,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Compute content for retrieve this data
      *
-     * @param  AbstractContent $content [description]
-     * @return Array                    [description]
+     * @param  AbstractContent $content
+     *
+     * @return array
      */
     protected function computeContent(AbstractContent $content)
     {
@@ -201,8 +252,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
             if ($handler->supports($content)) {
 
                 $handlerData = $handler->handleReverse($content, [
+                    'current_data'   => $contentObject['data'],
                     'uploadCallback' => [$this, 'uploadImage'],
-                    'themeName'      => $this->themeName
+                    'themeName'      => $this->themeName,
                 ]);
 
                 if (false != $handlerData) {
@@ -217,9 +269,10 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Compute page for retrieve this data
      *
-     * @param  Page     $page     [description]
-     * @param  PageType $pageType [description]
-     * @return Array              [description]
+     * @param  Page     $page
+     * @param  PageType $pageType
+     *
+     * @return array
      */
     protected function computePage(Page $page, PageType $pageType)
     {
@@ -230,14 +283,14 @@ class YamlStructureDumperManager implements JobHandlerInterface
                 return $keyword->getKeyWord();
             }, $this->pageMgr->getPageTag($page)->getTags()->toArray()),
             'type'  => $pageType->getTypeName(),
-            'contents' => []
+            'contents' => [],
         ];
     }
 
     /**
      * Retrieve the header logo
      *
-     * @return String [description]
+     * @return string
      */
     protected function getHeaderLogo()
     {
@@ -252,7 +305,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Retrieve the footer logo
      *
-     * @return String [description]
+     * @return string
      */
     protected function getFooterLogo()
     {
@@ -267,8 +320,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Define if the page is in footer, header or both menu
      *
-     * @param  Page   $page [description]
-     * @return String       [description]
+     * @param  Page   $page
+     *
+     * @return string
      */
     protected function getMenuState(Page $page)
     {
@@ -296,8 +350,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Upload image to local and add in the zip file
      *
-     * @param  String $imagePath [description]
-     * @return String            [description]
+     * @param  string $imagePath
+     *
+     * @return string
      */
     public function uploadImage($imagePath)
     {
@@ -331,8 +386,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Retrieve the image file name
      *
-     * @param  String $extension [description]
-     * @return String            [description]
+     * @param  string $extension
+     *
+     * @return string
      */
     protected function getImageFilename($extension)
     {
@@ -342,24 +398,58 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Compute CloudContentSet for retrieve this data
      *
-     * @param  CloudContentSet $cloudContentSet [description]
-     * @return Array                            [description]
+     * @param  CloudContentSet $cloudContentSet
+     *
+     * @return array
      */
     protected function computeCloudContentSet(CloudContentSet $cloudContentSet)
     {
+        $params = $cloudContentSet->getAllParams();
+        foreach ($cloudContentSet->getDefaultParams() as $attr => $default) {
+            if (
+                $params[$attr]['value'] === $default['value']
+                || (
+                    in_array($attr, ['responsive_mobile', 'responsive_tablet'])
+                    && false == $params[$attr]['value']
+                )
+            ) {
+                unset($params[$attr]);
+            }
+        }
+
         $object = [
             'data' => [
                 'parameters' => array_map(function($param) {
                     return $param['value'];
-                }, $cloudContentSet->getAllParams()),
+                }, $params),
             ],
             'columns' => [],
         ];
 
-        if (isset($object['data']['parameters']['bg_image']) && false != $bgImage = $object['data']['parameters']['bg_image']) {
+        if (
+            isset($object['data']['parameters']['bg_image'])
+            && false != $bgImage = $object['data']['parameters']['bg_image']
+        ) {
             $object['data']['parameters']['bg_image'] = $this->imagePath . '/' . $this->uploadImage($bgImage);
         }
 
         return $object;
+    }
+
+    protected function getDesignSettings()
+    {
+        $colorPanel = $this->designColorPanelManager->getColorPanel();
+
+        return [
+            'theme_color' => $this->designThemeColorManager->getByColorPanel($colorPanel)->getUniqueName(),
+            'color_panel' => [
+                'primary' => $colorPanel->getPrimaryColor()->getColor(),
+                'custom_colors' => array_map(function (Color $color) {
+                    return ['color' => $color->getColor()];
+                }, (array) $colorPanel->getCustomColors()),
+            ],
+            'buttons' => $this->designButtonManager->getSettings(),
+            'global_contents' => $this->designGlobalContentManager->getSettings(),
+        ];
     }
 }
