@@ -63,4 +63,11 @@ class ColorPanelUtils
 
         return '#' . $result;
     }
+
+    public static function addOpacity($colorHexCode, $opacity)
+    {
+        $rgb = ColorRGB::fromHex($colorHexCode);
+
+        return 'rgba(' . $rgb->getRed() . ',' . $rgb->getGreen() . ',' . $rgb->getBlue() . ',' . $opacity . ')';
+    }
 }

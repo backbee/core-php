@@ -48,6 +48,7 @@ class ColorPanelCssGenerator
                 ),
                 'color_darken10' => ColorPanelUtils::darken($color->getColor(), 10),
                 'color_darken15' => ColorPanelUtils::darken($color->getColor(), 15),
+                'color_opacity60' => ColorPanelUtils::addOpacity($color->getColor(), 0.6),
             ];
         }
 
