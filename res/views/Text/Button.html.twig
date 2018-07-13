@@ -1,7 +1,7 @@
 {% set settings = this.getDesignSettings('button') %}
 
-<div {{ this.bbcontent(null, {class: 'content button text-' ~ align.value})|raw }}>
-  <a href="{{url.value}}"
+<div data-forbidden-plugins="click" {{ this.bbcontent(null, {class: 'content button text-' ~ align.value})|raw }}>
+  <a {% if url.value %}href="{{ url.value }}"{% endif %}
     {% block data_attributes %}{% endblock %}
     {% if target_blank.value == true %}target="_blank"{% endif %}
     class="btn color-primary {{ color.value }} btn-{{ size.value }} btn-{{ form.value == false ? 'outline' }} btn-{{ settings.shape }}"
