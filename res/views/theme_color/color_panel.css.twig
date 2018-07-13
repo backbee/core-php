@@ -27,24 +27,6 @@ ul.pager li a {
   color: {{ primary_text_color }};
 }
 
-ul.pager li a:hover,
-.owl-carousel .owl-dots .owl-dot span {
-  background-color: {{ secondary_color }};
-}
-
-.cloud-liner:after,
-.form-control,
-.search-btn,
-.image-text-vertical:not(:last-of-type),
-.text-image-vertical:not(:last-of-type),
-.image-text-horizontal:not(:last-of-type),
-.only-text:not(:last-of-type),
-.autoblock-vertical .only-text,
-.highlight > .row:not(:last-of-type) .image-text-vertical,
-.pagination {
-  border-color: {{ secondary_color }};
-}
-
 .navbar-header {
   background-color: {{ background_color }};
 }
@@ -151,6 +133,28 @@ ul.pager li a:hover,
   .has-bg-color.paragraph.{{ color.id }} {
     background-color: {{ color.color }};
     color: {{ color.text_color }};
+  }
+
+  .has-bg-color.paragraph.bordered.{{ color.id }} {
+    color: {{ color.color }};
+    border-color: {{ color.color }};
+  }
+
+  .has-bg-color.paragraph.bordered.{{ color.id }} * {
+    color: {{ color.color }};
+  }
+
+  .has-bg-color.paragraph.transparency.{{ color.id }} {
+    background-color: {{ color.color_opacity60 }};
+  }
+
+  .has-bg-color.paragraph.transparency.bordered.{{ color.id }} {
+    color: {{ color.color_opacity60 }};
+    border-color: {{ color.color_opacity60 }};
+  }
+
+  .has-bg-color.paragraph.transparency.bordered.{{ color.id }} * {
+    color: {{ color.color_opacity60 }};
   }
 
   .has-bg-color.paragraph.{{ color.id }} * {
