@@ -211,13 +211,16 @@ services:
 
   structure.image_handler:
     class: BackBeeCloud\Structure\ContentHandler\ImageHandler
-    arguments: ["@cloud.file_handler"]
+    arguments:
+      - "@cloud.file_handler"
+      - "@structure.parameter_handler"
     tags:
       - { name: structure.content_handler, dispatch_event: false }
 
   structure.slider_handler:
     class: BackBeeCloud\Structure\ContentHandler\SliderHandler
-    arguments: ["@structure.image_handler", "@structure.parameter_handler"]
+    arguments:
+      - "@structure.image_handler"
     tags:
       - { name: structure.content_handler, dispatch_event: false }
 
@@ -234,6 +237,18 @@ services:
 
   structure.socialicons_handler:
     class: BackBeeCloud\Structure\ContentHandler\SocialIconsHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.cards_handler:
+    class: BackBeeCloud\Structure\ContentHandler\CardsHandler
+    arguments:
+      - "@structure.image_handler"
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.liner_and_spacer_handler:
+    class: BackBeeCloud\Structure\ContentHandler\LinerAndSpacerHandler
     tags:
       - { name: structure.content_handler, dispatch_event: false }
 

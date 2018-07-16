@@ -2,12 +2,12 @@
 
 namespace BackBeeCloud\Structure\ContentHandler;
 
+use BackBeeCloud\ImageHandlerInterface;
+use BackBeeCloud\Structure\ContentHandlerInterface;
+use BackBeeCloud\Structure\ContentHandler\ParameterHandler;
+use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Image;
-use BackBeeCloud\Structure\ContentHandlerInterface;
-use BackBeeCloud\ImageHandlerInterface;
-
-use BackBeePlanet\GlobalSettings;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -19,15 +19,21 @@ class ImageHandler implements ContentHandlerInterface
      */
     protected $imgUploadHandler;
 
-    public function __construct(ImageHandlerInterface $imgUploadHandler)
+    /**
+     * @var ParameterHandler
+     */
+    protected $paramHandler;
+
+    public function __construct(ImageHandlerInterface $imgUploadHandler, ParameterHandler $paramHandler)
     {
         $this->imgUploadHandler = $imgUploadHandler;
+        $this->paramHandler = $paramHandler;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handle(AbstractClassContent $content, array $data)
+    public function handle(AbstractClassContent $content, array $data, $handleParameters = false)
     {
         if (!$this->supports($content)) {
             return;
@@ -44,13 +50,19 @@ class ImageHandler implements ContentHandlerInterface
 
             $content->image->originalname = basename($data['path']);
         }
+
+        if ($handleParameters) {
+            $this->paramHandler->handle($content, $data);
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handleReverse(AbstractClassContent $content, array $config = [])
+    public function handleReverse(AbstractClassContent $content, array $config = [], $handleParameters = false)
     {
+        $result = isset($config['current_data']) ? $config['current_data'] : [];
+
         $settings = (new GlobalSettings())->cdn();
 
         $filename = '';
@@ -58,15 +70,13 @@ class ImageHandler implements ContentHandlerInterface
             $filename = $config['uploadCallback']($settings['image_domain'] . '/' . $path);
         }
 
-        $params = $content->getAllParams();
-        unset($params['image_small'], $params['image_medium']);
+        $result['path'] = false == $filename ? '' : $config['themeName'] . '/' . $filename;
 
-        return [
-            'path' => false == $filename ? '' : $config['themeName'] . '/' . $filename,
-            'parameters' => array_map(function($param) {
-                return $param['value'];
-            }, $params)
-        ];
+        if ($handleParameters) {
+            $result = array_merge($result, $this->paramHandler->handleReverse($content));
+        }
+
+        return $result;
     }
 
     /**
