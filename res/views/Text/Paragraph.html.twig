@@ -8,7 +8,7 @@
 <div
     {% block data_attributes %}{% endblock %}
     {{this.bbcontent(null, {
-        class: style.value ~ ' ' ~ transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' has-bg-color ' ~ bg_color.value)~ (picto != '' ? ' with-picto d-flex' : '') ~ (picto_direction != '' ? ' picto-' ~  picto_direction.value : '')
+        class: style.value ~ ' ' ~ transparencyClass ~ ' content paragraph' ~ (bg_color.value == '' ? '' : ' has-bg-color ' ~ bg_color.value)~ (picto != '' ? ' with-picto d-flex' : '') ~ (picto_direction != '' ? ' picto-' ~  picto_direction.value : '')
     })|raw}}
 >
     {% if picto != '' %}

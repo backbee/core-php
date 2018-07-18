@@ -45,29 +45,131 @@ class ColorPanelUtils
         return ($color->getRed() * 299 + $color->getGreen() * 587 + $color->getBlue() * 114) / 1000;
     }
 
-    public static function darken($colorHexCode, $percentage)
-    {
-        $percentage = abs($percentage)/100;
-        $rgb = ColorRGB::fromHex($colorHexCode);
-
-        $newColorComponents = [
-            min( max(0, $rgb->getRed() - $rgb->getRed() * $percentage), 255),
-            min( max(0, $rgb->getGreen() - $rgb->getGreen() * $percentage), 255),
-            min( max(0, $rgb->getBlue() - $rgb->getBlue() * $percentage), 255)
-        ];
-
-        $result = '';
-        foreach ($newColorComponents as $component) {
-            $result = $result . str_pad(dechex($component), 2, 0);
-        }
-
-        return '#' . $result;
-    }
-
     public static function addOpacity($colorHexCode, $opacity)
     {
         $rgb = ColorRGB::fromHex($colorHexCode);
 
         return 'rgba(' . $rgb->getRed() . ',' . $rgb->getGreen() . ',' . $rgb->getBlue() . ',' . $opacity . ')';
+    }
+
+    public static function colorShade($colorHexCode, $percentage)
+    {
+        $hsl = self::rgbToHSL($colorHexCode);
+
+        if ($hsl['l'] < 0.05) {
+            $percentage = abs($percentage);
+        } elseif ($hsl['l'] > 0.95) {
+            $percentage = (-1) * abs($percentage);
+        }
+
+        $hsl['l'] += $percentage/100;
+        $rgb = self::hslToRGB($hsl['h'], $hsl['s'], $hsl['l']);
+
+        $result = '';
+        foreach ($rgb as $component) {
+            $result = $result . str_pad(dechex($component), 2, 0, STR_PAD_LEFT);
+        }
+
+        return '#' . $result;
+    }
+
+    protected static function rgbToHSL($colorHexCode)
+    {
+        $rgb = ColorRGB::fromHex($colorHexCode);
+
+        $rPercentage = $rgb->getRed() / 255;
+        $gPercentage = $rgb->getGreen() / 255;
+        $bPercentage = $rgb->getBlue() / 255;
+
+        $max = max($rPercentage, $gPercentage, $bPercentage);
+        $min = min($rPercentage, $gPercentage, $bPercentage);
+
+        $hue;
+        $saturation;
+        $luminosity = ($max + $min) / 2;
+        $diff = $max - $min;
+
+        if ($diff === 0) {
+            $hue = 0;
+            $saturation = 0;
+        } else {
+            $saturation = $diff / (1 - abs(2 * $luminosity -1));
+
+            switch($max) {
+                case $rPercentage:
+                    $hue = 60 * fmod((($gPercentage - $bPercentage) / $diff), 6);
+                    if ($bPercentage > $gPercentage) {
+                        $hue += 360;
+                    }
+                    break;
+
+                case $gPercentage:
+                    $hue = 60 * (($bPercentage - $rPercentage)/ $diff + 2);
+                    break;
+
+                case $bPercentage:
+                    $hue = 60 * (($rPercentage - $gPercentage)/ $diff + 4);
+                    break;
+            }
+        }
+
+        return array('h' => round($hue, 2), 's' => round($saturation, 2), 'l' => round($luminosity, 2));
+    }
+
+    protected static function hslToRGB($hue, $saturation, $luminosity)
+    {
+        $chroma = (1 - abs(2 * $luminosity - 1)) * $saturation;
+        $value = $chroma * (1 - abs(fmod(($hue / 60), 2) - 1));
+        $mixing = $luminosity - ($chroma / 2);
+
+        switch ($hue) {
+            case ($hue < 60):
+                $red = $chroma;
+                $green = $value;
+                $blue = 0;
+                break;
+
+            case ($hue < 120):
+                $red = $value;
+                $green = $chroma;
+                $blue = 0;
+                break;
+
+            case ($hue < 180):
+                $red = 0;
+                $green = $chroma;
+                $blue = $value;
+                break;
+
+            case ($hue < 240):
+                $red = 0;
+                $green = $value;
+                $blue = $chroma;
+                break;
+
+            case ($hue < 300):
+                $red = $value;
+                $green = 0;
+                $blue = $chroma;
+                break;
+
+            default:
+                $red = $chroma;
+                $green = 0;
+                $blue = $value;
+                break;
+        }
+
+        $red = floor(($red + $mixing) * 255);
+        $green = floor(($green + $mixing) * 255);
+        $blue = floor(($blue + $mixing) * 255);
+
+        $newColorComponent = [
+            $red,
+            $green,
+            $blue
+        ];
+
+        return $newColorComponent;
     }
 }
