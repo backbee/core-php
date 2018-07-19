@@ -16,6 +16,7 @@ use BackBee\Renderer\Event\RendererEvent;
 class VideoListener
 {
     const YOUTUBE_HOST = 'www.youtube.com';
+    const YOUTUBE_HOST_SHORT = 'youtu.be';
     const DAILYMOTION_HOST = 'www.dailymotion.com';
     const VIMEO_HOST = 'vimeo.com';
     const BFMTV_HOST = 'www.bfmtv.com';
@@ -163,8 +164,12 @@ class VideoListener
                 if (isset($queryString['v'])) {
                     $data['src'] = self::YOUTUBE_BASEURL . $queryString['v'];
                 }
-
                 break;
+
+            case self::YOUTUBE_HOST_SHORT:
+                $data['src'] = self::YOUTUBE_BASEURL . substr($urlData['path'], 1);
+                break;
+
             case self::DAILYMOTION_HOST:
                 $data['src'] = self::DAILYMOTION_BASEURL . strtok(basename($url), '_');
                 break;
