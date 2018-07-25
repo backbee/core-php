@@ -5,11 +5,16 @@
     {% set transparencyClass = 'transparency' %}
 {% endif %}
 
+{% set style_class = style.value %}
+{% if bg_color.value == false %}
+    {% set style_class = '' %}
+{% endif %}
+
 <div
     {% block data_attributes %}{% endblock %}
-    {{this.bbcontent(null, {
-        class: style.value ~ ' ' ~ transparencyClass ~ ' content paragraph' ~ (bg_color.value == '' ? '' : ' has-bg-color ' ~ bg_color.value)~ (picto != '' ? ' with-picto d-flex' : '') ~ (picto_direction != '' ? ' picto-' ~  picto_direction.value : '')
-    })|raw}}
+    {{ this.bbcontent(null, {
+        class: style_class ~ ' ' ~ transparencyClass ~ ' content paragraph' ~ (bg_color.value == 'default' ? '' : ' has-bg-color ' ~ bg_color.value)~ (picto != '' ? ' with-picto d-flex' : '') ~ (picto_direction != '' ? ' picto-' ~  picto_direction.value : '')
+    })|raw }}
 >
     {% if picto != '' %}
         <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto picto-{{picto_size.value}}">
