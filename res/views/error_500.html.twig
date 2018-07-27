@@ -3,6 +3,6 @@
 {% set errors = this.getPageErrors('500') %}
 
 {% block title %}500 Error - {{this.getApplication().getSite().getLabel()}}{% endblock %}
-{% block error_title %}{{errors.title}}{% endblock %}
-{% block error_message %}{{errors.description}}{% endblock %}
-{% block button_title %}{{errors.button_title}}{% endblock %}
+{% block error_title %}{{ errors.title ?: parent() }}{% endblock %}
+{% block error_message %}{{ errors.description ?: parent() }}{% endblock %}
+{% block button_title %}{{ errors.button_title ?: parent() }}{% endblock %}

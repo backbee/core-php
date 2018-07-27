@@ -59,6 +59,8 @@ kernel.response:
     listeners:
         - [@profiler.toolbar.listener, onKernelResponse]
         - [@profiler.listener, onKernelResponse]
+        - ["@cloud.theme_color.listener", onKernelResponse]
+        - ["@cloud.favicon.listener", onKernelResponse]
 
 # ClassContent listeners
 
@@ -379,7 +381,6 @@ nestednode.page.render:
     listeners:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\PageListener, onPageRender]
-        - [BackBeeCloud\Listener\ThemeColorListener, onPageRender]
         - ["@api.multilang.listener", onPageRender]
 
 nestednode.page.postrender:

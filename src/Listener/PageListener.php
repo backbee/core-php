@@ -302,11 +302,6 @@ class PageListener
         }
 
         $event->getRenderer()->assign('layout_name', $type->layoutName());
-        if ($faviconData = $app->getContainer()->get('user_preference.manager')->dataOf('favicon')) {
-            $event->getRenderer()->assign('favicon_data', array_map(function ($url) {
-                return str_replace(['http:', 'https:'], '', $url);
-            }, $faviconData));
-        }
 
         if ($gaData = $app->getContainer()->get('user_preference.manager')->dataOf('google-analytics')) {
             $code = isset($gaData['code']) ? (string) $gaData['code'] : '';
