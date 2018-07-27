@@ -7,12 +7,15 @@ use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Entity\PageTag;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Article\ArticleAbstract;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\MetaData\MetaData;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -138,7 +141,7 @@ class PageManager
      */
     public function format(Page $page, $strictDraftMode = false)
     {
-        $metadatabag = $page->getMetaData();
+        $pageSeo = $this->getPageSeoMetadata($page);
         $type = $this->typeMgr->findByPage($page);
         $result = $this->elsMgr->getClient()->get([
             'id'      => $page->getUid(),
@@ -169,20 +172,7 @@ class PageManager
                     'label' => $keyword->getKeyWord(),
                 ];
             }, $this->getPageTag($page)->getTags()->toArray()),
-            'seo' => [
-                'title'       => null !== $metadatabag && $metadatabag->get('title')
-                    ? $metadatabag->get('title')->getAttribute('content', '')
-                    : ''
-                ,
-                'description' => null !== $metadatabag && $metadatabag->get('description')
-                    ? $metadatabag->get('description')->getAttribute('content', '')
-                    : ''
-                ,
-                'keywords'    => null !== $metadatabag && $metadatabag->get('keywords')
-                    ? $metadatabag->get('keywords')->getAttribute('content', '')
-                    : ''
-                ,
-            ],
+            'seo' => $pageSeo,
             'lang' => $this->multilangMgr->getLangByPage($page),
             'modified' => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at' => $page->getPublishing()
@@ -519,6 +509,59 @@ class PageManager
         ]);
     }
 
+    public function getPageSeoMetadata(Page $page)
+    {
+        $seoData = [];
+
+        $metadatabag = $page->getMetaData() ?: [];
+        foreach ($metadatabag as $attr => $metadata) {
+            if ($metadata->getAttribute('name') === $attr) {
+                if ($value = $metadata->getAttribute('content')) {
+                    $seoData[$attr] = $value;
+                }
+            }
+        }
+
+        $elasticsearchResult = null;
+
+        try {
+            $elasticsearchResult = $this->elsMgr->getClient()->get([
+                'id'    => $page->getUid(),
+                'type'  => $this->elsMgr->getPageTypeName(),
+                'index' => $this->elsMgr->getIndexName(),
+                '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
+            ]);
+        } catch (Missing404Exception $e) {
+            return $seoData;
+        }
+
+        $elasticsearchResult = $elasticsearchResult['_source'];
+        if (!isset($seoData['title'])) {
+            $seoData['title'] = $elasticsearchResult['title'];
+        }
+
+        if (
+            !isset($seoData['description'])
+            && $elasticsearchResult['abstract_uid']
+            && $abstract = $this->entyMgr->find(ArticleAbstract::class, $elasticsearchResult['abstract_uid'])
+        ) {
+            $seoData['description'] = strip_tags(str_replace("\n", '', $abstract->value));
+        }
+
+        if ('article' !== $elasticsearchResult['type']) {
+            return $seoData;
+        }
+
+        if (
+            $elasticsearchResult['image_uid']
+            && $image = $this->entyMgr->find(Image::class, $elasticsearchResult['image_uid'])
+        ) {
+            $seoData['image_url'] = $image->image->path;
+        }
+
+        return $seoData;
+    }
+
     protected function filterByTitle(QueryBuilder $qb, $value)
     {
         $operator = false !== strpos($value, '%') ? 'like' : 'eq';
@@ -746,7 +789,21 @@ class PageManager
      */
     protected function runSetSeo(Page $page, array $data)
     {
+        $currentSeo = $this->getPageSeoMetadata($page);
+        if ($data['title'] === $currentSeo['title']) {
+            unset($data['title']);
+        }
+
+        if ($data['description'] === $currentSeo['description']) {
+            unset($data['description']);
+        }
+
+        if (false == $data) {
+            return;
+        }
+
         $bag = $page->getMetaData() ?: new MetaDataBag();
+
         $data = array_merge([
             'title' => $bag->get('title')
                 ? $bag->get('title')->getAttribute('content', '')
@@ -910,5 +967,6 @@ class PageManager
 
         return $data;
     }
+
 
 }
