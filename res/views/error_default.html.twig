@@ -5,10 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
-    <title>{% block title %}Error - {{this.getApplication().getSite().getLabel()}}{% endblock %}</title>
+    <title>{% block title %}Error - {{ this.getApplication().getSite().getLabel() }}{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{this.getCdnUri('/css/gen.css')}}">
-    <link rel="stylesheet" href="{{this.getCdnUri('/static/css/cover.css')}}">
+    <!--##FAVICON_SPOT##-->
+
+    <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">
+    <link rel="stylesheet" href="{{ this.getCdnUri('/static/css/cover.css') }}">
 
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -16,22 +18,29 @@
     <![endif]-->
   </head>
   <body>
-    <div class="site-wrapper">
+    {# <div id="bb-site-wrapper" class="bb-site-wrapper{% if has_header_margin %} offset-main{% endif %} {{bb.token ? 'cloud-edit' : ''}}"> #}
+    <div class="bb-site-wrapper site-wrapper">
       <div class="site-wrapper-inner">
-        <div class="cover-container">
-          <div class="masthead">
-            {{this.render(this.globalContentFactory().getHeader())|raw}}
-          </div>
+        {# <div class="cover-container"> #}
+          {# <div class="masthead"> #}
+        {{ this.render(this.globalContentFactory().getHeader())|raw }}
+          {# </div> #}
 
-          <h1>{% block error_title %}Error{% endblock %}</h1>
-          <p class="reason"><em>{% block error_message %}Oops, it seems that something went wrong… try to refresh page or click on the button below.{% endblock %}</em></p>
-          <a href="/" class="btn btn-primary btn-md btn-rounded">{% block button_title %}BACK TO HOMEPAGE{% endblock %}</a>
-        </div>
+        <h1>{% block error_title %}Error{% endblock %}</h1>
+        <p class="reason"><em>{% block error_message %}Oops, it seems that something went wrong… try to refresh page or click on the button below.{% endblock %}</em></p>
+        {% set button_settings = this.getDesignSettings('button') %}
+        <a
+          href="/"
+          class="btn color-primary btn-md btn-{{ settings.shape }}"
+          {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
+        >
+          {% block button_title %}BACK TO HOMEPAGE{% endblock %}
+        </a>
       </div>
     </div>
 
-    {{this.render(this.globalContentFactory().getFooter())|raw}}
+    {{ this.render(this.globalContentFactory().getFooter())|raw }}
 
-    <script src="{{this.getCdnUri('/js/theme-bottom.min.js')}}"></script>
+    <script src="{{ this.getCdnUri('/js/theme-bottom.min.js') }}"></script>
   </body>
 </html>

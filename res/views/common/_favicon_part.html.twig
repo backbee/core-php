@@ -1,0 +1,21 @@
+{% if url_144x144 is defined and url_144x144 != '' %}
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ url_144x144 }}" />
+{% endif %}
+
+{% if url_152x152 is defined and url_152x152 != '' %}
+  <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{{ url_152x152 }}" />
+{% endif %}
+
+{% if url_32x32 is defined and url_32x32 != '' %}
+  <link rel="icon" type="image/png" href="{{ url_32x32 }}" sizes="32x32" />
+{% endif %}
+
+{% if url_16x16 is defined and url_16x16 != '' %}
+  <link rel="icon" type="image/png" href="{{ url_16x16 }}" sizes="16x16" />
+{% endif %}
+
+{% if url_144x144 is defined and url_144x144 != '' %}
+  <meta name="application-name" content="{{ this.sitename() }}" />
+  <meta name="msapplication-TileColor" content="#ffffff" />
+  <meta name="msapplication-TileImage" content="{{ url_144x144 }}" />
+{% endif %}

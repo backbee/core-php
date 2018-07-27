@@ -48,6 +48,12 @@ services:
     class: BackBeeCloud\SiteStatusManager
     arguments: ["@em"]
 
+  cloud.favicon.listener:
+    class: BackBeeCloud\Listener\FaviconListener
+    arguments:
+      - "@user_preference.manager"
+      - "@renderer"
+
   # Contact service
   contact_controller:
     class: BackBeeCloud\Controller\ContactController
@@ -342,6 +348,10 @@ services:
   cloud.color_panel_css_genrator.controller:
     class: BackBeeCloud\Controller\ColorPanelController
     arguments: ["@cloud.color_panel.css_generator", "@em"]
+
+  cloud.theme_color.listener:
+    class: BackBeeCloud\Listener\ThemeColorListener
+    arguments: ["@cloud.color_panel.css_generator", "@routing"]
 
   # Design services
   cloud.design.font.manager:
