@@ -9,7 +9,9 @@ use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -50,13 +52,18 @@ class CacheListener
         $event->getResponse()->headers->clearCookie(self::COOKIE_DISABLE_CACHE);
     }
 
-    public static function onPagePostRender(RendererEvent $event)
+    public static function onKernelResponse(FilterResponseEvent $event)
     {
-        $app = $event->getApplication();
+        $app = $event->getKernel()->getApplication();
+        $request = $event->getRequest();
+        $response = $event->getResponse();
+
         if (
-            !$app->getRequest()->isMethod('get')
+            $response instanceof JsonResponse
+            || Response::HTTP_OK !== $response->getStatusCode()
+            || !$request->isMethod('get')
+            || 'default' !== $request->attributes->get('_route')
             || null !== $app->getBBUserToken()
-            || 'default' !== $app->getRequest()->attributes->get('_route')
         ) {
             return;
         }
@@ -68,10 +75,10 @@ class CacheListener
         $redisClient->set(
             $key = sprintf(
                 '%s:%s[%s]',
-                $app->getSite()->getLabel(), $app->getRequest()->getRequestUri(),
+                $app->getSite()->getLabel(), $request->getRequestUri(),
                 UserAgentHelper::getDeviceType()
             ),
-            $event->getRender()
+            $response->getContent()
         );
         $redisClient->expire($key, 60 * 60 * 24);
     }

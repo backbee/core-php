@@ -61,6 +61,7 @@ kernel.response:
         - [@profiler.listener, onKernelResponse]
         - ["@cloud.theme_color.listener", onKernelResponse]
         - ["@cloud.favicon.listener", onKernelResponse]
+        - [BackBeeCloud\Listener\CacheListener, onKernelResponse, -8000]
 
 # ClassContent listeners
 
@@ -386,7 +387,6 @@ nestednode.page.render:
 nestednode.page.postrender:
     listeners:
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\CacheListener, onPagePostRender]
         - [BackBeeCloud\Listener\PageListener, onPostRender]
 
 # HAuthBundle listeners
