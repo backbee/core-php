@@ -67,6 +67,13 @@ class ContentManager
             $newVal = $value;
             if ($value instanceof AbstractClassContent) {
                 $newVal = $this->duplicateContent($value, $token, null, $putOnline);
+            } elseif (is_array($value)) {
+                $newVal = [];
+                foreach ($value as $subValue) {
+                    if ($subValue instanceof AbstractClassContent) {
+                        $newVal[] = $this->duplicateContent($subValue, $token, null, $putOnline);
+                    }
+                }
             }
 
             if ($copy->hasElement($key)) {
