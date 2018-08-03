@@ -6,7 +6,11 @@
 
 {% set height = this.getObject().getParamValue('height') %}
 {% if height is not null %}
-  {% set height = height ~ 'px' %}
+  {% if not this.userAgentHelper.isDesktop() %}
+    {% set height = (height * 3 / 4) ~ 'px' %}
+  {% else %}
+    {% set height = height ~ 'px' %}
+  {% endif %}
 {% endif %}
 
 <div data-forbidden-plugins="click" {{this.bbcontent(null, {'class': 'content block-slider'})|raw}}>
