@@ -452,7 +452,6 @@ class PageManager
         $data = $this->prepareDataWithLang($data);
         $data['title'] = isset($data['title']) ? $data['title'] : '';
         $data['tags'] = isset($data['tags']) ? (array) $data['tags'] : [];
-        $data['seo'] = isset($data['seo']) ? $data['seo'] : [];
         $putContentOnline = isset($data['put_content_online']) ? (bool) $data['put_content_online'] : false;
         unset($data['type'], $data['is_online'], $data['put_content_online']);
 
@@ -790,12 +789,14 @@ class PageManager
     protected function runSetSeo(Page $page, array $data)
     {
         $currentSeo = $this->getPageSeoMetadata($page);
-        if ($data['title'] === $currentSeo['title']) {
-            unset($data['title']);
-        }
+        if (false != $currentSeo) {
+            if (isset($data['title']) && $data['title'] === $currentSeo['title']) {
+                unset($data['title']);
+            }
 
-        if ($data['description'] === $currentSeo['description']) {
-            unset($data['description']);
+            if (isset($data['description']) && $data['description'] === $currentSeo['description']) {
+                unset($data['description']);
+            }
         }
 
         if (false == $data) {

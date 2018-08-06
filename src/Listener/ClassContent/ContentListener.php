@@ -42,10 +42,14 @@ class ContentListener
                 return;
             }
 
-            $content->path = $event->getApplication()->getContainer()->get('cloud.file_handler')->duplicate(
-                $content->path,
-                sprintf('%s.%s', $content->getUid(), explode('.', basename($content->path))[1])
-            );
+            try {
+                $content->path = $event->getApplication()->getContainer()->get('cloud.file_handler')->duplicate(
+                    $content->path,
+                    sprintf('%s.%s', $content->getUid(), explode('.', basename($content->path))[1])
+                );
+            } catch (\Exception $exception) {
+                $content->path = null;
+            }
         } elseif ($content instanceof Title) {
             if (null !== $page = $dic->get('cloud.page_manager')->getCurrentPage()) {
                 $content->value = $page->getTitle();
