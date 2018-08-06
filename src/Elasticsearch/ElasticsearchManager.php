@@ -65,37 +65,29 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     }
 
     /**
-     * Indexes the provide page into the 'page' type.
-     *
-     * @param  Page   $page
-     * @return self
+     * {@inheritdoc}
      */
-    public function indexPage(Page $page)
+    protected function getPageCustomDataToIndex(Page $page)
     {
         $type = $this->pagetypeMgr->findByPage($page);
 
-        $params = [
-            'index' => $this->getIndexName(),
-            'type'  => $this->getPageTypeName(),
-            'id'    => $page->getUid(),
-            'body'  => [
-                'title'              => $this->extractTitleFromPage($page),
-                'abstract_uid'       => $this->extractAbstractUidFromPage($page),
-                'tags'               => [],
-                'url'                => $page->getUrl(),
-                'image_uid'          => $this->extractImageUidFromPage($page),
-                'contents'           => $this->extractTextsFromPage($page),
-                'type'               => $type->uniqueName(),
-                'is_online'          => $page->isOnline(),
-                'is_pullable'        => $type->isPullable(),
-                'created_at'         => $page->getCreated()->format('Y-m-d H:i:s'),
-                'modified_at'        => $page->getModified()->format('Y-m-d H:i:s'),
-                'published_at'       => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,
-                'has_draft_contents' => $this->bbtoken
-                    ? $this->contentMgr->isDraftedPage($page, $this->bbtoken)
-                    : false
-                ,
-            ],
+        $data = [
+            'title'              => $this->extractTitleFromPage($page),
+            'abstract_uid'       => $this->extractAbstractUidFromPage($page),
+            'tags'               => [],
+            'url'                => $page->getUrl(),
+            'image_uid'          => $this->extractImageUidFromPage($page),
+            'contents'           => $this->extractTextsFromPage($page),
+            'type'               => $type->uniqueName(),
+            'is_online'          => $page->isOnline(),
+            'is_pullable'        => $type->isPullable(),
+            'created_at'         => $page->getCreated()->format('Y-m-d H:i:s'),
+            'modified_at'        => $page->getModified()->format('Y-m-d H:i:s'),
+            'published_at'       => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,
+            'has_draft_contents' => $this->bbtoken
+                ? $this->contentMgr->isDraftedPage($page, $this->bbtoken)
+                : false
+            ,
         ];
 
         $pagetag = $this
@@ -105,12 +97,10 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         ;
         $tags = null !== $pagetag ? $pagetag->getTags() : [];
         foreach ($tags as $tag) {
-            $params['body']['tags'][] = strtolower($tag->getKeyWord());
+            $data['body']['tags'][] = strtolower($tag->getKeyWord());
         }
 
-        $this->getClient()->index($params);
-
-        return $this;
+        return $data;
     }
 
     /**
