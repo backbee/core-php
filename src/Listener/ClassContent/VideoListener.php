@@ -159,15 +159,21 @@ class VideoListener
             parse_str($urlData['query'], $queryString);
         }
 
+        if (isset($urlData['host'])) {
+            return $data;
+        }
+
         switch ($urlData['host']) {
             case self::YOUTUBE_HOST:
                 if (isset($queryString['v'])) {
                     $data['src'] = self::YOUTUBE_BASEURL . $queryString['v'];
                 }
+
                 break;
 
             case self::YOUTUBE_HOST_SHORT:
                 $data['src'] = self::YOUTUBE_BASEURL . substr($urlData['path'], 1);
+
                 break;
 
             case self::DAILYMOTION_HOST:
@@ -176,12 +182,14 @@ class VideoListener
 
             case self::VIMEO_HOST:
                 $data['src'] = self::VIMEO_BASEURL . substr($urlData['path'], 1);
+
                 break;
 
             case self::BFMTV_HOST:
                 if ($urlData['path'] === self::BFMTV_BASEURL) {
                     $data['src'] = $url;
                 }
+
                 break;
         }
 
