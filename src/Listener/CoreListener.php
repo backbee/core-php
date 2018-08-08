@@ -9,6 +9,7 @@ use BackBee\Event\Event;
 use BackBee\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
@@ -108,6 +109,15 @@ class CoreListener
         }
 
         throw new WorkInProgressException();
+    }
+
+    /**
+     * This listener listen to 'kernel.controller' event to prevent \BackBee\Controller\FrontController::defaultAction
+     * sending response by itself.
+     */
+    public static function onKernelController(FilterControllerEvent $event)
+    {
+        $event->getRequest()->attributes->set('sendResponse', false);
     }
 
     public static function onAuthenticationException(GetResponseForExceptionEvent $event)
