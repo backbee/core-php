@@ -36,11 +36,6 @@ kernel.request:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\RequestListener, onKernelRequest]
 
-kernel.controller:
-    listeners:
-        # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\CoreListener, onKernelController]
-
 kernel.exception:
     listeners:
         - [@rest.listener.exception, onKernelException]
@@ -59,6 +54,8 @@ kernel.controller:
         - [@rest.listener.security, onKernelController]
         - [@rest.listener.validation, onKernelController]
         - [@rest.listener.pagination, onKernelController]
+        # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\CoreListener, onKernelController]
 
 kernel.response:
     listeners:
