@@ -97,7 +97,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         ;
         $tags = null !== $pagetag ? $pagetag->getTags() : [];
         foreach ($tags as $tag) {
-            $data['body']['tags'][] = strtolower($tag->getKeyWord());
+            $data['tags'][] = strtolower($tag->getKeyWord());
         }
 
         return $data;
