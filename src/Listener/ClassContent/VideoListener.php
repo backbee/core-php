@@ -159,7 +159,7 @@ class VideoListener
             parse_str($urlData['query'], $queryString);
         }
 
-        if (isset($urlData['host'])) {
+        if (!isset($urlData['host'])) {
             return $data;
         }
 
