@@ -1,4 +1,5 @@
 {% set sliderId = "slider_" ~ this.getObject().getUid() %}
+{% set dataForbidden = forbiddenPlugins ? forbiddenPlugins : 'click' %}
 
 {% if images != null and images is not iterable %}
   {% set images = [images] %}
@@ -9,7 +10,7 @@
   {% set height = height ~ 'px' %}
 {% endif %}
 
-<div data-forbidden-plugins="click" {{this.bbcontent(null, {'class': 'content block-slider'})|raw}}>
+<div data-forbidden-plugins="{{ dataForbidden }}" {{this.bbcontent(null, {'class': 'content block-slider'})|raw}}>
   {% if images|length == 0 %}
   {% include 'common/missing_config_block.html.twig' %}
   {% else %}
