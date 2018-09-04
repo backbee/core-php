@@ -49,6 +49,7 @@ class AutoHeightContentListener
             if (
                 $colContentSet instanceof ColContentSet
                 && 1 === count($colContentSet->getData())
+                && $colContentSet->getData()[0] instanceof AbstractClassContent
                 && self::isContentAutoHeightEnabled($colContentSet->getData()[0])
             ) {
                 $currentValue = (string) $event->getRenderer()->row_extra_css_classes;
