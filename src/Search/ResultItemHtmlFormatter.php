@@ -3,7 +3,6 @@
 namespace BackBeeCloud\Search;
 
 use BackBee\ClassContent\Article\ArticleAbstract;
-use BackBee\ClassContent\Basic\BaseSearchResult;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Text\Paragraph;
@@ -45,9 +44,14 @@ class ResultItemHtmlFormatter
         $this->bbtoken = $bbtoken;
     }
 
-    public function renderItemFromRawData(BaseSearchResult $content, array $pageRawData)
+    public function renderItemFromRawData(array $pageRawData, array $extraParams)
     {
-        $abstract = null;
+        $params = $pageRawData['_source'];
+
+        $params['publishing'] = $params['published_at']
+            ? new \DateTime($params['published_at'])
+            : null;
+
         if (false != $abstractUid = $pageRawData['_source']['abstract_uid']) {
             $abstract = $this->getContentWithDraft(ArticleAbstract::class, $abstractUid);
             if (null === $abstract) {
@@ -55,7 +59,7 @@ class ResultItemHtmlFormatter
             }
 
             if (null !== $abstract) {
-                $abstract = trim(preg_replace(
+                $params['abstract'] = trim(preg_replace(
                     '#\s\s+#',
                     ' ',
                     preg_replace('#<[^>]+>#', ' ', $abstract->value)
@@ -63,11 +67,10 @@ class ResultItemHtmlFormatter
             }
         }
 
-        $imageData = [];
         if (false != $imageUid = $pageRawData['_source']['image_uid']) {
             $image = $this->getContentWithDraft(Image::class, $imageUid);
             if (null !== $image) {
-                $imageData = [
+                $params['image'] = [
                     'uid'    => $image->getUid(),
                     'url'    => $image->image->path,
                     'title'  => $image->getParamValue('title'),
@@ -77,20 +80,16 @@ class ResultItemHtmlFormatter
             }
         }
 
-        return $this->renderer->partial('SearchResult/page_item.html.twig', [
-            'title'                => $pageRawData['_source']['title'],
-            'abstract'             => (string) $abstract,
-            'url'                  => $pageRawData['_source']['url'],
-            'is_online'            => $pageRawData['_source']['is_online'],
-            'image'                => $imageData,
-            'publishing'           => $pageRawData['_source']['published_at']
-                ? new \DateTime($pageRawData['_source']['published_at'])
-                : null
-            ,
-            'show_image'           => $content->getParamValue('show_image'),
-            'show_abstract'        => $content->getParamValue('show_abstract'),
-            'show_published_at'    => $content->getParamValue('show_published_at'),
-        ]);
+        unset(
+            $params['published_at'],
+            $params['abstract_uid'],
+            $params['image_uid']
+        );
+
+        return $this->renderer->partial('SearchResult/page_item.html.twig', array_merge(
+            $params,
+            $extraParams
+        ));
     }
 
     protected function getContentWithDraft($classname, $uid)
