@@ -15,6 +15,16 @@ class SearchEvent extends Event
     protected $queryBody;
 
     /**
+     * @var \ArrayObject
+     */
+    protected $size;
+
+    /**
+     * @var \ArrayObject
+     */
+    protected $orderBy;
+
+    /**
      * Constructor.
      *
      * Transforms provided array into \ArrayObject to allow update of query body
@@ -35,5 +45,25 @@ class SearchEvent extends Event
     public function getQueryBody()
     {
         return $this->queryBody;
+    }
+
+    public function getSize()
+    {
+        return $this->size;
+    }
+
+    public function setSize($size)
+    {
+        $this->size = (int) $size;
+    }
+
+    public function getOrderBy()
+    {
+        return $this->orderBy;
+    }
+
+    public function setOrderBy(array $orderBy)
+    {
+        $this->orderBy = $orderBy;
     }
 }

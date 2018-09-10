@@ -72,21 +72,28 @@ class SearchResultListener
                 ];
             }
 
+            $size = $searchEvent->getSize() ?: self::RESULT_PER_PAGE;
             $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
                 $esQuery,
-                $start = ($page > 0 ? $page - 1 : 0) * self::RESULT_PER_PAGE,
-                self::RESULT_PER_PAGE,
-                [],
+                ($page > 0 ? $page - 1 : 0) * $size,
+                $size,
+                (array) $searchEvent->getOrderBy(),
                 false
             );
-
             $formatter = new ResultItemHtmlFormatter(
                 $app->getEntityManager(),
                 $app->getRenderer(),
                 $app->getBBUserToken()
             );
+
+            $extraParams = [
+                'show_image' => $event->getTarget()->getParamValue('show_image'),
+                'show_abstract' => $event->getTarget()->getParamValue('show_abstract'),
+                'show_published_at' => $event->getTarget()->getParamValue('show_published_at'),
+            ];
+
             foreach ($pages->collection() as $page) {
-                $contents[] = $formatter->renderItemFromRawData($event->getTarget(), $page);
+                $contents[] = $formatter->renderItemFromRawData($page, $extraParams);
             }
         }
 
