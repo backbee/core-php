@@ -13,12 +13,12 @@
   {% set spacerClass = '' %}
 
   {% set tabletMaxItem = 4 %}
-  {% if responsive_tablet.value.nb_item_max >= 0 %}
+  {% if responsive_tablet.value.nb_item_max is defined and responsive_tablet.value.nb_item_max >= 0 %}
     {% set tabletMaxItem = responsive_tablet.value.nb_item_max %}
   {% endif %}
 
   {% set mobileMaxItem = 4 %}
-  {% if responsive_mobile.value.nb_item_max >= 0 %}
+  {% if responsive_mobile.value.nb_item_max is defined and responsive_mobile.value.nb_item_max >= 0 %}
     {% set mobileMaxItem = responsive_mobile.value.nb_item_max %}
   {% endif %}
 
