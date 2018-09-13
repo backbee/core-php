@@ -86,7 +86,7 @@ class ResultItemHtmlFormatter
             $params['image_uid']
         );
 
-        return $this->renderer->partial('SearchResult/page_item.html.twig', array_merge(
+        return $this->renderer->reset()->partial('SearchResult/page_item.html.twig', array_merge(
             $params,
             $extraParams
         ));
