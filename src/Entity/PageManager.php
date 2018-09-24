@@ -272,6 +272,7 @@ class PageManager
                 $query['query']['bool']['should'] = [
                     [ 'match' => ['title' => $title] ],
                     [ 'match' => ['title.raw' => $title] ],
+                    [ 'match' => ['title.folded' => $title] ],
                     [ 'match_phrase_prefix' => ['title' => $title] ],
                     [ 'match_phrase_prefix' => ['tags' => $title] ],
                 ];
