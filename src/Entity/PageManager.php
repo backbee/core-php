@@ -274,6 +274,8 @@ class PageManager
                     [ 'match' => ['title.raw' => $title] ],
                     [ 'match' => ['title.folded' => $title] ],
                     [ 'match_phrase_prefix' => ['title' => $title] ],
+                    [ 'match_phrase_prefix' => ['title.raw' => $title] ],
+                    [ 'match_phrase_prefix' => ['title.folded' => $title] ],
                     [ 'match_phrase_prefix' => ['tags' => $title] ],
                 ];
                 $query['query']['bool']['minimum_should_match'] = 1;
