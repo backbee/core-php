@@ -17,10 +17,10 @@ Video:
       type: selectButton
       label: yaml_block_video_position
       buttons:
-        left: {'icon': 'icon-align-left'}
+        start: {'icon': 'icon-align-left'}
         center: {'icon': 'icon-align-center'}
-        right: {'icon': 'icon-align-right'}
-      value: left
+        end: {'icon': 'icon-align-right'}
+      value: start
       tab: yaml_block_video_style
       group:
         id: position
