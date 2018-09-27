@@ -214,7 +214,7 @@
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
           {% set colsize = colsize ? colsize : default_colsize %}
           {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
-          <div class="row-item {% if mobileNbItem != null %}col-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }}{% if key >= mobileMaxItem %} hidden-xs{% endif %} {% if key >= tabletMaxItem %} hidden-sm{% endif %}" >
+          <div class="row-item {% if mobileNbItem != null %}col-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-md-{{tabletNbItem}}{% endif %} col-lg-{{ colsize }} {{ colClass }}{% if key >= mobileMaxItem %} hidden-xs{% endif %} {% if key >= tabletMaxItem %} hidden-sm{% endif %}" >
           {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value, 'colsize': colsize, 'in_fluid': width.value == 'container-fluid'}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
         {% endfor %}
@@ -247,7 +247,7 @@
           {% set colsize = this.getObject().getParamValue('blocksize')[loop.index0] %}
           {% set colsize = colsize ? colsize : default_colsize %}
           {% set colClass = colsize >= 6 ? 'large-col' : 'small-col' %}
-          <div class="row-item {% if mobileNbItem != null %}col-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-sm-{{tabletNbItem}}{% endif %} col-md-{{ colsize }} {{ colClass }}{% if key >= mobileMaxItem %} hidden-xs{% endif %}{% if key >= tabletMaxItem %} hidden-sm{% endif %}">
+          <div class="row-item {% if mobileNbItem != null %}col-{{mobileNbItem}}{% endif %} {% if tabletNbItem != null %}col-md-{{tabletNbItem}}{% endif %} col-lg-{{ colsize }} {{ colClass }}{% if key >= mobileMaxItem %} hidden-xs{% endif %}{% if key >= tabletMaxItem %} hidden-sm{% endif %}">
           {{this.render(content, this.getMode(), {'multi_column': data|length > 1, 'col_width': width.value, 'colsize': colsize, 'in_fluid': width.value == 'container-fluid'}, null, this.getIgnoreIfNotAvailable())|raw}}
           </div>
         {% endfor %}
