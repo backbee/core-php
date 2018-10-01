@@ -89,7 +89,7 @@ class ColorPanelUtils
         $luminosity = ($max + $min) / 2;
         $diff = $max - $min;
 
-        if ($diff === 0) {
+        if ($diff == 0) {
             $hue = 0;
             $saturation = 0;
         } else {
