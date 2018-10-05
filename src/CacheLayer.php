@@ -14,11 +14,12 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CacheLayer
 {
-    public static function getCachedResponse(Request $request, $basedir)
+    public static function getCachedResponse(Request $request, $basedir, GlobalSettings $settings = null)
     {
         $response = null;
 
-        $settings = (new GlobalSettings())->redis();
+        $settings = $settings ?: new GlobalSettings();
+        $settings = $settings->redis();
         if (isset($settings['disable_page_cache']) && true === $settings['disable_page_cache']) {
             return $response;
         }
@@ -28,8 +29,8 @@ class CacheLayer
 
             try {
                 $redisClient = RedisManager::getClient();
-            } catch (\Exception $e) {
-                error_log(sprintf('[%s] %s', __METHOD__, $e->getMessage()));
+            } catch (\Exception $exception) {
+                error_log(sprintf('[%s] %s', __METHOD__, $exception->getMessage()));
 
                 return $response;
             }
