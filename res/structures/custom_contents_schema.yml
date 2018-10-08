@@ -527,9 +527,7 @@ schema:
                     confirmation_message: 'Votre message a bien été envoyé. Merci pour votre temps.'
                     button_title: 'GET IN TOUCH'
                     button_align: center
-                    button_font: default
                     button_color: color2
-                    button_form: true
                     button_size: md
         -
           data:
