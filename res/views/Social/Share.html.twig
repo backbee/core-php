@@ -7,36 +7,41 @@
         {% include 'common/missing_config_block.html.twig' %}
     {% else %}
         {% if enable_facebook.value %}
-            <div class="btn-social-share">
+            <div class="btn-social-share facebook-share-btn d-none">
                 <div {% block data_attributes %}{% endblock %} class="fb-share-button" data-layout="button" data-mobile-iframe="true">
                     <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse">Facebook</a>
                 </div>
                 <script>
-                    if (document.getElementById('facebook-jssdk') === null) {
-                        (function(d, s, id) {
-                        var js, fjs = d.getElementsByTagName(s)[0];
-                        if (d.getElementById(id)) return;
-                        js = d.createElement(s); js.id = id;
-                        js.src = "//connect.facebook.net/{{lang}}/sdk.js#xfbml=1&version=v2.8";
-                        fjs.parentNode.insertBefore(js, fjs);
-                        }(document, 'script', 'facebook-jssdk'));
+                    window.onDocumentReady(function () {
+                        if (document.getElementById('facebook-jssdk') === null) {
+                            (function(d, s, id) {
+                            var js, fjs = d.getElementsByTagName(s)[0];
+                            if (d.getElementById(id)) return;
+                            js = d.createElement(s); js.id = id;
+                            js.src = "//connect.facebook.net/{{lang}}/sdk.js#xfbml=1&version=v2.8";
+                            fjs.parentNode.insertBefore(js, fjs);
+                            }(document, 'script', 'facebook-jssdk'));
                         } else {
                             if (window.FB) {
                                 FB.XFBML.parse();
                             }
                         }
+
+                        jQuery('.facebook-share-btn').removeClass('d-none');
+                    });
                 </script>
             </div>
         {% endif %}
 
         {% if enable_tweet.value %}
-            <div class="btn-social-share">
+            <div class="btn-social-share twitter-share-btn d-none">
                 <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
                 <script>
-                    !function(d,s,id){
-                        var js,
-                            fjs = d.getElementsByTagName(s)[0],
-                            p = /^http:/.test(d.location) ? 'http' : 'https';
+                    window.onDocumentReady(function () {
+                        !function(d,s,id){
+                            var js,
+                                fjs = d.getElementsByTagName(s)[0],
+                                p = /^http:/.test(d.location) ? 'http' : 'https';
 
                             if (!d.getElementById(id)) {
                                 js = d.createElement(s);
@@ -48,18 +53,28 @@
                                     twttr.widgets.load();
                                 }
                             }
-                    }(document, 'script', 'twitter-wjs');
+                        }(document, 'script', 'twitter-wjs');
+
+                        jQuery('.twitter-share-btn').removeClass('d-none');
+                    });
                 </script>
             </div>
         {% endif %}
 
         {% if enable_linkedin.value %}
             <div class="btn-social-share">
-                <script src="//platform.linkedin.com/in.js" type="text/javascript"> lang: {{ lang }}</script>
                 <script>
-                    if (typeof (IN) !== 'undefined') {
-                        IN.init();
-                    }
+                    window.onDocumentReady(function () {
+                        var $script = jQuery('<script>');
+                        $script.attr('src', '//platform.linkedin.com/in.js');
+                        $script.attr('type', 'text/javascript');
+                        $script.text('lang: {{ lang }}')
+                        jQuery('head').append($script);
+
+                        if (typeof (IN) !== 'undefined') {
+                            IN.init();
+                        }
+                    });
                 </script>
                 <script type="IN/Share"></script>
             </div>

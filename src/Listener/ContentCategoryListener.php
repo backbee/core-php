@@ -39,6 +39,9 @@ class ContentCategoryListener
         'block_category_more' => [
             'pos' => 3,
         ],
+        'block_category_privacy_policy' => [
+            'pos' => 4,
+        ],
     ];
 
     /**

@@ -31,7 +31,9 @@ services:
 
   user_preference.manager:
     class: BackBeeCloud\UserPreference\UserPreferenceManager
-    arguments: ["@em"]
+    arguments:
+      - "@em"
+      - "@multilang_manager"
 
   site_option.manager:
     class: BackBeeCloud\SiteOption\OptionManager

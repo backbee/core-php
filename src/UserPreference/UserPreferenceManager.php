@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\UserPreference;
 
+use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBee\Bundle\Registry;
 use Doctrine\ORM\EntityManager;
 
@@ -17,9 +18,15 @@ class UserPreferenceManager
      */
     protected $entyMgr;
 
-    public function __construct(EntityManager $entyMgr)
+    /**
+     * @var MultiLangManager
+     */
+    protected $multilangManager;
+
+    public function __construct(EntityManager $entyMgr, MultiLangManager $multilangManager)
     {
         $this->entyMgr = $entyMgr;
+        $this->multilangManager = $multilangManager;
     }
 
     /**
@@ -190,7 +197,7 @@ class UserPreferenceManager
 
     protected function authorizedNamesAndKeys()
     {
-        return [
+        $result = [
             'error_page_404' => [
                 'button_title' => 'is_string',
                 'description' => 'is_string',
@@ -219,7 +226,20 @@ class UserPreferenceManager
                 'code' => function ($code) {
                     return 1 === preg_match('#^[0-9]{15}$#', $code);
                 },
-            ]
+            ],
+            'privacy-policy' => [
+                'banner_message' => 'is_string',
+                'learn_more_url' => 'is_string',
+                'learn_more_link_title' => 'is_string',
+            ],
         ];
+
+        foreach ($this->multilangManager->getActiveLangs() as $lang) {
+            $result['privacy-policy'][$lang['id'] . '_banner_message'] = 'is_string';
+            $result['privacy-policy'][$lang['id'] . '_learn_more_url'] = 'is_string';
+            $result['privacy-policy'][$lang['id'] . '_learn_more_link_title'] = 'is_string';
+        }
+
+        return $result;
     }
 }
