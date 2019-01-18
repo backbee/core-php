@@ -1,0 +1,124 @@
+<script>
+    document.addEventListener('cloudReady', function () {
+        var cloud = window.cloud;
+        var Translator = cloud.translator;
+
+        var translationsCatalog = {
+            'fr': {
+                'cookie_policy': 'Politique de confidentialité',
+                'cookie_policy_description': 'La bannière se compose d\'un texte et d\'un lien menant vers une page d\'explication.',
+                'cookie_text': 'Message de la bannière',
+                'cookie_url': 'URL du lien "En savoir plus"',
+                'cookie_url_title': 'Libellé du lien "En savoir plus"'
+            },
+            'en': {
+                'cookie_policy': 'Privacy policy',
+                'cookie_policy_description': 'The banner consists of a text and a link to an explanation page.',
+                'cookie_text': 'Banner message',
+                'cookie_url': 'URL of "Learn more" link',
+                'cookie_url_title': 'Label of "Learn more" link'
+            }
+        };
+
+        for (var content in translationsCatalog) {
+            if (translationsCatalog.hasOwnProperty(content)) {
+                cloud.translator.addTransKeys(translationsCatalog[content], content);
+            }
+        }
+
+        cloud.mediator.subscribe('menu:more-parameters:ready', function(items) {
+            items.push({'name': 'cookie_policy', 'pos': 100});
+        });
+
+        cloud.mediator.subscribe('menu:more-parameters:cookie_policy:click', function() {
+            var $container = cloud.jQuery('<div class="cookie-policy-wrapper"></div>');
+            var config = {elements: {}, form: {'submit_class': 'd-none'}};
+            var $layer;
+
+            cloud.userPrefRepository.find('privacy-policy').done(function(savedData) {
+                cloud.langRepository.findAll().done((langs) => {
+                    var isMultilangEnabled = false;
+                    for (var key in langs) {
+                        var lang = langs[key];
+                        if (lang.is_default) {
+                            isMultilangEnabled = true;
+
+                            break;
+                        }
+                    }
+
+                    if (!isMultilangEnabled) {
+                        config.elements = {
+                            banner_message: {
+                                type: 'textarea',
+                                label: Translator.translate('cookie_text'),
+                                value: savedData['banner_message'],
+                                rows: 8
+                            },
+                            learn_more_link_title: {
+                                type: 'text',
+                                label: Translator.translate('cookie_url_title'),
+                                value: savedData['learn_more_link_title']
+                            },
+                            learn_more_url: {
+                                type: 'text',
+                                label: Translator.translate('cookie_url'),
+                                value: savedData['learn_more_url']
+                            }
+                        };
+                    } else {
+                        for (var key in langs) {
+                            var lang = langs[key];
+                            if (lang.is_active) {
+                                config.elements[lang.id + '_banner_message'] = {
+                                    type: 'textarea',
+                                    label: Translator.translate('cookie_text'),
+                                    value: savedData[lang.id + '_banner_message'],
+                                    rows: 8,
+                                    group: {
+                                        id: lang.id,
+                                        title: lang.label
+                                    }
+                                };
+                                config.elements[lang.id + '_learn_more_link_title'] = {
+                                    type: 'text',
+                                    label: Translator.translate('cookie_url_title'),
+                                    value: savedData[lang.id + '_learn_more_link_title'],
+                                    group: {
+                                        id: lang.id
+                                    }
+                                };
+                                config.elements[lang.id + '_learn_more_url'] = {
+                                    type: 'text',
+                                    label: Translator.translate('cookie_url'),
+                                    value: savedData[lang.id + '_learn_more_url'],
+                                    group: {
+                                        id: lang.id
+                                    }
+                                };
+                            }
+                        }
+                    }
+
+                    var form = cloud.formBuilder.getForm(config);
+
+                    form.on('submit', function(data) {
+                        cloud.userPrefRepository.save('privacy-policy', data).done(() => {
+                            window.location.reload();
+                        });
+                    });
+
+                    cloud.zone.setFooter($layer, cloud.zone.createSubmitButtons({
+                        onSubmitClick: form.submit.bind(form),
+                    }));
+
+                    $container.append(jQuery('<p class="small">' + Translator.translate('cookie_policy_description') + '</p><div class="cloud-liner py-3"></div>'));
+
+                    $container.append(form.render());
+                });
+            });
+
+            $layer = cloud.zone.addLayer(Translator.translate('cookie_policy'), $container);
+        });
+    });
+</script>

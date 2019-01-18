@@ -10,6 +10,7 @@ use BackBeeCloud\Entity\PageType;
 use BackBeeCloud\PageType\ArticleType;
 use BackBeeCloud\PageType\HomeType;
 use BackBeeCloud\PageType\SearchResultType;
+use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\Basic\Menu;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Revision;
@@ -301,20 +302,52 @@ class PageListener
             $type = $typeMgr->getDefaultType();
         }
 
-        $event->getRenderer()->assign('layout_name', $type->layoutName());
+        $renderer = $event->getRenderer();
+        $renderer->assign('layout_name', $type->layoutName());
 
-        if ($gaData = $app->getContainer()->get('user_preference.manager')->dataOf('google-analytics')) {
+        $userPreferenceManager = $app->getContainer()->get('user_preference.manager');
+        if ($gaData = $userPreferenceManager->dataOf('google-analytics')) {
             $code = isset($gaData['code']) ? (string) $gaData['code'] : '';
             if (1 === preg_match('#^UA\-[0-9]+\-[0-9]+$#', $code)) {
-                $event->getRenderer()->assign('google_analytics_code', $code);
+                $renderer->assign('google_analytics_code', $code);
             }
         }
 
-        if ($faData = $app->getContainer()->get('user_preference.manager')->dataOf('facebook-analytics')) {
+        if ($faData = $userPreferenceManager->dataOf('facebook-analytics')) {
             $code = isset($faData['code']) ? (string) $faData['code'] : '';
             if (1 === preg_match('#^[0-9]{15}$#', $code)) {
-                $event->getRenderer()->assign('facebook_analytics_code', $code);
+                $renderer->assign('facebook_analytics_code', $code);
             }
+        }
+
+        if ((new GlobalSettings())->isPrivacyPolicyEnabled()) {
+            if ($data = $userPreferenceManager->dataOf('privacy-policy')) {
+                $multilangManager = $app->getContainer()->get('multilang_manager');
+                if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
+                    $currentLang = $multilangManager->getCurrentLang();
+                    foreach ($data as $key => $value) {
+                        $prefix = $currentLang . '_';
+                        if (1 === preg_match(sprintf('~^%s~', $prefix), $key)) {
+                            $renderer->assign(str_replace($prefix, '', $key), $value);
+                        }
+                    }
+
+                    return;
+                }
+
+                $renderer->assign(
+                    'banner_message',
+                    isset($data['banner_message']) ? $data['banner_message'] : null
+                );
+                $renderer->assign(
+                    'learn_more_url',
+                    isset($data['learn_more_url']) ? $data['learn_more_url'] : null
+                );
+                $renderer->assign(
+                    'learn_more_link_title',
+                    isset($data['learn_more_link_title']) ? $data['learn_more_link_title'] : null
+                );
+            };
         }
     }
 
