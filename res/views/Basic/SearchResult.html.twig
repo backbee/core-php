@@ -27,22 +27,22 @@
   <nav class="text-center">
     <ul class="pagination">
       {% if pages.currentPagination() != 1 and pages.currentPagination() > 0 %}
-      <li>
-        <a href="?q={{ query|url_encode }}&page={{ pages.currentPagination() - 1 }}" aria-label="Previous">
+      <li class="page-item">
+        <a class="page-link" href="?q={{ query|url_encode }}&page={{ pages.currentPagination() - 1 }}" aria-label="Previous">
           <span class="arrow_carrot-left" aria-hidden="true"></span>
         </a>
       </li>
       {% endif %}
 
       {% for i in 1..pages.maxPagination() %}
-      <li {% if pages.currentPagination() == i %}class="active"{% endif %}>
-        <a href="?q={{ query|url_encode }}&page={{ i }}">{{ i }}</a>
+      <li class="page-item{% if pages.currentPagination() == i %} active{% endif %}">
+        <a class="page-link" href="?q={{ query|url_encode }}&page={{ i }}">{{ i }}</a>
       </li>
       {% endfor %}
 
       {% if pages.maxPagination() > pages.currentPagination() %}
-      <li>
-        <a href="?q={{ query|url_encode }}&page={{ pages.currentPagination() + 1 }}" aria-label="Next">
+      <li class="page-item">
+        <a class="page-link" href="?q={{ query|url_encode }}&page={{ pages.currentPagination() + 1 }}" aria-label="Next">
           <span class="arrow_carrot-right" aria-hidden="true"></span>
         </a>
       </li>
