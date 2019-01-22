@@ -35,10 +35,14 @@ class ImageListener
         $response = $event->getResponse();
 
         $data = json_decode($response->getContent(), true);
+
+        preg_match('/(.*)(\.[a-z]+)$/i', $data['originalname'], $matches);
+
         $filename = sprintf(
-            '%s/%s',
+            '%s/%s%s',
             substr($data['filename'], 0, 3),
-            (new Slugify())->addRule('@', '')->slugify($data['originalname'])
+            (new Slugify())->addRule('@', '')->slugify($matches[1]),
+            $matches[2]
         );
 
         $data['path'] = $this->imgHandler->upload($filename, $data['path']);
