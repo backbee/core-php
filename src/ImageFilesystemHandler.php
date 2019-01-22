@@ -104,6 +104,7 @@ class ImageFilesystemHandler implements ImageHandlerInterface
     protected function runUpload($filename, $filepath, $removeFile = true)
     {
         $newname = $this->mediaDir . DIRECTORY_SEPARATOR . $filename;
+        $this->mkdirOnce(dirname($newname));
         $result = copy($filepath, $newname);
         if (false === $result) {
             throw new \RuntimeException(sprintf(
@@ -117,5 +118,16 @@ class ImageFilesystemHandler implements ImageHandlerInterface
         }
 
         return static::MEDIA_BASE_URI . $filename;
+    }
+
+    private function mkdirOnce($path)
+    {
+        $umask = umask();
+        umask(0);
+        if (!is_dir($path) && !mkdir($path, 0777)) {
+            throw new \RuntimeException(sprintf('Error occurs while creating "%s".', $path));
+        }
+
+        umask($umask);
     }
 }

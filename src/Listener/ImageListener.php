@@ -34,7 +34,13 @@ class ImageListener
         $response = $event->getResponse();
 
         $data = json_decode($response->getContent(), true);
-        $data['path'] = $this->imgHandler->upload($data['filename'], $data['path']);
+        $filename = sprintf(
+            '%s/%s',
+            substr($data['filename'], 0, 3),
+            $data['originalname']
+        );
+
+        $data['path'] = $this->imgHandler->upload($filename, $data['path']);
         $data['url'] = $event->getApplication()->getRenderer()->getCdnImageUrl($data['path']);
 
         $response->setContent(json_encode($data));
