@@ -10,6 +10,7 @@ use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Event\Event;
 use BackBee\Renderer\Event\RendererEvent;
+use Cocur\Slugify\Slugify;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -37,7 +38,7 @@ class ImageListener
         $filename = sprintf(
             '%s/%s',
             substr($data['filename'], 0, 3),
-            $data['originalname']
+            (new Slugify())->addRule('@', '')->slugify($data['originalname'])
         );
 
         $data['path'] = $this->imgHandler->upload($filename, $data['path']);
