@@ -2,10 +2,11 @@
 
 namespace BackBeeCloud\Entity;
 
+use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBee\NestedNode\Builder\KeywordBuilder;
 use BackBee\NestedNode\KeyWord as Tag;
+use BackBee\NestedNode\Page;
 use Doctrine\ORM\EntityManager;
-use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -62,6 +63,12 @@ class TagManager
     public function update(Tag $tag, $newName)
     {
         if (strtolower($tag->getKeyWord()) === strtolower($newName)) {
+            if ($tag->getKeyWord() !== $newName) {
+                $tag->setKeyWord($newName);
+                $this->entyMgr->flush($tag);
+                $this->elasticMgr->indexTag($tag);
+            }
+
             return $this;
         }
 
@@ -96,7 +103,7 @@ class TagManager
         $this->entyMgr->flush($tag);
         $this->elasticMgr->$elasticsearchMethod($tag);
         foreach ($pages as $row) {
-            $this->elasticMgr->indexPage($this->entyMgr->find('BackBee\NestedNode\Page', $row['id']));
+            $this->elasticMgr->indexPage($this->entyMgr->find(Page::class, $row['id']));
         }
 
         return $this;
@@ -113,13 +120,13 @@ class TagManager
         $pages = $this->getLinkedPages($tag);
         $this->entyMgr->getConnection()->executeUpdate(
             'DELETE FROM page_tag_keyword WHERE tag_uid = :tag_uid',
-            [ 'tag_uid' => $tag->getUid() ]
+            ['tag_uid' => $tag->getUid()]
         );
 
         $this->entyMgr->remove($tag);
         $this->entyMgr->flush($tag);
         foreach ($pages as $row) {
-            $this->elasticMgr->indexPage($this->entyMgr->find('BackBee\NestedNode\Page', $row['id']));
+            $this->elasticMgr->indexPage($this->entyMgr->find(Page::class, $row['id']));
         }
 
         $this->elasticMgr->deleteTag($tag);
@@ -140,7 +147,7 @@ class TagManager
              FROM page_tag pt
              LEFT JOIN page_tag_keyword ptk ON ptk.page_tag_id = pt.id
              WHERE ptk.tag_uid = :tag_uid',
-            [ 'tag_uid' => $tag->getUid() ]
+            ['tag_uid' => $tag->getUid()]
         )->fetchAll();
 
         $pages = [];
