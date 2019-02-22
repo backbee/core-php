@@ -34,9 +34,7 @@ class PageAssociationController extends AbstractController
 
     public function customSearchPageAction($pageuid, Request $request)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         if (null === $page = $this->pageMgr->get($pageuid)) {
             return $this->getPageNotFoundResponse($pageuid);
@@ -49,9 +47,7 @@ class PageAssociationController extends AbstractController
 
     public function getAssociatedPagesAction($pageuid)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         if (null === $page = $this->pageMgr->get($pageuid)) {
             return $this->getPageNotFoundResponse($pageuid);
@@ -66,9 +62,7 @@ class PageAssociationController extends AbstractController
 
     public function getAssociatedPageAction($pageuid, $lang)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $page = $this->pageMgr->get($pageuid);
         if (false == $page) {
@@ -84,9 +78,7 @@ class PageAssociationController extends AbstractController
 
     public function associatePagesAction($pageuid, Request $request)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         if (null === $page = $this->pageMgr->get($pageuid)) {
             return $this->getPageNotFoundResponse($pageuid);
@@ -111,9 +103,7 @@ class PageAssociationController extends AbstractController
 
     public function deletePageAssociationAction($pageuid)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         if (null === $page = $this->pageMgr->get($pageuid)) {
             return $this->getPageNotFoundResponse($pageuid);

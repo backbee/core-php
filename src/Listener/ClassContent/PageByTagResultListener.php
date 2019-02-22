@@ -77,7 +77,7 @@ class PageByTagResultListener
                 $app->getBBUserToken()
             );
             foreach ($pages->collection() as $page) {
-                $contents[] = $formatter->renderItemFromRawData($event->getTarget(), $page);
+                $contents[] = $formatter->renderItemFromRawData($page);
             }
         }
 

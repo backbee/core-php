@@ -77,6 +77,11 @@ class PageManager
      */
     protected $currentLang;
 
+    /**
+     * @var \BackBeeCloud\PageCategory\PageCategoryManager
+     */
+    protected $pageCategoryManager;
+
     public function __construct(BBApplication $app)
     {
         $this->bbtoken = $app->getBBUserToken();
@@ -87,6 +92,7 @@ class PageManager
         $this->elsMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->tagMgr = $app->getContainer()->get('cloud.tag_manager');
         $this->multilangMgr = $app->getContainer()->get('multilang_manager');
+        $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
     }
 
     /**
@@ -159,16 +165,17 @@ class PageManager
         }
 
         return [
-            'id'         => $page->getUid(),
-            'title'      => $page->getTitle(),
-            'type'       => $type ? $type->uniqueName() : null,
-            'type_data'  => $type,
-            'is_online'  => $page->isOnline(),
+            'id' => $page->getUid(),
+            'title' => $page->getTitle(),
+            'type' => $type ? $type->uniqueName() : null,
+            'type_data' => $type,
+            'category' => $this->pageCategoryManager->getCategoryByPage($page),
+            'is_online' => $page->isOnline(),
             'is_drafted' => $isDrafted,
-            'url'        => $page->getUrl(),
-            'tags'       => array_map(function(KeyWord $keyword) {
+            'url' => $page->getUrl(),
+            'tags' => array_map(function(KeyWord $keyword) {
                 return [
-                    'uid'   => $keyword->getUid(),
+                    'uid' => $keyword->getUid(),
                     'label' => $keyword->getKeyWord(),
                 ];
             }, $this->getPageTag($page)->getTags()->toArray()),
@@ -867,6 +874,15 @@ class PageManager
     protected function runSetUrl(Page $page, $value)
     {
         $page->setUrl($value);
+    }
+
+    protected function runSetCategory(Page $page, $value)
+    {
+        if (false == $value) {
+            return;
+        }
+
+        $this->pageCategoryManager->associatePageAndCategory($page, $value);
     }
 
     /**

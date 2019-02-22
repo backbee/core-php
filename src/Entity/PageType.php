@@ -4,7 +4,6 @@ namespace BackBeeCloud\Entity;
 
 use BackBee\NestedNode\Page;
 use BackBeeCloud\PageType\TypeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

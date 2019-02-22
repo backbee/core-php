@@ -24,27 +24,22 @@ class UserPreferenceController extends AbstractController
 
     public function getCollection()
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse($this->usrPrefMgr->all());
     }
 
     public function get($name)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse($this->usrPrefMgr->dataOf($name));
     }
 
     public function put($name)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
+
         try {
             $this->usrPrefMgr->setDataOf($name, $this->request->request->all());
         } catch (\InvalidArgumentException $e) {
@@ -59,9 +54,7 @@ class UserPreferenceController extends AbstractController
 
     public function delete($name)
     {
-        if ($response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $this->usrPrefMgr->removeDataOf($name);
 

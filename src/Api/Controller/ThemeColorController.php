@@ -2,12 +2,13 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBeeCloud\ThemeColor\ThemeColorManager;
+use BackBeeCloud\Security\UserRightConstants;
 use BackBeeCloud\ThemeColor\ColorPanelManager;
+use BackBeeCloud\ThemeColor\ThemeColorManager;
 use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @author Sachan Nilleti <sachan.nilleti@lp-digital.fr>
@@ -34,15 +35,15 @@ class ThemeColorController extends AbstractController
 
     public function getAllThemesAction()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse($this->themeColorManager->all());
     }
 
     public function getCurrentThemeAction()
     {
+        $this->assertIsAuthenticated();
+
         return new JsonResponse(
             $this->themeColorManager->getByColorPanel($this->colorPanelManager->getColorPanel())
         );

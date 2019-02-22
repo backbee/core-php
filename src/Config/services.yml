@@ -11,7 +11,8 @@ parameters:
 services:
   cloud.page_manager:
     class: BackBeeCloud\Entity\PageManager
-    arguments: ["@bbapp"]
+    arguments:
+      - "@bbapp"
 
   cloud.content_manager:
     class: BackBeeCloud\Entity\ContentManager
@@ -99,7 +100,11 @@ services:
 
   cloud.api.page_controller:
     class: BackBeeCloud\Api\Controller\PageController
-    arguments: ["@bbapp"]
+    arguments:
+      - "@cloud.page_manager"
+      - "@cloud.page_type.manager"
+      - "@cloud.page_category.manager"
+      - "@bbapp"
 
   cloud.api.content_controller:
     class: BackBeeCloud\Api\Controller\ContentController
@@ -107,7 +112,9 @@ services:
 
   cloud.api.page_type_controller:
     class: BackBeeCloud\Api\Controller\PageTypeController
-    arguments: ["@bbapp"]
+    arguments:
+        - "@cloud.page_type.manager"
+        - "@bbapp"
 
   cloud.api.tag_controller:
     class: BackBeeCloud\Api\Controller\TagController
@@ -116,6 +123,59 @@ services:
   cloud.api.site_controller:
     class: BackBeeCloud\Api\Controller\SiteController
     arguments: ["@site_status.manager"]
+
+  cloud.api.user_controller.listener:
+    class: BackBeeCloud\Listener\Api\UserListener
+    arguments:
+      - "@cloud.user_manager"
+      - "@cloud.group_type.manager"
+      - "@em"
+      - "@bbapp"
+
+  # User right services
+  cloud.api.user_right.manager:
+    class: BackBeeCloud\Security\UserRightManager
+    arguments:
+      - "@security.context"
+      - "@em"
+      - "@cloud.page_category.manager"
+
+  cloud.api.user_right.listener:
+    class: BackBeeCloud\Listener\Api\UserRightListener
+    arguments:
+      - "@em"
+      - "@security.context"
+      - "@cloud.page_manager"
+      - "@cloud.page_type.manager"
+      - "@cloud.page_category.manager"
+
+  cloud.api.user_right.controller:
+    class: BackBeeCloud\Api\Controller\UserRightController
+    arguments:
+      - "@cloud.api.user_right.manager"
+      - "@cloud.page_manager"
+      - "@bbapp"
+
+  cloud.api.group_type.controller:
+    class: BackBeeCloud\Api\Controller\GroupTypeController
+    arguments:
+      - "@bbapp"
+      - "@cloud.group_type.manager"
+      - "@cloud.user_manager"
+      - "@cloud.group_type_right.manager"
+
+  cloud.group_type.manager:
+    class: BackBeeCloud\Security\GroupType\GroupTypeManager
+    arguments:
+      - "@em"
+      - "@cloud.group_type_right.manager"
+      - "@cloud.page_type.manager"
+      - "@cloud.page_category.manager"
+
+  cloud.group_type_right.manager:
+    class: BackBeeCloud\Security\GroupType\GroupTypeRightManager
+    arguments:
+      - "@em"
 
   # Page type services
   cloud.page_type.manager:
@@ -155,6 +215,20 @@ services:
   cloud.auto_height_content.listener:
     class: BackBeeCloud\Listener\ClassContent\AutoHeightContentListener
     arguments:
+      - "@bbapp"
+
+  # Page category services
+  cloud.page_category.manager:
+    class: BackBeeCloud\PageCategory\PageCategoryManager
+    factory: [BackBeeCloud\PageCategory\PageCategoryManagerFactory, createPageCategoryManager]
+    arguments:
+      - "@service_container"
+      - "@em"
+
+  cloud.page_category.api_controller:
+    class: BackBeeCloud\Api\Controller\PageCategoryController
+    arguments:
+      - "@cloud.page_category.manager"
       - "@bbapp"
 
   # MultiLang service
@@ -269,9 +343,28 @@ services:
     arguments: ["@bbapp"]
 
   # Security services
+  security.access.decision_manager:
+    class: BackBee\Security\Access\DecisionManager
+    arguments:
+        - ["@security.voter.sudo", "@security.voter.bb_role", "@security.voter.authenticated", "@security.voter.bb_acl"]
+        - affirmative
+        - false
+        - true
+        - false
+    calls:
+        - [setApplication, [@bbapp]]
+
   security.voter.sudo:
-    class: BackBeeCloud\Security\Authorization\Voter\SudoVoter
-    arguments: ["@bbapp"]
+        class: BackBeeCloud\Security\Authorization\Voter\SudoVoter
+        arguments:
+          - "@em"
+          - "@security.voter.user_right"
+
+  security.voter.user_right:
+    class: BackBeeCloud\Security\Authorization\Voter\UserRightVoter
+    arguments:
+      - "@cloud.group_type.manager"
+      - "@cloud.group_type_right.manager"
 
   cloud.api.acl_controller:
     class: BackBeeCloud\Api\Controller\AclController
@@ -293,6 +386,8 @@ services:
 
   cloud.user_manager:
     class: BackBeeCloud\User\UserManager
+    arguments:
+      - "@em"
 
   # Migrations services
   media_image.migration:

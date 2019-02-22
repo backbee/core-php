@@ -44,7 +44,7 @@ class ResultItemHtmlFormatter
         $this->bbtoken = $bbtoken;
     }
 
-    public function renderItemFromRawData(array $pageRawData, array $extraParams)
+    public function renderItemFromRawData(array $pageRawData, array $extraParams = [])
     {
         $params = $pageRawData['_source'];
 

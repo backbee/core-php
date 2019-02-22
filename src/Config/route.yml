@@ -76,6 +76,81 @@ cloud.api.mailchimp.get_lists:
   requirements:
     _method: GET
 
+# User right API
+cloud.api.user_right.get_user_rights_collection:
+  pattern: /api/user-rights/current-user-rights
+  defaults:
+    _action: getCurrentUserRightsCollection
+    _controller: cloud.api.user_right.controller
+    requirements:
+      _method: GET
+
+cloud.api.user_right.get_user_authorized_categories_collection:
+  pattern: /api/user-rights/current-user-authorized-categories
+  defaults:
+    _action: getCurrentUserAuthorizedCategoriesCollection
+    _controller: cloud.api.user_right.controller
+    requirements:
+      _method: GET
+
+# GroupType API
+
+cloud.api.group_type.get_collection:
+  pattern: /api/group-types
+  defaults:
+    _action: getCollection
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: GET
+
+cloud.api.group_type.create:
+  pattern: /api/group-types
+  defaults:
+    _action: create
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: POST
+
+cloud.api.group_type.update:
+  pattern: /api/group-types/{id}
+  defaults:
+    _action: update
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: PUT
+
+cloud.api.group_type.delete:
+  pattern: /api/group-types/{id}
+  defaults:
+    _action: delete
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: DELETE
+
+cloud.api.group_type.get_users_collection:
+  pattern: /api/group-types/{groupTypeId}/users
+  defaults:
+    _action: getGroupTypeUsersCollection
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: GET
+
+cloud.api.group_type.link_user:
+  pattern: /api/group-types/{groupTypeId}/add-user/{userId}
+  defaults:
+    _action: linkUser
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: POST
+
+cloud.api.group_type.delete_user:
+  pattern: /api/group-types/{groupTypeId}/remove-user/{userId}
+  defaults:
+    _action: deleteUser
+    _controller: cloud.api.group_type.controller
+  requirements:
+    _method: DELETE
+
 # User preference API
 
 cloud.api.user_preferences.get_collection:
@@ -151,19 +226,19 @@ cloud.api.contents.delete:
     type: .+
     _method: DELETE
 
-cloud.api.contents.publish:
-  pattern: /api/contents/publish-page/{pageuid}
+cloud.api.contents.commit_page:
+  pattern: /api/contents/commit-page/{pageuid}
   defaults:
-    _action: publish
+    _action: commitPage
     _controller: cloud.api.content_controller
   requirements:
     pageuid: "[a-f0-9]{32}"
     _method: PUT
 
-cloud.api.contents.get_pages_to_publish:
-  pattern: /api/contents/pages-to-publish
+cloud.api.contents.get_pages_to_commit:
+  pattern: /api/contents/pages-to-commit
   defaults:
-    _action: getPagesToPublish
+    _action: getPagesToCommit
     _controller: cloud.api.content_controller
   requirements:
     _method: GET
@@ -184,6 +259,16 @@ cloud.api.pages_types.get_collection:
   defaults:
     _action: getCollection
     _controller: cloud.api.page_type_controller
+  requirements:
+    _method: GET
+
+# Page category API
+
+cloud.api.page_category.get_collection:
+  pattern: /api/page-categories
+  defaults:
+    _action: getCollectionAction
+    _controller: cloud.page_category.api_controller
   requirements:
     _method: GET
 

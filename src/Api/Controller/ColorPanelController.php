@@ -2,11 +2,12 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBeeCloud\Security\UserRightConstants;
 use BackBeeCloud\ThemeColor\ColorPanelManager;
 use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @author Sachan Nilleti <sachan.nilleti@lp-digital.fr>
@@ -27,27 +28,24 @@ class ColorPanelController extends AbstractController
 
     public function getAction()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse($this->colorPanelManager->getColorPanel());
     }
 
     public function getAllColorsAction()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse($this->colorPanelManager->getColorPanel()->getAllColors());
     }
 
     public function putAction(Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::CUSTOM_DESIGN_FEATURE
+        );
 
         $data = $request->request->all();
 
@@ -65,9 +63,10 @@ class ColorPanelController extends AbstractController
 
     public function changeThemeColorAction(Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::CUSTOM_DESIGN_FEATURE
+        );
 
         $uniqueName = $request->request->get('unique_name');
         $conservePrimaryColor = $request->request->get('conserve_primary_color');

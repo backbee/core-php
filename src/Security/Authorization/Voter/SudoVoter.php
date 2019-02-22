@@ -2,9 +2,9 @@
 
 namespace BackBeeCloud\Security\Authorization\Voter;
 
-use BackBee\BBApplication;
 use BackBee\Security\Authorization\Voter\SudoVoter as BaseSudoVoter;
 use BackBee\Security\User;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
@@ -14,15 +14,19 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 class SudoVoter extends BaseSudoVoter
 {
     /**
+     * @var UserRightVoter
+     */
+    private $masterVoter;
+
+    /**
      * @var \Doctrine\ORM\EntityManager
      */
-    private $entyMgr;
+    private $entityManager;
 
-    public function __construct(BBApplication $app)
+    public function __construct(EntityManager $entityManager, UserRightVoter $masterVoter)
     {
-        parent::__construct($app);
-
-        $this->entyMgr = $app->getEntityManager();
+        $this->entityManager = $entityManager;
+        $this->masterVoter = $masterVoter;
     }
 
     /**
@@ -30,8 +34,13 @@ class SudoVoter extends BaseSudoVoter
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
-        $isSudoer = false;
+        $masterVote = $this->masterVoter->vote($token, $object, $attributes);
+        if (VoterInterface::ACCESS_ABSTAIN !== $masterVote) {
+            return $masterVote;
+        }
+
         $sudoers = $this->getSudoers();
+        $isSudoer = false;
 
         if (
             $this->supportsClass(get_class($token))
@@ -60,7 +69,7 @@ class SudoVoter extends BaseSudoVoter
             '_activated'       => true,
             '_api_key_enabled' => true,
         ];
-        foreach ($this->entyMgr->getRepository(User::class)->findBy($criteria) as $user) {
+        foreach ($this->entityManager->getRepository(User::class)->findBy($criteria) as $user) {
             $sudoers[$user->getUsername()] = $user->getId();
         }
 

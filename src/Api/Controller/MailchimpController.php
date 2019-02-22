@@ -30,9 +30,7 @@ class MailchimpController extends AbstractController
 
     public function getInformation()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $mailchimpConfig = (new GlobalSettings())->mailchimp();
 
@@ -45,9 +43,7 @@ class MailchimpController extends AbstractController
 
     public function getToken($code)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $mailchimpConfig = (new GlobalSettings())->mailchimp();
 
@@ -92,9 +88,7 @@ class MailchimpController extends AbstractController
 
     public function getLists($token)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $dc = $this->request->get('dc', null);
 
