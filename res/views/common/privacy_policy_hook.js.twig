@@ -27,7 +27,9 @@
         }
 
         cloud.mediator.subscribe('menu:more-parameters:ready', function(items) {
-            items.push({'name': 'cookie_policy', 'pos': 100});
+            if (cloud.container.get('isAllowedTo')('PRIVACY_POLICY_FEATURE')) {
+                items.push({'name': 'cookie_policy', 'pos': 100});
+            }
         });
 
         cloud.mediator.subscribe('menu:more-parameters:cookie_policy:click', function() {

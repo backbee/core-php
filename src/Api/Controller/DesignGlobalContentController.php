@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBeeCloud\Design\GlobalContentManager;
+use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,18 +28,20 @@ class DesignGlobalContentController extends AbstractController
 
     public function getGlobalContentSettingsAction()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::CUSTOM_DESIGN_FEATURE
+        );
 
         return new JsonResponse($this->globalContentManager->getSettings());
     }
 
     public function updateGlobalContentSettingsAction(Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::CUSTOM_DESIGN_FEATURE
+        );
 
         if (
             !$request->request->has('headerColor')

@@ -2,11 +2,18 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBee\BBApplication;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
+use BackBeeCloud\Entity\PageManager;
 use BackBeeCloud\Listener\RequestListener;
+use BackBeeCloud\PageCategory\PageCategoryManager;
+use BackBeeCloud\PageType\TypeManager;
+use BackBeeCloud\Security\Authorization\Voter\UserRightPageAttribute;
+use BackBeeCloud\Security\UserRightConstants;
+use BackBee\BBApplication;
+use BackBee\NestedNode\Page;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -15,47 +22,53 @@ use Symfony\Component\HttpFoundation\Response;
 class PageController extends AbstractController
 {
     /**
-     * @var \BackBeeCloud\Entity\PageManager
+     * @var PageManager
      */
-    protected $pageMgr;
+    protected $pageManager;
 
     /**
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var TypeManager
      */
-    protected $request;
+    protected $pageTypeManager;
 
-    public function __construct(BBApplication $app)
-    {
+    /**
+     * @var PageCategoryManager
+     */
+    protected $pageCategoryManager;
+
+    public function __construct(
+        PageManager $pageManager,
+        TypeManager $pageTypeManager,
+        PageCategoryManager $pageCategoryManager,
+        BBApplication $app
+    ) {
         parent::__construct($app);
 
-        $this->pageMgr = $app->getContainer()->get('cloud.page_manager');
-        $this->request = $app->getRequest();
+        $this->pageManager = $pageManager;
+        $this->pageTypeManager = $pageTypeManager;
+        $this->pageCategoryManager = $pageCategoryManager;
     }
 
     public function get($uid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
-        $page = $this->pageMgr->get($uid);
+        $page = $this->pageManager->get($uid);
         if (null === $page) {
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse($this->pageMgr->format($page));
+        return new JsonResponse($this->pageManager->format($page));
     }
 
-    public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM)
+    public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM, Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
-        $criteria = $this->request->query->all();
+        $criteria = $request->query->all();
         $sort = [];
         if (isset($criteria['sort'])) {
-            $desc = explode(',', $this->request->query->get('desc', ''));
+            $desc = explode(',', $request->query->get('desc', ''));
             foreach (explode(',', $criteria['sort']) as $attrName) {
                 $sort[$attrName] = 'asc';
                 if (in_array($attrName, $desc)) {
@@ -67,7 +80,7 @@ class PageController extends AbstractController
         unset($criteria['sort'], $criteria['desc']);
 
         try {
-            $pages = $this->pageMgr->getBy($criteria, $start, $limit, $sort);
+            $pages = $this->pageManager->getBy($criteria, $start, $limit, $sort);
 
             $end = null;
             $max = null;
@@ -84,7 +97,7 @@ class PageController extends AbstractController
             $end = $end >= 0 ? $end : 0;
 
             return new JsonResponse(
-                $this->pageMgr->formatCollection($pages, true),
+                $this->pageManager->formatCollection($pages, true),
                 null !== $max
                     ? ($max > $count ? Response::HTTP_PARTIAL_CONTENT : Response::HTTP_OK)
                     : Response::HTTP_OK,
@@ -101,18 +114,25 @@ class PageController extends AbstractController
         }
     }
 
-    public function post()
+    public function post(Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $pageData = $request->request->all();
+
+        $this->denyAccessUnlessGranted(
+            new UserRightPageAttribute(
+                UserRightConstants::CREATE_ATTRIBUTE,
+                $pageData['type'],
+                isset($pageData['category']) ? $pageData['category'] : null
+            ),
+            UserRightConstants::OFFLINE_PAGE
+        );
 
         try {
-            $page = $this->pageMgr->create($this->request->request->all());
-        } catch (\Exception $e) {
+            $page = $this->pageManager->create($pageData);
+        } catch (\Exception $exception) {
             return new JsonResponse([
                 'error'  => 'bad_request',
-                'reason' => $e->getMessage(),
+                'reason' => $exception->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -122,19 +142,17 @@ class PageController extends AbstractController
         ]);
     }
 
-    public function put($uid)
+    public function put($uid, Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
-
-        $page = $this->pageMgr->get($uid);
+        $page = $this->pageManager->get($uid);
         if (null === $page) {
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
+        $this->denyAccessUnlessGrantedByPage($page, UserRightConstants::EDIT_ATTRIBUTE);
+
         try {
-            $this->pageMgr->update($page, $this->request->request->all());
+            $this->pageManager->update($page, $request->request->all());
         } catch (\Exception $e) {
             return new JsonResponse([
                 'error'  => 'bad_request',
@@ -149,17 +167,15 @@ class PageController extends AbstractController
 
     public function delete($uid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
-
-        $page = $this->pageMgr->get($uid);
+        $page = $this->pageManager->get($uid);
         if (null === $page) {
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
+        $this->denyAccessUnlessGrantedByPage($page, UserRightConstants::DELETE_ATTRIBUTE);
+
         try {
-            $this->pageMgr->delete($page);
+            $this->pageManager->delete($page);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'error'  => 'bad_request',
@@ -170,22 +186,43 @@ class PageController extends AbstractController
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
 
-    public function duplicate($uid)
+    public function duplicate($uid, Request $request)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
-
-        $source = $this->pageMgr->get($uid);
+        $source = $this->pageManager->get($uid);
         if (null === $source) {
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
-        $new = $this->pageMgr->duplicate($source, $this->request->request->all());
+        $this->denyAccessUnlessGranted(
+            new UserRightPageAttribute(
+                UserRightConstants::CREATE_ATTRIBUTE,
+                $this->pageTypeManager->findByPage($source)->uniqueName()
+            ),
+            UserRightConstants::OFFLINE_PAGE
+        );
+
+        $new = $this->pageManager->duplicate($source, $request->request->all());
 
         return new Response(null, Response::HTTP_CREATED, [
             'Location'   => "/api/pages/{$new->getUid()}",
             'X-Page-URL' => $new->getUrl(),
         ]);
+    }
+
+    private function denyAccessUnlessGrantedByPage(Page $page, $attribute)
+    {
+        $subject = $page->isOnline(true)
+            ? UserRightConstants::ONLINE_PAGE
+            : UserRightConstants::OFFLINE_PAGE
+        ;
+
+        $this->denyAccessUnlessGranted(
+            new UserRightPageAttribute(
+                $attribute,
+                $this->pageTypeManager->findByPage($page)->uniqueName(),
+                $this->pageCategoryManager->getCategoryByPage($page)
+            ),
+            $subject
+        );
     }
 }

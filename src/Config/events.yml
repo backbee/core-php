@@ -41,6 +41,8 @@ kernel.exception:
         - [@rest.listener.exception, onKernelException]
         - [@exception.listener, onKernelException]
         # BackBee Cloud listeners
+        - [BackBeeCloud\Listener\Api\UserRightListener, onKernelException, 100]
+        - ["@cloud.api.user_controller.listener", onKernelException, 100]
         - [BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100]
         - [@cloud.disqus_listener, onDisqusControlledException, 100]
         - [BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100]
@@ -56,6 +58,7 @@ kernel.controller:
         - [@rest.listener.pagination, onKernelController]
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\CoreListener, onKernelController]
+        - ["@cloud.api.user_right.listener", onKernelController]
 
 kernel.response:
     listeners:
@@ -259,6 +262,7 @@ rest.controller.bundlecontroller.getcollectionaction.postcall:
     listeners:
         # BackBee Cloud listeners
         - [BackBeeCloud\Listener\BundleListener, onGetCollectionPostCall]
+        - ["@cloud.api.user_right.listener", onBundleGetCollectionPostCall]
 
 controller.frontcontroller.rssaction.precall:
     listeners:
@@ -328,7 +332,27 @@ backbeecloud.api.controller.userpreferencecontroller.delete.postcall:
 rest.controller.usercontroller.getcollectionaction.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\Api\UserListener, onGetCollectionPostCall]
+        - ["@cloud.api.user_controller.listener", onGetCollectionPostCall]
+
+rest.controller.usercontroller.getaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - ["@cloud.api.user_controller.listener", onGetPostCall]
+
+rest.controller.usercontroller.getcurrentaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - ["@cloud.api.user_controller.listener", onGetPostCall]
+
+rest.controller.usercontroller.postaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - ["@cloud.api.user_controller.listener", onRestUserPostActionPostCall]
+
+rest.controller.usercontroller.putaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - ["@cloud.api.user_controller.listener", onRestUserPutActionPostCall]
 
 # Page and Section listeners
 
@@ -404,4 +428,10 @@ bundle.hauth.started:
 rest.user.creation:
     listeners:
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\Api\UserListener, onRestUserCreationEvent]
+        - ["@cloud.api.user_controller.listener", onRestUserCreationEvent]
+
+# User Right listeners
+backbeecloud.api.controller.pagetypecontroller.getcollection.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - ["@cloud.api.user_right.listener", onPageTypeGetCollectionPostCall]

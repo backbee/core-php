@@ -2,10 +2,11 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBee\BBApplication;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
 use BackBeeCloud\Entity\TagManager;
 use BackBeeCloud\Listener\RequestListener;
+use BackBeeCloud\Security\UserRightConstants;
+use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,9 +36,7 @@ class TagController extends AbstractController
 
     public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $tags = $this->tagMgr->getBy(
             $this->request->query->get('term', ''),
@@ -79,9 +78,10 @@ class TagController extends AbstractController
      */
     public function getLinkedPages($uid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::TAG_FEATURE
+        );
 
         if (null === $tag = $this->tagMgr->get($uid)) {
             return new Response('', Response::HTTP_NOT_FOUND);
@@ -92,9 +92,10 @@ class TagController extends AbstractController
 
     public function post()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::TAG_FEATURE
+        );
 
         if (!$this->request->request->has('name')) {
             return new JsonResponse([
@@ -110,9 +111,10 @@ class TagController extends AbstractController
 
     public function put($uid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::TAG_FEATURE
+        );
 
         if (!$this->request->request->has('name')) {
             return new JsonResponse([
@@ -128,9 +130,10 @@ class TagController extends AbstractController
 
     public function delete($uid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::TAG_FEATURE
+        );
 
         $this->tagMgr->delete($this->tagMgr->get($uid));
 

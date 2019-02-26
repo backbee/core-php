@@ -16,23 +16,21 @@ class PageTypeController extends AbstractController
     /**
      * @var TypeManager
      */
-    protected $mgr;
+    protected $pageTypeManager;
 
-    public function __construct(BBApplication $app)
+    public function __construct(TypeManager $pageTypeManager, BBApplication $app)
     {
         parent::__construct($app);
 
-        $this->mgr = $app->getContainer()->get('cloud.page_type.manager');
+        $this->pageTypeManager = $pageTypeManager;
     }
 
     public function getCollection()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse(
-            $all = array_values($this->mgr->all()),
+            $all = array_values($this->pageTypeManager->all()),
             Response::HTTP_OK,
             [
                 'Accept-Range'  => 'pages-types ' . RequestListener::COLLECTION_MAX_ITEM,

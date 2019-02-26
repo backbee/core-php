@@ -39,9 +39,7 @@ class UserController extends AbstractController
 
     public function updatePassword($id)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $user = $this->securityContext->getToken()->getUser();
         if ((int) $id !== $user->getId()) {

@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBeeCloud\MultiLang\MultiLangManager;
+use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,9 +24,7 @@ class MultiLangController extends AbstractController
 
     public function getCollection()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $all = $this->multilangMgr->getAllLangs();
 
@@ -37,9 +36,10 @@ class MultiLangController extends AbstractController
 
     public function get($id)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::MULTILANG_FEATURE
+        );
 
         $data = $this->multilangMgr->getLang($id);
         if (null === $data) {
@@ -51,27 +51,30 @@ class MultiLangController extends AbstractController
 
     public function enable($id)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::MULTILANG_FEATURE
+        );
 
         return $this->updateLangAction($id, true);
     }
 
     public function disable($id)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::MULTILANG_FEATURE
+        );
 
         return $this->updateLangAction($id, false);
     }
 
     public function defineDefault($id)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->denyAccessUnlessGranted(
+            UserRightConstants::MANAGE_ATTRIBUTE,
+            UserRightConstants::MULTILANG_FEATURE
+        );
 
         try {
             $this->multilangMgr->setDefaultLang($id);

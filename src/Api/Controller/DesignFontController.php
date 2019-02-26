@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBeeCloud\Design\FontManager;
+use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -25,9 +26,7 @@ class DesignFontController extends AbstractController
 
     public function getAllAction()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         return new JsonResponse($this->fontManager->all());
     }

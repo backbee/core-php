@@ -2,7 +2,10 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBeeCloud\Security\Authentication\UserRightUnauthorizedException;
+use BackBeeCloud\Security\Authorization\UserRightAccessDeniedException;
 use BackBee\BBApplication;
+use BackBee\Security\Token\BBUserToken;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,13 +15,13 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class AbstractController
 {
     /**
-     * @var \BackBee\Security\Token\BBUserToken|null
+     * @var \BackBee\Security\SecurityContext
      */
-    protected $bbtoken;
+    protected $securityContext;
 
     public function __construct(BBApplication $app)
     {
-        $this->bbtoken = $app->getBBUserToken();
+        $this->securityContext = $app->getSecurityContext();
     }
 
     /**
@@ -29,13 +32,43 @@ abstract class AbstractController
     protected function getResponseOnAnonymousUser()
     {
         $response = null;
-        if (null === $this->bbtoken) {
-            $response = new JsonResponse([
-                'error'  => 'unauthorized',
-                'reason' => 'You must be authenticated to complete this action.',
-            ], Response::HTTP_UNAUTHORIZED);
+        if (!($this->securityContext->getToken() instanceof BBUserToken)) {
+            $response = $this->createErrorJsonResponse(
+                'unauthorized',
+                'You must be authenticated to complete this action.',
+                Response::HTTP_UNAUTHORIZED
+            );
         }
 
         return $response;
+    }
+
+    protected function createErrorJsonResponse($error, $reason, $statusCode)
+    {
+        return new JsonResponse([
+            'error' => $error,
+            'reason' => $reason,
+        ], $statusCode);
+    }
+
+    protected function assertIsAuthenticated()
+    {
+        if (!$this->securityContext->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw UserRightUnauthorizedException::create();
+        }
+    }
+
+    protected function getUser()
+    {
+        return $this->securityContext->getToken()->getUser();
+    }
+
+    protected function denyAccessUnlessGranted($attribute, $subject = null)
+    {
+        $this->assertIsAuthenticated();
+
+        if (!$this->securityContext->isGranted($attribute, $subject)) {
+            throw UserRightAccessDeniedException::create();
+        }
     }
 }

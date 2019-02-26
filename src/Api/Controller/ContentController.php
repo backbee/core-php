@@ -53,9 +53,7 @@ class ContentController extends AbstractController
 
     public function delete($type, $uid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $classname = AbstractContent::getClassnameByContentType($type);
         $content = $this->entyMgr->find($classname, $uid);
@@ -67,7 +65,7 @@ class ContentController extends AbstractController
         }
 
         $this->entyMgr->beginTransaction();
-        $draft = $this->entyMgr->getRepository(Revision::class)->getDraft($content, $this->bbtoken, true);
+        $draft = $this->entyMgr->getRepository(Revision::class)->getDraft($content, $this->securityContext->getToken(), true);
         $draft->setState(Revision::STATE_TO_DELETE);
         $this->entyMgr->flush();
         $this->entyMgr->commit();
@@ -75,39 +73,23 @@ class ContentController extends AbstractController
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
-    public function publish($pageuid)
+    public function commitPage($pageuid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $page = $this->entyMgr->find(Page::class, $pageuid);
         if (false == $page) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
-        $commitedCount = $this->runPublishPage($page);
-
-        $draftCount = 0;
-        foreach ($this->pageMgr->getPagesWithDraftContents() as $draftPage) {
-            if ($page === $draftPage) {
-                continue;
-            }
-
-            $draftCount++;
-        }
-
         return new Response('', Response::HTTP_NO_CONTENT, [
-            'X-Published-Count'                 => $commitedCount,
-            'X-Remaining-Page-To-Publish-Count' => $draftCount,
+            'X-Published-Count' => $this->runCommitPage($page),
         ]);
     }
 
-    public function getPagesToPublish()
+    public function getPagesToCommit()
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $result = [];
         foreach ($this->pageMgr->getPagesWithDraftContents() as $page) {
@@ -127,16 +109,14 @@ class ContentController extends AbstractController
 
     public function reset($pageuid)
     {
-        if (null !== $response = $this->getResponseOnAnonymousUser()) {
-            return $response;
-        }
+        $this->assertIsAuthenticated();
 
         $page = $this->entyMgr->find('BackBee\NestedNode\Page', $pageuid);
         if (false == $page) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
-        $count = $this->contentMgr->resetByPage($page, $this->bbtoken);
+        $count = $this->contentMgr->resetByPage($page, $this->securityContext->getToken());
         $this->elasticsearchMgr->indexPage($page);
 
         return new Response('', Response::HTTP_NO_CONTENT, [
@@ -152,13 +132,9 @@ class ContentController extends AbstractController
         ], Response::HTTP_NOT_FOUND);
     }
 
-    protected function runPublishPage(Page $page)
+    protected function runCommitPage(Page $page)
     {
-        $commitedCount = $this->contentMgr->publishByPage($page, $this->bbtoken);
-        $page->setState(Page::STATE_ONLINE);
-        if (!$page->isRoot() && null === $page->getPublishing()) {
-            $page->setPublishing(new \DateTime());
-        }
+        $commitedCount = $this->contentMgr->publishByPage($page, $this->securityContext->getToken());
 
         if (0 < $commitedCount) {
             $page->setModified(new \DateTime());
