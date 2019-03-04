@@ -181,6 +181,7 @@ class PageManager
             }, $this->getPageTag($page)->getTags()->toArray()),
             'seo' => $pageSeo,
             'lang' => $this->multilangMgr->getLangByPage($page),
+            'created_at' => $page->getCreated()->format('Y-m-d H:i:s'),
             'modified' => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at' => $page->getPublishing()
                 ? $page->getPublishing()->format('Y-m-d H:i:s')
@@ -247,7 +248,9 @@ class PageManager
             }
         }
 
-        unset($criteria['tags'], $criteria['lang'], $criteria['page_uid']);
+        $category = isset($criteria['category']) ? $criteria['category'] : null;
+
+        unset($criteria['tags'], $criteria['lang'], $criteria['page_uid'], $criteria['category']);
         if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title']))) {
             $query = [
                 'query' => [
@@ -262,6 +265,10 @@ class PageManager
                 $query['query']['bool']['must_not'] = [
                     [ 'match' => ['url' => '/' ] ],
                 ];
+            }
+
+            if ($category) {
+                $query['query']['bool']['must'] = [ 'match' => [ 'category' => $category ] ];
             }
 
             if ($tags) {
@@ -292,7 +299,15 @@ class PageManager
                 $query['query']['bool']['must'][] = [ 'match' => ['has_draft_contents' => true] ];
             }
 
-            $sortValidAttrNames = ['modified_at', 'created_at'];
+            $sortValidAttrNames = [
+                'modified_at',
+                'created_at',
+                'published_at',
+                'title',
+                'type',
+                'is_online',
+                'category',
+                ];
             $sortValidOrder = ['asc', 'desc'];
 
             $formattedSort = [];
@@ -300,7 +315,7 @@ class PageManager
             foreach ($sort as $attr => $order) {
                 if (!in_array($attr, $sortValidAttrNames)) {
                     throw new \InvalidArgumentException(sprintf(
-                        "Pages are not sortable by '%s'.",
+                        "Pages are not sortable by %s .",
                         $attr
                     ));
                 }
