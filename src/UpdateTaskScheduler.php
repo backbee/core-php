@@ -98,6 +98,10 @@ class UpdateTaskScheduler
                 'version'     => '3.0.4',
                 'update_mask' => self::ELASTICSEARCH_MASK,
             ],
+            '3.4.5' => [
+                'version'     => '3.4.5',
+                'update_mask' => self::ELASTICSEARCH_MASK,
+            ],
         ];
     }
 
