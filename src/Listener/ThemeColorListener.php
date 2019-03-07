@@ -39,7 +39,7 @@ class ThemeColorListener
         $response->setContent(str_replace(
             '</head>',
             sprintf(
-                '<link rel="stylesheet" href="%s">',
+                '<link rel="stylesheet" href="%s"></head>',
                 $this->routing->getUrlByRouteName('api.color_panel.get_color_panel_css', [
                     'hash' => $this->cssGenerator->getCurrentHash(),
                 ])
