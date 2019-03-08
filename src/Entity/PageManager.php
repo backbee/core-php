@@ -781,11 +781,14 @@ class PageManager
         if (!is_bool($value)) {
             throw new \InvalidArgumentException('`is_online` must be type of boolean');
         }
-
+        $today = new \DateTime();
         try {
             $page->setState($value ? Page::STATE_ONLINE : Page::STATE_OFFLINE);
-            if (true === $value && !$page->isRoot() && null === $page->getPublishing()) {
-                $page->setPublishing(new \DateTime());
+            if (true === $value && !$page->isRoot()) {
+                $page->setPublishing($today);
+            }
+            if (false === $value && !$page->isRoot() && $page->getPublishing() <= $today) {
+                $page->setPublishing();
             }
         } catch (\LogicException $e) {
             throw new \LogicException('Home page cannot be offline');
