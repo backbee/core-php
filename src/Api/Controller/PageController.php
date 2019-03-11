@@ -68,11 +68,10 @@ class PageController extends AbstractController
         $criteria = $request->query->all();
         $sort = [];
         if (isset($criteria['sort'])) {
-            $desc = explode(',', $request->query->get('desc', ''));
             foreach (explode(',', $criteria['sort']) as $attrName) {
-                $sort[$attrName] = 'asc';
-                if (in_array($attrName, $desc)) {
-                    $sort[$attrName] = 'desc';
+                $attrName = explode(':', $attrName);
+                if (count($attrName) === 2) {
+                    $sort[$attrName[0]] = $attrName[1];
                 }
             }
         }

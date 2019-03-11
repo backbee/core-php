@@ -173,10 +173,10 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         if (false != $sort) {
             $criteria['sort'] = $sort;
         }
-
         $result = $this->getClient()->search($criteria);
 
         $pages = $result['hits']['hits'];
+
         if ($formatResult) {
             $uids = array_column($pages, '_id');
             if (false != $uids) {
