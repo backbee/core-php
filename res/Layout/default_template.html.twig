@@ -135,13 +135,14 @@
                 {{ banner_message }}
                 <a href="{{ learn_more_url }}">{{ learn_more_link_title }}</a>
               </div>
-              <button class="btn btn-outline-light">OK</button>
+              <button class="btn btn-outline-light valid">OK</button>
             </div>
           </div>
         {% elseif bb.token %}
           <div id="privacy-policy-banner" class="missing-config">
             <div class="container d-flex align-items-center justify-content-between">
               <div class="cookie-text" data-cloud-trans="missing_privacy_policy_banner_config"></div>
+              <button class="btn btn-outline-light p-2 cloud-close"><i class="icon icon-times"></i></button>
             </div>
           </div>
         {% endif %}
