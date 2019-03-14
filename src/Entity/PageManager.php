@@ -303,7 +303,6 @@ class PageManager
                 'modified_at',
                 'created_at',
                 'published_at',
-                'title',
                 'type',
                 'is_online',
                 'category',
