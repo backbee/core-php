@@ -76,8 +76,15 @@ class PageByTagResultListener
                 $app->getRenderer(),
                 $app->getBBUserToken()
             );
+
+            $extraParams = [
+                'show_image' => $event->getTarget()->getParamValue('show_image'),
+                'show_abstract' => $event->getTarget()->getParamValue('show_abstract'),
+                'show_published_at' => $event->getTarget()->getParamValue('show_published_at'),
+            ];
+
             foreach ($pages->collection() as $page) {
-                $contents[] = $formatter->renderItemFromRawData($page);
+                $contents[] = $formatter->renderItemFromRawData($page, $extraParams);
             }
         }
 
