@@ -77,7 +77,7 @@ class Color implements \JsonSerializable
     {
         usleep(100);
 
-        $uniqueId = str_replace('.', '', (string) microtime(true));
+        $uniqueId = str_replace(['.', ','], '', (string) microtime(true));
         $uniqueId = str_pad($uniqueId, 14, '0');
 
         return 'color-' . $uniqueId;
