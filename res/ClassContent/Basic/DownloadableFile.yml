@@ -1,0 +1,50 @@
+DownloadableFile:
+    properties:
+        name: yaml_block_downloadable_file
+        description: ~
+        category: [block_category_more]
+        rte:
+            placeholder: yaml_block_text_rte_placeholder
+    elements:
+        logo:
+            type: \BackBee\ClassContent\Basic\Image
+            maxentry: 1
+    parameters:
+        title:
+            value: ~
+        description:
+            value: ~
+
+        download_label:
+            label: yaml_block_downloadable_file_label
+            type: text
+            value: ''
+        file:
+            label: yaml_block_downloadable_file_file
+            type: upload
+            value: ~
+        date:
+            label: yaml_block_downloadable_file_date
+            type: datetimepicker
+            enable_time: false
+            value: ~
+        display_date:
+            type: switch
+            label: yaml_block_downloadable_file_display_date
+            value: true
+        display_img:
+            type: switch
+            label: yaml_block_downloadable_file_display_img
+            value: true
+        display_size:
+            type: switch
+            label: yaml_block_downloadable_file_display_size
+            value: true
+        display_description:
+            type: switch
+            label: yaml_block_downloadable_file_display_description
+            value: true
+        download_text_label:
+            label: yaml_block_downloadable_file_download_label
+            type: text
+            value: ''
