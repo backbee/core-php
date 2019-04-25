@@ -568,7 +568,10 @@ class PageManager
             && $elasticsearchResult['abstract_uid']
             && $abstract = $this->entyMgr->find(ArticleAbstract::class, $elasticsearchResult['abstract_uid'])
         ) {
-            $seoData['description'] = strip_tags(str_replace("\n", '', $abstract->value));
+            if (strlen($abstract->value) > 300 ) {
+                $seoData['description'] = substr($abstract->value, 0, 300) . '...';
+            }
+            $seoData['description'] = strip_tags(str_replace("\n", '', str_replace("&nbsp;", '', $seoData['description'])));
         }
 
         if ('article' !== $elasticsearchResult['type']) {
