@@ -570,6 +570,8 @@ class PageManager
         ) {
             if (strlen($abstract->value) > 300 ) {
                 $seoData['description'] = substr($abstract->value, 0, 300) . '...';
+            } else {
+                $seoData['description'] = $abstract->value;
             }
             $seoData['description'] = strip_tags(str_replace("\n", '', str_replace("&nbsp;", '', $seoData['description'])));
         }
