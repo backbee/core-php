@@ -43,7 +43,7 @@ class getFileStat extends AbstractHelper
         $this->contentManager = $this->getRenderer()->getApplication()->getContainer()->get('cloud.content_manager');
         $this->elasticSearchManager = $this->getRenderer()->getApplication()->getContainer()->get('elasticsearch.manager');
 
-        $filepath = str_replace('/img/', '/Media/', $this->getDataDir() . $file['value']);
+        $filepath = str_replace('/media/', '/Media/', $this->getDataDir() . $file['value']);
         $stat = stat($filepath);
         $stat['sizeHumanReadable'] = $this->humanReadableFileSize($stat['size']);
         $stat['extension'] = pathinfo($filepath, PATHINFO_EXTENSION);
