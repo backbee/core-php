@@ -4,6 +4,9 @@
 <div {{this.bbcontent(null, {'class': 'content contact-form'})|raw}}>
     {% if email.value is not empty %}
     <form id="{{ formId }}" class="form" data-email="{{ email.value }}">
+        {% if recaptcha_sitekey is defined and bb.token == null %}
+            <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+        {% endif %}
         <p class="error-form-message" style="display:none;">{{error_message.value|nl2br}}</p>
         <p class="confirmation-form-message" style="display:none;">{{confirmation_message.value|nl2br}}</p>
         <div class="form-group">
@@ -20,9 +23,7 @@
         </div>
         <div class="form-action text-{{ button_align.value }}">
             {% if recaptcha_sitekey is defined and bb.token == null %}
-                <div class="g-recaptcha" data-sitekey="{{ recaptcha_sitekey }}"></div>
-                <p class="recaptcha-error error-form-message"></p>
-                {{ this.addFooterJs('https://www.google.com/recaptcha/api.js') }}
+                <p class="recaptcha-error error-form-message mb-3"></p>
             {% endif %}
 
             <button
@@ -34,13 +35,22 @@
                 {{ button_title.value }}
             </button>
         </div>
-
+        {{ this.addFooterJs('https://www.google.com/recaptcha/api.js?render=' ~ recaptcha_sitekey ) }}
         <script>
             (function () {
                 var init = function () {
                     var $form = $('#{{formId}}');
                     var $error = $form.find('.error-form-message').not('.recaptcha-error');
                     var message = '{{error_message.value}}';
+
+                    {% if recaptcha_sitekey is defined and bb.token == null %}
+                        grecaptcha.ready(function() {
+                            grecaptcha.execute('{{ recaptcha_sitekey }}', {action: 'homepage'}).then(function(token) {
+                                var recaptchaResponse = document.getElementById('recaptchaResponse');
+                                recaptchaResponse.value = token;
+                                });
+                        });
+                    {% endif %}
 
                     function transformFormToSuccess() {
                         $form.find('.confirmation-form-message').removeAttr('style');
@@ -88,20 +98,26 @@
                                 'data': data
                             }).done(transformFormToSuccess).fail(function (res) {
                                 {% if recaptcha_sitekey is defined and bb.token == null %}
-                                var error = JSON.parse(res.responseText);
-                                if ('missing input response' !== error.reason) {
-                                    transformFormToSuccess();
+                                var error = res.responseJSON;
+                                if ('timeout or duplicate' === error.reason) {
+                                    $('.recaptcha-error')
+                                        .removeClass('hidden')
+                                        .text('fr-FR' === navigator.language
+                                            ? 'Votre session auprès de reCaptcha a expiré. Veuillez rafraichir la page.'
+                                            : 'Your session with reCaptcha has expired. Please refresh the page.'
+                                        )
+                                    ;
 
                                     return;
                                 }
+                                    $('.recaptcha-error')
+                                        .removeClass('hidden')
+                                        .text('fr-FR' === navigator.language
+                                            ? 'Une erreur s\'est produite lors de l\'envoi de votre message. Veuillez réessayer plus tard.'
+                                            : 'There was an error trying to send your message. Please try again later.'
+                                        )
+                                    ;
 
-                                $('.recaptcha-error')
-                                    .removeClass('hidden')
-                                    .text('fr' === navigator.language
-                                        ? 'Vous devez cocher la case "Je ne suis pas un robot" pour pouvoir envoyer votre message'
-                                        : 'You must check the box "I\'m not a robot" to send your message'
-                                    )
-                                ;
                                 {% endif %}
                             });
                         }
