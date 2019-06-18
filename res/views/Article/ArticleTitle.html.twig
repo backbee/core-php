@@ -30,9 +30,9 @@
         {% endif %}
         {% if show_tags.value == true %}
           {% set current_lang = this.getCurrentLang() %}
-          {% for tag in this.getPageTags(this.getCurrentPage()) %}
+          {% for tag in this.getPageTags(this.getCurrentPage(), true) %}
             {% set route_name = 'cloud.search_by_tag' ~ (current_lang ? '_i18n' : '') %}
-            <span class="metadata-tag"><a href="{{ this.generateUrlByRouteName(route_name, {'lang': current_lang, 'tagName': tag|lower|url_encode}, null, false) }}">{{ tag }}</a></span>
+            <span class="metadata-tag"><a href="{{ this.generateUrlByRouteName(route_name, {'lang': current_lang, 'tagName': tag.keyWord|lower|url_encode}, null, false) }}">{{ this.getTagTranslation(tag, current_lang) }}</a></span>
           {% endfor %}
         {% endif %}
       </p>

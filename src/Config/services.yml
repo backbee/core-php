@@ -118,7 +118,10 @@ services:
 
   cloud.api.tag_controller:
     class: BackBeeCloud\Api\Controller\TagController
-    arguments: ["@bbapp"]
+    arguments:
+        - "@security.context"
+        - "@cloud.tag_manager"
+        - "@cloud.data_transformer.tag"
 
   cloud.api.site_controller:
     class: BackBeeCloud\Api\Controller\SiteController
@@ -496,3 +499,10 @@ services:
   # CSRF Security
   app.csrf_token.manager:
     class: Symfony\Component\Security\Csrf\CsrfTokenManager
+
+  # API Data formatter
+  cloud.data_transformer.tag:
+    class: BackBeeCloud\Api\DataFormatter\TagDataFormatter
+    arguments:
+      - "@multilang_manager"
+      - "@em"
