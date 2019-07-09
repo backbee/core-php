@@ -42,14 +42,21 @@ class UserRightManager
      */
     private $pageCategoryManager;
 
+    /**
+     * @var array
+     */
+    private $superAdminBundleRights;
+
     public function __construct(
         SecurityContext $securityContext,
         EntityManagerInterface $entityManager,
-        PageCategoryManager $pageCategoryManager
+        PageCategoryManager $pageCategoryManager,
+        array $superAdminBundleRights = []
     ) {
         $this->securityContext = $securityContext;
         $this->entityManager = $entityManager;
         $this->pageCategoryManager = $pageCategoryManager;
+        $this->superAdminBundleRights = $superAdminBundleRights;
     }
 
     public function getUserRights(User $user, Page $contextualPage = null)
@@ -89,23 +96,26 @@ class UserRightManager
 
     protected function getSuperAdminRights()
     {
-        return [
-            UserRightConstants::SEO_TRACKING_FEATURE,
-            UserRightConstants::TAG_FEATURE,
-            UserRightConstants::USER_RIGHT_FEATURE,
-            UserRightConstants::MULTILANG_FEATURE,
-            UserRightConstants::CUSTOM_DESIGN_FEATURE,
-            UserRightConstants::PRIVACY_POLICY_FEATURE,
-            UserRightConstants::GLOBAL_CONTENT_FEATURE,
-            self::CREATE_PAGE_RIGHT,
-            self::DUPLICATE_PAGE_RIGHT,
-            self::EDIT_PAGE_RIGHT,
-            self::PUBLISH_PAGE_RIGHT,
-            self::DELETE_PAGE_RIGHT,
-            self::CREATE_CONTENT_RIGHT,
-            self::EDIT_CONTENT_RIGHT,
-            self::DELETE_CONTENT_RIGHT,
-        ];
+        return array_merge(
+            [
+                UserRightConstants::SEO_TRACKING_FEATURE,
+                UserRightConstants::TAG_FEATURE,
+                UserRightConstants::USER_RIGHT_FEATURE,
+                UserRightConstants::MULTILANG_FEATURE,
+                UserRightConstants::CUSTOM_DESIGN_FEATURE,
+                UserRightConstants::PRIVACY_POLICY_FEATURE,
+                UserRightConstants::GLOBAL_CONTENT_FEATURE,
+                self::CREATE_PAGE_RIGHT,
+                self::DUPLICATE_PAGE_RIGHT,
+                self::EDIT_PAGE_RIGHT,
+                self::PUBLISH_PAGE_RIGHT,
+                self::DELETE_PAGE_RIGHT,
+                self::CREATE_CONTENT_RIGHT,
+                self::EDIT_CONTENT_RIGHT,
+                self::DELETE_CONTENT_RIGHT,
+            ],
+            $this->superAdminBundleRights
+        );
     }
 
     protected function getSuperAdminCategories()
