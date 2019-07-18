@@ -5,6 +5,7 @@ namespace BackBeeCloud\Api\Controller;
 use BackBeeCloud\Security\Authentication\UserRightUnauthorizedException;
 use BackBeeCloud\Security\Authorization\UserRightAccessDeniedException;
 use BackBee\BBApplication;
+use BackBee\Security\SecurityContext;
 use BackBee\Security\Token\BBUserToken;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,13 +16,18 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class AbstractController
 {
     /**
-     * @var \BackBee\Security\SecurityContext
+     * @var SecurityContext
      */
     protected $securityContext;
 
     public function __construct(BBApplication $app)
     {
-        $this->securityContext = $app->getSecurityContext();
+        $this->setSecurityContext($app->getSecurityContext());
+    }
+
+    protected function setSecurityContext(SecurityContext $securityContext)
+    {
+        $this->securityContext = $securityContext;
     }
 
     /**

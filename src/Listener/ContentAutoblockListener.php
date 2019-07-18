@@ -77,13 +77,15 @@ class ContentAutoblockListener
 
         // Building should clause
         $validTags = [];
-        $tagRpty = $app->getEntityManager()->getRepository(Tag::class);
+        $tagRepository = $app->getEntityManager()->getRepository(Tag::class);
         foreach ($block->getParamValue('tags') as $data) {
             if (is_array($data)) {
-                if ($tag = $tagRpty->find($data['uid'])) {
+                if ($tag = $tagRepository->find($data['uid'])) {
                     $validTags[] = $tag->getKeyWord();
                 }
-            } elseif (is_string($data) && $tagRpty->exists($data)) {
+
+                $validTags = array_merge($validTags, self::getTagAllChildren($tag));
+            } elseif (is_string($data) && $tagRepository->exists($data)) {
                 $validTags[] = $data;
             }
         }
@@ -219,5 +221,19 @@ class ContentAutoblockListener
     public static function getAutoblockId(ContentAutoblock $autoblock)
     {
         return substr($autoblock->getUid(), 0, self::AUTOBLOCK_ID_LENGTH);
+    }
+
+    protected static function getTagAllChildren(Tag $tag)
+    {
+        $children = [];
+        foreach ($tag->getChildren()->toArray() as $child) {
+            if ($child->getChildren()->toArray()) {
+                $children = array_merge($children, self::getTagAllChildren($child));
+            }
+
+            $children[] = $child->getKeyWord();
+        }
+
+        return array_unique($children);
     }
 }

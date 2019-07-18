@@ -273,7 +273,7 @@ class PageManager
 
             if ($tags) {
                 $query['query']['bool']['must'] = array_map(function ($tag) {
-                    return [ 'match' => ['tags' => $tag->getKeyWord()] ];
+                    return [ 'term' => ['tags.raw' => strtolower($tag->getKeyWord())] ];
                 }, $tags);
             }
 
@@ -809,8 +809,22 @@ class PageManager
         $pagetag = $this->getPageTag($page);
 
         $pagetag->resetTags();
-        foreach ((array) $values as $tag) {
-            $pagetag->addTag($this->tagMgr->create($tag['label']));
+        foreach ((array) $values as $tagData) {
+            $tag = null;
+            if (isset($tagData['uid'])) {
+                if (null === $tag = $this->tagMgr->get($tagData['uid'])) {
+                    throw new \InvalidArgumentException(
+                        sprintf(
+                            'Cannot find tag with provided uid (:%s)',
+                            $tagData['uid']
+                        )
+                    );
+                }
+            } else {
+                $tag = $this->tagMgr->createIfNotExists($tagData['label']);
+            }
+
+            $pagetag->addTag($tag);
         }
     }
 

@@ -97,7 +97,6 @@ class YamlStructureDumperManager implements JobHandlerInterface
 
     public function handle(JobInterface $job, SimpleWriterInterface $writer)
     {
-
         $this->domain = $job->domain();
         $this->themeName = $job->themeName();
 

@@ -336,6 +336,31 @@ cloud.api.tags.get_collection:
   requirements:
     _method: GET
 
+cloud.api.tags.get:
+  pattern: /api/tags/{uid}
+  defaults:
+    _action: get
+    _controller: cloud.api.tag_controller
+  requirements:
+    _method: GET
+    uid: "[a-f0-9]{32}"
+
+cloud.api.tags.get_tree_first_level:
+  pattern: /api/tags/tree-first-level
+  defaults:
+    _action: getTreeFirstLevelTags
+    _controller: cloud.api.tag_controller
+  requirements:
+    _method: GET
+
+cloud.api.tags.get_children:
+  pattern: /api/tags/{uid}/children
+  defaults:
+    _action: getChildren
+    _controller: cloud.api.tag_controller
+  requirements:
+    _method: GET
+
 cloud.api.tags.linked_pages:
   pattern: /api/tags/{uid}/linked-pages
   defaults:

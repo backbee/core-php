@@ -27,7 +27,7 @@ class PageByTagResultListener
         $tagName = $request->attributes->get('tagName', '');
         if (
             false != $tagName
-            && null !== $entyMgr->getRepository(Tag::class)->findOneBy(['_keyWord' => $tagName])
+            && null !== $tag = $entyMgr->getRepository(Tag::class)->findOneBy(['_keyWord' => $tagName])
         ) {
             $pageNum = $request->query->getInt('page', 1);
             $limit = (int) $content->getParamValue('limit') ?: SearchResultListener::RESULT_PER_PAGE;
@@ -90,6 +90,7 @@ class PageByTagResultListener
 
         $renderer = $event->getRenderer();
         $renderer->assign('tag', $tagName);
+        $renderer->assign('tag_entity', $tag);
         $renderer->assign('pages', $pages);
         $renderer->assign('contents', $contents);
     }
