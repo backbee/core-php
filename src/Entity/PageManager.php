@@ -569,7 +569,7 @@ class PageManager
             && $abstract = $this->entyMgr->find(ArticleAbstract::class, $elasticsearchResult['abstract_uid'])
         ) {
             if (strlen($abstract->value) > 300 ) {
-                $seoData['description'] = substr($abstract->value, 0, 300) . '...';
+                $seoData['description'] = mb_substr($abstract->value, 0, 300) . '...';
             } else {
                 $seoData['description'] = $abstract->value;
             }
@@ -973,7 +973,7 @@ class PageManager
      *
      * @return Page
      */
-    protected function getRootPage()
+    public function getRootPage()
     {
         $root = null;
         if (null !== $this->currentLang) {
