@@ -8,6 +8,9 @@ parameters:
   cloud.override.default.categories: false
   cloud.strictly.default.categories: true
 
+  # this parameter will be hydrated by \BackBeeCloud\Listener\UserRightListener::onApplicationInit()
+  user_right.super_admin_bundles_rights: []
+
 services:
   cloud.page_manager:
     class: BackBeeCloud\Entity\PageManager
@@ -142,6 +145,7 @@ services:
       - "@security.context"
       - "@em"
       - "@cloud.page_category.manager"
+      - "%user_right.super_admin_bundles_rights%"
 
   cloud.api.user_right.listener:
     class: BackBeeCloud\Listener\Api\UserRightListener
