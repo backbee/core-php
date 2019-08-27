@@ -67,10 +67,10 @@ class ContentAutoblockListener
 
         // Building must clause
         $mustClauses = [
-            [ 'match' => [ 'is_pullable' => true ] ],
+            ['match' => ['is_pullable' => true]],
         ];
         if (null === $app->getBBUserToken()) {
-            $mustClauses[] = [ 'match' => [ 'is_online' => true ] ];
+            $mustClauses[] = ['match' => ['is_online' => true]];
         }
 
         $esQuery['query']['bool']['must'] = $mustClauses;
@@ -80,10 +80,10 @@ class ContentAutoblockListener
         $tagRepository = $app->getEntityManager()->getRepository(Tag::class);
         foreach ($block->getParamValue('tags') as $data) {
             if (is_array($data)) {
-                if ($tag = $tagRepository->find($data['uid'])) {
-                    $validTags[] = $tag->getKeyWord();
+                if (empty($tag = $tagRepository->find($data['uid']))) {;
+                    continue;
                 }
-
+                $validTags[] = $tag->getKeyWord();
                 $validTags = array_merge($validTags, self::getTagAllChildren($tag));
             } elseif (is_string($data) && $tagRepository->exists($data)) {
                 $validTags[] = $data;
@@ -97,7 +97,7 @@ class ContentAutoblockListener
         $shouldClauses = [];
         foreach ($validTags as $tag) {
             $shouldClauses[] = [
-                'match' => [ 'tags.raw' => strtolower($tag) ],
+                'match' => ['tags.raw' => strtolower($tag)],
             ];
         }
 
@@ -179,19 +179,16 @@ class ContentAutoblockListener
 
             $refNum = self::MAX_PAGE % 2 === 0
                 ? self::MAX_PAGE / 2
-                : (self::MAX_PAGE - 1) / 2
-            ;
+                : (self::MAX_PAGE - 1) / 2;
             $midNum = self::MAX_PAGE % 2 === 0
                 ? $refNum - 1
-                : $refNum
-            ;
+                : $refNum;
 
             if ($nbPage > self::MAX_PAGE) {
                 if ($nbPage - $currentPaginationPage > $refNum) {
                     $startPagination = $currentPaginationPage > $refNum
                         ? $currentPaginationPage - $midNum
-                        : 1
-                    ;
+                        : 1;
                 } else {
                     $startPagination = $nbPage - self::MAX_PAGE + 1;
                 }
@@ -199,8 +196,7 @@ class ContentAutoblockListener
                 if ($currentPaginationPage > $refNum) {
                     $nbPage = $nbPage - $currentPaginationPage > $refNum
                         ? $currentPaginationPage + $refNum
-                        : $nbPage
-                    ;
+                        : $nbPage;
                 } else {
                     $nbPage = self::MAX_PAGE;
                 }
