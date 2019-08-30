@@ -132,8 +132,7 @@ class PageManager
         return (int) $this->repository->createQueryBuilder('p')
             ->select('count(p)')
             ->getQuery()
-            ->getSingleScalarResult()
-        ;
+            ->getSingleScalarResult();
     }
 
     /**
@@ -173,7 +172,7 @@ class PageManager
             'is_online' => $page->isOnline(),
             'is_drafted' => $isDrafted,
             'url' => $page->getUrl(),
-            'tags' => array_map(function(KeyWord $keyword) {
+            'tags' => array_map(function (KeyWord $keyword) {
                 return [
                     'uid' => $keyword->getUid(),
                     'label' => $keyword->getKeyWord(),
@@ -185,8 +184,7 @@ class PageManager
             'modified' => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at' => $page->getPublishing()
                 ? $page->getPublishing()->format('Y-m-d H:i:s')
-                : null
-            ,
+                : null,
         ];
     }
 
@@ -230,8 +228,7 @@ class PageManager
     {
         $hasDraftOnly = isset($criteria['has_draft_only'])
             ? (bool) $criteria['has_draft_only']
-            : false
-        ;
+            : false;
         unset($criteria['has_draft_only']);
 
         $lang = isset($criteria['lang']) ? $criteria['lang'] : null;
@@ -241,13 +238,12 @@ class PageManager
         }
 
         $tags = [];
-        $rawTags = isset($criteria['tags']) ? explode(',', $criteria['tags']) : [];
+        $rawTags = (isset($criteria['tags']) && !empty($criteria['tags']) ? explode(',', $criteria['tags']) : []);
         foreach ($rawTags as $tag) {
             if (null !== $tag = $this->entyMgr->getRepository(KeyWord::class)->exists($tag)) {
                 $tags[] = $tag;
             }
         }
-
         $category = isset($criteria['category']) ? $criteria['category'] : null;
 
         unset($criteria['tags'], $criteria['lang'], $criteria['page_uid'], $criteria['category']);
@@ -263,40 +259,40 @@ class PageManager
 
             if ($this->multilangMgr->isActive()) {
                 $query['query']['bool']['must_not'] = [
-                    [ 'match' => ['url' => '/' ] ],
+                    ['match' => ['url' => '/']],
                 ];
             }
 
             if ($category) {
-                $query['query']['bool']['must'] = [ 'match' => [ 'category' => $category ] ];
+                $query['query']['bool']['must'] = ['match' => ['category' => $category]];
             }
 
-            if ($tags) {
+            if (!empty($tags)) {
                 $query['query']['bool']['must'] = array_map(function ($tag) {
-                    return [ 'term' => ['tags.raw' => strtolower($tag->getKeyWord())] ];
+                    return ['term' => ['tags.raw' => strtolower($tag->getKeyWord())]];
                 }, $tags);
             }
 
-            if ($lang) {
-                $query['query']['bool']['must'][] = [ 'prefix' => ['url' => sprintf('/%s/', $lang)] ];
+            if ($lang && $lang !== 'all') {
+                $query['query']['bool']['must'][] = ['prefix' => ['url' => sprintf('/%s/', $lang)]];
             }
 
             if (isset($criteria['title'])) {
                 $title = str_replace('%', '', $criteria['title']);
                 $query['query']['bool']['should'] = [
-                    [ 'match' => ['title' => $title] ],
-                    [ 'match' => ['title.raw' => $title] ],
-                    [ 'match' => ['title.folded' => $title] ],
-                    [ 'match_phrase_prefix' => ['title' => $title] ],
-                    [ 'match_phrase_prefix' => ['title.raw' => $title] ],
-                    [ 'match_phrase_prefix' => ['title.folded' => $title] ],
-                    [ 'match_phrase_prefix' => ['tags' => $title] ],
+                    ['match' => ['title' => $title]],
+                    ['match' => ['title.raw' => $title]],
+                    ['match' => ['title.folded' => $title]],
+                    ['match_phrase_prefix' => ['title' => $title]],
+                    ['match_phrase_prefix' => ['title.raw' => $title]],
+                    ['match_phrase_prefix' => ['title.folded' => $title]],
+                    ['match_phrase_prefix' => ['tags' => $title]],
                 ];
                 $query['query']['bool']['minimum_should_match'] = 1;
             }
 
             if ($hasDraftOnly) {
-                $query['query']['bool']['must'][] = [ 'match' => ['has_draft_contents' => true] ];
+                $query['query']['bool']['must'][] = ['match' => ['has_draft_contents' => true]];
             }
 
             $sortValidAttrNames = [
@@ -306,7 +302,7 @@ class PageManager
                 'type',
                 'is_online',
                 'category',
-                ];
+            ];
             $sortValidOrder = ['asc', 'desc'];
 
             $formattedSort = [];
@@ -342,14 +338,12 @@ class PageManager
             ->createQueryBuilder('p')
             ->orderBy('p._modified', 'desc')
             ->setFirstResult($start)
-            ->setMaxResults($limit)
-        ;
+            ->setMaxResults($limit);
 
         if ($this->multilangMgr->isActive()) {
             $qb
                 ->where($qb->expr()->neq('p._url', ':url'))
-                ->setParameter('url', '/')
-            ;
+                ->setParameter('url', '/');
         }
 
         try {
@@ -393,8 +387,7 @@ class PageManager
         $data['seo'] = isset($data['seo']) ? $data['seo'] : [];
         $data['type'] = isset($data['type'])
             ? $data['type']
-            : $this->typeMgr->getDefaultType()->uniqueName()
-        ;
+            : $this->typeMgr->getDefaultType()->uniqueName();
 
         $redirections = isset($data['redirections']) ? $data['redirections'] : null;
         unset($data['redirections']);
@@ -525,7 +518,7 @@ class PageManager
             'query' => [
                 'bool' => [
                     'must' => [
-                        [ 'match' => ['has_draft_contents' => true] ],
+                        ['match' => ['has_draft_contents' => true]],
                     ],
                 ],
             ],
@@ -568,7 +561,7 @@ class PageManager
             && $elasticsearchResult['abstract_uid']
             && $abstract = $this->entyMgr->find(ArticleAbstract::class, $elasticsearchResult['abstract_uid'])
         ) {
-            if (strlen($abstract->value) > 300 ) {
+            if (strlen($abstract->value) > 300) {
                 $seoData['description'] = mb_substr($abstract->value, 0, 300) . '...';
             } else {
                 $seoData['description'] = $abstract->value;
@@ -596,8 +589,7 @@ class PageManager
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $qb
             ->{$method}($qb->expr()->{$operator}("{$qb->getRootAlias()}._title", ':title'))
-            ->setParameter('title', $value)
-        ;
+            ->setParameter('title', $value);
     }
 
     /**
@@ -611,8 +603,7 @@ class PageManager
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $qb
             ->{$method}("{$qb->getRootAlias()}._state = :state")
-            ->setParameter('state', $value ? Page::STATE_ONLINE : Page::STATE_OFFLINE)
-        ;
+            ->setParameter('state', $value ? Page::STATE_ONLINE : Page::STATE_OFFLINE);
     }
 
     /**
@@ -643,14 +634,12 @@ class PageManager
                 ->createQueryBuilder('pt')
                 ->join('pt.tags', 't')
                 ->where('t._uid = :keyword')
-                ->setParameter('keyword', $keyword)
-            ;
+                ->setParameter('keyword', $keyword);
 
             if (0 < count($pageTags)) {
                 $tagQb
                     ->orWhere($tagQb->expr()->in('pt.id', ':pagetags'))
-                    ->setParameter('pagetags', array_filter($pageTags))
-                ;
+                    ->setParameter('pagetags', array_filter($pageTags));
             }
 
             $pageTags = $tagQb->getQuery()->getResult();
@@ -660,7 +649,7 @@ class PageManager
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(function(PageTag $pageTag) {
+        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(function (PageTag $pageTag) {
             return $pageTag->getPage()->getUid();
         }, $pageTags)));
     }
@@ -689,15 +678,14 @@ class PageManager
             ->createQueryBuilder('pt')
             ->where($qb->expr()->in('pt.typeName',  $uniqueNames))
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
 
         if (0 === count($pageTypes)) {
             throw new EmptyPageSelectionException();
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(function(PageType $pageType) {
+        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(function (PageType $pageType) {
             return $pageType->getPage()->getUid();
         }, $pageTypes)));
     }
@@ -854,16 +842,13 @@ class PageManager
         $data = array_merge([
             'title' => $bag->get('title')
                 ? $bag->get('title')->getAttribute('content', '')
-                : ''
-            ,
+                : '',
             'description' => $bag->get('description')
                 ? $bag->get('description')->getAttribute('content', '')
-                : ''
-            ,
+                : '',
             'keywords' => $bag->get('keywords')
                 ? $bag->get('keywords')->getAttribute('content', '')
-                : ''
-            ,
+                : '',
         ], $data);
 
         foreach ($data as $name => $value) {
@@ -1023,6 +1008,4 @@ class PageManager
 
         return $data;
     }
-
-
 }
