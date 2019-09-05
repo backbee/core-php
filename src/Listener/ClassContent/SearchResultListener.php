@@ -2,12 +2,13 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
+use BackBee\Renderer\Event\RendererEvent;
 use BackBeeCloud\Elasticsearch\SearchEvent;
 use BackBeeCloud\Search\ResultItemHtmlFormatter;
-use BackBee\Renderer\Event\RendererEvent;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SearchResultListener
 {
@@ -39,7 +40,7 @@ class SearchResultListener
                             [ 'match' => ['contents' => $query] ],
                             [ 'match' => ['contents.folded' => $query] ],
                             [ 'match_phrase_prefix' => ['title' => ['query' => $query, 'boost' => 2] ] ],
-                            [ 'match_phrase_prefix' => ['title.raw' => ['query' => $query, 'boost' => 2] ] ],
+                            //[ 'match_phrase_prefix' => ['title.raw' => ['query' => $query, 'boost' => 2] ] ],
                             [ 'match_phrase_prefix' => ['title.folded' => ['query' => $query, 'boost' => 2] ] ],
                             [ 'match_phrase_prefix' => ['tags' => $query] ],
                         ],
@@ -61,7 +62,7 @@ class SearchResultListener
             $esQuery['query']['bool']['must'] = [];
         }
 
-        $esQuery['query']['bool']['must'][] = [ 'match' => ['is_pullable' => true] ];
+        //$esQuery['query']['bool']['must'][] = [ 'match' => ['is_pullable' => true] ];
         if (null === $app->getBBUserToken()) {
             $esQuery['query']['bool']['must'][] = [ 'match' => ['is_online' => true] ];
         }

@@ -2,12 +2,6 @@
 
 namespace BackBeeCloud\Elasticsearch;
 
-use BackBeeCloud\Entity\ContentManager;
-use BackBeeCloud\Importer\SimpleWriterInterface;
-use BackBeeCloud\Job\JobHandlerInterface;
-use BackBeePlanet\ElasticsearchManager as PlanetElasticsearchManager;
-use BackBeePlanet\Job\ElasticsearchJob;
-use BackBeePlanet\Job\JobInterface;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
@@ -18,9 +12,16 @@ use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
+use BackBeeCloud\Entity\ContentManager;
+use BackBeeCloud\Importer\SimpleWriterInterface;
+use BackBeeCloud\Job\JobHandlerInterface;
+use BackBeePlanet\ElasticsearchManager as PlanetElasticsearchManager;
+use BackBeePlanet\Job\ElasticsearchJob;
+use BackBeePlanet\Job\JobInterface;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class ElasticsearchManager extends PlanetElasticsearchManager implements JobHandlerInterface
 {
@@ -80,7 +81,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
             'contents'           => $this->extractTextsFromPage($page),
             'type'               => $type->uniqueName(),
             'is_online'          => $page->isOnline(),
-            'is_pullable'        => $type->isPullable(),
+            //'is_pullable'        => /*$type->isPullable()*/,
             'created_at'         => $page->getCreated()->format('Y-m-d H:i:s'),
             'modified_at'        => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at'       => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,
@@ -164,7 +165,6 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     {
         $criteria = [
             'index' => $this->getIndexName(),
-            'type'  => $this->getPageTypeName(),
             'from'  => (int) $start,
             'size'  => (int) $limit,
             'body'  => $body,
@@ -173,10 +173,10 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         if (false != $sort) {
             $criteria['sort'] = $sort;
         }
+
         $result = $this->getClient()->search($criteria);
 
         $pages = $result['hits']['hits'];
-
         if ($formatResult) {
             $uids = array_column($pages, '_id');
             if (false != $uids) {
@@ -187,7 +187,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
             }
         }
 
-        return new ElasticsearchCollection($pages, $result['hits']['total'], $start, $limit);
+        return new ElasticsearchCollection($pages, $result['hits']['total']['value'], $start, $limit);
     }
 
     /**
@@ -277,7 +277,10 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
      */
     public function handle(JobInterface $job, SimpleWriterInterface $writer)
     {
+        $writer->write('  <c2>> Create index...</c2>');
         $this->createIndex();
+        
+        $writer->write('  <c2>> Create types...</c2>');
         $this->createTypes();
 
         $writer->write('  <c2>> Reindexing all pages...</c2>');
