@@ -125,7 +125,7 @@ class UserRightVoter implements VoterInterface
                     break;
                 case UserRightConstants::CATEGORY_CONTEXT_MASK:
                     if (null === $attribute->getCategory()) {
-                        $isGranted = true;
+                        $isGranted = false;
 
                         break;
                     }
@@ -135,7 +135,10 @@ class UserRightVoter implements VoterInterface
                     break;
                 case (UserRightConstants::PAGE_TYPE_CONTEXT_MASK | UserRightConstants::CATEGORY_CONTEXT_MASK):
                     if (null === $attribute->getCategory()) {
-                        $isGranted = in_array($attribute->getPageType(), $right->getPageTypeContextData());
+                        $isGranted =
+                            UserRightConstants::CREATE_ATTRIBUTE === $attribute->getAttribute()
+                            && in_array($attribute->getPageType(), $right->getPageTypeContextData())
+                        ;
 
                         break;
                     }
