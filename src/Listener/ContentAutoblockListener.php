@@ -219,8 +219,11 @@ class ContentAutoblockListener
         return substr($autoblock->getUid(), 0, self::AUTOBLOCK_ID_LENGTH);
     }
 
-    protected static function getTagAllChildren(Tag $tag)
+    protected static function getTagAllChildren(Tag $tag = null)
     {
+        if (!$tag) {
+            return [];
+        }
         $children = [];
         foreach ($tag->getChildren()->toArray() as $child) {
             if ($child->getChildren()->toArray()) {
