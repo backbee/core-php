@@ -78,6 +78,8 @@ class PageController extends AbstractController
 
         unset($criteria['sort'], $criteria['desc']);
 
+        $criteria['lang'] = isset($criteria['lang']) ? $criteria['lang'] : 'all';
+
         try {
             $pages = $this->pageManager->getBy($criteria, $start, $limit, $sort);
 
