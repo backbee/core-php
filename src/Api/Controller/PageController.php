@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBee\Exception\InvalidArgumentException;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
 use BackBeeCloud\Entity\PageManager;
 use BackBeeCloud\Listener\RequestListener;
@@ -11,13 +12,17 @@ use BackBeeCloud\Security\Authorization\Voter\UserRightPageAttribute;
 use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
 use BackBee\NestedNode\Page;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class PageController extends AbstractController
 {
@@ -36,6 +41,14 @@ class PageController extends AbstractController
      */
     protected $pageCategoryManager;
 
+    /**
+     * PageController constructor.
+     *
+     * @param PageManager         $pageManager
+     * @param TypeManager         $pageTypeManager
+     * @param PageCategoryManager $pageCategoryManager
+     * @param BBApplication       $app
+     */
     public function __construct(
         PageManager $pageManager,
         TypeManager $pageTypeManager,
@@ -49,6 +62,11 @@ class PageController extends AbstractController
         $this->pageCategoryManager = $pageCategoryManager;
     }
 
+    /**
+     * @param $uid
+     *
+     * @return JsonResponse|Response
+     */
     public function get($uid)
     {
         $this->assertIsAuthenticated();
@@ -61,8 +79,18 @@ class PageController extends AbstractController
         return new JsonResponse($this->pageManager->format($page));
     }
 
-    public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM, Request $request)
-    {
+    /**
+     * @param int     $start
+     * @param int     $limit
+     * @param Request $request
+     *
+     * @return JsonResponse|null
+     */
+    public function getCollection(
+        $start = 0,
+        $limit = RequestListener::COLLECTION_MAX_ITEM,
+        Request $request
+    ): ?JsonResponse {
         $this->assertIsAuthenticated();
 
         $criteria = $request->query->all();
@@ -78,7 +106,7 @@ class PageController extends AbstractController
 
         unset($criteria['sort'], $criteria['desc']);
 
-        $criteria['lang'] = isset($criteria['lang']) ? $criteria['lang'] : 'all';
+        $criteria['lang'] = $criteria['lang'] ?? 'all';
 
         try {
             $pages = $this->pageManager->getBy($criteria, $start, $limit, $sort);
@@ -107,14 +135,19 @@ class PageController extends AbstractController
                     'Content-Range' => $max ? "$start-$end/$max" : '-/-',
                 ]
             );
-        } catch (\Exception $e) {
+        } catch (Exception $exception) {
             return new JsonResponse([
                 'error'  => 'bad_request',
-                'reason' => $e->getMessage(),
+                'reason' => $exception->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return JsonResponse|Response
+     */
     public function post(Request $request)
     {
         $pageData = $request->request->all();
@@ -123,14 +156,14 @@ class PageController extends AbstractController
             new UserRightPageAttribute(
                 UserRightConstants::CREATE_ATTRIBUTE,
                 $pageData['type'],
-                isset($pageData['category']) ? $pageData['category'] : null
+                $pageData['category'] ?? null
             ),
             UserRightConstants::OFFLINE_PAGE
         );
 
         try {
             $page = $this->pageManager->create($pageData);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new JsonResponse([
                 'error'  => 'bad_request',
                 'reason' => $exception->getMessage(),
@@ -143,6 +176,12 @@ class PageController extends AbstractController
         ]);
     }
 
+    /**
+     * @param         $uid
+     * @param Request $request
+     *
+     * @return JsonResponse|Response
+     */
     public function put($uid, Request $request)
     {
         $page = $this->pageManager->get($uid);
@@ -154,7 +193,7 @@ class PageController extends AbstractController
 
         try {
             $this->pageManager->update($page, $request->request->all());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse([
                 'error'  => 'bad_request',
                 'reason' => $e->getMessage(),
@@ -166,6 +205,11 @@ class PageController extends AbstractController
         ]);
     }
 
+    /**
+     * @param $uid
+     *
+     * @return JsonResponse|Response
+     */
     public function delete($uid)
     {
         $page = $this->pageManager->get($uid);
@@ -177,7 +221,7 @@ class PageController extends AbstractController
 
         try {
             $this->pageManager->delete($page);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse([
                 'error'  => 'bad_request',
                 'reason' => $e->getMessage(),
@@ -187,7 +231,16 @@ class PageController extends AbstractController
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
 
-    public function duplicate($uid, Request $request)
+    /**
+     * @param         $uid
+     * @param Request $request
+     *
+     * @return Response
+     * @throws InvalidArgumentException
+     * @throws OptimisticLockException
+     * @throws QueryException
+     */
+    public function duplicate($uid, Request $request): Response
     {
         $source = $this->pageManager->get($uid);
         if (null === $source) {
@@ -210,13 +263,13 @@ class PageController extends AbstractController
         ]);
     }
 
-    private function denyAccessUnlessGrantedByPage(Page $page, $attribute)
+    /**
+     * @param Page $page
+     * @param      $attribute
+     */
+    private function denyAccessUnlessGrantedByPage(Page $page, $attribute): void
     {
-        $subject = $page->isOnline(true)
-            ? UserRightConstants::ONLINE_PAGE
-            : UserRightConstants::OFFLINE_PAGE
-        ;
-
+        $subject = $page->isOnline(true) ? UserRightConstants::ONLINE_PAGE : UserRightConstants::OFFLINE_PAGE;
         $this->denyAccessUnlessGranted(
             new UserRightPageAttribute(
                 $attribute,
