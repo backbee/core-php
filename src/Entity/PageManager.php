@@ -21,8 +21,11 @@ use BackBeeCloud\PageType\TypeManager;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\ORM\TransactionRequiredException;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Exception;
 use InvalidArgumentException;
@@ -30,18 +33,19 @@ use LogicException;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class PageManager
 {
     /**
      * @var BBUserToken|null
      */
-    protected $bbtoken;
+    protected $bbToken;
 
     /**
      * @var EntityManager
      */
-    protected $entyMgr;
+    protected $entityMgr;
 
     /**
      * @var TypeManager
@@ -81,7 +85,7 @@ class PageManager
     /**
      * @var MultiLangManager
      */
-    protected $multilangMgr;
+    protected $multiLangMgr;
 
     /**
      * @var null|Lang
@@ -100,14 +104,14 @@ class PageManager
      */
     public function __construct(BBApplication $app)
     {
-        $this->bbtoken = $app->getBBUserToken();
-        $this->entyMgr = $app->getEntityManager();
+        $this->bbToken = $app->getBBUserToken();
+        $this->entityMgr = $app->getEntityManager();
         $this->typeMgr = $app->getContainer()->get('cloud.page_type.manager');
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
-        $this->repository = $this->entyMgr->getRepository(Page::class);
+        $this->repository = $this->entityMgr->getRepository(Page::class);
         $this->elsMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->tagMgr = $app->getContainer()->get('cloud.tag_manager');
-        $this->multilangMgr = $app->getContainer()->get('multilang_manager');
+        $this->multiLangMgr = $app->getContainer()->get('multilang_manager');
         $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
     }
 
@@ -160,6 +164,9 @@ class PageManager
      *                              on global contents to determine if page is drafted
      *
      * @return array
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
     public function format(Page $page, $strictDraftMode = false): array
     {
@@ -173,7 +180,8 @@ class PageManager
         ]);
 
         $isDrafted = $result['found'] && isset($result['_source']['has_draft_contents'])
-            ? $result['_source']['has_draft_contents'] : false;
+            ? $result['_source']['has_draft_contents']
+            : false;
 
         if (false === $strictDraftMode && !$isDrafted) {
             $isDrafted = $this->contentMgr->hasGlobalContentDraft();
@@ -188,14 +196,14 @@ class PageManager
             'is_online' => $page->isOnline(),
             'is_drafted' => $isDrafted,
             'url' => $page->getUrl(),
-            'tags' => array_map(function (KeyWord $keyword) {
+            'tags' => array_map(static function (KeyWord $keyword) {
                 return [
                     'uid' => $keyword->getUid(),
                     'label' => $keyword->getKeyWord(),
                 ];
             }, $this->getPageTag($page)->getTags()->toArray()),
             'seo' => $pageSeo,
-            'lang' => $this->multilangMgr->getLangByPage($page),
+            'lang' => $this->multiLangMgr->getLangByPage($page),
             'created_at' => $page->getCreated()->format('Y-m-d H:i:s'),
             'modified' => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at' => $page->getPublishing()
@@ -207,12 +215,15 @@ class PageManager
     /**
      * Applies ::format() on every item of the provided collection.
      *
-     * @see ::format()
-     *
      * @param mixed $collection
      * @param bool  $strictDraftMode
      *
      * @return array
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     * @see ::format()
+     *
      */
     public function formatCollection($collection, $strictDraftMode): array
     {
@@ -243,103 +254,149 @@ class PageManager
      * @param       $limit
      * @param array $sort
      *
-     * @return ElasticsearchCollection
+     * @return array|ElasticsearchCollection|Paginator
      */
-    public function getBy(array $criteria = [], $start, $limit, array $sort = []): ElasticsearchCollection
+    public function getBy(array $criteria = [], $start, $limit, array $sort = [])
     {
         $hasDraftOnly = isset($criteria['has_draft_only']) ? (bool) $criteria['has_draft_only'] : false;
+        unset($criteria['has_draft_only']);
 
-        $lang =  $criteria['lang'] ?? null;
+        $lang = $criteria['lang'] ?? null;
         if (null === $lang && isset($criteria['page_uid'])) {
             $page = $this->get($criteria['page_uid']);
-            $lang = $page ? $this->multilangMgr->getLangByPage($page) : null;
+            $lang = $page ? $this->multiLangMgr->getLangByPage($page) : null;
+            unset($criteria['lang']);
         }
 
         $tags = [];
         $rawTags = (isset($criteria['tags']) && !empty($criteria['tags']) ? explode(',', $criteria['tags']) : []);
-        foreach ($rawTags as $tag) {
-            if (null !== $tag = $this->entyMgr->getRepository(KeyWord::class)->exists($tag)) {
-                $tags[] = $tag;
+        if (!empty($rawTags)) {
+            foreach ($rawTags as $tagId) {
+                if (null !== $tag = $this->entityMgr->getRepository(KeyWord::class)->find($tagId)) {
+                    $tags[] = $tag;
+                }
             }
+        } else {
+            unset($criteria['tags']);
         }
 
-        $query = [
-            'query' => [
-                'bool' => [
-                    'must'   => [],
-                    'should' => [],
+        $category = $criteria['category'] ?? null;
+
+        unset($criteria['page_uid'], $criteria['category']);
+
+        if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title']))) {
+            $query = [
+                'query' => [
+                    'bool' => [
+                        'must'   => [],
+                        'should' => [],
+                    ],
                 ],
-            ],
-        ];
-
-        if ($this->multilangMgr->isActive()) {
-            $query['query']['bool']['must_not'] = [['match' => ['url' => '/']]];
-        }
-
-        if (null !== ($criteria['category'] ?? null)) {
-            $query['query']['bool']['must'] = [['match' => ['category' => $criteria['category']]]];
-        }
-
-        if (null !== ($criteria['type'] ?? null)) {
-            $query['query']['bool']['must'] = [['match' => ['type' => $criteria['type']]]];
-        }
-
-        if (null !== ($criteria['is_online'] ?? null) && 'all' !== $criteria['is_online']) {
-            $query['query']['bool']['must'][] = ['match' => ['is_online' => (bool) $criteria['is_online']]];
-        }
-
-        if (!empty($tags)) {
-            $query['query']['bool']['must'][] = array_map(function (KeyWord $tag) {
-                return ['term' => ['tags.raw' => strtolower($tag->getKeyWord())]];
-            }, $tags);
-        }
-
-        if ($lang && $lang !== 'all') {
-            $query['query']['bool']['must'][] = ['prefix' => ['url' => sprintf('/%s/', $lang)]];
-        }
-
-        if (isset($criteria['title'])) {
-            $title = str_replace('%', '', $criteria['title']);
-            $query['query']['bool']['should'] = [
-                ['match' => ['title' => $title]],
-                ['match' => ['title.raw' => $title]],
-                ['match' => ['title.folded' => $title]],
-                ['match_phrase_prefix' => ['title' => $title]],
-                ['match_phrase_prefix' => ['title.raw' => $title]],
-                ['match_phrase_prefix' => ['title.folded' => $title]],
-                ['match_phrase_prefix' => ['tags' => $title]],
             ];
-            $query['query']['bool']['minimum_should_match'] = 1;
-        }
 
-        if ($hasDraftOnly) {
-            $query['query']['bool']['must'][] = ['match' => ['has_draft_contents' => true]];
-        }
-
-        $sortValidAttrNames = [
-            'modified_at',
-            'created_at',
-            'published_at',
-            'type',
-            'is_online',
-            'category',
-        ];
-        $sortValidOrder = ['asc', 'desc'];
-
-        $formattedSort = [];
-        $sort = 0 === count($criteria) && false !== $sort ? $sort : ['modified_at' => 'desc'];
-        foreach ($sort as $attr => $order) {
-            if (!in_array($attr, $sortValidAttrNames, true)) {
-                throw new InvalidArgumentException(sprintf('Pages are not sortable by %s .', $attr));
+            if ($this->multiLangMgr->isActive()) {
+                $query['query']['bool']['must_not'] = [
+                    ['match' => ['url' => '/']],
+                ];
             }
-            if (!in_array($order, $sortValidOrder, true)) {
-                throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
+
+            if ($category) {
+                $query['query']['bool']['must'] = ['match' => ['category' => $category]];
             }
-            $formattedSort[] = $attr . ':' . $order;
+
+            if (null !== ($criteria['type'] ?? null)) {
+                $query['query']['bool']['must'] = [['match' => ['type' => $criteria['type']]]];
+            }
+
+            if (null !== ($criteria['is_online'] ?? null) && 'all' !== $criteria['is_online']) {
+                $query['query']['bool']['must'][] = ['match' => ['is_online' => (bool) $criteria['is_online']]];
+            }
+
+            if (!empty($tags)) {
+                $query['query']['bool']['must'] = array_map(static function (KeyWord $tag) {
+                    return ['term' => ['tags.raw' => strtolower($tag->getKeyWord())]];
+                }, $tags);
+            }
+
+            if ($lang && $lang !== 'all') {
+                $query['query']['bool']['must'][] = ['prefix' => ['url' => sprintf('/%s/', $lang)]];
+            }
+
+            if (isset($criteria['title'])) {
+                $title = str_replace('%', '', $criteria['title']);
+                $query['query']['bool']['should'] = [
+                    ['match' => ['title' => $title]],
+                    ['match' => ['title.raw' => $title]],
+                    ['match' => ['title.folded' => $title]],
+                    ['match_phrase_prefix' => ['title' => $title]],
+                    ['match_phrase_prefix' => ['title.raw' => $title]],
+                    ['match_phrase_prefix' => ['title.folded' => $title]],
+                    ['match_phrase_prefix' => ['tags' => $title]],
+                ];
+                $query['query']['bool']['minimum_should_match'] = 1;
+            }
+
+            if ($hasDraftOnly) {
+                $query['query']['bool']['must'][] = ['match' => ['has_draft_contents' => true]];
+            }
+
+            $sortValidAttrNames = [
+                'modified_at',
+                'created_at',
+                'published_at',
+                'type',
+                'is_online',
+                'category',
+            ];
+            $sortValidOrder = ['asc', 'desc'];
+
+            $formattedSort = [];
+            $sort = 0 === count($criteria) && false !== $sort ? $sort : ['modified_at' => 'desc'];
+            foreach ($sort as $attr => $order) {
+                if (!in_array($attr, $sortValidAttrNames, true)) {
+                    throw new InvalidArgumentException(sprintf('Pages are not sortable by %s .', $attr));
+                }
+                if (!in_array($order, $sortValidOrder, true)) {
+                    throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
+                }
+                $formattedSort[] = $attr . ':' . $order;
+            }
+
+            return $this->elsMgr->customSearchPage($query, $start, $limit, $formattedSort);
         }
 
-        return $this->elsMgr->customSearchPage($query, $start, $limit, $formattedSort);
+        unset($criteria['page_uid']);
+        if (1 === count($criteria) && isset($criteria['title'])) {
+            return $this->elsMgr->searchPage(str_replace('%', '', $criteria['title']), $start, $limit);
+        }
 
+        $qb = $this
+            ->repository
+            ->createQueryBuilder('p')
+            ->orderBy('p._modified', 'desc')
+            ->setFirstResult($start)
+            ->setMaxResults($limit);
+
+        if ($this->multiLangMgr->isActive()) {
+            $qb
+                ->where($qb->expr()->neq('p._url', ':url'))
+                ->setParameter('url', '/');
+        }
+
+        try {
+            foreach ($criteria as $attr => $data) {
+                $method = 'filterBy' . implode('', array_map('ucfirst', explode('_', $attr)));
+                if (method_exists($this, $method)) {
+                    $this->{$method}($qb, $data);
+                } else {
+                    throw new InvalidArgumentException("`$attr` attribute is not filterable");
+                }
+            }
+        } catch (EmptyPageSelectionException $e) {
+            return [];
+        }
+
+        return new Paginator($qb->getQuery(), false);
     }
 
     /**
@@ -348,8 +405,10 @@ class PageManager
      * @param array $data
      *
      * @return Page
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws QueryException
+     * @throws TransactionRequiredException
      * @throws \BackBee\Exception\InvalidArgumentException
      */
     public function create(array $data): Page
@@ -367,9 +426,10 @@ class PageManager
 
         unset($data['is_online'], $data['uid']);
 
-        $this->entyMgr->persist($page);
+        $this->entityMgr->persist($page);
         $data['seo'] = $data['seo'] ?? [];
         $data['type'] = $data['type'] ?? $this->typeMgr->getDefaultType()->uniqueName();
+
         $redirections = $data['redirections'] ?? null;
         unset($data['redirections']);
 
@@ -417,7 +477,7 @@ class PageManager
         }
 
         if (true === $doFlush) {
-            $this->entyMgr->flush();
+            $this->entityMgr->flush();
         }
     }
 
@@ -428,14 +488,14 @@ class PageManager
      *
      * @throws OptimisticLockException
      */
-    public function delete(Page $page)
+    public function delete(Page $page): void
     {
         if ($page->isRoot()) {
             throw new LogicException('Home page cannot be deleted');
         }
 
         $this->repository->deletePage($page);
-        $this->entyMgr->flush();
+        $this->entityMgr->flush();
     }
 
     /**
@@ -446,13 +506,15 @@ class PageManager
      * @param array $data
      *
      * @return Page
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws QueryException
+     * @throws TransactionRequiredException
      * @throws \BackBee\Exception\InvalidArgumentException
      */
-    public function duplicate(Page $page, array $data)
+    public function duplicate(Page $page, array $data): Page
     {
-        $this->entyMgr->beginTransaction();
+        $this->entityMgr->beginTransaction();
 
         $data = $this->prepareDataWithLang($data);
         $data['title'] = $data['title'] ?? '';
@@ -468,7 +530,7 @@ class PageManager
         $copy->setState(Page::STATE_OFFLINE);
         $copy->setPosition($this->count() + 1);
 
-        $this->entyMgr->persist($copy);
+        $this->entityMgr->persist($copy);
         $this->typeMgr->associate($copy, $this->typeMgr->findByPage($page));
 
         $this->update($copy, ['title' => $data['title']], false);
@@ -477,17 +539,17 @@ class PageManager
         $this->currentPage = $copy;
         $this->update($copy, $data, false);
 
-        $this->entyMgr->flush();
+        $this->entityMgr->flush();
 
         $copy->setContentset($this->contentMgr->duplicateContent(
             $page->getContentSet(),
-            $this->bbtoken,
+            $this->bbToken,
             null,
             $putContentOnline
         ));
 
-        $this->entyMgr->flush();
-        $this->entyMgr->commit();
+        $this->entityMgr->flush();
+        $this->entityMgr->commit();
 
         $this->elsMgr->indexPage($copy);
         $this->currentPage = null;
@@ -513,23 +575,29 @@ class PageManager
         ]);
     }
 
+    /**
+     * @param Page $page
+     *
+     * @return array
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TransactionRequiredException
+     */
     public function getPageSeoMetadata(Page $page): array
     {
         $seoData = [];
 
         $metadatabag = $page->getMetaData() ?: [];
         foreach ($metadatabag as $attr => $metadata) {
-            if ($metadata->getAttribute('name') === $attr) {
-                if ($value = $metadata->getAttribute('content')) {
-                    $seoData[$attr] = $value;
-                }
+            if (($metadata->getAttribute('name') === $attr) && $value = $metadata->getAttribute('content')) {
+                $seoData[$attr] = $value;
             }
         }
 
-        $elasticsearchResult = null;
+        $elasticSearchResult = null;
 
         try {
-            $elasticsearchResult = $this->elsMgr->getClient()->get([
+            $elasticSearchResult = $this->elsMgr->getClient()->get([
                 'id'    => $page->getUid(),
                 'type'  => $this->elsMgr->getPageTypeName(),
                 'index' => $this->elsMgr->getIndexName(),
@@ -539,31 +607,31 @@ class PageManager
             return $seoData;
         }
 
-        $elasticsearchResult = $elasticsearchResult['_source'];
+        $elasticSearchResult = $elasticSearchResult['_source'];
         if (!isset($seoData['title'])) {
-            $seoData['title'] = $elasticsearchResult['title'];
+            $seoData['title'] = $elasticSearchResult['title'];
         }
 
         if (
             !isset($seoData['description'])
-            && $elasticsearchResult['abstract_uid']
-            && $abstract = $this->entyMgr->find(ArticleAbstract::class, $elasticsearchResult['abstract_uid'])
+            && $elasticSearchResult['abstract_uid']
+            && $abstract = $this->entityMgr->find(ArticleAbstract::class, $elasticSearchResult['abstract_uid'])
         ) {
             if (strlen($abstract->value) > 300) {
                 $seoData['description'] = mb_substr($abstract->value, 0, 300) . '...';
             } else {
                 $seoData['description'] = $abstract->value;
             }
-            $seoData['description'] = strip_tags(str_replace("\n", '', str_replace("&nbsp;", '', $seoData['description'])));
+            $seoData['description'] = strip_tags(str_replace("\n", '', str_replace('&nbsp;', '', $seoData['description'])));
         }
 
-        if ('article' !== $elasticsearchResult['type']) {
+        if ('article' !== $elasticSearchResult['type']) {
             return $seoData;
         }
 
         if (
-            $elasticsearchResult['image_uid']
-            && $image = $this->entyMgr->find(Image::class, $elasticsearchResult['image_uid'])
+            $elasticSearchResult['image_uid']
+            && $image = $this->entityMgr->find(Image::class, $elasticSearchResult['image_uid'])
         ) {
             $seoData['image_url'] = $image->image->path;
         }
@@ -571,13 +639,17 @@ class PageManager
         return $seoData;
     }
 
-    protected function filterByTitle(QueryBuilder $qb, $value)
+    /**
+     * @param QueryBuilder $qb
+     * @param string       $value
+     */
+    protected function filterByTitle(QueryBuilder $qb, string $value)
     {
-        $operator = false !== strpos($value, '%') ? 'like' : 'eq';
+        //$operator = false !== strpos($value, '%') ? 'like' : 'eq';
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $qb
-            ->{$method}($qb->expr()->{$operator}("{$qb->getRootAlias()}._title", ':title'))
-            ->setParameter('title', $value);
+            ->{$method}($qb->expr()->like("{$qb->getRootAlias()}._title", ':title'))
+            ->setParameter('title', '%'.$value.'%');
     }
 
     /**
@@ -586,7 +658,7 @@ class PageManager
      * @param  QueryBuilder $qb
      * @param  bool         $value
      */
-    protected function filterByIsOnline(QueryBuilder $qb, $value)
+    protected function filterByIsOnline(QueryBuilder $qb, bool $value)
     {
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $qb
@@ -607,9 +679,9 @@ class PageManager
     protected function filterByTags(QueryBuilder $qb, $tags)
     {
         $keywords = [];
-        foreach (explode(',', $tags) as $tag) {
-            if (null === $keyword = $this->entyMgr->getRepository(KeyWord::class)->exists($tag)) {
-                throw new EmptyPageSelectionException();
+        foreach (explode(',', $tags) as $tagId) {
+            if (null === $keyword = $this->entityMgr->getRepository(KeyWord::class)->find($tagId)) {
+                throw new EmptyPageSelectionException('');
             }
 
             $keywords[] = $keyword;
@@ -617,8 +689,8 @@ class PageManager
 
         $pageTags = [];
         foreach ($keywords as $keyword) {
-            $tagQb = $this->entyMgr
-                ->getRepository('BackBeeCloud\Entity\PageTag')
+            $tagQb = $this->entityMgr
+                ->getRepository(PageTag::class)
                 ->createQueryBuilder('pt')
                 ->join('pt.tags', 't')
                 ->where('t._uid = :keyword')
@@ -632,12 +704,12 @@ class PageManager
 
             $pageTags = $tagQb->getQuery()->getResult();
             if (0 === count($pageTags)) {
-                throw new EmptyPageSelectionException();
+                throw new EmptyPageSelectionException('');
             }
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(function (PageTag $pageTag) {
+        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(static function (PageTag $pageTag) {
             return $pageTag->getPage()->getUid();
         }, $pageTags)));
     }
@@ -645,10 +717,8 @@ class PageManager
     /**
      * Adds where clause to query builder to filter page collection by page type.
      *
-     * @param  QueryBuilder $qb
-     * @param  string       $tags
-     * @throws InvalidArgumentException if one of the provided page type unique name is valid
-     * @throws EmptyPageSelectionException if there is no page that match with requested page type
+     * @param QueryBuilder $qb
+     * @param              $types
      */
     protected function filterByType(QueryBuilder $qb, $types)
     {
@@ -661,21 +731,51 @@ class PageManager
             $uniqueNames[] = $type;
         }
 
-        $pageTypes = $this->entyMgr
-            ->getRepository('BackBeeCloud\Entity\PageType')
+        $pageTypes = $this->entityMgr
+            ->getRepository(PageType::class)
             ->createQueryBuilder('pt')
             ->where($qb->expr()->in('pt.typeName',  $uniqueNames))
             ->getQuery()
             ->getResult();
 
         if (0 === count($pageTypes)) {
-            throw new EmptyPageSelectionException();
+            throw new EmptyPageSelectionException('');
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(function (PageType $pageType) {
+        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(static function (PageType $pageType) {
             return $pageType->getPage()->getUid();
         }, $pageTypes)));
+    }
+
+    /**
+     * Adds where clause to query builder to filter page collection by page lang.
+     *
+     * @param QueryBuilder $qb
+     * @param string       $lang
+     */
+    protected function filterByLang(QueryBuilder $qb, string $lang)
+    {
+        $langEntity = $this->entityMgr->getRepository(Lang::class)->findOneBy(['lang' => $lang]);
+
+        if ($langEntity instanceof Lang) {
+            $pageLang = $this->entityMgr
+                ->getRepository(PageLang::class)
+                ->createQueryBuilder('pl')
+                ->where('pl.lang = :langId')
+                ->setParameter('langId', $langEntity)
+                ->getQuery()
+                ->getResult();
+
+            if (0 === count($pageLang)) {
+                throw new EmptyPageSelectionException('');
+            }
+
+            $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
+            $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(static function (PageLang $pageLang) {
+                return $pageLang->getPage()->getUid();
+            }, $pageLang)));
+        }
     }
 
     /**
@@ -733,7 +833,7 @@ class PageManager
      * @param  string $value
      * @throws InvalidArgumentException if the provided value is not a valid datetime string
      */
-    protected function genericRunSetDateTime(Page $page, $method, $value)
+    protected function genericRunSetDateTime(Page $page, $method, $value): void
     {
         $datetime = null;
 
@@ -752,10 +852,10 @@ class PageManager
     }
 
     /**
-     * @param  Page $page  The page to update
-     * @param  bool $value The value to set
-     * @throws InvalidArgumentException if value is not a boolean
-     * @throws LogicException if you try to put the home page offline
+     * @param Page $page  The page to update
+     * @param bool $value The value to set
+     *
+     * @throws Exception
      */
     protected function runSetIsOnline(Page $page, $value)
     {
@@ -805,13 +905,17 @@ class PageManager
     }
 
     /**
-     * @param  Page   $page
-     * @param  array  $data
+     * @param Page  $page
+     * @param array $data
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
     protected function runSetSeo(Page $page, array $data)
     {
         $currentSeo = $this->getPageSeoMetadata($page);
-        if (false != $currentSeo) {
+        if (false !== $currentSeo) {
             if (isset($data['title']) && $data['title'] === $currentSeo['title']) {
                 unset($data['title']);
             }
@@ -821,7 +925,7 @@ class PageManager
             }
         }
 
-        if (false == $data) {
+        if (false === $data) {
             return;
         }
 
@@ -850,8 +954,8 @@ class PageManager
     }
 
     /**
-     * @param  Page   $page
-     * @param  array  $data
+     * @param Page $page
+     * @param      $typeName
      */
     protected function runSetType(Page $page, $typeName)
     {
@@ -861,8 +965,8 @@ class PageManager
         }
 
         $this->typeMgr->associate($page, $type);
-        if ($this->hydratePage && $this->entyMgr->getUnitOfWork()->isScheduledForInsert($page)) {
-            $this->typeMgr->hydratePageContentsByType($type, $page, $this->bbtoken);
+        if ($this->hydratePage && $this->entityMgr->getUnitOfWork()->isScheduledForInsert($page)) {
+            $this->typeMgr->hydratePageContentsByType($type, $page, $this->bbToken);
         }
     }
 
@@ -875,19 +979,27 @@ class PageManager
     protected function runSetLang(Page $page, $value)
     {
         if ($this->currentLang instanceof Lang) {
-            $this->multilangMgr->associate($page, $this->currentLang);
+            $this->multiLangMgr->associate($page, $this->currentLang);
             $this->currentLang = null;
         }
     }
 
+    /**
+     * @param Page $page
+     * @param      $value
+     */
     protected function runSetUrl(Page $page, $value)
     {
         $page->setUrl($value);
     }
 
+    /**
+     * @param Page $page
+     * @param      $value
+     */
     protected function runSetCategory(Page $page, $value)
     {
-        if (false == $value) {
+        if (false === $value) {
             return;
         }
 
@@ -897,18 +1009,20 @@ class PageManager
     /**
      * Create redirection for all URLs in $redirections to provided page's url.
      *
-     * @param  Page  $page
-     * @param  array $redirections
+     * @param Page  $page
+     * @param array $redirections
+     *
+     * @throws OptimisticLockException
      */
     protected function handleRedirections(Page $page, array $redirections = [])
     {
         foreach ($redirections as $redirection) {
             $redirection = '/' . preg_replace('~^/~', '', $redirection);
             $pageRedirection = new PageRedirection($redirection, $page->getUrl());
-            $this->entyMgr->persist($pageRedirection);
+            $this->entityMgr->persist($pageRedirection);
         }
 
-        $this->entyMgr->flush();
+        $this->entityMgr->flush();
     }
 
     /**
@@ -920,14 +1034,14 @@ class PageManager
      */
     public function getPageTag(Page $page)
     {
-        $pageTag = $this->entyMgr->getRepository('BackBeeCloud\Entity\PageTag')->findOneBy([
+        $pageTag = $this->entityMgr->getRepository('BackBeeCloud\Entity\PageTag')->findOneBy([
             'page' => $page,
         ]);
 
         if (null === $pageTag) {
             $pageTag = new PageTag($page);
 
-            $this->entyMgr->persist($pageTag);
+            $this->entityMgr->persist($pageTag);
         }
 
         return $pageTag;
@@ -936,9 +1050,9 @@ class PageManager
     /**
      * @return Layout
      */
-    protected function getLayout()
+    protected function getLayout(): Layout
     {
-        return $this->entyMgr->getRepository('BackBee\Site\Layout')->findOneBy([]);
+        return $this->entityMgr->getRepository('BackBee\Site\Layout')->findOneBy([]);
     }
 
     /**
@@ -950,11 +1064,11 @@ class PageManager
     {
         $root = null;
         if (null !== $this->currentLang) {
-            $root = $this->multilangMgr->getRootByLang($this->currentLang);
+            $root = $this->multiLangMgr->getRootByLang($this->currentLang);
         }
 
         if (null === $root) {
-            $root = $this->entyMgr->getRepository(Page::class)->findOneBy([
+            $root = $this->entityMgr->getRepository(Page::class)->findOneBy([
                 '_url' => '/',
             ]);
         }
@@ -967,11 +1081,19 @@ class PageManager
      *
      * @return Site
      */
-    protected function getSite()
+    protected function getSite(): Site
     {
-        return $this->entyMgr->getRepository('BackBee\Site\Site')->findOneBy([]);
+        return $this->entityMgr->getRepository('BackBee\Site\Site')->findOneBy([]);
     }
 
+    /**
+     * @param array $data
+     *
+     * @return array
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
     protected function prepareDataWithLang(array $data)
     {
         if (isset($data['lang'])) {
@@ -979,19 +1101,19 @@ class PageManager
             unset($data['lang']);
             $data = ['lang' => $lang] + $data;
 
-            $langEntity = $this->entyMgr->find(Lang::class, $lang);
+            $langEntity = $this->entityMgr->find(Lang::class, $lang);
             if (null === $langEntity || !$langEntity->isActive()) {
                 throw new InvalidArgumentException(sprintf(
                     'Lang "%s" does not exist or is not activated',
                     $lang
                 ));
             }
-        } elseif (null !== $defaultlang = $this->multilangMgr->getDefaultLang()) {
+        } elseif (null !== $defaultlang = $this->multiLangMgr->getDefaultLang()) {
             $data['lang'] = $defaultlang['id'];
         }
 
         if (isset($data['lang'])) {
-            $this->currentLang = $this->entyMgr->find(Lang::class, $data['lang']);
+            $this->currentLang = $this->entityMgr->find(Lang::class, $data['lang']);
         }
 
         return $data;

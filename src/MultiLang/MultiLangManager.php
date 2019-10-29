@@ -14,6 +14,10 @@ use BackBeePlanet\RedisManager;
 use BackBee\BBApplication;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use InvalidArgumentException;
+use LogicException;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -26,7 +30,7 @@ class MultiLangManager implements JobHandlerInterface
     protected $app;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     protected $entyMgr;
 
@@ -147,11 +151,11 @@ class MultiLangManager implements JobHandlerInterface
     public function setDefaultLang($id)
     {
         if (null !== $this->getDefaultLang()) {
-            throw new \LogicException('You have already defined a default lang.');
+            throw new LogicException('You have already defined a default lang.');
         }
 
         if (null === $lang = $this->getLang($id)) {
-            throw new \InvalidArgumentException(sprintf('Lang \'%s\' does not exist', $id));
+            throw new InvalidArgumentException(sprintf('Lang \'%s\' does not exist', $id));
         }
 
         (new JobManager())->pushJob(new MultiLangJob($this->getSite()->getLabel(), $id));
@@ -162,13 +166,13 @@ class MultiLangManager implements JobHandlerInterface
     {
         $data = $this->getLang($id);
         if (null === $data) {
-            throw new \InvalidArgumentException(sprintf('Lang "%s" does not exist', $id));
+            throw new InvalidArgumentException(sprintf('Lang "%s" does not exist', $id));
         }
 
         $lang = $this->entyMgr->find(Lang::class, $id);
         if (false === $newIsActive) {
             if ($data['is_default']) {
-                throw new \LogicException(sprintf('You cannot disable the default lang \'%s\'.', $id));
+                throw new LogicException(sprintf('You cannot disable the default lang \'%s\'.', $id));
             }
 
             if (null !== $lang) {
@@ -244,7 +248,7 @@ class MultiLangManager implements JobHandlerInterface
     {
         $pagelang = $this->getAssociation($page);
         if (null !== $pagelang) {
-            throw new \LogicException(sprintf(
+            throw new LogicException(sprintf(
                 'Page #%s is already associated to language "%s"',
                 $page->getUid(),
                 $pagelang->getLang()->getLang()
@@ -252,7 +256,7 @@ class MultiLangManager implements JobHandlerInterface
         }
 
         if (!$lang->isActive()) {
-            throw new \InvalidArgumentException(sprintf('Lang "%s" is not active', $lang->getLang()));
+            throw new InvalidArgumentException(sprintf('Lang "%s" is not active', $lang->getLang()));
         }
 
         $pagelang = new PageLang($page, $lang);
@@ -287,6 +291,8 @@ class MultiLangManager implements JobHandlerInterface
      *
      * @param JobInterface          $job
      * @param SimpleWriterInterface $writer
+     *
+     * @throws OptimisticLockException
      */
     public function handle(JobInterface $job, SimpleWriterInterface $writer)
     {
