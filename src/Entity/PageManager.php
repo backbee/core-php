@@ -645,7 +645,6 @@ class PageManager
      */
     protected function filterByTitle(QueryBuilder $qb, string $value)
     {
-        //$operator = false !== strpos($value, '%') ? 'like' : 'eq';
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $qb
             ->{$method}($qb->expr()->like("{$qb->getRootAlias()}._title", ':title'))
