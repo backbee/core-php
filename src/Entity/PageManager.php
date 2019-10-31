@@ -16,6 +16,7 @@ use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
 use BackBeeCloud\MultiLang\MultiLangManager;
+use BackBeeCloud\PageCategory\PageCategory;
 use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\PageType\TypeManager;
 use DateTime;
@@ -280,9 +281,11 @@ class PageManager
             unset($criteria['tags']);
         }
 
-        $category = $criteria['category'] ?? null;
+        if (null === ($criteria['category'] ?? null)) {
+            unset($criteria['category']);
+        }
 
-        unset($criteria['page_uid'], $criteria['category']);
+        unset($criteria['page_uid']);
 
         if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title']))) {
             $query = [
@@ -300,8 +303,8 @@ class PageManager
                 ];
             }
 
-            if ($category) {
-                $query['query']['bool']['must'] = ['match' => ['category' => $category]];
+            if (null !== ($criteria['category'] ?? null)) {
+                $query['query']['bool']['must'] = ['match' => ['category' => $criteria['category']]];
             }
 
             if (null !== ($criteria['type'] ?? null)) {
@@ -646,8 +649,9 @@ class PageManager
     protected function filterByTitle(QueryBuilder $qb, string $value)
     {
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
+        $rootAlias = current($qb->getRootAliases());
         $qb
-            ->{$method}($qb->expr()->like("{$qb->getRootAlias()}._title", ':title'))
+            ->{$method}($qb->expr()->like("{$rootAlias}._title", ':title'))
             ->setParameter('title', '%'.$value.'%');
     }
 
@@ -660,8 +664,9 @@ class PageManager
     protected function filterByIsOnline(QueryBuilder $qb, bool $value)
     {
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
+        $rootAlias = current($qb->getRootAliases());
         $qb
-            ->{$method}("{$qb->getRootAlias()}._state = :state")
+            ->{$method}("{$rootAlias}._state = :state")
             ->setParameter('state', $value ? Page::STATE_ONLINE : Page::STATE_OFFLINE);
     }
 
@@ -708,7 +713,8 @@ class PageManager
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(static function (PageTag $pageTag) {
+        $rootAlias = current($qb->getRootAliases());
+        $qb->{$method}($qb->expr()->in("{$rootAlias}._uid", array_map(static function (PageTag $pageTag) {
             return $pageTag->getPage()->getUid();
         }, $pageTags)));
     }
@@ -742,7 +748,8 @@ class PageManager
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(static function (PageType $pageType) {
+        $rootAlias = current($qb->getRootAliases());
+        $qb->{$method}($qb->expr()->in("{$rootAlias}._uid", array_map(static function (PageType $pageType) {
             return $pageType->getPage()->getUid();
         }, $pageTypes)));
     }
@@ -771,10 +778,37 @@ class PageManager
             }
 
             $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-            $qb->{$method}($qb->expr()->in("{$qb->getRootAlias()}._uid", array_map(static function (PageLang $pageLang) {
+            $rootAlias = current($qb->getRootAliases());
+            $qb->{$method}($qb->expr()->in("{$rootAlias}._uid", array_map(static function (PageLang $pageLang) {
                 return $pageLang->getPage()->getUid();
             }, $pageLang)));
         }
+    }
+
+    /**
+     * Adds where clause to query builder to filter page collection by page category.
+     *
+     * @param QueryBuilder $qb
+     * @param string       $category
+     */
+    protected function filterByCategory(QueryBuilder $qb, string $category)
+    {
+        $pageCategory = $this->entityMgr->getRepository(PageCategory::class)
+            ->createQueryBuilder('pc')
+            ->where('pc.category = :category')
+            ->setParameter('category', $category)
+            ->getQuery()
+            ->getResult();
+
+        if (0 === count($pageCategory)) {
+            throw new EmptyPageSelectionException('');
+        }
+
+        $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
+        $rootAlias = current($qb->getRootAliases());
+        $qb->{$method}($qb->expr()->in("{$rootAlias}._uid", array_map(static function (PageCategory $pageCategory) {
+            return $pageCategory->getPage()->getUid();
+        }, $pageCategory)));
     }
 
     /**
@@ -881,9 +915,9 @@ class PageManager
      */
     protected function runSetTags(Page $page, $values)
     {
-        $pagetag = $this->getPageTag($page);
+        $pageTag = $this->getPageTag($page);
 
-        $pagetag->resetTags();
+        $pageTag->resetTags();
         foreach ((array) $values as $tagData) {
             $tag = null;
             if (isset($tagData['uid'])) {
@@ -899,7 +933,7 @@ class PageManager
                 $tag = $this->tagMgr->createIfNotExists($tagData['label']);
             }
 
-            $pagetag->addTag($tag);
+            $pageTag->addTag($tag);
         }
     }
 
@@ -1013,7 +1047,7 @@ class PageManager
      *
      * @throws OptimisticLockException
      */
-    protected function handleRedirections(Page $page, array $redirections = [])
+    protected function handleRedirections(Page $page, array $redirections = []): void
     {
         foreach ($redirections as $redirection) {
             $redirection = '/' . preg_replace('~^/~', '', $redirection);
@@ -1031,9 +1065,9 @@ class PageManager
      * @param  Page   $page
      * @return PageTag
      */
-    public function getPageTag(Page $page)
+    public function getPageTag(Page $page): PageTag
     {
-        $pageTag = $this->entityMgr->getRepository('BackBeeCloud\Entity\PageTag')->findOneBy([
+        $pageTag = $this->entityMgr->getRepository(PageTag::class)->findOneBy([
             'page' => $page,
         ]);
 
@@ -1047,11 +1081,12 @@ class PageManager
     }
 
     /**
-     * @return Layout
+     * @return Layout|null
      */
-    protected function getLayout(): Layout
+    protected function getLayout(): ?Layout
     {
-        return $this->entityMgr->getRepository('BackBee\Site\Layout')->findOneBy([]);
+        $entity = $this->entityMgr->getRepository(Layout::class)->findOneBy([]);
+        return $entity instanceof Layout ? $entity : null;
     }
 
     /**
@@ -1059,7 +1094,7 @@ class PageManager
      *
      * @return Page
      */
-    public function getRootPage()
+    public function getRootPage(): Page
     {
         $root = null;
         if (null !== $this->currentLang) {
@@ -1078,11 +1113,12 @@ class PageManager
     /**
      * Returns the current site.
      *
-     * @return Site
+     * @return Site|null
      */
-    protected function getSite(): Site
+    protected function getSite(): ?Site
     {
-        return $this->entityMgr->getRepository('BackBee\Site\Site')->findOneBy([]);
+        $entity = $this->entityMgr->getRepository(Site::class)->findOneBy([]);
+        return $entity instanceof Site ? $entity : null;
     }
 
     /**
@@ -1093,7 +1129,7 @@ class PageManager
      * @throws OptimisticLockException
      * @throws TransactionRequiredException
      */
-    protected function prepareDataWithLang(array $data)
+    protected function prepareDataWithLang(array $data): array
     {
         if (isset($data['lang'])) {
             $lang = $data['lang'];
@@ -1107,8 +1143,8 @@ class PageManager
                     $lang
                 ));
             }
-        } elseif (null !== $defaultlang = $this->multiLangMgr->getDefaultLang()) {
-            $data['lang'] = $defaultlang['id'];
+        } elseif (null !== $defaultLang = $this->multiLangMgr->getDefaultLang()) {
+            $data['lang'] = $defaultLang['id'];
         }
 
         if (isset($data['lang'])) {
