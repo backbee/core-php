@@ -739,7 +739,7 @@ class PageManager
         $pageTypes = $this->entityMgr
             ->getRepository(PageType::class)
             ->createQueryBuilder('pt')
-            ->where($qb->expr()->in('pt.typeName',  $uniqueNames))
+            ->where($qb->expr()->in('pt.typeName', $uniqueNames))
             ->getQuery()
             ->getResult();
 
@@ -793,22 +793,27 @@ class PageManager
      */
     protected function filterByCategory(QueryBuilder $qb, string $category)
     {
-        $pageCategory = $this->entityMgr->getRepository(PageCategory::class)
-            ->createQueryBuilder('pc')
-            ->where('pc.category = :category')
-            ->setParameter('category', $category)
-            ->getQuery()
-            ->getResult();
+        $qbPageCategory = $this->entityMgr->getRepository(PageCategory::class)->createQueryBuilder('pc');
+
+        if ('none' !== $category) {
+            $qbPageCategory->where('pc.category = :category')->setParameter('category', $category);
+        }
+
+        $pageCategory = $qbPageCategory->getQuery()->getResult();
 
         if (0 === count($pageCategory)) {
             throw new EmptyPageSelectionException('');
         }
 
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
+        $exprMethod = 'none' !== $category ? 'in' : 'notIn';
         $rootAlias = current($qb->getRootAliases());
-        $qb->{$method}($qb->expr()->in("{$rootAlias}._uid", array_map(static function (PageCategory $pageCategory) {
-            return $pageCategory->getPage()->getUid();
-        }, $pageCategory)));
+        $qb->{$method}($qb->expr()->{$exprMethod}(
+            "{$rootAlias}._uid",
+            array_map(static function (PageCategory $pageCategory) {
+                return $pageCategory->getPage()->getUid();
+            }, $pageCategory)
+        ));
     }
 
     /**
