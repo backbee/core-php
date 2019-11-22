@@ -696,6 +696,7 @@ class PageManager
             $tagQb = $this->entityMgr
                 ->getRepository(PageTag::class)
                 ->createQueryBuilder('pt')
+                ->join('pt.page', Page::class)
                 ->join('pt.tags', 't')
                 ->where('t._uid = :keyword')
                 ->setParameter('keyword', $keyword);
@@ -739,6 +740,7 @@ class PageManager
         $pageTypes = $this->entityMgr
             ->getRepository(PageType::class)
             ->createQueryBuilder('pt')
+            ->join('pt.page', Page::class)
             ->where($qb->expr()->in('pt.typeName', $uniqueNames))
             ->getQuery()
             ->getResult();
@@ -768,6 +770,7 @@ class PageManager
             $pageLang = $this->entityMgr
                 ->getRepository(PageLang::class)
                 ->createQueryBuilder('pl')
+                ->join('pl.page', Page::class)
                 ->where('pl.lang = :langId')
                 ->setParameter('langId', $langEntity)
                 ->getQuery()
@@ -793,7 +796,11 @@ class PageManager
      */
     protected function filterByCategory(QueryBuilder $qb, string $category)
     {
-        $qbPageCategory = $this->entityMgr->getRepository(PageCategory::class)->createQueryBuilder('pc');
+        $qbPageCategory = $this
+            ->entityMgr
+            ->getRepository(PageCategory::class)
+            ->createQueryBuilder('pc')
+            ->join('pc.page', Page::class);
 
         if ('none' !== $category) {
             $qbPageCategory->where('pc.category = :category')->setParameter('category', $category);
