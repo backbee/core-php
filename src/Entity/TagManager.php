@@ -119,6 +119,7 @@ class TagManager
                         'A tag cannot have one of his children as parent.'
                     );
                 }
+                $parentParent = $parentParent->getParent();
             }
 
             $tag->setParent($parent);
@@ -286,7 +287,7 @@ class TagManager
     private function resetTagParent(Tag $tag)
     {
         $qb = $this->entityManager->createQueryBuilder();
-
+        var_dump('herere');die();
         $qb
             ->update(Tag::class, 't')
             ->set('t._parent', ':null')
@@ -298,6 +299,7 @@ class TagManager
             ->getQuery()
             ->execute()
         ;
+        var_dump($query->getSql($qb)); die();
     }
 
     private function handleTagTranslations(Tag $tag, array $translations)
