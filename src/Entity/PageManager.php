@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Entity;
 
+use BackBee\ClassContent\Revision;
 use BackBee\NestedNode\Repository\PageRepository;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Layout;
@@ -259,9 +260,6 @@ class PageManager
      */
     public function getBy(array $criteria = [], $start, $limit, array $sort = [])
     {
-        $hasDraftOnly = isset($criteria['has_draft_only']) ? (bool) $criteria['has_draft_only'] : false;
-        unset($criteria['has_draft_only']);
-
         $lang = $criteria['lang'] ?? null;
         if (null === $lang && isset($criteria['page_uid'])) {
             $page = $this->get($criteria['page_uid']);
@@ -287,7 +285,7 @@ class PageManager
 
         unset($criteria['page_uid']);
 
-        if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title']))) {
+        if (0 === count($criteria) || (1 === count($criteria) && isset($criteria['title'])) || isset($criteria['has_draft_only'])) {
             $query = [
                 'query' => [
                     'bool' => [
@@ -339,7 +337,7 @@ class PageManager
                 $query['query']['bool']['minimum_should_match'] = 1;
             }
 
-            if ($hasDraftOnly) {
+            if (isset($criteria['has_draft_only']) ? (bool) $criteria['has_draft_only'] : false) {
                 $query['query']['bool']['must'][] = ['match' => ['has_draft_contents' => true]];
             }
 
