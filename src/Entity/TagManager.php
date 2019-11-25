@@ -119,6 +119,7 @@ class TagManager
                         'A tag cannot have one of his children as parent.'
                     );
                 }
+                $parentParent = $parentParent->getParent();
             }
 
             $tag->setParent($parent);
