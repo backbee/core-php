@@ -374,8 +374,8 @@ class PageManager
         $qb = $this
             ->repository
             ->createQueryBuilder('p')
-            ->where('p._state != :state')
-            ->setParameter('state', Page::STATE_DELETED)
+            ->where('p._state != :deleted_state')
+            ->setParameter('deleted_state', Page::STATE_DELETED)
             ->orderBy('p._modified', 'desc')
             ->setFirstResult($start)
             ->setMaxResults($limit);
