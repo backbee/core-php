@@ -374,13 +374,15 @@ class PageManager
         $qb = $this
             ->repository
             ->createQueryBuilder('p')
+            ->where('p._state != :state')
+            ->setParameter('state', Page::STATE_DELETED)
             ->orderBy('p._modified', 'desc')
             ->setFirstResult($start)
             ->setMaxResults($limit);
 
         if ($this->multiLangMgr->isActive()) {
             $qb
-                ->where($qb->expr()->neq('p._url', ':url'))
+                ->andWhere($qb->expr()->neq('p._url', ':url'))
                 ->setParameter('url', '/');
         }
 
