@@ -2,7 +2,6 @@
 
 namespace BackBeeCloud\Entity;
 
-use BackBee\ClassContent\Revision;
 use BackBee\NestedNode\Repository\PageRepository;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Layout;
@@ -177,7 +176,7 @@ class PageManager
         $result = $this->elsMgr->getClient()->get([
             'id'      => $page->getUid(),
             'index'   => $this->elsMgr->getIndexName(),
-            'type'    => $this->elsMgr->getPageTypeName(),
+            //'type'    => $this->elsMgr->getPageTypeName(),
             '_source' => ['has_draft_contents'],
         ]);
 
@@ -221,17 +220,17 @@ class PageManager
      * @param bool  $strictDraftMode
      *
      * @return array
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
      * @see ::format()
-     *
      */
     public function formatCollection($collection, $strictDraftMode): array
     {
         $result = [];
         foreach ($collection as $page) {
-            $result[] = $this->format($page, $strictDraftMode);
+            try {
+                $result[] = $this->format($page, $strictDraftMode);
+            } catch (Exception $exception) {
+                continue;
+            }
         }
 
         return $result;
@@ -433,7 +432,7 @@ class PageManager
         $data['seo'] = $data['seo'] ?? [];
         $data['type'] = $data['type'] ?? $this->typeMgr->getDefaultType()->uniqueName();
 
-        $redirections = $data['redirections'] ?? null;
+        $redirects = $data['redirections'] ?? null;
         unset($data['redirections']);
 
         $this->update($page, ['title' => $data['title'] ?? ''], false);
@@ -444,8 +443,8 @@ class PageManager
         $this->currentPage = $page;
         $this->update($page, $data);
 
-        if (null !== $redirections) {
-            $this->handleRedirections($page, (array) $redirections);
+        if ($redirects !== null) {
+            $this->handleRedirections($page, (array) $redirects);
         }
 
         $this->elsMgr->indexPage($page);
@@ -1005,7 +1004,7 @@ class PageManager
     protected function runSetType(Page $page, $typeName)
     {
         $type = $this->typeMgr->find($typeName);
-        if (null === $type) {
+        if ($type === null) {
             throw new InvalidArgumentException("You selected `{$typeName}` as page type but it does not exist.");
         }
 
@@ -1052,7 +1051,10 @@ class PageManager
     }
 
     /**
-     * Create redirection for all URLs in $redirections to provided page's url.
+     * Create redirection for all URLs in $redirects to provided page's url.
+     *
+     * @param Page  $page
+     * @param array $redirects
      *
      * @param Page  $page
      * @param array $redirections

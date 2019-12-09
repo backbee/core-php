@@ -12,12 +12,16 @@ use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
+use BackBee\Security\Token\BBUserToken;
 use BackBeeCloud\Entity\ContentManager;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
+use BackBeeCloud\PageType\TypeManager;
 use BackBeePlanet\ElasticsearchManager as PlanetElasticsearchManager;
 use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
+use Exception;
+use stdClass;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -26,17 +30,17 @@ use BackBeePlanet\Job\JobInterface;
 class ElasticsearchManager extends PlanetElasticsearchManager implements JobHandlerInterface
 {
     /**
-     * @var \BackBeeCloud\Entity\ContentManager
+     * @var ContentManager
      */
     protected $contentMgr;
 
     /**
-     * @var \BackBeeCloud\PageType\TypeManager
+     * @var TypeManager
      */
     protected $pagetypeMgr;
 
     /**
-     * @var \BackBee\Security\Token\BBUserToken
+     * @var BBUserToken
      */
     protected $bbtoken;
 
@@ -51,9 +55,6 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
 
     /**
      * Deletes the index if it exist and create a new one.
-     *
-     * @param  boolean $replace
-     * @return self
      */
     public function resetIndex()
     {
@@ -91,13 +92,9 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
             ,
         ];
 
-        $pagetag = $this
-            ->entyMgr
-            ->getRepository('BackBeeCloud\Entity\PageTag')
-            ->findOneBy(['page' => $page])
-        ;
-        $tags = null !== $pagetag ? $pagetag->getTags() : [];
-        foreach ($tags as $tag) {
+        $pageTag = $this->entyMgr->getRepository('BackBeeCloud\Entity\PageTag')->findOneBy(['page' => $page]);
+
+        foreach (null !== $pageTag ? $pageTag->getTags() : [] as $tag) {
             $data['tags'][] = strtolower($tag->getKeyWord());
         }
 
@@ -107,8 +104,9 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     /**
      * Removes the provided page from Elasticsearch.
      *
-     * @param  Page   $page
-     * @return self
+     * @param Page $page
+     *
+     * @return ElasticsearchManager
      */
     public function deletePage(Page $page)
     {
@@ -125,12 +123,14 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
      * Searches pages against the provided term and return an ElasticsearchCollection
      * of Page entity.
      *
-     * @param  string                   $term
-     * @param  integer                  $start
-     * @param  integer                  $limit
+     * @param string  $term
+     * @param integer $start
+     * @param integer $limit
+     * @param array   $sort
+     *
      * @return ElasticsearchCollection
      */
-    public function searchPage($term, $start = 0, $limit = 25, array $sort = [])
+    public function searchPage($term, $start = 0, $limit = 25, array $sort = []): ElasticsearchCollection
     {
         return $this->customSearchPage([
             'query' => [
@@ -155,14 +155,21 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     /**
      * Searches pages against the provided body.
      *
-     * @param  array   $body
-     * @param  integer $start
-     * @param  integer $limit
-     * @param  array   $sort
+     * @param array   $body
+     * @param integer $start
+     * @param integer $limit
+     * @param array   $sort
+     * @param bool    $formatResult
+     *
      * @return ElasticsearchCollection
      */
-    public function customSearchPage(array $body, $start = 0, $limit = 25, array $sort = [], $formatResult = true)
-    {
+    public function customSearchPage(
+        array $body,
+        $start = 0,
+        $limit = 25,
+        array $sort = [],
+        $formatResult = true
+    ): ElasticsearchCollection {
         $criteria = [
             'index' => $this->getIndexName(),
             'from'  => (int) $start,
@@ -170,7 +177,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
             'body'  => $body,
         ];
 
-        if (false != $sort) {
+        if (false !== $sort) {
             $criteria['sort'] = $sort;
         }
 
@@ -179,10 +186,10 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         $pages = $result['hits']['hits'];
         if ($formatResult) {
             $uids = array_column($pages, '_id');
-            if (false != $uids) {
+            if (false !== $uids) {
                 $pages = $this->sortEntitiesByUids(
                     $uids,
-                    $this->entyMgr->getRepository(Page::class)->findBy(['_uid' => $uids])
+                    $this->entityMgr->getRepository(Page::class)->findBy(['_uid' => $uids])
                 );
             }
         }
@@ -221,9 +228,9 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     public function searchTag($prefix, $start, $limit)
     {
         $filter = [
-            'match_all' => new \stdClass,
+            'match_all' => new stdClass,
         ];
-        if (false != $prefix && is_string($prefix)) {
+        if (false !== $prefix && is_string($prefix)) {
             $filter = [
                 'prefix' => [
                     'name' => strtolower($prefix),
@@ -250,7 +257,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
                     ],
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             error_log($e->getMessage());
 
             return new ElasticsearchCollection([], 0);
@@ -262,7 +269,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         }
 
         $tags = [];
-        if (false != $uids) {
+        if (false !== $uids) {
             $tags = $this->sortEntitiesByUids(
                 $uids,
                 $this->entyMgr->getRepository(Tag::class)->findBy(['_uid' => $uids])
@@ -275,11 +282,11 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     /**
      * {@inheritdoc}
      */
-    public function handle(JobInterface $job, SimpleWriterInterface $writer)
+    public function handle(JobInterface $job, SimpleWriterInterface $writer): void
     {
         $writer->write('  <c2>> Create index...</c2>');
         $this->createIndex();
-        
+
         $writer->write('  <c2>> Create types...</c2>');
         $this->createTypes();
 
@@ -296,7 +303,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
     /**
      * {@inheritdoc}
      */
-    public function supports(JobInterface $job)
+    public function supports(JobInterface $job): bool
     {
         return $job instanceof ElasticsearchJob;
     }
@@ -310,7 +317,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
      * @param  array  $entities
      * @return array
      */
-    protected function sortEntitiesByUids(array $uids, array $entities)
+    protected function sortEntitiesByUids(array $uids, array $entities):array
     {
         $sorted = [];
         $positions = array_flip($uids);
@@ -323,12 +330,26 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         return array_values($sorted);
     }
 
-    protected function extractTitleFromPage(Page $page)
+    /**
+     * Extract title form page.
+     *
+     * @param Page $page
+     *
+     * @return string
+     */
+    protected function extractTitleFromPage(Page $page): string
     {
         return $page->getTitle();
     }
 
-    protected function extractAbstractUidFromPage(Page $page)
+    /**
+     * Extract abstract uid from page.
+     *
+     * @param Page $page
+     *
+     * @return string
+     */
+    protected function extractAbstractUidFromPage(Page $page): string
     {
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
         $abstract = $this->getRealFirstContentByUid(
@@ -351,7 +372,14 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         return $abstract ? $abstract->getUid() : null;
     }
 
-    protected function extractTextsFromPage(Page $page)
+    /**
+     * Extract texts form page.
+     *
+     * @param Page $page
+     *
+     * @return string
+     */
+    protected function extractTextsFromPage(Page $page): string
     {
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
 
@@ -391,7 +419,14 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         return $this->cleanText(implode(' ', $result));
     }
 
-    protected function extractImageUidFromPage(Page $page)
+    /**
+     * Extract image uid from page.
+     *
+     * @param Page $page
+     *
+     * @return string|null
+     */
+    protected function extractImageUidFromPage(Page $page): ?string
     {
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
         $media = $this->getRealFirstContentByUid(
@@ -407,7 +442,7 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         );
 
         if ($media instanceof Video) {
-            if (false == $media->thumbnail->image->path || AbstractClassContent::STATE_NORMAL !== $media->getState()) {
+            if (false === $media->thumbnail->image->path || AbstractClassContent::STATE_NORMAL !== $media->getState()) {
                 $contentUids = array_filter($contentUids, function ($uid) use ($media) {
                     return $uid !== $media->getUid();
                 });
@@ -423,14 +458,29 @@ class ElasticsearchManager extends PlanetElasticsearchManager implements JobHand
         return $media ? $media->getUid() : null;
     }
 
-    protected function cleanText($text)
+    /**
+     * Clean text.
+     *
+     * @param $text
+     *
+     * @return string
+     */
+    protected function cleanText($text): string
     {
         return trim(preg_replace('#\s\s+#', ' ', preg_replace('#<[^>]+>#', ' ', $text)));
     }
 
+    /**
+     * Get real first content by uid.
+     *
+     * @param array $contents
+     * @param array $orders
+     *
+     * @return mixed|null
+     */
     protected function getRealFirstContentByUid(array $contents, array $orders)
     {
-        if (false == $contents) {
+        if (false === $contents) {
             return null;
         }
 

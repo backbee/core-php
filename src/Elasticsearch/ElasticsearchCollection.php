@@ -4,6 +4,7 @@ namespace BackBeeCloud\Elasticsearch;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class ElasticsearchCollection implements \Iterator
 {
@@ -32,6 +33,14 @@ class ElasticsearchCollection implements \Iterator
      */
     protected $limit;
 
+    /**
+     * ElasticSearchCollection constructor.
+     *
+     * @param array $collection
+     * @param       $countMax
+     * @param int   $start
+     * @param null  $limit
+     */
     public function __construct(array $collection, $countMax, $start = 0, $limit = null)
     {
         $this->collection = $collection;
@@ -45,7 +54,7 @@ class ElasticsearchCollection implements \Iterator
      *
      * @return integer
      */
-    public function count()
+    public function count(): int
     {
         return count($this->collection);
     }
@@ -55,7 +64,7 @@ class ElasticsearchCollection implements \Iterator
      *
      * @return integer
      */
-    public function countMax()
+    public function countMax(): int
     {
         return $this->countMax;
     }
@@ -65,7 +74,7 @@ class ElasticsearchCollection implements \Iterator
      *
      * @return array
      */
-    public function collection()
+    public function collection(): array
     {
         return $this->collection;
     }
@@ -75,7 +84,7 @@ class ElasticsearchCollection implements \Iterator
      *
      * @return integer
      */
-    public function start()
+    public function start(): int
     {
         return $this->start;
     }
@@ -85,7 +94,7 @@ class ElasticsearchCollection implements \Iterator
      *
      * @return integer|null
      */
-    public function limit()
+    public function limit(): ?int
     {
         return $this->limit;
     }
@@ -97,10 +106,7 @@ class ElasticsearchCollection implements \Iterator
      */
     public function currentPagination()
     {
-        return $this->limit && 0 < $this->start
-            ? ($this->start / $this->limit) + 1
-            : 1
-        ;
+        return $this->limit && 0 < $this->start ? ($this->start / $this->limit) + 1 : 1;
     }
 
     /**
@@ -118,7 +124,7 @@ class ElasticsearchCollection implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
     }
@@ -134,7 +140,7 @@ class ElasticsearchCollection implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function key()
+    public function key(): int
     {
         return $this->position;
     }
@@ -142,15 +148,15 @@ class ElasticsearchCollection implements \Iterator
     /**
      * {@inheritdoc}
      */
-    public function next()
+    public function next(): void
     {
-        $this->position = $this->position + 1;
+        ++$this->position;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->collection[$this->position]);
     }
