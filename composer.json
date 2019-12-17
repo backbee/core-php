@@ -28,12 +28,11 @@
             "url": "git@gitlab.lp-lab.com:lpdigital/sitemap-bundle.git"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.6.0",
         "backbee/backbee-php": "^1.3",
         "backbee/cloud-toolbar-bundle": "^3.0",
-        "backbee-planet/common-components": "dev-issue/24849",
+        "backbee-planet/common-components": "v3.5.0-beta",
         "lp-digital/hauth-bundle": "^0.1.0",
         "lp-digital/sitemap-bundle": "^0.3.0",
         "guzzlehttp/guzzle": "^6.0",
