@@ -118,7 +118,6 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     {
         $this->getClient()->delete([
             'index' => $this->getIndexName(),
-            'type'  => $this->getPageTypeName(),
             'id'    => $page->getUid(),
         ]);
 
@@ -213,7 +212,6 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     {
         $this->getClient()->delete([
             'index' => $this->getIndexName(),
-            'type'  => $this->getTagTypeName(),
             'id'    => $tag->getUid(),
         ]);
 
@@ -247,7 +245,6 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         try {
             $result = $this->getClient()->search([
                 'index' => $this->getIndexName(),
-                'type'  => $this->getTagTypeName(),
                 'from'  => (int) $start,
                 'size'  => (int) $limit,
                 'body'  => [
