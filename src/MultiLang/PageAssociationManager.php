@@ -2,14 +2,19 @@
 
 namespace BackBeeCloud\MultiLang;
 
+use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
 use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageAssociation;
 use BackBeeCloud\Entity\PageLang;
-use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBee\NestedNode\Page;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\Expr\Join;
+use InvalidArgumentException;
+use LogicException;
+use RuntimeException;
+use function count;
 
 /**
  * @author Alina Pascalau <alina.pascalau@lp-digital.fr>
@@ -31,6 +36,13 @@ class PageAssociationManager
      */
     protected $elasticsearchMgr;
 
+    /**
+     * PageAssociationManager constructor.
+     *
+     * @param EntityManager        $entyMgr
+     * @param MultiLangManager     $multilangMgr
+     * @param ElasticsearchManager $elasticsearchMgr
+     */
     public function __construct(
         EntityManager $entyMgr,
         MultiLangManager $multilangMgr,
@@ -41,7 +53,13 @@ class PageAssociationManager
         $this->elasticsearchMgr = $elasticsearchMgr;
     }
 
-    public function customSearchPages(Page $page, $term)
+    /**
+     * @param Page $page
+     * @param      $term
+     *
+     * @return ElasticsearchCollection
+     */
+    public function customSearchPages(Page $page, $term): ElasticsearchCollection
     {
         $this->exceptionIfMultilangNotActivated();
 
@@ -62,7 +80,6 @@ class PageAssociationManager
             $esQuery['query']['bool']['should'][] = [ 'match' => ['title.raw' => $matchPart] ];
             $esQuery['query']['bool']['should'][] = [ 'match' => ['title.folded' => $matchPart] ];
             $esQuery['query']['bool']['should'][] = [ 'match_phrase_prefix' => ['title' => $matchPart] ];
-            $esQuery['query']['bool']['should'][] = [ 'match_phrase_prefix' => ['title.raw' => $matchPart] ];
             $esQuery['query']['bool']['should'][] = [ 'match_phrase_prefix' => ['title.folded' => $matchPart] ];
         }
 
@@ -90,7 +107,7 @@ class PageAssociationManager
 
         $pagesToExclude = [];
         $pageLangsToExclude = array_values(array_unique(array_column($pageLangsToExclude, 'page_lang_id')));
-        if (false != $pageLangsToExclude) {
+        if (false !== $pageLangsToExclude) {
             $qb = $this->entyMgr->getRepository(PageAssociation::class)->createQueryBuilder('pa');
             $pagesToExclude = $qb
                 ->select('p._uid as page_uid')
@@ -111,89 +128,95 @@ class PageAssociationManager
     /**
      * Sets associated pages.
      *
-     * @param Page $page - default language page
+     * @param Page $page   - default language page
      * @param Page $target - target page
+     *
+     * @throws OptimisticLockException
      */
-    public function associatePages(Page $page, Page $target)
+    public function associatePages(Page $page, Page $target): void
     {
         $this->exceptionIfMultilangNotActivated();
 
         $sourcePageLang = $this->multilangMgr->getAssociation($page);
         $targetPageLang = $this->multilangMgr->getAssociation($target);
 
-        // Checks if source and target pages have different lang or not
-        if ($sourcePageLang->getLang() === $targetPageLang->getLang()) {
-            throw new \LogicException(sprintf(
-                'Cannot associate page \'%s\' and page \'%s\' because they have same lang (%s).',
-                $page->getUid(),
-                $target->getUid(),
-                $targetPageLang->getLang()->getLang()
-            ));
-        }
-
-        $defaultAssociation = $this->getAssociationByPage($page);
-        $targetAssociation = $this->getAssociationByPage($target);
-        if ($defaultAssociation && $targetAssociation) {
-            $langs = array_keys($this->getAssociatedPages($page));
-            $targetAssociatedPages = $this->getAssociatedPages($target);
-            $targetLangs = array_keys($targetAssociatedPages);
-            if ((count($langs) + count($targetLangs)) !== count(array_unique(array_merge($langs, $targetLangs)))) {
-                throw new \LogicException(sprintf(
-                    'Both pages \'%s\' and \'%s\' are not compatible to be associated',
+        if ($sourcePageLang instanceof PageLang && $targetPageLang instanceof PageLang) {
+            // Checks if source and target pages have different lang or not
+            if ($sourcePageLang->getLang() === $targetPageLang->getLang()) {
+                throw new LogicException(sprintf(
+                    'Cannot associate page \'%s\' and page \'%s\' because they have same lang (%s).',
                     $page->getUid(),
-                    $target->getUid()
+                    $target->getUid(),
+                    $targetPageLang->getLang()->getLang()
                 ));
             }
 
-            $targetAssociatedPages[] = $targetAssociation->getPage();
-            foreach ($targetAssociatedPages as $associatedPage) {
-                $association = $this->getAssociationByPage($associatedPage);
-                $association->updateId($defaultAssociation->getId());
+            $defaultAssociation = $this->getAssociationByPage($page);
+            $targetAssociation = $this->getAssociationByPage($target);
+            if ($defaultAssociation && $targetAssociation) {
+                $langs = array_keys($this->getAssociatedPages($page));
+                $targetAssociatedPages = $this->getAssociatedPages($target);
+                $targetLangs = array_keys($targetAssociatedPages);
+                if ((count($langs) + count($targetLangs)) !== count(array_unique(array_merge($langs, $targetLangs)))) {
+                    throw new LogicException(sprintf(
+                        'Both pages \'%s\' and \'%s\' are not compatible to be associated',
+                        $page->getUid(),
+                        $target->getUid()
+                    ));
+                }
+
+                $targetAssociatedPages[] = $targetAssociation->getPage();
+                foreach ($targetAssociatedPages as $associatedPage) {
+                    $association = $this->getAssociationByPage($associatedPage);
+                    if ($association instanceof PageAssociation) {
+                        $association->updateId($defaultAssociation->getId());
+                    }
+                }
+
+                $this->entyMgr->flush();
+
+                return;
+            }
+
+            // Checks if source page has already an association for target lang
+            $associatedPages = $this->getAssociatedPages($page);
+            $targetLang = $targetPageLang->getLang()->getLang();
+            if (isset($associatedPages[$targetLang])) {
+                throw new InvalidArgumentException(sprintf(
+                    'Page \'%s\' has already an association for lang \'%s\'',
+                    $page->getUid(),
+                    $targetLang
+                ));
+            }
+
+            if (null === $defaultAssociation && $targetAssociation) {
+                $defaultAssociation = new PageAssociation(
+                    $targetAssociation->getId(),
+                    $page
+                );
+                $this->entyMgr->persist($defaultAssociation);
+            } elseif (null === $targetAssociation && $defaultAssociation) {
+                $targetAssociation = new PageAssociation(
+                    $defaultAssociation->getId(),
+                    $target
+                );
+                $this->entyMgr->persist($targetAssociation);
+            } else {
+                $defaultAssociation = new PageAssociation(
+                    $sourcePageLang,
+                    $page
+                );
+                $this->entyMgr->persist($defaultAssociation);
+
+                $targetAssociation = new PageAssociation(
+                    $sourcePageLang,
+                    $target
+                );
+                $this->entyMgr->persist($targetAssociation);
             }
 
             $this->entyMgr->flush();
-
-            return;
         }
-
-        // Checks if source page has already an association for target lang
-        $associatedPages = $this->getAssociatedPages($page);
-        $targetLang = $targetPageLang->getLang()->getLang();
-        if (isset($associatedPages[$targetLang])) {
-            throw new \InvalidArgumentException(sprintf(
-                'Page \'%s\' has already an association for lang \'%s\'',
-                $page->getUid(),
-                $targetLang
-            ));
-        }
-
-        if (null === $defaultAssociation && $targetAssociation) {
-            $defaultAssociation = new PageAssociation(
-                $targetAssociation->getId(),
-                $page
-            );
-            $this->entyMgr->persist($defaultAssociation);
-        } elseif (null === $targetAssociation && $defaultAssociation) {
-            $targetAssociation = new PageAssociation(
-                $defaultAssociation->getId(),
-                $target
-            );
-            $this->entyMgr->persist($targetAssociation);
-        } else {
-            $defaultAssociation = new PageAssociation(
-                $sourcePageLang,
-                $page
-            );
-            $this->entyMgr->persist($defaultAssociation);
-
-            $targetAssociation = new PageAssociation(
-                $sourcePageLang,
-                $target
-            );
-            $this->entyMgr->persist($targetAssociation);
-        }
-
-        $this->entyMgr->flush();
     }
 
     /**
@@ -203,7 +226,7 @@ class PageAssociationManager
      *
      * @return array
      */
-    public function getAssociatedPages(Page $page)
+    public function getAssociatedPages(Page $page): array
     {
         $this->exceptionIfMultilangNotActivated();
 
@@ -234,25 +257,27 @@ class PageAssociationManager
 
     /**
      * @param Page $page
-     * @param string $lg
+     * @param      $lang
      *
      * @return Page|null
      */
-    public function getAssociatedPage(Page $page, $lang)
+    public function getAssociatedPage(Page $page, $lang): ?Page
     {
         $this->exceptionIfMultilangNotActivated();
 
         $associatedPages = $this->getAssociatedPages($page);
 
-        return isset($associatedPages[$lang]) ? $associatedPages[$lang] : null;
+        return $associatedPages[$lang] ?? null;
     }
 
     /**
      * Deletes page association.
      *
      * @param Page $page
+     *
+     * @throws OptimisticLockException
      */
-    public function deleteAssociatedPage(Page $page)
+    public function deleteAssociatedPage(Page $page): void
     {
         $this->exceptionIfMultilangNotActivated();
 
@@ -267,7 +292,9 @@ class PageAssociationManager
                 $newId = $this->multilangMgr->getAssociation($newSourcePage);
                 foreach ($associatedPages as $associatedPage) {
                     $association = $this->getAssociationByPage($associatedPage);
-                    $association->updateId($newId);
+                    if ($association instanceof PageAssociation && $newId instanceof PageLang) {
+                        $association->updateId($newId);
+                    }
                 }
             }
         } elseif (1 === count($associatedPages)) {
@@ -279,13 +306,21 @@ class PageAssociationManager
         $this->entyMgr->flush();
     }
 
-    protected function exceptionIfMultilangNotActivated()
+    /**
+     * Exception if multi lang not activated.
+     */
+    protected function exceptionIfMultilangNotActivated(): void
     {
         if (!$this->multilangMgr->isActive()) {
-            throw new \RuntimeException('You must enable multilang before using page association manager.');
+            throw new RuntimeException('You must enable multilang before using page association manager.');
         }
     }
 
+    /**
+     * @param Page $page
+     *
+     * @return PageAssociation|object|null
+     */
     protected function getAssociationByPage(Page $page)
     {
         return $this->entyMgr->getRepository(PageAssociation::class)->findOneBy([
