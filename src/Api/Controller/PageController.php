@@ -13,8 +13,10 @@ use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
 use BackBee\NestedNode\Page;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -63,9 +65,14 @@ class PageController extends AbstractController
     }
 
     /**
+     * Get.
+     *
      * @param $uid
      *
      * @return JsonResponse|Response
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
     public function get($uid)
     {
@@ -80,11 +87,13 @@ class PageController extends AbstractController
     }
 
     /**
+     * Get collection.
+     *
      * @param int     $start
      * @param int     $limit
      * @param Request $request
      *
-     * @return JsonResponse|null
+     * @return JsonResponse
      */
     public function getCollection(
         $start = 0,
@@ -136,14 +145,16 @@ class PageController extends AbstractController
                 ]
             );
         } catch (Exception $exception) {
-            return new JsonResponse([
-                'error'  => 'bad_request',
-                'reason' => $exception->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error'  => 'bad_request', 'reason' => $exception->getMessage()],
+                Response::HTTP_BAD_REQUEST
+            );
         }
     }
 
     /**
+     * Post.
+     *
      * @param Request $request
      *
      * @return JsonResponse|Response
@@ -177,6 +188,8 @@ class PageController extends AbstractController
     }
 
     /**
+     * Put.
+     *
      * @param         $uid
      * @param Request $request
      *
@@ -206,6 +219,8 @@ class PageController extends AbstractController
     }
 
     /**
+     * Delete.
+     *
      * @param $uid
      *
      * @return JsonResponse|Response
@@ -232,13 +247,17 @@ class PageController extends AbstractController
     }
 
     /**
+     * Duplicate.
+     *
      * @param         $uid
      * @param Request $request
      *
      * @return Response
      * @throws InvalidArgumentException
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws QueryException
+     * @throws TransactionRequiredException
      */
     public function duplicate($uid, Request $request): Response
     {
@@ -264,6 +283,8 @@ class PageController extends AbstractController
     }
 
     /**
+     * Deny access unless granted by page.
+     *
      * @param Page $page
      * @param      $attribute
      */

@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Elasticsearch;
 
+use ArrayObject;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -10,17 +11,17 @@ use Symfony\Component\EventDispatcher\Event;
 class SearchEvent extends Event
 {
     /**
-     * @var \ArrayObject
+     * @var ArrayObject
      */
     protected $queryBody;
 
     /**
-     * @var \ArrayObject
+     * @var ArrayObject
      */
     protected $size;
 
     /**
-     * @var \ArrayObject
+     * @var ArrayObject
      */
     protected $orderBy;
 
@@ -34,13 +35,13 @@ class SearchEvent extends Event
      */
     public function __construct(array $queryBody)
     {
-        $this->queryBody = new \ArrayObject($queryBody);
+        $this->queryBody = new ArrayObject($queryBody);
     }
 
     /**
      * Returns query body.
      *
-     * @return \ArrayObject
+     * @return ArrayObject
      */
     public function getQueryBody()
     {
