@@ -176,7 +176,6 @@ class PageManager
         $result = $this->elsMgr->getClient()->get([
             'id'      => $page->getUid(),
             'index'   => $this->elsMgr->getIndexName(),
-            //'type'    => $this->elsMgr->getPageTypeName(),
             '_source' => ['has_draft_contents'],
         ]);
 
@@ -601,7 +600,6 @@ class PageManager
         try {
             $elasticSearchResult = $this->elsMgr->getClient()->get([
                 'id'    => $page->getUid(),
-                'type'  => $this->elsMgr->getPageTypeName(),
                 'index' => $this->elsMgr->getIndexName(),
                 '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
             ]);

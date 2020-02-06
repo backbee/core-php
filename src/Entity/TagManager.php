@@ -219,8 +219,7 @@ class TagManager
         foreach (array_column($result, 'page_uid') as $pageUid) {
             $item = $this->elasticsearchManager->getClient()->get([
                 'id'    => $pageUid,
-                'index' => $this->elasticsearchManager->getIndexName(),
-                'type'  => $this->elasticsearchManager->getPageTypeName(),
+                'index' => $this->elasticsearchManager->getIndexName()
             ]);
             $pages[] = [
                 'id'    => $item['_id'],
