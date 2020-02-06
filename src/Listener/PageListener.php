@@ -112,7 +112,6 @@ class PageListener
             $elsMgr = $container->get('elasticsearch.manager');
             $count = $elsMgr->getClient()->count([
                 'index' => $elsMgr->getIndexName(),
-                'type'  => $elsMgr->getPageTypeName(),
                 'body'  => [
                     'query' => [
                         'regexp' => [
