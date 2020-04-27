@@ -114,7 +114,6 @@
                 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
               } else {
                  onYouTubeIframeAPIReady();
-                 videoResize();
               }
 
               var player;
@@ -130,6 +129,8 @@
                 var videoStartAt = {{ bg_video_start_at ?: 'false' }};
                 var videoEndAt = {{ bg_video_end_at ?: 'false' }};
 
+                videoResize();
+
                 if (videoStartAt) {
                   playerVars.start = videoStartAt;
                 }
@@ -144,6 +145,7 @@
                   new YT.Player(players[i], {
                     videoId: players[i].dataset.id,
                     events: {
+                      'fitToBackground': true,
                       'onReady': onPlayerReady,
                       'onStateChange': onPlayerStateChange
                     },
@@ -181,23 +183,22 @@
                 }
               }
 
+              $(window).on('load resize', function(){
+                var loop;
+                var callback = function () {
+                  var height = $('.bg-video-wrapper iframe').css('height');
+                  if (height) {
+                    videoResize();
 
-                $(window).on('load resize', function(){
-                  var loop;
-                  var callback = function () {
-                    var height = $('.bg-video-wrapper iframe').css('height');
-                    if (height) {
-                      videoResize();
-
-                      if (loop) {
-                        window.clearInterval(loop);
-                      }
+                    if (loop) {
+                      window.clearInterval(loop);
                     }
-                  };
+                  }
+                };
 
-                  callback();
-                  loop = setInterval(callback, 1000);
-                });
+                callback();
+                loop = setInterval(callback, 100);
+              });
             };
 
             if (window.$) {
