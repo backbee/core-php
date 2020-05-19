@@ -16,6 +16,7 @@ use BackBee\Security\Token\BBUserToken;
 use BackBeeCloud\Entity\ContentManager;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
+use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\PageType\TypeManager;
 use BackBeePlanet\ElasticsearchManager as PlanetElasticSearchManager;
 use BackBeePlanet\Job\ElasticsearchJob;
@@ -46,6 +47,11 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     protected $bbtoken;
 
     /**
+     * @var PageCategoryManager
+     */
+    protected $pageCategoryManager;
+
+    /**
      * ElasticsearchManager constructor.
      *
      * @param BBApplication $app
@@ -56,6 +62,7 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
 
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
         $this->pagetypeMgr = $app->getContainer()->get('cloud.page_type.manager');
+        $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
         $this->bbtoken = $app->getBBUserToken();
     }
 
@@ -96,6 +103,7 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
                 ? $this->contentMgr->isDraftedPage($page, $this->bbtoken)
                 : false
             ,
+            'category' => $this->pageCategoryManager->getCategoryByPage($page),
         ];
 
         $pageTag = $this->entityMgr->getRepository(PageTag::class)->findOneBy(['page' => $page]);
