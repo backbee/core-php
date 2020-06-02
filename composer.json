@@ -34,7 +34,7 @@
         "backbee/cloud-toolbar-bundle": "^3.0",
         "backbee-planet/common-components": "^v3.6.0",
         "lp-digital/hauth-bundle": "^0.1.0",
-        "lp-digital/sitemap-bundle": "^0.3.0",
+        "lp-digital/sitemap-bundle": ">=0.3",
         "guzzlehttp/guzzle": "^6.0",
         "jenssegers/agent": "^2.5.0",
         "google/recaptcha": "^1.1",
