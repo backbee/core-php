@@ -72,6 +72,10 @@ class PageCategoryManager
             return;
         }
 
+        if ('none' === $category) {
+            return;
+        }
+
         $this->assertCategoryExists($category);
 
         if (null === $association) {
