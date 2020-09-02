@@ -9,7 +9,14 @@ use BackBee\ClassContent\Basic\Header;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Basic\Menu;
 use BackBee\ClassContent\Revision;
+use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Site;
+use BackBeeCloud\Entity\ContentManager;
+use BackBeePlanet\Bundle\MultiLang\MultiLangManager;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -19,25 +26,30 @@ class GlobalContentFactory
     use ClassContentHelperTrait;
 
     /**
-     * @var \BackBee\Security\Token\BBUserToken
+     * @var BBUserToken
      */
     protected $bbtoken;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     protected $entyMgr;
 
     /**
-     * @var \BackBeeCloud\Entity\ContentManager
+     * @var ContentManager
      */
     protected $contentMgr;
 
     /**
-     * @var \BackBeePlanet\Bundle\MultiLang\MultiLangManager
+     * @var MultiLangManager
      */
     protected $multilangMgr;
 
+    /**
+     * GlobalContentFactory constructor.
+     *
+     * @param BBApplication $app
+     */
     public function __construct(BBApplication $app)
     {
         $this->bbtoken = $app->getBBUserToken();
@@ -50,8 +62,11 @@ class GlobalContentFactory
      * Returns an unique instance of header menu.
      *
      * @return Menu
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getHeaderMenu()
+    public function getHeaderMenu(): Menu
     {
         return $this->genericContentGetter('header_menu', Menu::class);
     }
@@ -60,8 +75,11 @@ class GlobalContentFactory
      * Returns an unique instance of footer menu.
      *
      * @return Menu
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getFooterMenu()
+    public function getFooterMenu(): Menu
     {
         return $this->genericContentGetter('footer_menu', Menu::class);
     }
@@ -70,8 +88,11 @@ class GlobalContentFactory
      * Returns an unique instance of header logo (classcontent: BackBee\ClassContent\Basic\Image).
      *
      * @return Image
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getHeaderLogo()
+    public function getHeaderLogo(): Image
     {
         return $this->genericContentGetter('header_logo', Image::class);
     }
@@ -80,8 +101,11 @@ class GlobalContentFactory
      * Returns an unique instance of footer logo (classcontent: BackBee\ClassContent\Basic\Image).
      *
      * @return Image
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getFooterLogo()
+    public function getFooterLogo(): Image
     {
         return $this->genericContentGetter('footer_logo', Image::class);
     }
@@ -90,8 +114,11 @@ class GlobalContentFactory
      * Returns an unique instance of header (classcontent: BackBee\ClassContent\Basic\Header).
      *
      * @return Header
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getHeader()
+    public function getHeader(): Header
     {
         return $this->genericContentGetter('header', Header::class);
     }
@@ -100,8 +127,11 @@ class GlobalContentFactory
      * Returns an unique instance of header (classcontent: BackBee\ClassContent\Basic\Footer).
      *
      * @return Footer
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getFooter()
+    public function getFooter(): Footer
     {
         return $this->genericContentGetter('footer', Footer::class);
     }
@@ -109,11 +139,15 @@ class GlobalContentFactory
     /**
      * Returns an unique instance of header content identified by the given name.
      *
-     * @param  string $name
-     * @param  string $type
+     * @param string $name
+     * @param string $type
+     *
      * @return AbstractClassContent
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getHeaderContent($name, $type)
+    public function getHeaderContent(string $name, string $type): AbstractClassContent
     {
         return $this->genericContentGetter('header_' . $name, $this->getClassnameFromType($type));
     }
@@ -121,21 +155,32 @@ class GlobalContentFactory
     /**
      * Returns an unique instance of footer content identified by the given name.
      *
-     * @param  string $name
-     * @param  string $type
+     * @param string $name
+     * @param string $type
+     *
      * @return AbstractClassContent
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
-    public function getFooterContent($name, $type)
+    public function getFooterContent(string $name, string $type): AbstractClassContent
     {
         return $this->genericContentGetter('footer_' . $name, $this->getClassnameFromType($type));
     }
 
-    public function duplicateLogoForLang($lang)
+    /**
+     * @param $lang
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
+    public function duplicateLogoForLang($lang): void
     {
         $copy = $this->contentMgr->duplicateContent(
             $this->getHeaderLogo(),
             null,
-            $this->computeUid('header_logo', $lang),
+            null,
             true
         );
         $this->contentMgr->addGlobalContent($copy);
@@ -149,12 +194,18 @@ class GlobalContentFactory
         $this->contentMgr->addGlobalContent($copy);
     }
 
-    public function duplicateMenuForLang($lang)
+    /**
+     * @param $lang
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
+    public function duplicateMenuForLang($lang): void
     {
         $copy = $this->contentMgr->duplicateContent(
             $this->getHeaderMenu(),
             null,
-            $this->computeUid('header_menu', $lang),
+            null,
             true
         );
         $this->contentMgr->addGlobalContent($copy);
@@ -168,6 +219,15 @@ class GlobalContentFactory
         $this->contentMgr->addGlobalContent($copy);
     }
 
+    /**
+     * @param $type
+     * @param $classname
+     *
+     * @return AbstractClassContent|object|null
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
     protected function genericContentGetter($type, $classname)
     {
         if (null === $content = $this->entyMgr->find($classname, $uid = $this->computeUid($type))) {
@@ -188,10 +248,12 @@ class GlobalContentFactory
     /**
      * Computes an unique identifier with the provided type.
      *
-     * @param  string $type
+     * @param string $type
+     * @param null   $lang
+     *
      * @return string
      */
-    protected function computeUid($type, $lang = null)
+    protected function computeUid(string $type, $lang = null): string
     {
         $lang = $lang ?: $this->multilangMgr->getCurrentLang();
 
@@ -203,7 +265,7 @@ class GlobalContentFactory
      *
      * @return Site
      */
-    protected function getSite()
+    protected function getSite(): Site
     {
         return $this->entyMgr->getRepository(Site::class)->findOneBy([]);
     }
