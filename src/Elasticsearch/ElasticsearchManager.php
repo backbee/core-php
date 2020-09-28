@@ -14,6 +14,7 @@ use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBeeCloud\Entity\ContentManager;
+use BackBeeCloud\Entity\PageTag;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\PageCategory\PageCategoryManager;
@@ -23,7 +24,6 @@ use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
 use Exception;
 use stdClass;
-use BackBeeCloud\Entity\PageTag;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -58,7 +58,7 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      */
     public function __construct(BBApplication $app)
     {
-        parent::__construct($app->getEntityManager());
+        parent::__construct($app);
 
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
         $this->pagetypeMgr = $app->getContainer()->get('cloud.page_type.manager');
@@ -82,23 +82,23 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     /**
      * {@inheritdoc}
      */
-    protected function getPageCustomDataToIndex(Page $page):array
+    protected function getPageCustomDataToIndex(Page $page): array
     {
         $type = $this->pagetypeMgr->findByPage($page);
 
         $data = [
-            'title'              => $this->extractTitleFromPage($page),
-            'abstract_uid'       => $this->extractAbstractUidFromPage($page),
-            'tags'               => [],
-            'url'                => $page->getUrl(),
-            'image_uid'          => $this->extractImageUidFromPage($page),
-            'contents'           => $this->extractTextsFromPage($page),
-            'type'               => $type->uniqueName(),
-            'is_online'          => $page->isOnline(),
-            'is_pullable'        => $type->isPullable(),
-            'created_at'         => $page->getCreated()->format('Y-m-d H:i:s'),
-            'modified_at'        => $page->getModified()->format('Y-m-d H:i:s'),
-            'published_at'       => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,
+            'title' => $this->extractTitleFromPage($page),
+            'abstract_uid' => $this->extractAbstractUidFromPage($page),
+            'tags' => [],
+            'url' => $page->getUrl(),
+            'image_uid' => $this->extractImageUidFromPage($page),
+            'contents' => $this->extractTextsFromPage($page),
+            'type' => $type->uniqueName(),
+            'is_online' => $page->isOnline(),
+            'is_pullable' => $type->isPullable(),
+            'created_at' => $page->getCreated()->format('Y-m-d H:i:s'),
+            'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
+            'published_at' => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,
             'has_draft_contents' => $this->bbtoken
                 ? $this->contentMgr->isDraftedPage($page, $this->bbtoken)
                 : false
@@ -124,10 +124,12 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      */
     public function deletePage(Page $page)
     {
-        $this->getClient()->delete([
-            'index' => $this->getIndexName(),
-            'id'    => $page->getUid(),
-        ]);
+        $this->getClient()->delete(
+            [
+                'index' => $this->getIndexName(),
+                'id' => $page->getUid(),
+            ]
+        );
 
         return $this;
     }
@@ -145,24 +147,29 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      */
     public function searchPage($term, $start = 0, $limit = 25, array $sort = []): ElasticsearchCollection
     {
-        return $this->customSearchPage([
-            'query' => [
-                'bool' => [
-                    'should' => [
-                        [ 'match' => ['title' => ['query' => $term, 'boost' => 2] ] ],
-                        [ 'match' => ['title.raw' => ['query' => $term, 'boost' => 2] ] ],
-                        [ 'match' => ['title.folded' => ['query' => $term, 'boost' => 2] ] ],
-                        [ 'match' => ['tags' => $term] ],
-                        [ 'match' => ['tags.raw' => $term] ],
-                        [ 'match' => ['contents' => $term] ],
-                        [ 'match_phrase_prefix' => ['title' => ['query' => $term, 'boost' => 2] ] ],
-                        [ 'match_phrase_prefix' => ['title.raw' => ['query' => $term, 'boost' => 2] ] ],
-                        [ 'match_phrase_prefix' => ['title.folded' => ['query' => $term, 'boost' => 2] ] ],
-                        [ 'match_phrase_prefix' => ['tags' => $term] ],
+        return $this->customSearchPage(
+            [
+                'query' => [
+                    'bool' => [
+                        'should' => [
+                            ['match' => ['title' => ['query' => $term, 'boost' => 2]]],
+                            ['match' => ['title.raw' => ['query' => $term, 'boost' => 2]]],
+                            ['match' => ['title.folded' => ['query' => $term, 'boost' => 2]]],
+                            ['match' => ['tags' => $term]],
+                            ['match' => ['tags.raw' => $term]],
+                            ['match' => ['contents' => $term]],
+                            ['match_phrase_prefix' => ['title' => ['query' => $term, 'boost' => 2]]],
+                            ['match_phrase_prefix' => ['title.raw' => ['query' => $term, 'boost' => 2]]],
+                            ['match_phrase_prefix' => ['title.folded' => ['query' => $term, 'boost' => 2]]],
+                            ['match_phrase_prefix' => ['tags' => $term]],
+                        ],
                     ],
                 ],
             ],
-        ], $start, $limit, $sort);
+            $start,
+            $limit,
+            $sort
+        );
     }
 
     /**
@@ -185,9 +192,9 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     ): ElasticsearchCollection {
         $criteria = [
             'index' => $this->getIndexName(),
-            'from'  => (int) $start,
-            'size'  => (int) $limit,
-            'body'  => $body,
+            'from' => (int)$start,
+            'size' => (int)$limit,
+            'body' => $body,
         ];
 
         if (false !== $sort) {
@@ -213,15 +220,18 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     /**
      * Delete the provided tag from Elasticsearch's index.
      *
-     * @param  Tag  $tag
+     * @param Tag $tag
+     *
      * @return self
      */
     public function deleteTag(Tag $tag)
     {
-        $this->getClient()->delete([
-            'index' => $this->getIndexName(),
-            'id'    => $tag->getUid(),
-        ]);
+        $this->getClient()->delete(
+            [
+                'index' => $this->getIndexName(),
+                'id' => $tag->getUid(),
+            ]
+        );
 
         return $this;
     }
@@ -232,9 +242,10 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      *
      * Note that tags are ordered by its name (ascending).
      *
-     * @param  string $prefix
-     * @param  integer $start
-     * @param  integer $limit
+     * @param string  $prefix
+     * @param integer $start
+     * @param integer $limit
+     *
      * @return ElasticsearchCollection
      */
     public function searchTag($prefix, $start, $limit)
@@ -251,25 +262,27 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         }
 
         try {
-            $result = $this->getClient()->search([
-                'index' => $this->getIndexName(),
-                'from'  => (int) $start,
-                'size'  => (int) $limit,
-                'body'  => [
-                    'query' => [
-                        'constant_score' => [
-                            'filter' => $filter,
+            $result = $this->getClient()->search(
+                [
+                    'index' => $this->getIndexName(),
+                    'from' => (int)$start,
+                    'size' => (int)$limit,
+                    'body' => [
+                        'query' => [
+                            'constant_score' => [
+                                'filter' => $filter,
+                            ],
+                        ],
+                        'sort' => [
+                            'name' => [
+                                'order' => 'asc',
+                            ],
                         ],
                     ],
-                    'sort' => [
-                        'name' => [
-                            'order' => 'asc',
-                        ],
-                    ],
-                ],
-            ]);
+                ]
+            );
         } catch (Exception $e) {
-            error_log($e->getMessage());
+            $this->bbApp->getLogging()->error(__CLASS__ . ' : ' . __FUNCTION__ . ' : ' . $e->getMessage());
 
             return new ElasticsearchCollection([], 0);
         }
@@ -324,11 +337,12 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      *
      * Note that provided entities collection must have the method ::getUid().
      *
-     * @param  array  $uids
-     * @param  array  $entities
+     * @param array $uids
+     * @param array $entities
+     *
      * @return array
      */
-    protected function sortEntitiesByUids(array $uids, array $entities):array
+    protected function sortEntitiesByUids(array $uids, array $entities): array
     {
         $sorted = [];
         $positions = array_flip($uids);
@@ -364,18 +378,22 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     {
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
         $abstract = $this->getRealFirstContentByUid(
-            $this->entityMgr->getRepository(ArticleAbstract::class)->findBy([
-                '_uid' => $contentUids,
-            ]),
+            $this->entityMgr->getRepository(ArticleAbstract::class)->findBy(
+                [
+                    '_uid' => $contentUids,
+                ]
+            ),
             $contentUids
         );
 
         $abstract = $abstract ?: null;
         if ($abstract === null) {
             $abstract = $this->getRealFirstContentByUid(
-                $this->entityMgr->getRepository(Paragraph::class)->findBy([
-                    '_uid' => $contentUids,
-                ]),
+                $this->entityMgr->getRepository(Paragraph::class)->findBy(
+                    [
+                        '_uid' => $contentUids,
+                    ]
+                ),
                 $contentUids
             );
         }
@@ -395,12 +413,16 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
 
         $titles = array_merge(
-            $this->entityMgr->getRepository(Title::class)->findBy([
-                '_uid' => $contentUids,
-            ]),
-            $this->entityMgr->getRepository(ArticleTitle::class)->findBy([
-                '_uid' => $contentUids,
-            ])
+            $this->entityMgr->getRepository(Title::class)->findBy(
+                [
+                    '_uid' => $contentUids,
+                ]
+            ),
+            $this->entityMgr->getRepository(ArticleTitle::class)->findBy(
+                [
+                    '_uid' => $contentUids,
+                ]
+            )
         );
 
         $result = [];
@@ -409,18 +431,22 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
             $result[] = $title->value;
         }
 
-        $abstracts = $this->entityMgr->getRepository(ArticleAbstract::class)->findBy([
-            '_uid' => $contentUids,
-        ]);
+        $abstracts = $this->entityMgr->getRepository(ArticleAbstract::class)->findBy(
+            [
+                '_uid' => $contentUids,
+            ]
+        );
 
         foreach ($abstracts as $abstract) {
             $abstract->setDraft(null);
             $result[] = $abstract->value;
         }
 
-        $paragraphs = $this->entityMgr->getRepository(Paragraph::class)->findBy([
-            '_uid' => $contentUids,
-        ]);
+        $paragraphs = $this->entityMgr->getRepository(Paragraph::class)->findBy(
+            [
+                '_uid' => $contentUids,
+            ]
+        );
 
         foreach ($paragraphs as $paragraph) {
             $paragraph->setDraft(null);
@@ -442,25 +468,34 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         $contentUids = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
         $media = $this->getRealFirstContentByUid(
             array_merge(
-                $this->entityMgr->getRepository(Image::class)->findBy([
-                    '_uid' => $contentUids,
-                ]),
-                $this->entityMgr->getRepository(Video::class)->findBy([
-                    '_uid' => $contentUids,
-                ])
+                $this->entityMgr->getRepository(Image::class)->findBy(
+                    [
+                        '_uid' => $contentUids,
+                    ]
+                ),
+                $this->entityMgr->getRepository(Video::class)->findBy(
+                    [
+                        '_uid' => $contentUids,
+                    ]
+                )
             ),
             $contentUids
         );
 
         if ($media instanceof Video) {
             if ($media->thumbnail->image->path === false || AbstractClassContent::STATE_NORMAL !== $media->getState()) {
-                $contentUids = array_filter($contentUids, static function ($uid) use ($media) {
-                    return $uid !== $media->getUid();
-                });
+                $contentUids = array_filter(
+                    $contentUids,
+                    static function ($uid) use ($media) {
+                        return $uid !== $media->getUid();
+                    }
+                );
                 $media = $this->getRealFirstContentByUid(
-                    $this->entityMgr->getRepository(Image::class)->findBy([
-                        '_uid' => $contentUids,
-                    ]),
+                    $this->entityMgr->getRepository(Image::class)->findBy(
+                        [
+                            '_uid' => $contentUids,
+                        ]
+                    ),
                     $contentUids
                 );
             }
