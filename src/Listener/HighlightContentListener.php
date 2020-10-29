@@ -6,15 +6,18 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Basic\Image;
-use BackBee\ClassContent\ContentAutoblock;
+use BackBee\ClassContent\CloudContentSet;
 use BackBee\ClassContent\Content\HighlightContent;
+use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\Event\Event;
+use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Security\Token\BBUserToken;
 use Doctrine\ORM\EntityManager;
+
 
 /**
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
@@ -25,7 +28,7 @@ class HighlightContentListener
     /**
      * Called on `rest.controller.classcontentcontroller.getaction.postcall` event.
      *
-     * @param  Event $event
+     * @param Event $event
      */
     public static function onPostCall(Event $event)
     {
@@ -52,7 +55,7 @@ class HighlightContentListener
     /**
      * Called on `content.highlightcontent.render` event.
      *
-     * @param  RendererEvent  $event
+     * @param RendererEvent $event
      */
     public static function onRender(RendererEvent $event)
     {
@@ -77,17 +80,23 @@ class HighlightContentListener
         if (false != $param) {
             $shouldMatch = [];
             foreach ($param as $data) {
-                $shouldMatch[] = [ 'match' => [ '_id' => $data['id'] ] ];
+                $shouldMatch[] = ['match' => ['_id' => $data['id']]];
             }
 
-            $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage([
-               'query' => [
-                   'bool' => [
-                       'should' => $shouldMatch,
-                       'minimum_should_match' => 1,
-                   ],
-               ],
-            ], 0, count($param), [], false);
+            $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
+                [
+                    'query' => [
+                        'bool' => [
+                            'should' => $shouldMatch,
+                            'minimum_should_match' => 1,
+                        ],
+                    ],
+                ],
+                0,
+                count($param),
+                [],
+                false
+            );
 
             $pages = self::sortPagesByUids($param, $pages);
 
@@ -102,7 +111,7 @@ class HighlightContentListener
     public static function sortPagesByUids(array $param, $pages)
     {
         $uids = [];
-        foreach($param as $data) {
+        foreach ($param as $data) {
             $uids[] = $data['id'];
         }
 
@@ -118,8 +127,12 @@ class HighlightContentListener
     }
 
 
-    public static function renderPageFromRawData(array $pageRawData, AbstractClassContent $wrapper, $currentMode, BBApplication $app)
-    {
+    public static function renderPageFromRawData(
+        array $pageRawData,
+        AbstractClassContent $wrapper,
+        $currentMode,
+        BBApplication $app
+    ) {
         if (!($wrapper instanceof HighlightContent) && !($wrapper instanceof ContentAutoblock)) {
             return;
         }
@@ -146,6 +159,7 @@ class HighlightContentListener
         $imageData = [
             'is_video_thumbnail' => false,
         ];
+
         if (false != $mediaUid = $pageRawData['_source']['image_uid']) {
             $image = null;
             $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $entyMgr, $bbtoken);
@@ -158,48 +172,73 @@ class HighlightContentListener
 
             if (null !== $image) {
                 $imageData = [
-                    'uid'    => $image->getUid(),
-                    'url'    => $image->path,
-                    'title'  => $image->getParamValue('title'),
-                    'legend' => $image->getParamValue('description'),
-                    'stat'   => $image->getParamValue('stat'),
-                ] + $imageData;
+                        'uid' => $image->getUid(),
+                        'url' => $image->path,
+                        'title' => $image->getParamValue('title'),
+                        'legend' => $image->getParamValue('description'),
+                        'stat' => $image->getParamValue('stat'),
+                    ] + $imageData;
             }
         }
 
-        return $app->getRenderer()->partial(sprintf('ContentAutoblock/item%s.html.twig', $mode), [
-            'title'                => $pageRawData['_source']['title'],
-            'abstract'             => (string) $abstract,
-            'tags'                 => array_map('ucfirst', $pageRawData['_source']['tags']),
-            'url'                  => $pageRawData['_source']['url'],
-            'is_online'            => $pageRawData['_source']['is_online'],
-            'publishing'           => $pageRawData['_source']['published_at']
-                ? new \DateTime($pageRawData['_source']['published_at'])
-                : null
-            ,
-            'image'                => $imageData,
-            'display_abstract'     => $wrapper->getParamValue('abstract'),
-            'display_published_at' => $wrapper->getParamValue('published_at'),
-            'reduce_title_size'    => !$displayImage && !$wrapper->getParamValue('abstract'),
-            'display_image'        => $displayImage,
-            'title_max_length'     => $wrapper->getParamValue('title_max_length'),
-            'abstract_max_length'  => $wrapper->getParamValue('abstract_max_length'),
-            'autoblock_id'         => $wrapper instanceof ContentAutoblock
-                ? ContentAutoblockListener::getAutoblockId($wrapper)
-                : null
-            ,
-            'wrapper'              => $wrapper,
-        ]);
+        return $app->getRenderer()->partial(
+            sprintf('ContentAutoblock/item%s.html.twig', $mode),
+            [
+                'title' => $pageRawData['_source']['title'],
+                'abstract' => (string)$abstract,
+                'tags' => array_map('ucfirst', $pageRawData['_source']['tags']),
+                'url' => $pageRawData['_source']['url'],
+                'is_online' => $pageRawData['_source']['is_online'],
+                'publishing' => $pageRawData['_source']['published_at']
+                    ? new \DateTime($pageRawData['_source']['published_at'])
+                    : null
+                ,
+                'image' => $imageData,
+                'bgImage' => self::getItemBgImage($pageRawData, $entyMgr),
+                'display_abstract' => $wrapper->getParamValue('abstract'),
+                'display_published_at' => $wrapper->getParamValue('published_at'),
+                'reduce_title_size' => !$displayImage && !$wrapper->getParamValue('abstract'),
+                'display_image' => $displayImage,
+                'title_max_length' => $wrapper->getParamValue('title_max_length'),
+                'abstract_max_length' => $wrapper->getParamValue('abstract_max_length'),
+                'autoblock_id' => $wrapper instanceof ContentAutoblock
+                    ? ContentAutoblockListener::getAutoblockId($wrapper)
+                    : null
+                ,
+                'wrapper' => $wrapper,
+            ]
+        );
     }
 
     protected static function getContentWithDraft($classname, $uid, EntityManager $entyMgr, BBUserToken $bbtoken = null)
     {
         $content = $entyMgr->find($classname, $uid);
         if (null !== $content && null !== $bbtoken) {
-            $draft = $entyMgr->getRepository(Revision::class)->getDraft($content, $bbtoken, false);
+            $draft = $entyMgr->getRepository(Revision::class)->getDraft($content, $bbtoken);
             $content->setDraft($draft);
         }
 
         return $content;
+    }
+
+    public static function getItemBgImage(array $item, EntityManager $em): ?string
+    {
+        $bgImage = null;
+
+        if (null !== $page = $em->getRepository(Page::class)->find($item['_id'])) {
+            foreach ($page->getContentSet()->first() as $cloudContentSet) {
+                if (
+                    $cloudContentSet instanceof CloudContentSet &&
+                    null !== ($params = $cloudContentSet->getAllParams()) &&
+                    (null !== $params['bg_image'] ?? null) &&
+                    !empty($params['bg_image']['value'])
+                ) {
+                    $bgImage = $params['bg_image']['value'];
+                    break;
+                }
+            }
+        }
+
+        return $bgImage;
     }
 }
