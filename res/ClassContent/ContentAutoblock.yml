@@ -1,96 +1,108 @@
 ContentAutoblock:
-  properties:
-    name: yaml_block_page_list_of_pages
-    description: ~
-    category: [block_category_pages]
-    form_height: 500
-  parameters:
-    tags:
-      type: selectTag
-      label:  yaml_block_page_list_of_pages_choose_tags
-      allow_add: false
-      choices: []
-      value: []
-      tab: yaml_block_page_list_of_pages_tags
-    limit:
-      type: text
-      label: yaml_block_page_list_of_pages_number_pages_display
-      value: 10
-      tab: yaml_block_page_list_of_pages_list
-    pagination:
-      type: switch
-      value: false
-      label: yaml_block_page_list_of_pages_use_pagination
-      tab: yaml_block_page_list_of_pages_list
-      group:
-        id: autoblock-pager
-      forbiddenElementsOnSwitchOn: ['start']
-    start:
-      type: text
-      label: yaml_block_page_list_of_pages_ignore_x_first_pages
-      value: 0
-      tab: yaml_block_page_list_of_pages_list
-      group:
-        id: startgroup
-    order_by:
-      type: select
-      label: yaml_block_page_list_of_pages_order_by_label
-      options:
-        published_at: yaml_block_page_list_of_pages_order_by_published_at
-        modified_at: yaml_block_page_list_of_pages_order_by_modified_at
-      value: published_at
-      tab: yaml_block_page_list_of_pages_list
-    format:
-      type: selectButton
-      label: yaml_block_page_list_of_pages_image_text_position
-      buttons:
-        image_text_vertical: {'icon': 'icon-image-left'}
-        text_image_vertical: {'icon': 'icon-image-right'}
-        image_text_horizontal: {'icon': 'icon-image-text'}
-      value: 'image_text_horizontal'
-      tab: yaml_block_page_list_of_pages_style
-      group:
-        id: format
-    align:
-      type: radio
-      options:
-        vertical: 'yaml_block_page_list_of_pages_vertical'
-        horizontal: 'yaml_block_page_list_of_pages_horizontal'
-      value: 'horizontal'
-      horizontal: true
-      tab: yaml_block_page_list_of_pages_style
-      group:
-        id: align
-        title: yaml_block_page_list_of_pages_display_your_list_in
-    abstract:
-      type: switch
-      value: false
-      label: yaml_block_page_list_of_pages_show_abstract
-      tab: yaml_block_page_list_of_pages_style
-      group:
-        id: show-hide
-        title: yaml_block_page_list_of_pages_show_hide_elements
-    published_at:
-      type: switch
-      value: true
-      label: yaml_block_page_list_of_pages_show_publication_date
-      tab: yaml_block_page_list_of_pages_style
-      group:
-        id: show-hide
-    display_image:
-      type: switch
-      value: true
-      label: yaml_block_page_list_of_pages_show_image
-      tab: yaml_block_page_list_of_pages_style
-      group:
-        id: show-hide
-    title_max_length:
-      type: text
-      value: ~
-      label: yaml_block_page_list_of_pages_limit_letter_title
-      tab: yaml_block_page_list_of_pages_characters
-    abstract_max_length:
-      type: text
-      value: ~
-      label: yaml_block_page_list_of_pages_limit_letter_abstract
-      tab: yaml_block_page_list_of_pages_characters
+    properties:
+        name: yaml_block_page_list_of_pages
+        description: ~
+        category: [ block_category_pages ]
+        form_height: 500
+    parameters:
+        tags:
+            type: selectTag
+            label: yaml_block_page_list_of_pages_choose_tags
+            allow_add: false
+            choices: [ ]
+            value: [ ]
+            tab: yaml_block_page_list_of_pages_tags
+        limit:
+            type: text
+            label: yaml_block_page_list_of_pages_number_pages_display
+            value: 10
+            tab: yaml_block_page_list_of_pages_list
+        pagination:
+            type: switch
+            value: false
+            label: yaml_block_page_list_of_pages_use_pagination
+            tab: yaml_block_page_list_of_pages_list
+            group:
+                id: autoblock-pager
+            forbiddenElementsOnSwitchOn: [ 'start' ]
+        start:
+            type: text
+            label: yaml_block_page_list_of_pages_ignore_x_first_pages
+            value: 0
+            tab: yaml_block_page_list_of_pages_list
+            group:
+                id: startgroup
+        order_by:
+            type: select
+            label: yaml_block_page_list_of_pages_order_by_label
+            options:
+                published_at: yaml_block_page_list_of_pages_order_by_published_at
+                modified_at: yaml_block_page_list_of_pages_order_by_modified_at
+            value: published_at
+            tab: yaml_block_page_list_of_pages_list
+            group:
+                id: order_by
+        format:
+            type: selectButton
+            label: yaml_block_page_list_of_pages_image_text_position
+            buttons:
+                image_text_vertical: { 'icon': 'icon-image-left' }
+                text_image_vertical: { 'icon': 'icon-image-right' }
+                image_text_horizontal: { 'icon': 'icon-image-text' }
+            value: 'image_text_horizontal'
+            tab: yaml_block_page_list_of_pages_style
+            group:
+                id: format
+        align:
+            type: radio
+            options:
+                vertical: 'yaml_block_page_list_of_pages_vertical'
+                horizontal: 'yaml_block_page_list_of_pages_horizontal'
+            value: 'horizontal'
+            horizontal: true
+            tab: yaml_block_page_list_of_pages_style
+            group:
+                id: align
+                title: yaml_block_page_list_of_pages_display_your_list_in
+        title_to_be_displayed:
+            type: select
+            label: yaml_block_page_list_of_pages_choose_title_to_be_displayed
+            options:
+                title_of_page: yaml_block_page_list_of_pages_choose_title_of_page_url
+                first_heading: yaml_block_page_list_of_pages_choose_first_heading
+            value: title_of_page
+            tab: yaml_block_page_list_of_pages_style
+            group:
+                id: title_to_be_displayed
+        abstract:
+            type: switch
+            value: false
+            label: yaml_block_page_list_of_pages_show_abstract
+            tab: yaml_block_page_list_of_pages_style
+            group:
+                id: show-hide
+                title: yaml_block_page_list_of_pages_show_hide_elements
+        published_at:
+            type: switch
+            value: true
+            label: yaml_block_page_list_of_pages_show_publication_date
+            tab: yaml_block_page_list_of_pages_style
+            group:
+                id: show-hide
+        display_image:
+            type: switch
+            value: true
+            label: yaml_block_page_list_of_pages_show_image
+            tab: yaml_block_page_list_of_pages_style
+            group:
+                id: show-hide
+        title_max_length:
+            type: text
+            value: ~
+            label: yaml_block_page_list_of_pages_limit_letter_title
+            tab: yaml_block_page_list_of_pages_characters
+        abstract_max_length:
+            type: text
+            value: ~
+            label: yaml_block_page_list_of_pages_limit_letter_abstract
+            tab: yaml_block_page_list_of_pages_characters

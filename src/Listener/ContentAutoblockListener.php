@@ -2,22 +2,31 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\Listener\ClassContent\ContentAutoblockElasticsearchPreQueryEvent;
+use ArrayObject;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Event\Event;
+use BackBee\Exception\BBException;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\Renderer\Event\RendererEvent;
+use BackBeeCloud\Listener\ClassContent\ContentAutoblockElasticsearchPreQueryEvent;
+use BackBeeCloud\Revision\RevisionManager;
+use Exception;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentAutoblockListener
 {
-    const AUTOBLOCK_ID_LENGTH = 7;
-    const MAX_PAGE = 5;
+    public const AUTOBLOCK_ID_LENGTH = 7;
+    public const MAX_PAGE = 5;
 
-    public static function onPostCall(Event $event)
+    /**
+     * On post call.
+     *
+     * @param Event $event
+     */
+    public static function onPostCall(Event $event): void
     {
         $app = $event->getApplication();
         $response = $event->getResponse();
@@ -37,7 +46,7 @@ class ContentAutoblockListener
 
             if (null !== $tag) {
                 $formattedTags[] = [
-                    'uid'   => $tag->getUid(),
+                    'uid' => $tag->getUid(),
                     'label' => $tag->getKeyWord(),
                 ];
             }
@@ -50,20 +59,26 @@ class ContentAutoblockListener
     /**
      * Called on `contentautoblock.render` event.
      *
-     * @param  RendererEvent  $event
+     * @param RendererEvent $event
+     *
+     * @throws FrontControllerException
+     * @throws BBException
+     * @throws Exception
      */
-    public static function onRender(RendererEvent $event)
+    public static function onRender(RendererEvent $event): void
     {
         $app = $event->getApplication();
         $renderer = $event->getRenderer();
         $request = $app->getRequest();
         $block = $event->getTarget();
 
-        $esQuery = new \ArrayObject([
-            'query' => [
-                'bool' => [],
-            ],
-        ]);
+        $esQuery = new ArrayObject(
+            [
+                'query' => [
+                    'bool' => [],
+                ],
+            ]
+        );
 
         // Building must clause
         $mustClauses = [
@@ -80,7 +95,8 @@ class ContentAutoblockListener
         $tagRepository = $app->getEntityManager()->getRepository(Tag::class);
         foreach ($block->getParamValue('tags') as $data) {
             if (is_array($data)) {
-                if (empty($tag = $tagRepository->find($data['uid']))) {;
+                if (empty($tag = $tagRepository->find($data['uid']))) {
+                    ;
                     continue;
                 }
                 $validTags[] = $tag->getKeyWord();
@@ -90,7 +106,7 @@ class ContentAutoblockListener
             }
         }
 
-        if (false != $validTags) {
+        if (false !== $validTags) {
             $criteria['tags'] = implode(',', $validTags);
         }
 
@@ -101,15 +117,15 @@ class ContentAutoblockListener
             ];
         }
 
-        if (false != $shouldClauses) {
+        if (false !== $shouldClauses) {
             $esQuery['query']['bool']['should'] = $shouldClauses;
             $esQuery['query']['bool']['minimum_should_match'] = 1;
         }
 
         // Pagination data process
-        $start = (int) $block->getParamValue('start');
-        $limit = (int) $block->getParamValue('limit');
-        $currentPaginationPage = (int) $request->get('page_' . substr($block->getUid(), 0, 5), 1);
+        $start = (int)$block->getParamValue('start');
+        $limit = (int)$block->getParamValue('limit');
+        $currentPaginationPage = (int)$request->get('page_' . substr($block->getUid(), 0, 5), 1);
         if ($currentPaginationPage <= 0) {
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
         }
@@ -132,7 +148,6 @@ class ContentAutoblockListener
             ];
         }
 
-
         $app->getEventDispatcher()->dispatch(
             ContentAutoblockElasticsearchPreQueryEvent::EVENT_NAME,
             new ContentAutoblockElasticsearchPreQueryEvent($block, $esQuery)
@@ -147,7 +162,7 @@ class ContentAutoblockListener
             false
         );
 
-        if (0 === $pages->count() && $pages->start() >= $pages->countMax() && $currentPaginationPage !== 1) {
+        if ($currentPaginationPage !== 1 && 0 === $pages->count() && $pages->start() >= $pages->countMax()) {
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
         }
 
@@ -170,9 +185,8 @@ class ContentAutoblockListener
             );
         }
 
-        $count = 0;
         $paginationData = [];
-        if ($block->getParamValue('pagination') && false != $pages) {
+        if (false !== $pages && $block->getParamValue('pagination')) {
             $count = $pages->countMax();
             $nbPage = ceil(($count ?: 1) / $limit);
             $startPagination = 1;
@@ -204,9 +218,9 @@ class ContentAutoblockListener
 
             $paginationData = [
                 'start_pagination' => $startPagination,
-                'count'            => $count,
-                'nb_page'          => $nbPage,
-                'current_page'     => $currentPaginationPage,
+                'count' => $count,
+                'nb_page' => $nbPage,
+                'current_page' => $currentPaginationPage,
             ];
         }
 
@@ -214,12 +228,26 @@ class ContentAutoblockListener
         $renderer->assign('pagination_data', $paginationData);
     }
 
+    /**
+     * Get autoblock id.
+     *
+     * @param ContentAutoblock $autoblock
+     *
+     * @return false|string
+     */
     public static function getAutoblockId(ContentAutoblock $autoblock)
     {
         return substr($autoblock->getUid(), 0, self::AUTOBLOCK_ID_LENGTH);
     }
 
-    protected static function getTagAllChildren(Tag $tag = null)
+    /**
+     * Get tag all children.
+     *
+     * @param Tag|null $tag
+     *
+     * @return array
+     */
+    protected static function getTagAllChildren(Tag $tag = null): array
     {
         if (!$tag) {
             return [];

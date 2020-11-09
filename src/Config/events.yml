@@ -152,7 +152,7 @@ contentautoblock.render:
 content.highlightcontent.render:
     listeners:
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\HighlightContentListener, onRender]
+        - ['@cloud.highlightcontent.listener', onRender]
 
 element.image.onflush:
     listeners:
@@ -208,7 +208,7 @@ rest.controller.classcontentcontroller.getaction.postcall:
     listeners:
         - [BackBee\ClassContent\Listener\ClassContentListener, onPostCall]
         # BackBee Cloud listeners
-        - [BackBeeCloud\Listener\HighlightContentListener, onPostCall]
+        - ['@cloud.highlightcontent.listener', onPostCall]
         - [BackBeeCloud\Listener\ContentAutoblockListener, onPostCall]
 
 frontcontroller.request:

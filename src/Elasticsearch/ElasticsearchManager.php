@@ -88,6 +88,7 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
 
         $data = [
             'title' => $this->extractTitleFromPage($page),
+            'first_heading' => $this->getFirstHeadingFromPage($page),
             'abstract_uid' => $this->extractAbstractUidFromPage($page),
             'tags' => [],
             'url' => $page->getUrl(),
@@ -454,6 +455,24 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         }
 
         return $this->cleanText(implode(' ', $result));
+    }
+
+    /**
+     * Get first heading form page.
+     *
+     * @param Page $page
+     *
+     * @return string
+     */
+    protected function getFirstHeadingFromPage(Page $page): string
+    {
+        $contentIds = $this->contentMgr->getUidsFromPage($page, $this->bbtoken);
+        $title = $this->getRealFirstContentByUid(
+            [$this->entityMgr->getRepository(ArticleTitle::class)->findOneBy(['_uid' => $contentIds])],
+            $contentIds
+        );
+
+        return $title ? trim(strip_tags($title->value)) : '';
     }
 
     /**

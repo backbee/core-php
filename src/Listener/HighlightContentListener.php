@@ -15,9 +15,12 @@ use BackBee\ClassContent\Text\Paragraph;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
-use BackBee\Security\Token\BBUserToken;
-use Doctrine\ORM\EntityManager;
-
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
+use Exception;
 
 /**
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
@@ -26,11 +29,33 @@ use Doctrine\ORM\EntityManager;
 class HighlightContentListener
 {
     /**
+     * @var BBApplication
+     */
+    private static $bbApp;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    private static $entityManager;
+
+    /**
+     * HighlightContentListener constructor.
+     *
+     * @param BBApplication          $bbApp
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(BBApplication $bbApp, EntityManagerInterface $entityManager)
+    {
+        self::$bbApp = $bbApp;
+        self::$entityManager = $entityManager;
+    }
+
+    /**
      * Called on `rest.controller.classcontentcontroller.getaction.postcall` event.
      *
      * @param Event $event
      */
-    public static function onPostCall(Event $event)
+    public static function onPostCall(Event $event): void
     {
         $app = $event->getApplication();
         $response = $event->getResponse();
@@ -56,17 +81,16 @@ class HighlightContentListener
      * Called on `content.highlightcontent.render` event.
      *
      * @param RendererEvent $event
+     *
+     * @throws Exception
      */
-    public static function onRender(RendererEvent $event)
+    public static function onRender(RendererEvent $event): void
     {
         $app = $event->getApplication();
         $renderer = $event->getRenderer();
-        $pageMgr = $app->getContainer()->get('cloud.page_manager');
         $block = $event->getTarget();
-
         $page = null;
         $content = null;
-
         $param = $block->getParamValue('content');
         $contents = [];
 
@@ -77,7 +101,7 @@ class HighlightContentListener
             $param[] = ['id' => $id];
         }
 
-        if (false != $param) {
+        if (false !== $param) {
             $shouldMatch = [];
             foreach ($param as $data) {
                 $shouldMatch[] = ['match' => ['_id' => $data['id']]];
@@ -101,14 +125,27 @@ class HighlightContentListener
             $pages = self::sortPagesByUids($param, $pages);
 
             foreach ($pages as $page) {
-                $contents[] = self::renderPageFromRawData($page, $block, $renderer->getMode(), $app);
+                $contents[] = self::renderPageFromRawData(
+                    $page,
+                    $block,
+                    $renderer->getMode(),
+                    $app
+                );
             }
         }
 
         $renderer->assign('contents', $contents);
     }
 
-    public static function sortPagesByUids(array $param, $pages)
+    /**
+     * Sort pages by uids.
+     *
+     * @param array $param
+     * @param       $pages
+     *
+     * @return array
+     */
+    private static function sortPagesByUids(array $param, $pages): array
     {
         $uids = [];
         foreach ($param as $data) {
@@ -126,15 +163,27 @@ class HighlightContentListener
         return array_values($sorted);
     }
 
-
+    /**
+     * Render page form raw data.
+     *
+     * @param array                $pageRawData
+     * @param AbstractClassContent $wrapper
+     * @param                      $currentMode
+     * @param BBApplication        $bbApp
+     *
+     * @return string
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
     public static function renderPageFromRawData(
         array $pageRawData,
         AbstractClassContent $wrapper,
         $currentMode,
-        BBApplication $app
-    ) {
+        BBApplication $bbApp
+    ): ?string {
         if (!($wrapper instanceof HighlightContent) && !($wrapper instanceof ContentAutoblock)) {
-            return;
+            return null;
         }
 
         $mode = '';
@@ -146,11 +195,9 @@ class HighlightContentListener
         }
 
         $abstract = null;
-        $entyMgr = $app->getEntityManager();
-        $bbtoken = $app->getBBUserToken();
-        if (false != $abstractUid = $pageRawData['_source']['abstract_uid']) {
-            $abstract = self::getContentWithDraft(ArticleAbstract::class, $abstractUid, $entyMgr, $bbtoken);
-            $abstract = $abstract ?: self::getContentWithDraft(Paragraph::class, $abstractUid, $entyMgr, $bbtoken);
+        if (null !== $abstractUid = $pageRawData['_source']['abstract_uid'] ?: null) {
+            $abstract = self::getContentWithDraft(ArticleAbstract::class, $abstractUid, $bbApp);
+            $abstract = $abstract ?: self::getContentWithDraft(Paragraph::class, $abstractUid, $bbApp);
             if (null !== $abstract) {
                 $abstract = trim(preg_replace('#\s\s+#', ' ', preg_replace('#<[^>]+>#', ' ', $abstract->value)));
             }
@@ -160,9 +207,9 @@ class HighlightContentListener
             'is_video_thumbnail' => false,
         ];
 
-        if (false != $mediaUid = $pageRawData['_source']['image_uid']) {
+        if (null !== $mediaUid = $pageRawData['_source']['image_uid'] ?: null) {
             $image = null;
-            $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $entyMgr, $bbtoken);
+            $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $bbApp);
             if ($media instanceof Video) {
                 $image = $media->thumbnail->image;
                 $imageData['is_video_thumbnail'] = true;
@@ -181,20 +228,21 @@ class HighlightContentListener
             }
         }
 
-        return $app->getRenderer()->partial(
+        return $bbApp->getRenderer()->partial(
             sprintf('ContentAutoblock/item%s.html.twig', $mode),
             [
-                'title' => $pageRawData['_source']['title'],
+                'title' => $wrapper->getParamValue('title_to_be_displayed') === 'first_heading' ?
+                    $pageRawData['_source']['first_heading'] : $pageRawData['_source']['title'],
                 'abstract' => (string)$abstract,
                 'tags' => array_map('ucfirst', $pageRawData['_source']['tags']),
                 'url' => $pageRawData['_source']['url'],
                 'is_online' => $pageRawData['_source']['is_online'],
                 'publishing' => $pageRawData['_source']['published_at']
-                    ? new \DateTime($pageRawData['_source']['published_at'])
+                    ? new DateTime($pageRawData['_source']['published_at'])
                     : null
                 ,
                 'image' => $imageData,
-                'bgImage' => self::getItemBgImage($pageRawData, $entyMgr),
+                'bg_image' => self::getItemBgImage($pageRawData, $bbApp),
                 'display_abstract' => $wrapper->getParamValue('abstract'),
                 'display_published_at' => $wrapper->getParamValue('published_at'),
                 'reduce_title_size' => !$displayImage && !$wrapper->getParamValue('abstract'),
@@ -210,22 +258,42 @@ class HighlightContentListener
         );
     }
 
-    protected static function getContentWithDraft($classname, $uid, EntityManager $entyMgr, BBUserToken $bbtoken = null)
+    /**
+     * Get content with draft.
+     *
+     * @param                  $classname
+     * @param                  $uid
+     *
+     * @param BBApplication    $bbApp
+     *
+     * @return object|null
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
+    protected static function getContentWithDraft($classname, $uid, BBApplication $bbApp)
     {
-        $content = $entyMgr->find($classname, $uid);
-        if (null !== $content && null !== $bbtoken) {
-            $draft = $entyMgr->getRepository(Revision::class)->getDraft($content, $bbtoken);
+        $content = $bbApp->getEntityManager()->find($classname, $uid);
+
+        if (null !== $content && null !== ($bbToken = $bbApp->getBBUserToken())) {
+            $draft = $bbApp->getEntityManager()->getRepository(Revision::class)->getDraft($content, $bbToken);
             $content->setDraft($draft);
         }
 
         return $content;
     }
 
-    public static function getItemBgImage(array $item, EntityManager $em): ?string
+    /**
+     * Get Background image by page.
+     *
+     * @param array         $item
+     * @param BBApplication $bbApp
+     *
+     * @return string|null
+     */
+    private static function getItemBgImage(array $item, BBApplication $bbApp): ?string
     {
-        $bgImage = null;
-
-        if (null !== $page = $em->getRepository(Page::class)->find($item['_id'])) {
+        if (null !== $page = $bbApp->getEntityManager()->getRepository(Page::class)->find($item['_id'])) {
             foreach ($page->getContentSet()->first() as $cloudContentSet) {
                 if (
                     $cloudContentSet instanceof CloudContentSet &&
@@ -239,6 +307,6 @@ class HighlightContentListener
             }
         }
 
-        return $bgImage;
+        return $bgImage ?? null;
     }
 }
