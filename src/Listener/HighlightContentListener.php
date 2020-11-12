@@ -22,6 +22,7 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 
+
 /**
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  * @author Eric Chau <eric.chau@lp-digital.fr>
