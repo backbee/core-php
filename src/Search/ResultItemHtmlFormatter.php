@@ -52,30 +52,32 @@ class ResultItemHtmlFormatter
             ? new \DateTime($params['published_at'])
             : null;
 
-        if (false != $abstractUid = $pageRawData['_source']['abstract_uid']) {
+        if (false !== $abstractUid = $pageRawData['_source']['abstract_uid']) {
             $abstract = $this->getContentWithDraft(ArticleAbstract::class, $abstractUid);
             if (null === $abstract) {
                 $abstract = $this->getContentWithDraft(Paragraph::class, $abstractUid);
             }
 
             if (null !== $abstract) {
-                $params['abstract'] = trim(preg_replace(
-                    '#\s\s+#',
-                    ' ',
-                    preg_replace('#<[^>]+>#', ' ', $abstract->value)
-                ));
+                $params['abstract'] = trim(
+                    preg_replace(
+                        '#\s\s+#',
+                        ' ',
+                        preg_replace('#<[^>]+>#', ' ', $abstract->value)
+                    )
+                );
             }
         }
 
-        if (false != $imageUid = $pageRawData['_source']['image_uid']) {
+        if (false !== $imageUid = $pageRawData['_source']['image_uid']) {
             $image = $this->getContentWithDraft(Image::class, $imageUid);
             if (null !== $image) {
                 $params['image'] = [
-                    'uid'    => $image->getUid(),
-                    'url'    => $image->image->path,
-                    'title'  => $image->getParamValue('title'),
+                    'uid' => $image->getUid(),
+                    'url' => $image->image->path,
+                    'title' => $image->getParamValue('title'),
                     'legend' => $image->getParamValue('description'),
-                    'stat'   => $image->image->getParamValue('stat'),
+                    'stat' => $image->image->getParamValue('stat'),
                 ];
             }
         }
@@ -86,10 +88,13 @@ class ResultItemHtmlFormatter
             $params['image_uid']
         );
 
-        return $this->renderer->reset()->partial('SearchResult/page_item.html.twig', array_merge(
-            $params,
-            $extraParams
-        ));
+        return $this->renderer->reset()->partial(
+            'SearchResult/page_item.html.twig',
+            array_merge(
+                $params,
+                $extraParams
+            )
+        );
     }
 
     protected function getContentWithDraft($classname, $uid)
@@ -98,8 +103,7 @@ class ResultItemHtmlFormatter
         if (null !== $content && null !== $this->bbtoken) {
             $draft = $this->entyMgr
                 ->getRepository(Revision::class)
-                ->getDraft($content, $this->bbtoken, false)
-            ;
+                ->getDraft($content, $this->bbtoken, false);
             $content->setDraft($draft);
         }
 
