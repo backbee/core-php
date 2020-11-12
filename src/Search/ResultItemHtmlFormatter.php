@@ -52,7 +52,7 @@ class ResultItemHtmlFormatter
             ? new \DateTime($params['published_at'])
             : null;
 
-        if (false !== $abstractUid = $pageRawData['_source']['abstract_uid']) {
+        if (null !== $abstractUid = $pageRawData['_source']['abstract_uid'] ?? null) {
             $abstract = $this->getContentWithDraft(ArticleAbstract::class, $abstractUid);
             if (null === $abstract) {
                 $abstract = $this->getContentWithDraft(Paragraph::class, $abstractUid);
@@ -69,7 +69,7 @@ class ResultItemHtmlFormatter
             }
         }
 
-        if (false !== $imageUid = $pageRawData['_source']['image_uid']) {
+        if (null !== $imageUid = $pageRawData['_source']['image_uid'] ?? null) {
             $image = $this->getContentWithDraft(Image::class, $imageUid);
             if (null !== $image) {
                 $params['image'] = [
