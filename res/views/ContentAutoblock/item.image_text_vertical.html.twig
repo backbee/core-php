@@ -3,10 +3,10 @@
         <div class="col-md-4">
             {% if image.url != false %}
             <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
-                <figure class="figure push-image" style="background-image: url({{this.getCdnImageUrl(image.url)}});">
+                <figure class="figure push-image" style="background-image: url({{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}});">
                     <div class="contentwrapper">
                         {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-                        <img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive image-resize d-none" alt="{{img_alt}}" />
+                        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive image-resize d-none" alt="{{img_alt}}" />
                         {% if image.is_video_thumbnail %}
                             <span class="picto-video"><i></i></span>
                         {% endif %}

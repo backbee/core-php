@@ -41,11 +41,13 @@
         "drewm/mailchimp-api": "^2.4",
         "filp/whoops": "^2.1",
         "symfony/security-csrf": "v2.7.*",
-        "cocur/slugify": "^3.1"
+        "cocur/slugify": "^3.1",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
-            "BackBeeCloud\\": "src/"
+            "BackBeeCloud\\": "src/",
+            "BackBeePlanet\\": "src/"
         }
     }
 }

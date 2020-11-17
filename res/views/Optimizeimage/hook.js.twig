@@ -1,0 +1,16 @@
+<script>
+    document.addEventListener('cloudReady', function () {
+        var cloud = window.cloud;
+        var translations = {
+            'en': {
+            },
+            'fr': {
+            }
+        };
+        for (var lang in translations) {
+            if (translations.hasOwnProperty(lang)) {
+                cloud.translator.addTransKeys(translations[lang], lang);
+            }
+        }
+    });
+</script>

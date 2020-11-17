@@ -514,3 +514,12 @@ services:
         arguments:
             - "@multilang_manager"
             - "@em"
+
+    # Optimize image
+    app.optimize_image.manager:
+        class: BackBeePlanet\OptimizeImage\OptimizeImageManager
+        arguments: [ '@bbapp' ]
+
+    app.optimize_image.listener:
+        class: BackBeePlanet\Listener\OptimizeImageListener
+        arguments: [ '@app.optimize_image.manager' ]
