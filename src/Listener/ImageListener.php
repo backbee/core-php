@@ -2,14 +2,12 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
-use BackBeeCloud\ImageHandlerInterface;
-use BackBeeCloud\UserAgentHelper;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Event\Event;
 use BackBee\Renderer\Event\RendererEvent;
+use BackBeeCloud\ImageHandlerInterface;
 use Cocur\Slugify\Slugify;
 
 /**
@@ -17,8 +15,16 @@ use Cocur\Slugify\Slugify;
  */
 class ImageListener
 {
+    /**
+     * @var ImageHandlerInterface
+     */
     protected $imgHandler;
 
+    /**
+     * ImageListener constructor.
+     *
+     * @param ImageHandlerInterface $imgHandler
+     */
     public function __construct(ImageHandlerInterface $imgHandler)
     {
         $this->imgHandler = $imgHandler;
@@ -28,9 +34,9 @@ class ImageListener
      * Occurs on 'rest.controller.resourcecontroller.uploadaction.postcall'. This
      * listener send the image to AWS S3 bucket.
      *
-     * @param  PostResponseEvent $event
+     * @param PostResponseEvent $event
      */
-    public function onUploadPostCall(PostResponseEvent $event)
+    public function onUploadPostCall(PostResponseEvent $event): void
     {
         $response = $event->getResponse();
 
@@ -46,7 +52,7 @@ class ImageListener
         );
 
         $data['path'] = $this->imgHandler->upload($filename, $data['path']);
-        $data['url'] = $event->getApplication()->getRenderer()->getCdnImageUrl($data['path']);
+        $data['url'] = $data['path'];
 
         $response->setContent(json_encode($data));
     }
@@ -55,20 +61,16 @@ class ImageListener
      * Occurs on 'element.image.onflush'. If a new image is uploaded, this listener
      * will remove the old image from AWS S3 bucket.
      *
-     * @param  Event  $event
+     * @param Event $event
      */
-    public function onImageFlush(Event $event)
+    public function onImageFlush(Event $event): void
     {
-        $entyMgr = $event->getApplication()->getEntityManager();
-        $uow = $entyMgr->getUnitOfWork();
-        $entity = $event->getTarget();
-        if ($uow->isScheduledForInsert($entity)) {
-            return;
-        }
+        $entityMgr = $event->getApplication()->getEntityManager();
+        $uow = $entityMgr->getUnitOfWork();
 
-        if ($uow->isScheduledForDelete($entity)) {
-            $paths = [$entity->path];
-            foreach ($entyMgr->getRepository(Revision::class)->getRevisions($entity) as $revision) {
+        if ($uow->isScheduledForDelete($event->getTarget())) {
+            $paths = [$event->getTarget()->path];
+            foreach ($entityMgr->getRepository(Revision::class)->getRevisions($event->getTarget()) as $revision) {
                 $paths[] = $revision->path;
             }
 
@@ -79,19 +81,16 @@ class ImageListener
             return;
         }
 
-        $changeset = $uow->getEntityChangeSet($entity);
-        if (!isset($changeset['_data'])) {
-            return;
-        }
+        $changeSet = $uow->getEntityChangeSet($event->getTarget());
+        $oldData = $changeSet['_data'][0];
+        $newData = $changeSet['_data'][1];
 
-        $oldData = $changeset['_data'][0];
-        $newData = $changeset['_data'][1];
-
-        if ($oldData['path'] === $newData['path']) {
-            return;
-        }
-
-        if (false !== strpos($oldData['path'][0]['scalar'], 'theme-default-resources')) {
+        if (
+            !isset($changeSet['_data']) ||
+            $oldData['path'] === $newData['path'] ||
+            false !== strpos($oldData['path'][0]['scalar'], 'theme-default-resources') ||
+            $uow->isScheduledForInsert($event->getTarget())
+        ) {
             return;
         }
 
@@ -99,42 +98,11 @@ class ImageListener
     }
 
     /**
-     * @todo to remove if it's not necessary anymore, not used at moment.
+     * On cloud content set render.
+     *
+     * @param RendererEvent $event
      */
-    public function onImageRevisionFlush(Event $event)
-    {
-        $revision = $event->getTarget();
-        $entyMgr = $event->getApplication()->getEntityManager();
-        if ($entyMgr->getUnitOfWork()->isScheduledForDelete($revision)) {
-            return;
-        }
-
-        if (!($revision->getContent() instanceof Image)) {
-            return;
-        }
-
-        $reload = false;
-        $isStretch = $revision->getParamValue('stretch');
-        if ($isStretch != $revision->getParamValue('stretch_state')) {
-            $reload = true;
-        }
-
-        if ($reload) {
-            $revision->setParam('width', '0');
-
-            $revision->setParam('focus', [
-                'left' => 50,
-                'top' => 50,
-            ]);
-
-            $entyMgr->getUnitOfWork()->recomputeSingleEntityChangeSet(
-                $entyMgr->getClassMetadata(Revision::class),
-                $revision
-            );
-        }
-    }
-
-    public function onCloudContentSetRender(RendererEvent $event)
+    public function onCloudContentSetRender(RendererEvent $event): void
     {
         $block = $event->getTarget();
         if (false !== strpos($block->getParamValue('bg_image'), 'theme-default-resources')) {
