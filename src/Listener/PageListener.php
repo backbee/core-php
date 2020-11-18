@@ -2,15 +2,6 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\Entity\Lang;
-use BackBeeCloud\Entity\PageLang;
-use BackBeeCloud\Entity\PageRedirection;
-use BackBeeCloud\Entity\PageTag;
-use BackBeeCloud\Entity\PageType;
-use BackBeeCloud\PageType\ArticleType;
-use BackBeeCloud\PageType\HomeType;
-use BackBeeCloud\PageType\SearchResultType;
-use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\Basic\Menu;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Revision;
@@ -20,6 +11,15 @@ use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Site\Site;
+use BackBeeCloud\Entity\Lang;
+use BackBeeCloud\Entity\PageLang;
+use BackBeeCloud\Entity\PageRedirection;
+use BackBeeCloud\Entity\PageTag;
+use BackBeeCloud\Entity\PageType;
+use BackBeeCloud\PageType\ArticleType;
+use BackBeeCloud\PageType\HomeType;
+use BackBeeCloud\PageType\SearchResultType;
+use BackBeePlanet\GlobalSettings;
 use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,7 +44,7 @@ class PageListener
      * Listens to "bbapplication.init" to ensures that home page is associated to
      * "home" page type. It runs its process only if the application is not restored.
      *
-     * @param  Event  $event
+     * @param Event $event
      */
     public static function onApplicationInit(Event $event)
     {
@@ -110,18 +110,20 @@ class PageListener
 
         if (1 === preg_match('~/search$~', $page->getUrl())) {
             $elsMgr = $container->get('elasticsearch.manager');
-            $count = $elsMgr->getClient()->count([
-                'index' => $elsMgr->getIndexName(),
-                'body'  => [
-                    'query' => [
-                        'regexp' => [
-                            'url' => [
-                                'value' => $page->getUrl() . '\-[0-9]+',
+            $count = $elsMgr->getClient()->count(
+                [
+                    'index' => $elsMgr->getIndexName(),
+                    'body' => [
+                        'query' => [
+                            'regexp' => [
+                                'url' => [
+                                    'value' => $page->getUrl() . '\-[0-9]+',
+                                ],
                             ],
                         ],
                     ],
-                ],
-            ])['count'];
+                ]
+            )['count'];
 
             $url = $page->getUrl() . '-' . ++$count;
             while ($url !== $container->get('rewriting.urlgenerator')->getUniqueness($page, $url)) {
@@ -157,8 +159,7 @@ class PageListener
                 ->where('pr.toRedirect = :to_redirect')
                 ->setParameter('to_redirect', $page->getUrl())
                 ->getQuery()
-                ->getResult()
-            ;
+                ->getResult();
 
             return;
         }
@@ -200,7 +201,7 @@ class PageListener
      * Occurs on "nestednode.page.postremove" to delete associated PageType, PageTag
      * and PageLang.
      *
-     * @param  Event $event
+     * @param Event $event
      */
     public static function onPostRemove(Event $event)
     {
@@ -231,7 +232,7 @@ class PageListener
      *     - rest.controller.classcontentcontroller.putaction.precall
      *     - backbeecloud.api.controller.contentcontroller.delete.precall
      *
-     * @param  Event  $event
+     * @param Event $event
      */
     public static function onRestContentUpdatePostcall(Event $event)
     {
@@ -262,8 +263,7 @@ class PageListener
                 ->orWhere('pr.target = :target')
                 ->setParameter('target', $url)
                 ->getQuery()
-                ->getResult()
-            ;
+                ->getResult();
         }
 
         self::$toDelete = [];
@@ -275,8 +275,7 @@ class PageListener
                 ->where('pr.target = :old_target')
                 ->setParameter('old_target', $currUrl)
                 ->getQuery()
-                ->getResult()
-            ;
+                ->getResult();
 
             $pageRedirection = new PageRedirection($currUrl, $newUrl);
             $entyMgr->persist($pageRedirection);
@@ -289,7 +288,7 @@ class PageListener
     /**
      * Occurs on `nestednode.page.render` to set the right layout name to use.
      *
-     * @param  RendererEvent $event
+     * @param RendererEvent $event
      */
     public static function onPageRender(RendererEvent $event)
     {
@@ -306,14 +305,14 @@ class PageListener
 
         $userPreferenceManager = $app->getContainer()->get('user_preference.manager');
         if ($gaData = $userPreferenceManager->dataOf('google-analytics')) {
-            $code = isset($gaData['code']) ? (string) $gaData['code'] : '';
+            $code = isset($gaData['code']) ? (string)$gaData['code'] : '';
             if (1 === preg_match('#^UA\-[0-9]+\-[0-9]+$#', $code)) {
                 $renderer->assign('google_analytics_code', $code);
             }
         }
 
         if ($faData = $userPreferenceManager->dataOf('facebook-analytics')) {
-            $code = isset($faData['code']) ? (string) $faData['code'] : '';
+            $code = isset($faData['code']) ? (string)$faData['code'] : '';
             if (1 === preg_match('#^[0-9]{15}$#', $code)) {
                 $renderer->assign('facebook_analytics_code', $code);
             }
@@ -353,7 +352,7 @@ class PageListener
     /**
      * Called on "nestednode.page.postrender" event.
      *
-     * @param  RendererEvent $event
+     * @param RendererEvent $event
      */
     public static function onPostRender(RendererEvent $event)
     {
@@ -362,18 +361,21 @@ class PageListener
         }
 
         $renderer = $event->getRenderer();
-        $renderer->setRender(str_replace(
-            '</body>',
-            $renderer->partial('common/hook_form.js.twig') . '</body>',
-            $renderer->getRender()
-        ));
+        $renderer->setRender(
+            str_replace(
+                '</body>',
+                $renderer->partial('common/hook_form.js.twig') .
+                $renderer->partial('Optimizeimage/hook.js.twig') .'</body>',
+                $renderer->getRender()
+            )
+        );
     }
 
     /**
      * Occurs on `rest.controller.pagecontroller.deleteaction.postcall` to hard
      * delete the page.
      *
-     * @param  Event  $event
+     * @param Event $event
      */
     public static function onPageDeletePostcall(Event $event)
     {
@@ -418,15 +420,22 @@ class PageListener
 
         $app = $event->getKernel()->getApplication();
         $entyMgr = $app->getEntityManager();
-        $pageRedirection = $entyMgr->getRepository(PageRedirection::class)->findOneBy([
-            'toRedirect' => $app->getRequest()->getPathInfo(),
-        ]);
+        $pageRedirection = $entyMgr->getRepository(PageRedirection::class)->findOneBy(
+            [
+                'toRedirect' => $app->getRequest()->getPathInfo(),
+            ]
+        );
         if ($pageRedirection) {
-            $event->setResponse(new RedirectResponse(str_replace(
-                $app->getRequest()->getPathInfo(),
-                $pageRedirection->target(),
-                $app->getRequest()->getRequestUri()
-            )), Response::HTTP_MOVED_PERMANENTLY);
+            $event->setResponse(
+                new RedirectResponse(
+                    str_replace(
+                        $app->getRequest()->getPathInfo(),
+                        $pageRedirection->target(),
+                        $app->getRequest()->getRequestUri()
+                    )
+                ),
+                Response::HTTP_MOVED_PERMANENTLY
+            );
         }
     }
 
@@ -436,9 +445,11 @@ class PageListener
         $request = $event->getTarget();
 
         $uri = '/' . $request->attributes->get('uri');
-        $page = $app->getEntityManager()->getRepository(Page::class)->findOneBy([
-            '_url' => $uri,
-        ]);
+        $page = $app->getEntityManager()->getRepository(Page::class)->findOneBy(
+            [
+                '_url' => $uri,
+            ]
+        );
 
         if (null === $page) {
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
@@ -449,9 +460,11 @@ class PageListener
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
         }
 
-        $autoblocks = $app->getEntityManager()->getRepository(ContentAutoblock::class)->findBy([
-            '_uid' => $app->getContainer()->get('cloud.content_manager')->getUidsFromPage($page),
-        ]);
+        $autoblocks = $app->getEntityManager()->getRepository(ContentAutoblock::class)->findBy(
+            [
+                '_uid' => $app->getContainer()->get('cloud.content_manager')->getUidsFromPage($page),
+            ]
+        );
         if (false == $autoblocks) {
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
         }
@@ -460,8 +473,9 @@ class PageListener
     /**
      * Removes the provided page from menu's items.
      *
-     * @param  Menu   $menu
-     * @param  Page   $pageToRemove
+     * @param Menu $menu
+     * @param Page $pageToRemove
+     *
      * @return
      */
     protected static function cleanMenu(Menu $menu, Page $pageToRemove)
