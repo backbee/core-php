@@ -97,6 +97,20 @@ class StructureBuilder
             );
         }
 
+        if (isset($schema['logos_header']) && is_array($schema['logos_header'])) {
+            foreach ($schema['logos_header'] as $attr => $data) {
+                $content = $this->globalContentFactory->getHeaderLogos($attr);
+                $this->contentBuilder->hydrateContent($content, $data['path']);
+            }
+        }
+
+        if (isset($schema['logos_footer']) && is_array($schema['logos_footer'])) {
+            foreach ($schema['logos_footer'] as $attr => $data) {
+                $content = $this->globalContentFactory->getFooterLogos($attr);
+                $this->contentBuilder->hydrateContent($content, $data['path']);
+            }
+        }
+
         if (isset($schema['header']) && is_array($schema['header'])) {
             foreach ($schema['header'] as $attr => $data) {
                 $content = $this->globalContentFactory->getHeaderContent($attr, $data['type']);
