@@ -111,6 +111,36 @@ class GlobalContentFactory
     }
 
     /**
+     * Returns an unique instance of header logo (classcontent: BackBee\ClassContent\Basic\Image).
+     *
+     * @param string $name
+     * 
+     * @return Image
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
+    public function getHeaderLogos(string $name): Image
+    {
+        return $this->genericContentGetter('header_logos_' . $name, Image::class);
+    }
+
+    /**
+     * Returns an unique instance of footer logo (classcontent: BackBee\ClassContent\Basic\Image).
+     *
+     * @param string $name
+     * 
+     * @return Image
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     */
+    public function getFooterLogos(string $name): Image
+    {
+        return $this->genericContentGetter('footer_logos_' . $name, Image::class);
+    }
+
+    /**
      * Returns an unique instance of header (classcontent: BackBee\ClassContent\Basic\Header).
      *
      * @return Header
