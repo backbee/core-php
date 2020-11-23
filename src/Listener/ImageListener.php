@@ -82,19 +82,22 @@ class ImageListener
         }
 
         $changeSet = $uow->getEntityChangeSet($event->getTarget());
-        $oldData = $changeSet['_data'][0];
-        $newData = $changeSet['_data'][1];
 
         if (
-            !isset($changeSet['_data']) ||
-            $oldData['path'] === $newData['path'] ||
-            false !== strpos($oldData['path'][0]['scalar'], 'theme-default-resources') ||
-            $uow->isScheduledForInsert($event->getTarget())
+            null !== ($changeSet['_data'] ?? null) &&
+            null !== ($oldData = $changeSet['_data'][0] ?? null) &&
+            null !== ($newData = $changeSet['_data'][1] ?? null)
         ) {
-            return;
-        }
+            if (
+                $oldData['path'] === $newData['path'] ||
+                false !== strpos($oldData['path'][0]['scalar'], 'theme-default-resources') ||
+                $uow->isScheduledForInsert($event->getTarget())
+            ) {
+                return;
+            }
 
-        $this->imgHandler->delete($oldData['path'][0]['scalar']);
+            $this->imgHandler->delete($oldData['path'][0]['scalar']);
+        }
     }
 
     /**
