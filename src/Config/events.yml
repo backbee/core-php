@@ -437,6 +437,3 @@ backbeecloud.api.controller.pagetypecontroller.getcollection.postcall:
 basic.image.render:
     listeners:
         - [ '@app.optimize_image.listener', onBasicImageRender ]
-console.commandline.ready:
-    listeners:
-        - [ BackBeePlanet\Listener\CommandLineListener, onCommandLineReady ]
