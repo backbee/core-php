@@ -141,7 +141,16 @@ class ContentListener
             }
         }
 
-        $content->setParam('bg_image', $event->getRenderer()->getCdnImageUrl($content->getParamValue('bg_image')));
+        $content->setParam(
+            'bg_image',
+            $event->getRenderer()->getCdnImageUrl(
+                $event->getRenderer()->getOptimizeImagePathHelper(
+                    $content->getParamValue('bg_image'),
+                    false,
+                    12
+                )
+            )
+        );
 
         if (UserAgentHelper::isDesktop()) {
             return;
