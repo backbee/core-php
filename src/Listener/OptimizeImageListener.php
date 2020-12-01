@@ -65,36 +65,6 @@ class OptimizeImageListener
         if (false === $this->optimizeImageManager->isValidToOptimize($filePath)) {
             return;
         }
-
-        // get settings
-        $colsizesSettings = $this->optimizeImageManager->getSettings()['colsizes'];
-        $browserColsizesSettings = $this->optimizeImageManager->getSettings()['browsercolsizes'];
-
-        // $filesystem = new Filesystem();
-        // $size = $colsizesSettings[$browserColsizesSettings['max']];
-        // switch (UserAgentHelper::getDeviceType()) {
-        //     case 'mobile':
-        //         $size = $colsizesSettings[$browserColsizesSettings['mid']];
-        //         break;
-        //     default:
-        //         break;
-        // }
-
-        // $filename = OptimizeImageUtils::genericSizeFilename($bgImageUrl, $size, 'jpg');
-
-        if ('mobile' === UserAgentHelper::getDeviceType()) {
-            $filename = OptimizeImageUtils::genericSizeFilename(
-                $bgImageUrl,
-                $colsizesSettings[$browserColsizesSettings['mid']],
-                'jpg'
-            );
-
-            // if (false === $filesystem->exists($this->optimizeImageManager->getMediaPath($filename))) {
-            //     $this->optimizeImageManager->convertAllImages($filePath);
-            // }
-
-            $cloudContentSet->setParam('bg_image', $filename);
-        }
     }
 
     /**
