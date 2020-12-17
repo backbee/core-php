@@ -1,0 +1,7 @@
+<script>
+  document.addEventListener('cloudReady', function() {
+    window.cloud.mediator.subscribe('session:expired', function () {
+      window.location.reload();
+    })
+  });
+</script>
