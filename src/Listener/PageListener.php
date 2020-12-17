@@ -365,6 +365,7 @@ class PageListener
             str_replace(
                 '</body>',
                 $renderer->partial('common/hook_form.js.twig') .
+                $renderer->partial('common/hook_session.js.twig') .
                 $renderer->partial('Optimizeimage/hook.js.twig') .'</body>',
                 $renderer->getRender()
             )
