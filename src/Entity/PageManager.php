@@ -521,14 +521,14 @@ class PageManager
         $data['title'] = $data['title'] ?? '';
         $data['tags'] = isset($data['tags']) ? (array) $data['tags'] : [];
         $putContentOnline = isset($data['put_content_online']) ? (bool) $data['put_content_online'] : false;
-        unset($data['type'], $data['is_online'], $data['put_content_online']);
-
-        $copy = new Page();
+        $isOnline = $data['is_online'] ?? false;
+        $copy = new Page($data['uid'] ?? null);
+        unset($data['type'], $data['is_online'], $data['put_content_online'], $data['uid']);
 
         $copy->setSite($this->getSite());
         $copy->setLayout($this->getLayout());
         $copy->setParent($this->getRootPage());
-        $copy->setState(Page::STATE_OFFLINE);
+        $copy->setState(true === $isOnline ? Page::STATE_ONLINE : Page::STATE_OFFLINE);
         $copy->setPosition($this->count() + 1);
 
         $this->entityMgr->persist($copy);
