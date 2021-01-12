@@ -55,7 +55,7 @@ class SearchEvent extends Event
 
     public function setSize($size)
     {
-        $this->size = (int) $size;
+        $this->size = (int)$size;
     }
 
     public function getOrderBy()

@@ -153,16 +153,75 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
                 'query' => [
                     'bool' => [
                         'should' => [
-                            ['match' => ['title' => ['query' => $term, 'boost' => 2]]],
-                            ['match' => ['title.raw' => ['query' => $term, 'boost' => 2]]],
-                            ['match' => ['title.folded' => ['query' => $term, 'boost' => 2]]],
-                            ['match' => ['tags' => $term]],
-                            ['match' => ['tags.raw' => $term]],
-                            ['match' => ['contents' => $term]],
-                            ['match_phrase_prefix' => ['title' => ['query' => $term, 'boost' => 2]]],
-                            ['match_phrase_prefix' => ['title.raw' => ['query' => $term, 'boost' => 2]]],
-                            ['match_phrase_prefix' => ['title.folded' => ['query' => $term, 'boost' => 2]]],
-                            ['match_phrase_prefix' => ['tags' => $term]],
+                            [
+                                'match' => [
+                                    'title' => [
+                                        'query' => $term,
+                                        'boost' => 5,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'title.raw' => [
+                                        'query' => $term,
+                                        'boost' => 5,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'title.folded' => [
+                                        'query' => $term,
+                                        'boost' => 5,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'contents' => [
+                                        'query' => $term,
+                                        'boost' => 3,
+                                        'fuzziness' => 'AUTO',
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'contents.folded' => [
+                                        'query' => $term,
+                                        'boost' => 3,
+                                        'fuzziness' => 'AUTO',
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'tags' => [
+                                        'query' => $term,
+                                        'boost' => 2,
+                                        'fuzziness' => 'AUTO',
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'tags.raw' => [
+                                        'query' => $term,
+                                        'boost' => 2,
+                                        'fuzziness' => 'AUTO',
+                                    ],
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'tags.folded' => [
+                                        'query' => $term,
+                                        'boost' => 2,
+                                        'fuzziness' => 'AUTO',
+                                    ],
+                                ],
+                            ],
                         ],
                     ],
                 ],
@@ -205,10 +264,6 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         $result = $this->getClient()->search($criteria);
 
         $pages = $result['hits']['hits'];
-
-        foreach ($pages as $page) {
-            dump('[Score] : ' . $page['_score'] . ' - '  . '[Titre] : ' . $page['_source']['title']);
-        }
 
         if ($formatResult) {
             $uids = array_column($pages, '_id');
