@@ -85,7 +85,7 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     protected function getPageCustomDataToIndex(Page $page): array
     {
         $type = $this->pagetypeMgr->findByPage($page);
-        
+
         $data = [
             'title' => $this->extractTitleFromPage($page),
             'first_heading' => $this->getFirstHeadingFromPage($page),
@@ -205,6 +205,11 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
         $result = $this->getClient()->search($criteria);
 
         $pages = $result['hits']['hits'];
+
+        foreach ($pages as $page) {
+            dump('[Score] : ' . $page['_score'] . ' - '  . '[Titre] : ' . $page['_source']['title']);
+        }
+
         if ($formatResult) {
             $uids = array_column($pages, '_id');
             if (false !== $uids) {
