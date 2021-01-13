@@ -40,17 +40,75 @@ class SearchResultListener
                     'query' => [
                         'bool' => [
                             'should' => [
-                                ['match' => ['title' => ['query' => $query, 'boost' => 2]]],
-                                ['match' => ['title.raw' => ['query' => $query, 'boost' => 2]]],
-                                ['match' => ['title.folded' => ['query' => $query, 'boost' => 2]]],
-                                ['match' => ['tags' => $query]],
-                                ['match' => ['tags.raw' => $query]],
-                                ['match' => ['tags.folded' => $query]],
-                                ['match' => ['contents' => $query]],
-                                ['match' => ['contents.folded' => $query]],
-                                ['match_phrase_prefix' => ['title' => ['query' => $query, 'boost' => 2]]],
-                                ['match_phrase_prefix' => ['title.folded' => ['query' => $query, 'boost' => 2]]],
-                                ['match_phrase_prefix' => ['tags' => $query]],
+                                [
+                                    'match' => [
+                                        'title' => [
+                                            'query' => $query,
+                                            'boost' => 5,
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'title.raw' => [
+                                            'query' => $query,
+                                            'boost' => 5,
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'title.folded' => [
+                                            'query' => $query,
+                                            'boost' => 5,
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'contents' => [
+                                            'query' => $query,
+                                            'boost' => 3,
+                                            'fuzziness' => 'AUTO',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'contents.folded' => [
+                                            'query' => $query,
+                                            'boost' => 3,
+                                            'fuzziness' => 'AUTO',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'tags' => [
+                                            'query' => $query,
+                                            'boost' => 2,
+                                            'fuzziness' => 'AUTO',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'tags.raw' => [
+                                            'query' => $query,
+                                            'boost' => 2,
+                                            'fuzziness' => 'AUTO',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'match' => [
+                                        'tags.folded' => [
+                                            'query' => $query,
+                                            'boost' => 2,
+                                            'fuzziness' => 'AUTO',
+                                        ],
+                                    ],
+                                ],
                             ],
                             'minimum_should_match' => 1,
                         ],
@@ -70,7 +128,7 @@ class SearchResultListener
                 $esQuery['query']['bool']['must'] = [];
             }
 
-            $esQuery['query']['bool']['must'][] = [ 'match' => ['is_pullable' => true] ];
+            $esQuery['query']['bool']['must'][] = ['match' => ['is_pullable' => true]];
 
             if (null === $app->getBBUserToken()) {
                 $esQuery['query']['bool']['must'][] = ['match' => ['is_online' => true]];
@@ -82,18 +140,12 @@ class SearchResultListener
                 ];
             }
 
-            $sort = [];
-
-            if (false == $searchEvent->getOrderBy()) {
-                $sort[] = "published_at:desc";
-            }
-
             $size = $searchEvent->getSize() ?: self::RESULT_PER_PAGE;
             $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
                 $esQuery,
                 ($page > 0 ? $page - 1 : 0) * $size,
                 $size,
-                $sort,
+                $searchEvent->getOrderBy() ?? ['_score', 'published_at:desc'],
                 false
             );
             $formatter = new ResultItemHtmlFormatter(
