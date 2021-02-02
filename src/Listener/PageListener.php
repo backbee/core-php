@@ -8,6 +8,7 @@ use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Event\Event;
+use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Site\Site;
@@ -21,6 +22,10 @@ use BackBeeCloud\PageType\HomeType;
 use BackBeeCloud\PageType\SearchResultType;
 use BackBeePlanet\GlobalSettings;
 use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -45,8 +50,11 @@ class PageListener
      * "home" page type. It runs its process only if the application is not restored.
      *
      * @param Event $event
+     *
+     * @throws DBALException
+     * @throws OptimisticLockException
      */
-    public static function onApplicationInit(Event $event)
+    public static function onApplicationInit(Event $event): void
     {
         $app = $event->getApplication();
         if ($app->isRestored()) {
@@ -92,7 +100,7 @@ class PageListener
         }
     }
 
-    public static function handleUriCollisionOnFlushPage(Event $event)
+    public static function handleUriCollisionOnFlushPage(Event $event): void
     {
         $page = $event->getTarget();
         $app = $event->getApplication();
@@ -135,7 +143,7 @@ class PageListener
         }
     }
 
-    public static function onFlush(Event $event)
+    public static function onFlush(Event $event): void
     {
         $page = $event->getTarget();
         if ($page->isRoot()) {
@@ -183,7 +191,7 @@ class PageListener
         }
 
         $currUrl = $page->getUrl();
-        if (isset($changes['_url']) && false != $changes['_url'][0]) {
+        if (isset($changes['_url']) && false !== $changes['_url'][0]) {
             $currUrl = $changes['_url'][0];
         }
 
@@ -202,28 +210,32 @@ class PageListener
      * and PageLang.
      *
      * @param Event $event
+     *
+     * @throws OptimisticLockException
      */
-    public static function onPostRemove(Event $event)
+    public static function onPostRemove(Event $event): void
     {
         $page = $event->getTarget();
-        $entyMgr = $event->getApplication()->getEntityManager();
+        $entityMgr = $event->getApplication()->getEntityManager();
 
-        // Delete associated PageTag
-        if (null !== $pagetag = $entyMgr->getRepository(PageTag::class)->findOneBy(['page' => $page])) {
-            $entyMgr->remove($pagetag);
+        if ($entityMgr instanceof EntityManager) {
+            // Delete associated PageTag
+            if (null !== $pagetag = $entityMgr->getRepository(PageTag::class)->findOneBy(['page' => $page])) {
+                $entityMgr->remove($pagetag);
+            }
+
+            // Delete associated PageType
+            if (null !== $pagetype = $entityMgr->getRepository(PageType::class)->findOneBy(['page' => $page])) {
+                $entityMgr->remove($pagetype);
+            }
+
+            // Delete associated PageLang
+            if (null !== $pagelang = $entityMgr->getRepository(PageLang::class)->findOneBy(['page' => $page])) {
+                $entityMgr->remove($pagelang);
+            }
+
+            $entityMgr->flush();
         }
-
-        // Delete associated PageType
-        if (null !== $pagetype = $entyMgr->getRepository(PageType::class)->findOneBy(['page' => $page])) {
-            $entyMgr->remove($pagetype);
-        }
-
-        // Delete associated PageLang
-        if (null !== $pagelang = $entyMgr->getRepository(PageLang::class)->findOneBy(['page' => $page])) {
-            $entyMgr->remove($pagelang);
-        }
-
-        $entyMgr->flush();
     }
 
     /**
@@ -233,8 +245,13 @@ class PageListener
      *     - backbeecloud.api.controller.contentcontroller.delete.precall
      *
      * @param Event $event
+     *
+     * @throws BBException
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TransactionRequiredException
      */
-    public static function onRestContentUpdatePostcall(Event $event)
+    public static function onRestContentUpdatePostcall(Event $event): void
     {
         $app = $event->getApplication();
         $querybag = $app->getRequest()->query;
@@ -250,7 +267,14 @@ class PageListener
         }
     }
 
-    public static function onPagePostChange(Event $event)
+    /**
+     * On page post change.
+     *
+     * @param Event $event
+     *
+     * @throws OptimisticLockException
+     */
+    public static function onPagePostChange(Event $event): void
     {
         $entyMgr = $event->getApplication()->getEntityManager();
         foreach (self::$toDelete as $url) {
@@ -290,7 +314,7 @@ class PageListener
      *
      * @param RendererEvent $event
      */
-    public static function onPageRender(RendererEvent $event)
+    public static function onPageRender(RendererEvent $event): void
     {
         $page = $event->getTarget();
         $app = $event->getApplication();
@@ -335,17 +359,17 @@ class PageListener
 
                 $renderer->assign(
                     'banner_message',
-                    isset($data['banner_message']) ? $data['banner_message'] : null
+                    $data['banner_message'] ?? null
                 );
                 $renderer->assign(
                     'learn_more_url',
-                    isset($data['learn_more_url']) ? $data['learn_more_url'] : null
+                    $data['learn_more_url'] ?? null
                 );
                 $renderer->assign(
                     'learn_more_link_title',
-                    isset($data['learn_more_link_title']) ? $data['learn_more_link_title'] : null
+                    $data['learn_more_link_title'] ?? null
                 );
-            };
+            }
         }
     }
 
@@ -354,7 +378,7 @@ class PageListener
      *
      * @param RendererEvent $event
      */
-    public static function onPostRender(RendererEvent $event)
+    public static function onPostRender(RendererEvent $event): void
     {
         if ($event->getApplication()->getBBUserToken() === null) {
             return;
@@ -366,7 +390,7 @@ class PageListener
                 '</body>',
                 $renderer->partial('common/hook_form.js.twig') .
                 $renderer->partial('common/hook_session.js.twig') .
-                $renderer->partial('Optimizeimage/hook.js.twig') .'</body>',
+                $renderer->partial('Optimizeimage/hook.js.twig') . '</body>',
                 $renderer->getRender()
             )
         );
@@ -377,39 +401,52 @@ class PageListener
      * delete the page.
      *
      * @param Event $event
+     *
+     * @throws BBException
+     * @throws OptimisticLockException
      */
-    public static function onPageDeletePostcall(Event $event)
+    public static function onPageDeletePostcall(Event $event): void
     {
         $app = $event->getApplication();
+        $pageAssociationMgr = $app->getContainer()->get('cloud.multilang.page_association.manager');
         $page = $app->getRequest()->attributes->get('page');
         if (!($page instanceof Page)) {
             return;
         }
 
-        $entyMgr = $app->getEntityManager();
+        $entityMgr = $app->getEntityManager();
         $bbtoken = $app->getBBUserToken();
-        foreach ($entyMgr->getRepository(Menu::class)->findAll() as $menu) {
-            $originalDraft = $menu->getDraft();
-            $menu->setDraft(null);
-            self::cleanMenu($menu, $page);
-            $draft = $originalDraft;
-            if (null === $draft && null !== $bbtoken) {
-                $draft = $entyMgr->getRepository(Revision::class)->getDraft($menu, $bbtoken, false);
-            }
 
-            if (null !== $draft) {
-                $menu->setDraft($draft);
+        if ($entityMgr instanceof EntityManager) {
+            foreach ($entityMgr->getRepository(Menu::class)->findAll() as $menu) {
+                $originalDraft = $menu->getDraft();
+                $menu->setDraft(null);
                 self::cleanMenu($menu, $page);
+                $draft = $originalDraft;
+                if (null === $draft && null !== $bbtoken) {
+                    $draft = $entityMgr->getRepository(Revision::class)->getDraft($menu, $bbtoken);
+                }
+
+                if (null !== $draft) {
+                    $menu->setDraft($draft);
+                    self::cleanMenu($menu, $page);
+                }
+
+                $menu->setDraft($originalDraft);
             }
 
-            $menu->setDraft($originalDraft);
+            $pageAssociationMgr->deleteAssociatedPage($page);
+            $entityMgr->getRepository(Page::class)->deletePage($page);
+            $entityMgr->flush();
         }
-
-        $entyMgr->getRepository(Page::class)->deletePage($page);
-        $entyMgr->flush();
     }
 
-    public static function onPageNotFoundException(GetResponseForExceptionEvent $event)
+    /**
+     * On page not found exception.
+     *
+     * @param GetResponseForExceptionEvent $event
+     */
+    public static function onPageNotFoundException(GetResponseForExceptionEvent $event): void
     {
         $exception = $event->getException();
         if (
@@ -433,14 +470,21 @@ class PageListener
                         $app->getRequest()->getPathInfo(),
                         $pageRedirection->target(),
                         $app->getRequest()->getRequestUri()
-                    )
-                ),
-                Response::HTTP_MOVED_PERMANENTLY
+                    ),
+                    Response::HTTP_MOVED_PERMANENTLY
+                )
             );
         }
     }
 
-    public static function onRssActionPreCall(PreRequestEvent $event)
+    /**
+     * On Rss action pre call.
+     *
+     * @param PreRequestEvent $event
+     *
+     * @throws FrontControllerException
+     */
+    public static function onRssActionPreCall(PreRequestEvent $event): void
     {
         $app = $event->getApplication();
         $request = $event->getTarget();
@@ -466,7 +510,7 @@ class PageListener
                 '_uid' => $app->getContainer()->get('cloud.content_manager')->getUidsFromPage($page),
             ]
         );
-        if (false == $autoblocks) {
+        if (false === $autoblocks) {
             throw new FrontControllerException('', FrontControllerException::NOT_FOUND);
         }
     }
@@ -477,14 +521,14 @@ class PageListener
      * @param Menu $menu
      * @param Page $pageToRemove
      *
-     * @return
+     * @return void
      */
-    protected static function cleanMenu(Menu $menu, Page $pageToRemove)
+    protected static function cleanMenu(Menu $menu, Page $pageToRemove): void
     {
         $items = $menu->getParamValue('items');
         $validItems = [];
         foreach ($items as $item) {
-            if (false != $item['id'] && $pageToRemove->getUid() === $item['id']) {
+            if (false !== $item['id'] && $pageToRemove->getUid() === $item['id']) {
                 continue;
             }
 
