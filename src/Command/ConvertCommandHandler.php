@@ -146,7 +146,6 @@ class ConvertCommandHandler
             // skipping obsolete image
             if (
                 (empty($content->image->path))
-                || (false === $this->filesystem->exists($filePath))
                 || (false === $this->optimizeImageManager->isValidToOptimize($filePath))
             ) {
                 continue;
@@ -213,7 +212,6 @@ class ConvertCommandHandler
             // skipping obsolete bg image
             if (
                 (empty($bgImagePath))
-                || (false === $this->filesystem->exists($filePath))
                 || (false === $this->optimizeImageManager->isValidToOptimize($filePath))
             ) {
                 continue;

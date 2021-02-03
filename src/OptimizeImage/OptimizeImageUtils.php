@@ -55,7 +55,7 @@ class OptimizeImageUtils
      */
     public static function getMedianColsizeKey($colsize)
     {
-        if (($c = count($colsize)) % 2 == 0) {
+        if (($c = count($colsize)) % 2 === 0) {
             return $colsize[$c / 2 - 1];
         }
 
