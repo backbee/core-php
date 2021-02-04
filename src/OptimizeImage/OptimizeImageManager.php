@@ -111,34 +111,30 @@ class OptimizeImageManager
         if (
             null === ($this->settings['original'] ?? null) ||
             false === $this->filesystem->exists($filepath) ||
-            1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp|webp)$~', @mime_content_type($filepath))
+            1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp)$~', @mime_content_type($filepath))
         ) {
             return;
         }
 
         $partsFilename = pathinfo($filepath);
         $filepathOut = $partsFilename['dirname'] . '/' . $partsFilename['filename'] . '%s.%s';
-
-        // check original file size
-        $keepOriginal = $this->keepOriginal($filepath, sprintf($filepathOut, '_keeporiginal', 'jpg'));
+        $settingsOriginal = $this->settings['original'];
+        [$width] = getimagesize($filepath);
 
         // formats
         foreach ($this->settings['formats'] as $key => $options) {
-            if ($keepOriginal) {
+            if ($width <= $options['resize']) {
                 unset($options['resize']);
             }
-            
-            $this->convert($filepath, sprintf($filepathOut, '_' . $key, 'webp'), $options);
             $this->convert($filepath, sprintf($filepathOut, '_' . $key, 'jpg'), $options);
         }
 
-        if ($keepOriginal) {
-            unset($this->settings['original']['resize']);
+        if ($width <= $settingsOriginal['resize']) {
+            unset($settingsOriginal['resize']);
         }
-        
+
         // original always at the end
-        $this->convert($filepath, sprintf($filepathOut, '', 'webp'), $this->settings['original']);
-        $this->convert($filepath, sprintf($filepathOut, '', 'jpg'), $this->settings['original']);
+        $this->convert($filepath, sprintf($filepathOut, '', 'jpg'), $settingsOriginal);
     }
 
     /**
@@ -180,7 +176,7 @@ class OptimizeImageManager
     public function isValidToOptimize($filePath): bool
     {
         return !(
-            (1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp|webp)$~', @mime_content_type($filePath)))
+            (1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp)$~', @mime_content_type($filePath)))
             || ('image/gif' === @mime_content_type($filePath) && (true === $this->isAnimated($filePath)))
             || ('image/png' === @mime_content_type($filePath)) && (true === $this->isTransparent($filePath))
         );
@@ -317,33 +313,11 @@ class OptimizeImageManager
         }
 
         $filename = OptimizeImageUtils::genericSizeFilename($path, $size, 'jpg');
+
         if (false === $this->filesystem->exists($this->getMediaPath($filename))) {
             $this->convertAllImages($filePath);
         }
 
         return $filename;
-    }
-    
-    /**
-     * Keep original?
-     *
-     * @param string $filepath
-     * @param string $originalFilepath
-     *
-     * @return bool
-     */
-    private function keepOriginal(string $filepath, string $originalFilepath): bool
-    {
-        $returnValue = false;
-
-        $this->convert($filepath, $originalFilepath, $this->settings['original']);
-        if ((true === $this->filesystem->exists($originalFilepath)) && (filesize($filepath) <= filesize($originalFilepath))) {
-            $returnValue = true;
-        }
-
-        // delete temporary originalFilepath
-        @unlink($originalFilepath);
-
-        return $returnValue;
     }
 }
