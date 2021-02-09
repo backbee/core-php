@@ -1,41 +1,41 @@
-<div {{this.bbcontent(null)|raw}}>
-  <div id="disqus_thread" class="disqus-block"></div>
+<div {{ this.bbcontent(null)|raw }}>
+    <div id="disqus_thread" class="disqus-block"></div>
+    {% if disqusId.value is not empty and (' ' in disqusId.value|trim) == false %}
+        <script>
+          (function () {
+            if (!document.getElementById('cloud-disqus')) {
+              window.disqus_config = function () {
+                this.page.url = '{{ this.getUri(this.getCurrentPage().getUrl()) }}'
+                this.page.identifier = '{{ this.getCurrentPage().getUid() }}'
+              };
 
-  {% if short_name.value is not empty and (' ' in short_name.value|trim) == false %}
-    <script>
-      (function() {
-        if (!document.getElementById('cloud-disqus')) {
-          window.disqus_config = function () {
-            this.page.url = '{{this.getUri(this.getCurrentPage().getUrl())}}';
-            this.page.identifier = '{{this.getCurrentPage().getUid()}}';
-          };
+              (function () {
+                var d = document, s = d.createElement('script')
 
-          (function() {
-            var d = document, s = d.createElement('script');
+                s.src = '//{{ disqusId.value }}.disqus.com/embed.js'
 
-            s.src = '//{{short_name.value}}.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date())
+                s.setAttribute('id', 'cloud-disqus');
+                (d.head || d.body).appendChild(s)
+              })()
+            } else {
+              if (window.DISQUS) {
+                DISQUS.reset({
+                  'reload': true
+                })
+              }
+            }
 
-            s.setAttribute('data-timestamp', +new Date());
-            s.setAttribute('id', 'cloud-disqus');
-            (d.head || d.body).appendChild(s);
-          })();
-        } else {
-          if (window.DISQUS) {
-            DISQUS.reset({
-              'reload': true
-            });
-          }
-        }
-
-        {% if bb.token != null %}
-          setTimeout(function () {
-            window.dndZone.apply();
-          }, 3000);
-        {% endif %}
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+              {% if bb.token != null %}
+            setTimeout(function () {
+              window.dndZone.apply()
+            }, 3000)
+              {% endif %}
+          })()
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments
+                powered by Disqus.</a></noscript>
     {% else %}
-      {% include 'common/missing_config_block.html.twig' %}
+        {% include 'common/missing_config_block.html.twig' %}
     {% endif %}
 </div>
