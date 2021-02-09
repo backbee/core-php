@@ -215,7 +215,7 @@ services:
 
     cloud.disqus_listener:
         class: BackBeeCloud\Listener\ClassContent\DisqusListener
-        arguments: [ "@bbapp" ]
+        arguments: [ '@bbapp', '@em' ]
 
     elasticsearch.manager:
         class: BackBeeCloud\Elasticsearch\ElasticsearchManager

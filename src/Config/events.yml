@@ -203,6 +203,11 @@ contentset.render:
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\ClassContent\ContentSetListener, onRender ]
 
+comment.disqus.render:
+    listeners:
+        # BackBee Cloud listeners
+        - [ '@cloud.disqus_listener', onRender ]
+
 # Controller listeners
 
 rest.controller.classcontentcontroller.getaction.postcall:

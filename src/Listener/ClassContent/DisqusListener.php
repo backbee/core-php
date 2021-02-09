@@ -6,7 +6,11 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\Comment\Disqus;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PreRequestEvent;
+use BackBee\Exception\BBException;
+use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Site\Site;
+use BackBeeCloud\MultiLang\MultiLangManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -16,50 +20,74 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
  */
 class DisqusListener
 {
+    /**
+     * @var BBApplication
+     */
     protected $app;
-    protected $entyMgr;
 
-    public function __construct(BBApplication $app)
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityMgr;
+
+    /**
+     * @var MultiLangManager
+     */
+    private static $multiLangManager;
+
+    /**
+     * DisqusListener constructor.
+     *
+     * @param BBApplication $app
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(BBApplication $app, EntityManagerInterface $entityManager)
     {
         $this->app = $app;
-        $this->entyMgr = $app->getEntityManager();
+        $this->entityMgr = $entityManager;
+        self::$multiLangManager = $app->getContainer()->get('multilang_manager');
     }
 
     /**
      * Handles Disqus content to be unique per site.
      *
-     * @param  PreRequestEvent $event
+     * @param PreRequestEvent $event
+     *
+     * @throws DisqusControlledException
      */
-    public function onCreateContent(PreRequestEvent $event)
+    public function onCreateContent(PreRequestEvent $event): void
     {
         if (null === $this->app->getBBUserToken()) {
             return;
         }
 
         $type = $event->getRequest()->attributes->get('type');
+
         if ('Comment/Disqus' !== $type) {
             return;
         }
 
         $uid = $this->getDisqusUid();
-        if (null === $disqus = $this->entyMgr->find(Disqus::class, $uid)) {
+        if (null === $disqus = $this->entityMgr->find(Disqus::class, $uid)) {
             $disqus = new Disqus($uid);
-            $this->entyMgr->persist($disqus);
-            $draft = $this->entyMgr->getRepository(Revision::class)->checkout($disqus, $this->app->getBBUserToken());
+            $this->entityMgr->persist($disqus);
+            $draft = $this->entityMgr->getRepository(Revision::class)->checkout($disqus, $this->app->getBBUserToken());
             $disqus->setDraft($draft);
         }
 
-        $this->entyMgr->flush();
+        $this->entityMgr->flush();
 
-        throw new DisqusControlledException();
+        throw new DisqusControlledException('');
     }
 
     /**
      * Handles Disqus content to be unique per site.
      *
-     * @param  PreRequestEvent $event
+     * @param PreRequestEvent $event
+     *
+     * @throws DisqusControlledException
      */
-    public function onDeleteContent(PreRequestEvent $event)
+    public function onDeleteContent(PreRequestEvent $event): void
     {
         if (null === $this->app->getBBUserToken()) {
             return;
@@ -70,15 +98,17 @@ class DisqusListener
             return;
         }
 
-        throw new DisqusControlledException();
+        throw new DisqusControlledException('');
     }
 
     /**
      * Handles DisqusControlledException.
      *
-     * @param  GetResponseForExceptionEvent $event
+     * @param GetResponseForExceptionEvent $event
+     *
+     * @throws BBException
      */
-    public function onDisqusControlledException(GetResponseForExceptionEvent $event)
+    public function onDisqusControlledException(GetResponseForExceptionEvent $event): void
     {
         if (!($event->getException() instanceof DisqusControlledException)) {
             return;
@@ -88,26 +118,47 @@ class DisqusListener
         if ('deleteAction' === $this->app->getRequest()->attributes->get('_action')) {
             $response = new Response('', Response::HTTP_NO_CONTENT);
         } else {
-            $response = new JsonResponse(null, Response::HTTP_CREATED, [
-                'BB-RESOURCE-UID' => $this->getDisqusUid(),
-                'Location'        => $this->app->getRouting()->getUrlByRouteName(
-                    'bb.rest.classcontent.get',
-                    [
-                        'version' => $this->app->getRequest()->attributes->get('version'),
-                        'type'    => 'Comment/Disqus',
-                        'uid'     => $this->getDisqusUid(),
-                    ],
-                    '',
-                    false
-                ),
-            ]);
+            $response = new JsonResponse(
+                null, Response::HTTP_CREATED, [
+                    'BB-RESOURCE-UID' => $this->getDisqusUid(),
+                    'Location' => $this->app->getRouting()->getUrlByRouteName(
+                        'bb.rest.classcontent.get',
+                        [
+                            'version' => $this->app->getRequest()->attributes->get('version'),
+                            'type' => 'Comment/Disqus',
+                            'uid' => $this->getDisqusUid(),
+                        ],
+                        '',
+                        false
+                    ),
+                ]
+            );
         }
 
         $event->setResponse($response);
     }
 
-    public function getDisqusUid()
+    /**
+     * Handle on render content.
+     *
+     * @param RendererEvent $event
+     */
+    public static function onRender(RendererEvent $event): void
     {
-        return md5('disqus_' . $this->entyMgr->getRepository(Site::class)->findOneBy([])->getLabel());
+        $currentLang = self::$multiLangManager->isActive() ? self::$multiLangManager->getCurrentLang() : null;
+        $event->getRenderer()->assign(
+            'disqusId',
+            $event->getTarget()->getParam('short_name_' . $currentLang) ?? $event->getTarget()->getParam('short_name')
+        );
+    }
+
+    /**
+     * Get Disqus uid.
+     *
+     * @return string
+     */
+    public function getDisqusUid(): string
+    {
+        return md5('disqus_' . $this->entityMgr->getRepository(Site::class)->findOneBy([])->getLabel());
     }
 }
