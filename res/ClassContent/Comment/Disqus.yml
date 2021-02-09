@@ -12,5 +12,4 @@ Disqus:
         short_name_en:
             type: text
             label: yaml_block_disqus_id_en
-            description: yaml_block_disqus_comment
             value: ''
