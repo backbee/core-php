@@ -1,12 +1,15 @@
 Disqus:
-  properties:
-    name: yaml_block_disqus
-    description: ~
-    category: [block_category_social]
-    unique_per_page: true
-  parameters:
-    short_name:
-      type: text
-      label: yaml_block_disqus_id
-      description: yaml_block_disqus_comment
-      value: ''
+    properties:
+        name: yaml_block_disqus
+        description: ~
+        category: [ block_category_social ]
+        unique_per_page: true
+    parameters:
+        short_name:
+            type: text
+            label: yaml_block_disqus_id_fr
+            value: ''
+        short_name_en:
+            type: text
+            label: yaml_block_disqus_id_en
+            value: ''
