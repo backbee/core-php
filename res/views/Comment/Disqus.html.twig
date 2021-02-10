@@ -5,47 +5,46 @@
 
     {% if disqusId.value is not empty and (' ' in disqusId.value|trim) == false %}
         <script>
-          var disqus_observer = new IntersectionObserver(function(entries) {
+          (function () {
+            var disqus_observer = new IntersectionObserver(function(entries) {
             // comments section reached
             // start loading Disqus now
             if(entries[0].isIntersecting) {
-              (function () {
-                if (!document.getElementById('cloud-disqus')) {
-                  window.disqus_config = function () {
-                    this.page.url = '{{ this.getUri(this.getCurrentPage().getUrl()) }}'
-                    this.page.identifier = '{{ this.getCurrentPage().getUid() }}'
-                  };
+              if (!document.getElementById('cloud-disqus')) {
+                window.disqus_config = function () {
+                  this.page.url = '{{ this.getUri(this.getCurrentPage().getUrl()) }}'
+                  this.page.identifier = '{{ this.getCurrentPage().getUid() }}'
+                };
 
-                  (function () {
-                    var d = document, s = d.createElement('script')
+                (function () {
+                  var d = document, s = d.createElement('script')
 
-                    s.src = '//{{ disqusId.value }}.disqus.com/embed.js'
+                  s.src = '//{{ disqusId.value }}.disqus.com/embed.js'
 
-                    s.setAttribute('data-timestamp', +new Date())
-                    s.setAttribute('id', 'cloud-disqus');
-                    (d.head || d.body).appendChild(s)
-                  })()
-                } else {
-                  if (window.DISQUS) {
-                    DISQUS.reset({
-                      'reload': true
-                    })
-                  }
+                  s.setAttribute('data-timestamp', +new Date())
+                  s.setAttribute('id', 'cloud-disqus');
+                  (d.head || d.body).appendChild(s)
+                })()
+              } else {
+                if (window.DISQUS) {
+                  DISQUS.reset({
+                    'reload': true
+                  })
                 }
+              }
 
-                {% if bb.token != null %}
-                  setTimeout(function () {
-                    window.dndZone.apply()
-                  }, 3000)
-                {% endif %}
-              })();
+              {% if bb.token != null %}
+                setTimeout(function () {
+                  window.dndZone.apply()
+                }, 3000)
+              {% endif %}
 
-              // once executed, stop observing
-              disqus_observer.disconnect();
-            }
-        }, { threshold: [0] });
-
-        disqus_observer.observe(document.querySelector("#disqus_thread"));
+                // once executed, stop observing
+                disqus_observer.disconnect();
+              }
+            }, { threshold: [0] });
+            disqus_observer.observe(document.querySelector("#disqus_thread"));
+          })();
         </script>
         <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments
                 powered by Disqus.</a></noscript>
