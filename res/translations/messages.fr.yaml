@@ -2,3 +2,5 @@ button:
     collapse:
         open: 'Voir moins'
         close: 'Voir plus'
+disqus:
+    loading_comments: 'Chargement des commentaires ...'

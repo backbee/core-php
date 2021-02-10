@@ -2,3 +2,5 @@ button:
     collapse:
         open: 'Show less'
         close: 'Show more'
+disqus:
+    loading_comments: 'Loading comments...'
