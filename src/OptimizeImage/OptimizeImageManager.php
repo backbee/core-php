@@ -21,6 +21,21 @@ class OptimizeImageManager
     public const CMD_TRANSPARENCY_INFO = 'convert %s -format "%%[opaque]" info:';
     public const CMD_FRAMES_NUMBER = 'identify -format %%n %s';
 
+    private const DEFAULT_SETTINGS = [
+        'filter' => 'Triangle',
+        'define' => 'filter:support=2', 
+        'unsharp' =>  '0.25x0.25+8+0.065', 
+        'dither' => 'None -posterize 136', 
+        'define' => 'jpeg:fancy-upsampling=off',
+        'define' => 'png:compression-filter=5',
+        'define' => 'png:compression-level=9',
+        'define' => 'png:compression-strategy=1',
+        'define' => 'png:exclude-chunk=all', 
+        'interlace' => 'none', 
+        'colorspace' => 'sRGB',
+        'strip' =>  null,
+    ];
+
     /**
      * @var Filesystem
      */
@@ -86,7 +101,7 @@ class OptimizeImageManager
             $this->settings['colsizes'] = [];
             foreach ($options['formats'] as $key => $value) {
                 // merge original settings with formats...
-                $this->settings['formats'][$key] = array_merge($this->settings['original'], $value['options']);
+                $this->settings['formats'][$key] = array_merge(self::DEFAULT_SETTINGS, $this->settings['original'], $value['options']);
 
                 // setting up colsize...
                 foreach ($value['colsizes'] as $colsize) {
@@ -134,7 +149,7 @@ class OptimizeImageManager
         }
 
         // original always at the end
-        $this->convert($filepath, sprintf($filepathOut, '', 'jpg'), $settingsOriginal);
+        $this->convert($filepath, sprintf($filepathOut, '', 'jpg'), array_merge(self::DEFAULT_SETTINGS, $settingsOriginal));
     }
 
     /**
@@ -239,7 +254,7 @@ class OptimizeImageManager
                 ' ',
                 array_map(
                     static function ($key) use ($options) {
-                        return '-' . $key . ' ' . $options[$key];
+                        return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
                     },
                     array_keys($options)
                 )
