@@ -8,6 +8,7 @@ use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
+use function count;
 
 /**
  * @author Michel Baptista <michel.baptista@lp-digital.fr>
@@ -23,17 +24,17 @@ class OptimizeImageManager
 
     private const DEFAULT_SETTINGS = [
         'filter' => 'Triangle',
-        'define' => 'filter:support=2', 
-        'unsharp' =>  '0.25x0.25+8+0.065', 
-        'dither' => 'None -posterize 136', 
+        'define' => 'filter:support=2',
+        'unsharp' => '0.25x0.25+8+0.065',
+        'dither' => 'None -posterize 136',
         'define' => 'jpeg:fancy-upsampling=off',
         'define' => 'png:compression-filter=5',
         'define' => 'png:compression-level=9',
         'define' => 'png:compression-strategy=1',
-        'define' => 'png:exclude-chunk=all', 
-        'interlace' => 'none', 
+        'define' => 'png:exclude-chunk=all',
+        'interlace' => 'none',
         'colorspace' => 'sRGB',
-        'strip' =>  null,
+        'strip' => null,
     ];
 
     /**
@@ -101,7 +102,11 @@ class OptimizeImageManager
             $this->settings['colsizes'] = [];
             foreach ($options['formats'] as $key => $value) {
                 // merge original settings with formats...
-                $this->settings['formats'][$key] = array_merge(self::DEFAULT_SETTINGS, $this->settings['original'], $value['options']);
+                $this->settings['formats'][$key] = array_merge(
+                    self::DEFAULT_SETTINGS,
+                    $this->settings['original'],
+                    $value['options']
+                );
 
                 // setting up colsize...
                 foreach ($value['colsizes'] as $colsize) {
@@ -149,7 +154,11 @@ class OptimizeImageManager
         }
 
         // original always at the end
-        $this->convert($filepath, sprintf($filepathOut, '', 'jpg'), array_merge(self::DEFAULT_SETTINGS, $settingsOriginal));
+        $this->convert(
+            $filepath,
+            sprintf($filepathOut, '', 'jpg'),
+            array_merge(self::DEFAULT_SETTINGS, $settingsOriginal)
+        );
     }
 
     /**
@@ -251,14 +260,11 @@ class OptimizeImageManager
         }
 
         return ' ' . (implode(
-                ' ',
-                array_map(
-                    static function ($key) use ($options) {
-                        return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
-                    },
-                    array_keys($options)
-                )
-            )) . ' ';
+            ' ',
+            array_map(static function ($key) use ($options) {
+                return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
+            }, array_keys($options))
+        )) . ' ';
     }
 
     //@TODO current media directory <> current web media
@@ -310,7 +316,8 @@ class OptimizeImageManager
             null === ($this->settings['browsercolsizes'] ?? null) ||
             false === $path ||
             true === $inFluid ||
-            false === $this->isValidToOptimize($filePath = $this->getMediaPath($path))
+            false === $this->isValidToOptimize($filePath = $this->getMediaPath($path)) ||
+            ($this->checkImageHasAlreadyBeenOptimized($path) && $this->filesystem->exists($this->getMediaPath($path)))
         ) {
             return $path;
         }
@@ -334,5 +341,20 @@ class OptimizeImageManager
         }
 
         return $filename;
+    }
+
+    /**
+     * Checks if the image has already been optimized.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    private function checkImageHasAlreadyBeenOptimized(string $path): bool
+    {
+        return 1 === preg_match(
+            '/.*_[' . sprintf("'%s'", implode("','", array_keys($this->settings['formats']))) . '].*/',
+            $path
+        );
     }
 }

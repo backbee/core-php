@@ -7,7 +7,16 @@ namespace BackBee\Renderer\Helper;
  */
 class getOptimizeImagePathHelper extends AbstractHelper
 {
-    public function __invoke(string $path, bool $inFluid, int $colSize)
+    /**
+     * Invoke.
+     *
+     * @param string $path
+     * @param bool   $inFluid
+     * @param int    $colSize
+     *
+     * @return string
+     */
+    public function __invoke(string $path, bool $inFluid, int $colSize): string
     {
         return $this
             ->getRenderer()
