@@ -2,8 +2,8 @@
 
 namespace BackBeeCloud\UserPreference;
 
-use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBee\Bundle\Registry;
+use BackBeeCloud\MultiLang\MultiLangManager;
 use Doctrine\ORM\EntityManager;
 
 /**
@@ -37,9 +37,11 @@ class UserPreferenceManager
     public function all()
     {
         $result = [];
-        $all = $this->entyMgr->getRepository(Registry::class)->findBy([
-            'scope' => self::REGISTRY_SCOPE,
-        ]);
+        $all = $this->entyMgr->getRepository(Registry::class)->findBy(
+            [
+                'scope' => self::REGISTRY_SCOPE,
+            ]
+        );
         foreach ($all as $row) {
             if (!isset($result[$row->getType()])) {
                 $result[$row->getType()] = [];
@@ -67,14 +69,16 @@ class UserPreferenceManager
     /**
      * Removes data associated to the given name.
      *
-     * @param  string $name
+     * @param string $name
      */
     public function removeDataOf($name)
     {
-        $rawData = $this->entyMgr->getRepository(Registry::class)->findBy([
-            'scope' => self::REGISTRY_SCOPE,
-            'type'  => $name,
-        ]);
+        $rawData = $this->entyMgr->getRepository(Registry::class)->findBy(
+            [
+                'scope' => self::REGISTRY_SCOPE,
+                'type' => $name,
+            ]
+        );
         foreach ($rawData as $row) {
             $this->entyMgr->remove($row);
         }
@@ -92,11 +96,13 @@ class UserPreferenceManager
     public function addInto($name, $key, $value)
     {
         $this->isAuthorizedNameAndKey($name, $key, $value);
-        $registry = $this->entyMgr->getRepository(Registry::class)->findOneBy([
-            'scope' => self::REGISTRY_SCOPE,
-            'type'  => $name,
-            'key'   => $key,
-        ]);
+        $registry = $this->entyMgr->getRepository(Registry::class)->findOneBy(
+            [
+                'scope' => self::REGISTRY_SCOPE,
+                'type' => $name,
+                'key' => $key,
+            ]
+        );
         if (null === $registry) {
             $registry = new Registry();
             $registry->setScope(self::REGISTRY_SCOPE);
@@ -115,16 +121,19 @@ class UserPreferenceManager
      *
      * Notes that if the key name does not exist, it returns an empty array.
      *
-     * @param  string $name
+     * @param string $name
+     *
      * @return array
      */
     public function dataOf($name)
     {
         $result = [];
-        $rawData = $this->entyMgr->getRepository(Registry::class)->findBy([
-            'scope' => self::REGISTRY_SCOPE,
-            'type'  => $name,
-        ]);
+        $rawData = $this->entyMgr->getRepository(Registry::class)->findBy(
+            [
+                'scope' => self::REGISTRY_SCOPE,
+                'type' => $name,
+            ]
+        );
         foreach ($rawData as $row) {
             $result[$row->getKey()] = $row->getValue();
         }
@@ -137,8 +146,9 @@ class UserPreferenceManager
      *
      * Notes that it returns null if the resquested value does not exist.
      *
-     * @param  string $name
-     * @param  string $key
+     * @param string $name
+     * @param string $key
+     *
      * @return string|null
      */
     public function singleDataOf($name, $key)
@@ -153,11 +163,13 @@ class UserPreferenceManager
         $authorizedKeys = $this->authorizedNamesAndKeys();
         $target = isset($authorizedKeys[$name]) ? $authorizedKeys[$name] : null;
         if (null === $target) {
-            throw new \InvalidArgumentException(sprintf(
-                '[%s] %s is not authorized as user preference name',
-                __METHOD__,
-                $name
-            ));
+            throw new \InvalidArgumentException(
+                sprintf(
+                    '[%s] %s is not authorized as user preference name',
+                    __METHOD__,
+                    $name
+                )
+            );
         }
 
         if (null === $key) {
@@ -165,12 +177,14 @@ class UserPreferenceManager
         }
 
         if (!in_array($key, array_keys($target))) {
-            throw new \InvalidArgumentException(sprintf(
-                '[%s] %s is not authorized as user preference %s keyname',
-                __METHOD__,
-                $key,
-                $name
-            ));
+            throw new \InvalidArgumentException(
+                sprintf(
+                    '[%s] %s is not authorized as user preference %s keyname',
+                    __METHOD__,
+                    $key,
+                    $name
+                )
+            );
         }
 
         if (null === $value) {
@@ -182,20 +196,27 @@ class UserPreferenceManager
             return true;
         }
 
-        $result = (bool) $callback($value);
+        $result = (bool)$callback($value);
         if (!$result) {
-            throw new \InvalidArgumentException(sprintf(
-                '[%s] provided value is not valid for user preferences %s %s',
-                __METHOD__,
-                $name,
-                $key
-            ));
+            throw new \InvalidArgumentException(
+                sprintf(
+                    '[%s] provided value is not valid for user preferences %s %s',
+                    __METHOD__,
+                    $name,
+                    $key
+                )
+            );
         }
 
         return true;
     }
 
-    protected function authorizedNamesAndKeys()
+    /**
+     * Return array with authorized names and keys.
+     *
+     * @return array
+     */
+    protected function authorizedNamesAndKeys(): array
     {
         $result = [
             'error_page_404' => [
@@ -212,14 +233,19 @@ class UserPreferenceManager
                 'robots_index' => null,
             ],
             'favicon' => [
-                'url_16x16'   => 'is_string',
-                'url_32x32'   => 'is_string',
+                'url_16x16' => 'is_string',
+                'url_32x32' => 'is_string',
                 'url_144x144' => 'is_string',
                 'url_152x152' => 'is_string',
             ],
             'google-analytics' => [
                 'code' => function ($code) {
                     return 1 === preg_match('#^UA\-[0-9]+\-[0-9]+$#', $code);
+                },
+            ],
+            'gtm-analytics' => [
+                'code' => function ($code) {
+                    return 1 === preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code);
                 },
             ],
             'facebook-analytics' => [

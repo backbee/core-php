@@ -335,6 +335,13 @@ class PageListener
             }
         }
 
+        if ($gtmData = $userPreferenceManager->dataOf('gtm-analytics')) {
+            $code = isset($gtmData['code']) ? (string)$gtmData['code'] : '';
+            if (1 === preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code)) {
+                $renderer->assign('gtm_code', $code);
+            }
+        }
+
         if ($faData = $userPreferenceManager->dataOf('facebook-analytics')) {
             $code = isset($faData['code']) ? (string)$faData['code'] : '';
             if (1 === preg_match('#^[0-9]{15}$#', $code)) {
