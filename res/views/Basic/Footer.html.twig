@@ -1,41 +1,41 @@
 {% set global_content_settings = this.getDesignSettings('global_content') %}
 {% if global_content_settings['footer_background_color'] is defined and global_content_settings['footer_background_color'] %}
-  {% set footer_background_color_id = global_content_settings['footer_background_color'] %}
+    {% set footer_background_color_id = global_content_settings['footer_background_color'] %}
 {% endif %}
 {% if global_content_settings['copyright_background_color'] is defined and global_content_settings['copyright_background_color'] %}
-  {% set copyright_background_color_id = global_content_settings['copyright_background_color'] %}
+    {% set copyright_background_color_id = global_content_settings['copyright_background_color'] %}
 {% endif %}
 
 <footer id="footer" class="footer footer-wrapper" role="contentinfo">
-  <div class="footer-main {% if footer_background_color_id is defined %} has-bg-color {{ footer_background_color_id }} {% endif %}">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12 text-center">
-          {{this.render(this.globalContentFactory().getFooterLogo(), 'logo_footer')|raw}}
+    <div class="footer-main {% if footer_background_color_id is defined %} has-bg-color {{ footer_background_color_id }} {% endif %}">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    {{ this.render(this.globalContentFactory().getFooterLogo(), 'logo_footer', {'in_fluid': false, 'colsize': 4})|raw }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    {{ this.render(this.globalContentFactory().getFooterContent('social', 'Social/Icons'), 'fix')|raw }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    {{ this.render(this.globalContentFactory().getFooterContent('address', 'Text/Paragraph'), 'fix')|raw }}
+                </div>
+            </div>
         </div>
-      </div>
-          <div class="row">
-        <div class="col-md-12 text-center">
-          {{this.render(this.globalContentFactory().getFooterContent('social', 'Social/Icons'), 'fix')|raw}}
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12 text-center">
-          {{this.render(this.globalContentFactory().getFooterContent('address', 'Text/Paragraph'), 'fix')|raw}}
-        </div>
-      </div>
     </div>
-  </div>
-  <div class="footer-copyright {% if copyright_background_color_id is defined %} has-bg-color {{ copyright_background_color_id }} {% endif %}">
-    <div class="container">
-      <div class="row">
-        <div class="footer-copyright-left mr-lg-auto pr-sm-5">
-          {{this.render(this.globalContentFactory().getFooterContent('copyright', 'Text/Paragraph'), 'copyright')|raw}}
+    <div class="footer-copyright {% if copyright_background_color_id is defined %} has-bg-color {{ copyright_background_color_id }} {% endif %}">
+        <div class="container">
+            <div class="row">
+                <div class="footer-copyright-left mr-lg-auto pr-sm-5">
+                    {{ this.render(this.globalContentFactory().getFooterContent('copyright', 'Text/Paragraph'), 'copyright')|raw }}
+                </div>
+                <div class="footer-copyright-right ml-lg-auto d-flex align-items-center">
+                    {{ this.render(this.globalContentFactory().getFooterMenu(), 'footer')|raw }}
+                </div>
+            </div>
         </div>
-        <div class="footer-copyright-right ml-lg-auto d-flex align-items-center">
-          {{this.render(this.globalContentFactory().getFooterMenu(), 'footer')|raw}}
-        </div>
-      </div>
     </div>
-  </div>
 </footer>
