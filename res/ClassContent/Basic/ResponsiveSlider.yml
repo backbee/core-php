@@ -1,0 +1,58 @@
+ResponsiveSlider:
+    properties:
+        name: Responsive slider
+        description: ~
+        category: [ block_category_basics ]
+        resizable: true
+    elements:
+        images:
+            type: \BackBee\ClassContent\Basic\Image
+            maxentry: 0
+    parameters:
+        image:
+            type: imageList
+            target_element: images
+            value: [ ]
+            tab: yaml_block_slider_image
+        full_figure:
+            type: switch
+            label: yaml_block_slider_display_full_figure
+            value: false
+            tab: yaml_block_slider_style
+        long_description:
+            type: switch
+            label: yaml_block_slider_long_description
+            value: false
+            tab: yaml_block_slider_style
+        bg_color:
+            type: color
+            label: yaml_block_button_color
+            value: 'color-secondary'
+            disable_transparent: false
+            tab: yaml_block_slider_style
+        autoplay:
+            type: switch
+            label: yaml_block_slider_autoplay
+            value: false
+            tab: yaml_block_slider_style
+        only_slider:
+            type: switch
+            label: yaml_block_slider_only_slider
+            value: false
+            tab: yaml_block_slider_style
+        reduiced_width:
+            type: switch
+            label: yaml_block_slider_reduced_width
+            value: false
+            tab: yaml_block_slider_style
+        navigation:
+            type: select
+            label: yaml_block_slider_navigation
+            options:
+                hidenav: yaml_block_slider_hidenav
+                shownav: yaml_block_slider_shownav
+                shownavonhover: yaml_block_slider_shownavonhover
+            value: shownav
+            tab: yaml_block_slider_style
+        height:
+            value: ~
