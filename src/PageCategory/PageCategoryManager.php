@@ -148,4 +148,17 @@ class PageCategoryManager
     {
         return $this->entityManager->getRepository(PageCategory::class)->findOneBy(['page' => $page]);
     }
+
+    /**
+     * Delete association by page.
+     *
+     * @param Page $page
+     */
+    public function deleteAssociationByPage(Page $page): void
+    {
+        if (null !== $association = $this->getAssociationByPage($page)) {
+            $this->entityManager->remove($association);
+            return;
+        }
+    }
 }
