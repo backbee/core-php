@@ -442,7 +442,12 @@ class PageListener
                 $menu->setDraft($originalDraft);
             }
 
-            $pageAssociationMgr->deleteAssociatedPage($page);
+            if ($app->getContainer()->get('multilang_manager')->isActive()) {
+                $pageAssociationMgr->deleteAssociatedPage($page);
+            }
+
+            $app->getContainer()->get('cloud.page_category.manager')->deleteAssociationByPage($page);
+
             $entityMgr->getRepository(Page::class)->deletePage($page);
             $entityMgr->flush();
         }
