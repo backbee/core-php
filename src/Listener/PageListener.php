@@ -442,7 +442,10 @@ class PageListener
                 $menu->setDraft($originalDraft);
             }
 
-            $pageAssociationMgr->deleteAssociatedPage($page);
+            if ($app->getContainer()->get('multilang_manager')->isActive()) {
+                $pageAssociationMgr->deleteAssociatedPage($page);
+            }
+
             $entityMgr->getRepository(Page::class)->deletePage($page);
             $entityMgr->flush();
         }
