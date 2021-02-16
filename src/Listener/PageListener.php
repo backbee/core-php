@@ -446,6 +446,8 @@ class PageListener
                 $pageAssociationMgr->deleteAssociatedPage($page);
             }
 
+            $app->getContainer()->get('cloud.page_category.manager')->deleteAssociationByPage($page);
+
             $entityMgr->getRepository(Page::class)->deletePage($page);
             $entityMgr->flush();
         }

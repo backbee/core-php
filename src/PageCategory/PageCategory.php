@@ -23,7 +23,7 @@ class PageCategory
     protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="BackBee\NestedNode\Page")
+     * @ORM\OneToOne(targetEntity="BackBee\NestedNode\Page", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="page_uid", referencedColumnName="uid", nullable=false)
      *
      * @var Page
