@@ -16,13 +16,21 @@ services:
     twig.extension.intl:
         class: Twig_Extensions_Extension_Intl
         tags:
-            -
-                name: twig.extension
+            -   name: twig.extension
     # BackBee
+    backbee.logger:
+        class: BackBee\Logging\Logger
+
     cloud.page_manager:
         class: BackBeeCloud\Entity\PageManager
         arguments:
             - "@bbapp"
+            - "@core.knowledge_graph.seo_metadata.manager"
+
+    core.page.page_from_raw_data:
+        class: BackBeeCloud\Page\PageFromRawData
+        arguments:
+            [ '@em', '@elasticsearch.manager' ]
 
     cloud.content_manager:
         class: BackBeeCloud\Entity\ContentManager
@@ -135,6 +143,10 @@ services:
     cloud.api.site_controller:
         class: BackBeeCloud\Api\Controller\SiteController
         arguments: [ "@site_status.manager" ]
+
+    cloud.api.knowledge_graph.controller:
+        class: BackBeeCloud\Api\Controller\KnowledgeGraphController
+        arguments: [ '@bbapp', '@config' ]
 
     cloud.api.user_controller.listener:
         class: BackBeeCloud\Listener\Api\UserListener
@@ -368,10 +380,11 @@ services:
             - [ setApplication, [ @bbapp ] ]
 
     security.voter.sudo:
-        class: BackBeeCloud\Security\Authorization\Voter\SudoVoter
+        class: BackBeeCloud\Security\Authorization\Voter\BackBeeSudoVoter
         arguments:
             - "@em"
             - "@security.voter.user_right"
+            - "@bbapp"
 
     security.voter.user_right:
         class: BackBeeCloud\Security\Authorization\Voter\UserRightVoter
@@ -379,9 +392,9 @@ services:
             - "@cloud.group_type.manager"
             - "@cloud.group_type_right.manager"
 
-    cloud.api.acl_controller:
-        class: BackBeeCloud\Api\Controller\AclController
-        arguments: [ "@bbapp" ]
+    #    cloud.api.acl_controller:
+    #        class: BackBeeCloud\Api\Controller\AclController
+    #        arguments: [ "@bbapp" ]
 
     # Search pages by tag services
     cloud.page_by_tag.manager:
@@ -527,21 +540,21 @@ services:
         arguments: [ '@app.optimize_image.manager' ]
 
     # Sitemap
-    app.sitemap.manager:
+    core.sitemap.manager:
         class: BackBeePlanet\Sitemap\SitemapManager
         arguments: [ '@bbapp', '@config' ]
 
-    app.sitemap.controller:
+    core.sitemap.controller:
         class: BackBeePlanet\Controller\SitemapController
-        arguments: [ '@bbapp', '@app.sitemap.manager', '@config' ]
+        arguments: [ '@bbapp', '@core.sitemap.manager', '@config' ]
 
-    app.sitemap.query_builder:
+    core.sitemap.query_builder:
         class: BackBeePlanet\Sitemap\Query\QueryBuilder
         arguments: [ '@em', '@site' ]
 
-    app.sitemap.listener:
+    core.sitemap.listener:
         class: BackBeePlanet\Listener\SitemapListener
-        arguments: [ '@bbapp', '@app.sitemap.manager', '@config' ]
+        arguments: [ '@bbapp', '@core.sitemap.manager', '@config' ]
 
     # Search engine
     core.search_engine.controller:
@@ -552,3 +565,29 @@ services:
         class: BackBeeCloud\SearchEngine\SearchEngineManager
         arguments:
             [ '@user_preference.manager' ]
+
+    # Knowledge Graph
+    core.knowledge_graph.seo_metadata.manager:
+        class: BackBee\KnowledgeGraph\SeoMetadataManager
+        arguments:
+            - '@bbapp'
+            - '@em'
+            - '@core.search_engine.manager'
+            - '@elasticsearch.manager'
+            - '@multilang_manager'
+            - '@cloud.multilang.page_association.manager'
+
+    core.knowledge_graph.manager:
+        class: BackBee\KnowledgeGraph\KnowledgeGraphManager
+        arguments:
+            - '@bbapp'
+            - '@user_preference.manager'
+            - '@config'
+            - '@core.page.page_from_raw_data'
+            - '@core.knowledge_graph.seo_metadata.manager'
+
+    # Menu
+    core.menu.listener:
+        class: BackBeeCloud\Listener\MenuListener
+        arguments:
+            [ '@bbapp' ]

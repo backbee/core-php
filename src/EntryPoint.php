@@ -7,8 +7,13 @@ use BackBee\Bundle\AbstractBundle;
 use BackBee\Config\Config;
 use BackBeeCloud\Translation\HasTranslatableResourceInterface;
 use Exception;
+use function dirname;
 
 /**
+ * Class EntryPoint
+ *
+ * @package BackBeeCloud
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterface
@@ -44,7 +49,22 @@ class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterf
     public static function onLoadConfigurations(BBApplication $app, Config $config): void
     {
         // Sitemaps
-        $app->getConfig()->setSection('sitemaps', $config->getRawSection('sitemaps'), false);
+        $app->getConfig()->setSection(
+            'sitemaps',
+            array_replace_recursive(
+                $config->getRawSection('sitemaps') ?? [],
+                $app->getConfig()->getSection('sitemaps') ?? []
+            )
+        );
+
+        // Knowledge Graph
+        $app->getConfig()->setSection(
+            'knowledge_graph',
+            array_replace_recursive(
+                $config->getRawSection('knowledge_graph') ?? [],
+                $app->getConfig()->getSection('knowledge_graph') ?? []
+            )
+        );
     }
 
     /**

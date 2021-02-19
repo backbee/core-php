@@ -42,7 +42,8 @@
     "autoload": {
         "psr-4": {
             "BackBeeCloud\\": "src/",
-            "BackBeePlanet\\": "src/"
+            "BackBeePlanet\\": "src/",
+            "BackBee\\": "src/"
         }
     }
 }

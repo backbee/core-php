@@ -129,7 +129,7 @@ class SitemapController
     {
         $pathInfo = (string)str_replace('.gz', '', $request->getPathInfo());
 
-        //if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
+        if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
             $preset = $this->getPreset($decorator, $request->attributes->all());
             $params = $this->getParams($id);
             $sitemaps = $decorator->render($preset, $params);
@@ -139,8 +139,8 @@ class SitemapController
 
             $sitemap = $sitemaps[$pathInfo];
 
-            //$this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
-        //}
+            $this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
+        }
 
         return $sitemap;
     }

@@ -261,9 +261,12 @@ class OptimizeImageManager
 
         return ' ' . (implode(
             ' ',
-            array_map(static function ($key) use ($options) {
-                return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
-            }, array_keys($options))
+            array_map(
+                static function ($key) use ($options) {
+                    return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
+                },
+                array_keys($options)
+            )
         )) . ' ';
     }
 
@@ -328,7 +331,7 @@ class OptimizeImageManager
 
         if (UserAgentHelper::isMobile()) {
             $size = $colSizesSettings[$browserColSizesSettings['min']];
-        } elseif (null !== $colSizesSettings[$colSize] ?? null) {
+        } elseif (null !== ($colSizesSettings[$colSize] ?? null)) {
             $size = $colSizesSettings[$colSize];
         } else {
             $size = $colSizesSettings[$browserColSizesSettings['max']];
