@@ -2,10 +2,11 @@
 
 namespace BackBeeCloud;
 
-use BackBeeCloud\Translation\HasTranslatableResourceInterface;
 use BackBee\BBApplication;
 use BackBee\Bundle\AbstractBundle;
 use BackBee\Config\Config;
+use BackBeeCloud\Translation\HasTranslatableResourceInterface;
+use Exception;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -13,10 +14,14 @@ use BackBee\Config\Config;
 class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterface
 {
     /**
-     * @param  BBApplication $app
-     * @param  Config        $config
+     * On load events.
+     *
+     * @param BBApplication $app
+     * @param Config        $config
+     *
+     * @throws Exception
      */
-    public static function onLoadEvents(BBApplication $app, Config $config)
+    public static function onLoadEvents(BBApplication $app, Config $config): void
     {
         $app->getConfig()->setSection(
             'events',
@@ -26,6 +31,20 @@ class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterf
 
         $app->getEventDispatcher()->clearAllListeners();
         $app->getEventDispatcher()->addListeners($config->getRawSection('events'));
+    }
+
+    /**
+     * On load configurations.
+     *
+     * @param BBApplication $app
+     * @param Config        $config
+     *
+     * @throws Exception
+     */
+    public static function onLoadConfigurations(BBApplication $app, Config $config): void
+    {
+        // Sitemaps
+        $app->getConfig()->setSection('sitemaps', $config->getRawSection('sitemaps'), false);
     }
 
     /**
@@ -44,8 +63,11 @@ class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterf
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getTranslationDirectory()
     {
-        return realpath($this->getBaseDirectory() . '/../res/translations');
+        return dirname($this->getBaseDirectory()) . '/res/translations';
     }
 }
