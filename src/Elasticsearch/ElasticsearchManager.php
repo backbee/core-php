@@ -20,6 +20,7 @@ use BackBeeCloud\Entity\PageTag;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\PageCategory\PageCategoryManager;
+use BackBeeCloud\PageType\TypeInterface;
 use BackBeeCloud\PageType\TypeManager;
 use BackBeePlanet\ElasticsearchManager as PlanetElasticSearchManager;
 use BackBeePlanet\Job\ElasticsearchJob;
@@ -96,9 +97,9 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
             'url' => $page->getUrl(),
             'image_uid' => $this->extractImageUidFromPage($page),
             'contents' => $this->extractTextsFromPage($page),
-            'type' => $type->uniqueName(),
+            'type' => $type instanceof TypeInterface ? $type->uniqueName() : '',
             'is_online' => $page->isOnline(),
-            'is_pullable' => $type->isPullable(),
+            'is_pullable' => $type instanceof TypeInterface ? $type->isPullable() : false,
             'created_at' => $page->getCreated()->format('Y-m-d H:i:s'),
             'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at' => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,

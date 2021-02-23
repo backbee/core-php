@@ -1,630 +1,629 @@
-
 # Override "bb.rss" pattern to also work for home page
 bb.rss:
-  pattern: /rss/{uri}
-  defaults:
-    _action: rssAction
-    _controller: controller
-    uri:     _root_
-  requirements:
-    uri: .*
+    pattern: /rss/{uri}
+    defaults:
+        _action: rssAction
+        _controller: controller
+        uri: _root_
+    requirements:
+        uri: .*
 
 # Send contact email
 
 cloud.send_contact:
-  pattern: /send-contact
-  defaults:
-    _action: send
-    _controller: contact_controller
-  requirements:
-    _method: POST
+    pattern: /send-contact
+    defaults:
+        _action: send
+        _controller: contact_controller
+    requirements:
+        _method: POST
 
 # Newsletter
 
 cloud.newsletter_send:
-  pattern: /newsletter/send
-  defaults:
-    _action: send
-    _controller: newsletter_controller
-  requirements:
-    _method: POST
+    pattern: /newsletter/send
+    defaults:
+        _action: send
+        _controller: newsletter_controller
+    requirements:
+        _method: POST
 
 # robots.txt
 
 cloud.robots_txt:
-  pattern: /robots.txt
-  defaults:
-    _action: robotsTxt
-    _controller: search_engine_controller
-  requirements:
-    _method: GET
+    pattern: /robots.txt
+    defaults:
+        _action: robotsTxt
+        _controller: core.search_engine.controller
+    requirements:
+        _method: GET
 
 # ACL API
 
 cloud.api.acl.get:
-  pattern: /api/acl-permissions/{id}
-  defaults:
-    _action: get
-    _controller: cloud.api.acl_controller
-  requirements:
-    _method: GET
-    id: \d+
+    pattern: /api/acl-permissions/{id}
+    defaults:
+        _action: get
+        _controller: cloud.api.acl_controller
+    requirements:
+        _method: GET
+        id: \d+
 
 # MailChimp API
 
 cloud.api.mailchimp.get_information:
-  pattern: /api/mailchimp/get-information
-  defaults:
-    _action: getInformation
-    _controller: cloud.api.mailchimp_controller
-  requirements:
-    _method: GET
+    pattern: /api/mailchimp/get-information
+    defaults:
+        _action: getInformation
+        _controller: cloud.api.mailchimp_controller
+    requirements:
+        _method: GET
 
 cloud.api.mailchimp.get_token:
-  pattern: /api/mailchimp/get-token/{code}
-  defaults:
-    _action: getToken
-    _controller: cloud.api.mailchimp_controller
-  requirements:
-    _method: GET
+    pattern: /api/mailchimp/get-token/{code}
+    defaults:
+        _action: getToken
+        _controller: cloud.api.mailchimp_controller
+    requirements:
+        _method: GET
 
 cloud.api.mailchimp.get_lists:
-  pattern: /api/mailchimp/lists/{token}
-  defaults:
-    _action: getLists
-    _controller: cloud.api.mailchimp_controller
-  requirements:
-    _method: GET
+    pattern: /api/mailchimp/lists/{token}
+    defaults:
+        _action: getLists
+        _controller: cloud.api.mailchimp_controller
+    requirements:
+        _method: GET
 
 # User right API
 cloud.api.user_right.get_user_rights_collection:
-  pattern: /api/user-rights/current-user-rights
-  defaults:
-    _action: getCurrentUserRightsCollection
-    _controller: cloud.api.user_right.controller
-    requirements:
-      _method: GET
+    pattern: /api/user-rights/current-user-rights
+    defaults:
+        _action: getCurrentUserRightsCollection
+        _controller: cloud.api.user_right.controller
+        requirements:
+            _method: GET
 
 cloud.api.user_right.get_user_authorized_categories_collection:
-  pattern: /api/user-rights/current-user-authorized-categories
-  defaults:
-    _action: getCurrentUserAuthorizedCategoriesCollection
-    _controller: cloud.api.user_right.controller
-    requirements:
-      _method: GET
+    pattern: /api/user-rights/current-user-authorized-categories
+    defaults:
+        _action: getCurrentUserAuthorizedCategoriesCollection
+        _controller: cloud.api.user_right.controller
+        requirements:
+            _method: GET
 
 # GroupType API
 
 cloud.api.group_type.get_collection:
-  pattern: /api/group-types
-  defaults:
-    _action: getCollection
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: GET
+    pattern: /api/group-types
+    defaults:
+        _action: getCollection
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: GET
 
 cloud.api.group_type.create:
-  pattern: /api/group-types
-  defaults:
-    _action: create
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: POST
+    pattern: /api/group-types
+    defaults:
+        _action: create
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: POST
 
 cloud.api.group_type.update:
-  pattern: /api/group-types/{id}
-  defaults:
-    _action: update
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: PUT
+    pattern: /api/group-types/{id}
+    defaults:
+        _action: update
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: PUT
 
 cloud.api.group_type.delete:
-  pattern: /api/group-types/{id}
-  defaults:
-    _action: delete
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: DELETE
+    pattern: /api/group-types/{id}
+    defaults:
+        _action: delete
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: DELETE
 
 cloud.api.group_type.get_users_collection:
-  pattern: /api/group-types/{groupTypeId}/users
-  defaults:
-    _action: getGroupTypeUsersCollection
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: GET
+    pattern: /api/group-types/{groupTypeId}/users
+    defaults:
+        _action: getGroupTypeUsersCollection
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: GET
 
 cloud.api.group_type.link_user:
-  pattern: /api/group-types/{groupTypeId}/add-user/{userId}
-  defaults:
-    _action: linkUser
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: POST
+    pattern: /api/group-types/{groupTypeId}/add-user/{userId}
+    defaults:
+        _action: linkUser
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: POST
 
 cloud.api.group_type.delete_user:
-  pattern: /api/group-types/{groupTypeId}/remove-user/{userId}
-  defaults:
-    _action: deleteUser
-    _controller: cloud.api.group_type.controller
-  requirements:
-    _method: DELETE
+    pattern: /api/group-types/{groupTypeId}/remove-user/{userId}
+    defaults:
+        _action: deleteUser
+        _controller: cloud.api.group_type.controller
+    requirements:
+        _method: DELETE
 
 # User preference API
 
 cloud.api.user_preferences.get_collection:
-  pattern: /api/user-preferences
-  defaults:
-    _action: getCollection
-    _controller: cloud.api.user_preference_controller
-  requirements:
-    _method: GET
+    pattern: /api/user-preferences
+    defaults:
+        _action: getCollection
+        _controller: cloud.api.user_preference_controller
+    requirements:
+        _method: GET
 
 cloud.api.user_preferences.get:
-  pattern: /api/user-preferences/{name}
-  defaults:
-    _action: get
-    _controller: cloud.api.user_preference_controller
-  requirements:
-    _method: GET
+    pattern: /api/user-preferences/{name}
+    defaults:
+        _action: get
+        _controller: cloud.api.user_preference_controller
+    requirements:
+        _method: GET
 
 cloud.api.user_preferences.put:
-  pattern: /api/user-preferences/{name}
-  defaults:
-    _action: put
-    _controller: cloud.api.user_preference_controller
-  requirements:
-    _method: PUT
+    pattern: /api/user-preferences/{name}
+    defaults:
+        _action: put
+        _controller: cloud.api.user_preference_controller
+    requirements:
+        _method: PUT
 
 cloud.api.user_preferences.delete:
-  pattern: /api/user-preferences/{name}
-  defaults:
-    _action: delete
-    _controller: cloud.api.user_preference_controller
-  requirements:
-    _method: DELETE
+    pattern: /api/user-preferences/{name}
+    defaults:
+        _action: delete
+        _controller: cloud.api.user_preference_controller
+    requirements:
+        _method: DELETE
 
 # Import Status API
 
 cloud.import_status:
-  pattern: /api/import-status
-  defaults:
-    _action: getCollection
-    _controller: cloud.api.import_status_controller
+    pattern: /api/import-status
+    defaults:
+        _action: getCollection
+        _controller: cloud.api.import_status_controller
 
 # Search route
 
 cloud.search:
-  pattern: /search
-  defaults:
-    _action: searchAction
-    _controller: cloud.search_controller
-  requirements:
-    _method: GET
+    pattern: /search
+    defaults:
+        _action: searchAction
+        _controller: cloud.search_controller
+    requirements:
+        _method: GET
 
 # User API
 
 cloud.api.user.update_password:
-  pattern: /api/users/{id}/update-password
-  defaults:
-    _action: updatePassword
-    _controller: cloud.api.user_controller
-  requirements:
-    id: \d+
-    _method: PUT
+    pattern: /api/users/{id}/update-password
+    defaults:
+        _action: updatePassword
+        _controller: cloud.api.user_controller
+    requirements:
+        id: \d+
+        _method: PUT
 
 # Content API
 
 cloud.api.contents.delete:
-  pattern: /api/contents/{type}/{uid}
-  defaults:
-    _action: delete
-    _controller: cloud.api.content_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    type: .+
-    _method: DELETE
+    pattern: /api/contents/{type}/{uid}
+    defaults:
+        _action: delete
+        _controller: cloud.api.content_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        type: .+
+        _method: DELETE
 
 cloud.api.contents.commit_page:
-  pattern: /api/contents/commit-page/{pageuid}
-  defaults:
-    _action: commitPage
-    _controller: cloud.api.content_controller
-  requirements:
-    pageuid: "[a-f0-9]{32}"
-    _method: PUT
+    pattern: /api/contents/commit-page/{pageuid}
+    defaults:
+        _action: commitPage
+        _controller: cloud.api.content_controller
+    requirements:
+        pageuid: "[a-f0-9]{32}"
+        _method: PUT
 
 cloud.api.contents.get_pages_to_commit:
-  pattern: /api/contents/pages-to-commit
-  defaults:
-    _action: getPagesToCommit
-    _controller: cloud.api.content_controller
-  requirements:
-    _method: GET
+    pattern: /api/contents/pages-to-commit
+    defaults:
+        _action: getPagesToCommit
+        _controller: cloud.api.content_controller
+    requirements:
+        _method: GET
 
 cloud.api.contents.reset:
-  pattern: /api/contents/reset-page/{pageuid}
-  defaults:
-    _action: reset
-    _controller: cloud.api.content_controller
-  requirements:
-    pageuid: "[a-f0-9]{32}"
-    _method: PUT
+    pattern: /api/contents/reset-page/{pageuid}
+    defaults:
+        _action: reset
+        _controller: cloud.api.content_controller
+    requirements:
+        pageuid: "[a-f0-9]{32}"
+        _method: PUT
 
 # Page type API
 
 cloud.api.pages_types.get_collection:
-  pattern: /api/pages-types
-  defaults:
-    _action: getCollection
-    _controller: cloud.api.page_type_controller
-  requirements:
-    _method: GET
+    pattern: /api/pages-types
+    defaults:
+        _action: getCollection
+        _controller: cloud.api.page_type_controller
+    requirements:
+        _method: GET
 
 # Page category API
 
 cloud.api.page_category.get_collection:
-  pattern: /api/page-categories
-  defaults:
-    _action: getCollectionAction
-    _controller: cloud.page_category.api_controller
-  requirements:
-    _method: GET
+    pattern: /api/page-categories
+    defaults:
+        _action: getCollectionAction
+        _controller: cloud.page_category.api_controller
+    requirements:
+        _method: GET
 
 # Page API
 
 cloud.api.pages.get:
-  pattern: /api/pages/{uid}
-  defaults:
-    _action: get
-    _controller: cloud.api.page_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: GET
+    pattern: /api/pages/{uid}
+    defaults:
+        _action: get
+        _controller: cloud.api.page_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: GET
 
 cloud.api.pages.get_collection:
-  pattern: /api/pages
-  defaults:
-    _action: getCollection
-    _controller: cloud.api.page_controller
-  requirements:
-    _method: GET
+    pattern: /api/pages
+    defaults:
+        _action: getCollection
+        _controller: cloud.api.page_controller
+    requirements:
+        _method: GET
 
 cloud.api.pages.post:
-  pattern: /api/pages
-  defaults:
-    _action: post
-    _controller: cloud.api.page_controller
-  requirements:
-    _method: POST
+    pattern: /api/pages
+    defaults:
+        _action: post
+        _controller: cloud.api.page_controller
+    requirements:
+        _method: POST
 
 cloud.api.pages.put:
-  pattern: /api/pages/{uid}
-  defaults:
-    _action: put
-    _controller: cloud.api.page_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: PUT
+    pattern: /api/pages/{uid}
+    defaults:
+        _action: put
+        _controller: cloud.api.page_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: PUT
 
 cloud.api.pages.delete:
-  pattern: /api/pages/{uid}
-  defaults:
-    _action: delete
-    _controller: cloud.api.page_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: DELETE
+    pattern: /api/pages/{uid}
+    defaults:
+        _action: delete
+        _controller: cloud.api.page_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: DELETE
 
 cloud.api.pages.duplicate:
-  pattern: /api/pages/duplicate/{uid}
-  defaults:
-    _action: duplicate
-    _controller: cloud.api.page_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: POST
+    pattern: /api/pages/duplicate/{uid}
+    defaults:
+        _action: duplicate
+        _controller: cloud.api.page_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: POST
 
 # Tag API
 
 cloud.api.tags.get_collection:
-  pattern: /api/tags
-  defaults:
-    _action: getCollection
-    _controller: cloud.api.tag_controller
-  requirements:
-    _method: GET
+    pattern: /api/tags
+    defaults:
+        _action: getCollection
+        _controller: cloud.api.tag_controller
+    requirements:
+        _method: GET
 
 cloud.api.tags.get:
-  pattern: /api/tags/{uid}
-  defaults:
-    _action: get
-    _controller: cloud.api.tag_controller
-  requirements:
-    _method: GET
-    uid: "[a-f0-9]{32}"
+    pattern: /api/tags/{uid}
+    defaults:
+        _action: get
+        _controller: cloud.api.tag_controller
+    requirements:
+        _method: GET
+        uid: "[a-f0-9]{32}"
 
 cloud.api.tags.get_tree_first_level:
-  pattern: /api/tags/tree-first-level
-  defaults:
-    _action: getTreeFirstLevelTags
-    _controller: cloud.api.tag_controller
-  requirements:
-    _method: GET
+    pattern: /api/tags/tree-first-level
+    defaults:
+        _action: getTreeFirstLevelTags
+        _controller: cloud.api.tag_controller
+    requirements:
+        _method: GET
 
 cloud.api.tags.get_children:
-  pattern: /api/tags/{uid}/children
-  defaults:
-    _action: getChildren
-    _controller: cloud.api.tag_controller
-  requirements:
-    _method: GET
+    pattern: /api/tags/{uid}/children
+    defaults:
+        _action: getChildren
+        _controller: cloud.api.tag_controller
+    requirements:
+        _method: GET
 
 cloud.api.tags.linked_pages:
-  pattern: /api/tags/{uid}/linked-pages
-  defaults:
-    _action: getLinkedPages
-    _controller: cloud.api.tag_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: GET
+    pattern: /api/tags/{uid}/linked-pages
+    defaults:
+        _action: getLinkedPages
+        _controller: cloud.api.tag_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: GET
 
 cloud.api.tags.post:
-  pattern: /api/tags
-  defaults:
-    _action: post
-    _controller: cloud.api.tag_controller
-  requirements:
-    _method: POST
+    pattern: /api/tags
+    defaults:
+        _action: post
+        _controller: cloud.api.tag_controller
+    requirements:
+        _method: POST
 
 cloud.api.tags.put:
-  pattern: /api/tags/{uid}
-  defaults:
-    _action: put
-    _controller: cloud.api.tag_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: PUT
+    pattern: /api/tags/{uid}
+    defaults:
+        _action: put
+        _controller: cloud.api.tag_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: PUT
 
 cloud.api.tags.delete:
-  pattern: /api/tags/{uid}
-  defaults:
-    _action: delete
-    _controller: cloud.api.tag_controller
-  requirements:
-    uid: "[a-f0-9]{32}"
-    _method: DELETE
+    pattern: /api/tags/{uid}
+    defaults:
+        _action: delete
+        _controller: cloud.api.tag_controller
+    requirements:
+        uid: "[a-f0-9]{32}"
+        _method: DELETE
 
 cloud.hauth.authenticate:
-  pattern: /social/authenticate
-  defaults:
-    _action: authenticateAction
-    _controller: cloud.hauth.controller
-  requirements:
-    _method: POST
+    pattern: /social/authenticate
+    defaults:
+        _action: authenticateAction
+        _controller: cloud.hauth.controller
+    requirements:
+        _method: POST
 
 # Site API
 
 api.site.work_progress:
-  pattern: /api/sites/work-progress
-  defaults:
-    _action: getWorkProgress
-    _controller: cloud.api.site_controller
-  requirements:
-    _method: GET
+    pattern: /api/sites/work-progress
+    defaults:
+        _action: getWorkProgress
+        _controller: cloud.api.site_controller
+    requirements:
+        _method: GET
 
 # MultiLang API
 
 api.multilang.get_collection:
-  pattern: /api/langs
-  defaults:
-    _action: getCollection
-    _controller: api.multilang_controller
-  requirements:
-    _method: GET
+    pattern: /api/langs
+    defaults:
+        _action: getCollection
+        _controller: api.multilang_controller
+    requirements:
+        _method: GET
 
 api.multilang.get:
-  pattern: /api/langs/{id}
-  defaults:
-    _action: get
-    _controller: api.multilang_controller
-  requirements:
-    _method: GET
+    pattern: /api/langs/{id}
+    defaults:
+        _action: get
+        _controller: api.multilang_controller
+    requirements:
+        _method: GET
 
 api.multilang.enable:
-  pattern: /api/langs/enable/{id}
-  defaults:
-    _action: enable
-    _controller: api.multilang_controller
-  requirements:
-    _method: PUT
+    pattern: /api/langs/enable/{id}
+    defaults:
+        _action: enable
+        _controller: api.multilang_controller
+    requirements:
+        _method: PUT
 
 api.multilang.disable:
-  pattern: /api/langs/disable/{id}
-  defaults:
-    _action: disable
-    _controller: api.multilang_controller
-  requirements:
-    _method: PUT
+    pattern: /api/langs/disable/{id}
+    defaults:
+        _action: disable
+        _controller: api.multilang_controller
+    requirements:
+        _method: PUT
 
 api.multilang.define_default:
-  pattern: /api/langs/define-default/{id}
-  defaults:
-    _action: defineDefault
-    _controller: api.multilang_controller
-  requirements:
-    _method: PUT
+    pattern: /api/langs/define-default/{id}
+    defaults:
+        _action: defineDefault
+        _controller: api.multilang_controller
+    requirements:
+        _method: PUT
 
 # Color Panel API
 api.theme_color.get_all_themes:
-  pattern: /api/theme-colors
-  defaults:
-    _action: getAllThemesAction
-    _controller: cloud.api.theme_color.controller
-  requirements:
-    _method: GET
+    pattern: /api/theme-colors
+    defaults:
+        _action: getAllThemesAction
+        _controller: cloud.api.theme_color.controller
+    requirements:
+        _method: GET
 
 api.theme_color.get_current_theme:
-  pattern: /api/current-theme
-  defaults:
-    _action: getCurrentThemeAction
-    _controller: cloud.api.theme_color.controller
-  requirements:
-    _method: GET
+    pattern: /api/current-theme
+    defaults:
+        _action: getCurrentThemeAction
+        _controller: cloud.api.theme_color.controller
+    requirements:
+        _method: GET
 
 api.color_panel.change_theme_color:
-  pattern: /api/color-panel/change-theme
-  defaults:
-    _action: changeThemeColorAction
-    _controller: cloud.api.color_panel.controller
-  requirements:
-    _method: PUT
+    pattern: /api/color-panel/change-theme
+    defaults:
+        _action: changeThemeColorAction
+        _controller: cloud.api.color_panel.controller
+    requirements:
+        _method: PUT
 
 api.color_panel.get:
-  pattern: /api/color-panel
-  defaults:
-    _action: getAction
-    _controller: cloud.api.color_panel.controller
-  requirements:
-    _method: GET
+    pattern: /api/color-panel
+    defaults:
+        _action: getAction
+        _controller: cloud.api.color_panel.controller
+    requirements:
+        _method: GET
 
 api.color_panel.get_all_colors:
-  pattern: /api/color-panel/colors
-  defaults:
-    _action: getAllColorsAction
-    _controller: cloud.api.color_panel.controller
-  requirements:
-    _method: GET
+    pattern: /api/color-panel/colors
+    defaults:
+        _action: getAllColorsAction
+        _controller: cloud.api.color_panel.controller
+    requirements:
+        _method: GET
 
 api.color_panel.get_color_panel_css:
-  pattern: /css/color_panel_{hash}.css
-  defaults:
-    _action: getColorPanelCssAction
-    _controller: cloud.color_panel_css_genrator.controller
-  requirements:
-    _method: GET
+    pattern: /css/color_panel_{hash}.css
+    defaults:
+        _action: getColorPanelCssAction
+        _controller: cloud.color_panel_css_genrator.controller
+    requirements:
+        _method: GET
 
 api.color_panel.put:
-  pattern: /api/color-panel
-  defaults:
-    _action: putAction
-    _controller: cloud.api.color_panel.controller
-  requirements:
-    _method: PUT
+    pattern: /api/color-panel
+    defaults:
+        _action: putAction
+        _controller: cloud.api.color_panel.controller
+    requirements:
+        _method: PUT
 
 cloud.search_i18n:
-  pattern: /{lang}/search
-  defaults:
-    _action: searchAction
-    _controller: cloud.search_controller
-  requirements:
-    _method: GET
-    lang: "[a-z]{2}"
+    pattern: /{lang}/search
+    defaults:
+        _action: searchAction
+        _controller: cloud.search_controller
+    requirements:
+        _method: GET
+        lang: "[a-z]{2}"
 
 # Design API routes
 api.design.font.get_all:
-  pattern: /api/design/fonts
-  defaults:
-    _action: getAllAction
-    _controller: cloud.api.design.font.controller
-  requirements:
-    _method: GET
+    pattern: /api/design/fonts
+    defaults:
+        _action: getAllAction
+        _controller: cloud.api.design.font.controller
+    requirements:
+        _method: GET
 
 api.design.button.get_settings:
-  pattern: /api/design/button-settings
-  defaults:
-    _action: getSettingsAction
-    _controller: cloud.api.design.button.controller
-  requirements:
-    _method: GET
+    pattern: /api/design/button-settings
+    defaults:
+        _action: getSettingsAction
+        _controller: cloud.api.design.button.controller
+    requirements:
+        _method: GET
 
 api.design.button.get_shape_values:
-  pattern: /api/design/button-settings/shapes
-  defaults:
-    _action: getShapeValuesAction
-    _controller: cloud.api.design.button.controller
-  requirements:
-    _method: GET
+    pattern: /api/design/button-settings/shapes
+    defaults:
+        _action: getShapeValuesAction
+        _controller: cloud.api.design.button.controller
+    requirements:
+        _method: GET
 
 api.design.button.update_settings:
-  pattern: /api/design/button-settings
-  defaults:
-    _action: updateSettingsAction
-    _controller: cloud.api.design.button.controller
-  requirements:
-    _method: PUT
+    pattern: /api/design/button-settings
+    defaults:
+        _action: updateSettingsAction
+        _controller: cloud.api.design.button.controller
+    requirements:
+        _method: PUT
 
 api.design.global.content.get_background_colors:
-  pattern: /api/design/global-content-settings
-  defaults:
-    _action: getGlobalContentSettingsAction
-    _controller: cloud.api.design.global.content.controller
-  requirements:
-    _method: GET
+    pattern: /api/design/global-content-settings
+    defaults:
+        _action: getGlobalContentSettingsAction
+        _controller: cloud.api.design.global.content.controller
+    requirements:
+        _method: GET
 
 api.design.global.content.update_background_colors:
-  pattern: /api/design/global-content-settings
-  defaults:
-    _action: updateGlobalContentSettingsAction
-    _controller: cloud.api.design.global.content.controller
-  requirements:
-    _method: PUT
+    pattern: /api/design/global-content-settings
+    defaults:
+        _action: updateGlobalContentSettingsAction
+        _controller: cloud.api.design.global.content.controller
+    requirements:
+        _method: PUT
 
 # Search pages by tag routes
 cloud.search_by_tag:
-  pattern: /pages/tag/{tagName}
-  defaults:
-    _action: searchAction
-    _controller: cloud.page_by_tag.controller
-  requirements:
-    _method: GET
-    tagName: .+
+    pattern: /pages/tag/{tagName}
+    defaults:
+        _action: searchAction
+        _controller: cloud.page_by_tag.controller
+    requirements:
+        _method: GET
+        tagName: .+
 
 cloud.search_by_tag_i18n:
-  pattern: /{lang}/pages/tag/{tagName}
-  defaults:
-    _action: searchAction
-    _controller: cloud.page_by_tag.controller
-  requirements:
-    _method: GET
-    tagName: .+
-    lang: "[a-z]{2}"
+    pattern: /{lang}/pages/tag/{tagName}
+    defaults:
+        _action: searchAction
+        _controller: cloud.page_by_tag.controller
+    requirements:
+        _method: GET
+        tagName: .+
+        lang: "[a-z]{2}"
 
 # Page association API
 api.multilang.get_associated_pages:
-  pattern: /api/multilang/associated-pages/{pageuid}
-  defaults:
-    _action: getAssociatedPagesAction
-    _controller: cloud.multilang.page_association.controller
-  requirements:
-    _method: GET
-    pageuid: "[a-f0-9]{32}"
+    pattern: /api/multilang/associated-pages/{pageuid}
+    defaults:
+        _action: getAssociatedPagesAction
+        _controller: cloud.multilang.page_association.controller
+    requirements:
+        _method: GET
+        pageuid: "[a-f0-9]{32}"
 
 api.multilang.associated_pages_search:
-  pattern: /api/multilang/associated-pages/custom-search-page/{pageuid}
-  defaults:
-    _action: customSearchPageAction
-    _controller: cloud.multilang.page_association.controller
-  requirements:
-    _method: GET
-    pageuid: "[a-f0-9]{32}"
+    pattern: /api/multilang/associated-pages/custom-search-page/{pageuid}
+    defaults:
+        _action: customSearchPageAction
+        _controller: cloud.multilang.page_association.controller
+    requirements:
+        _method: GET
+        pageuid: "[a-f0-9]{32}"
 
 api.multilang.associate_pages:
-  pattern: /api/multilang/associated-pages/{pageuid}
-  defaults:
-    _action: associatePagesAction
-    _controller: cloud.multilang.page_association.controller
-  requirements:
-    _method: PUT
-    pageuid: "[a-f0-9]{32}"
+    pattern: /api/multilang/associated-pages/{pageuid}
+    defaults:
+        _action: associatePagesAction
+        _controller: cloud.multilang.page_association.controller
+    requirements:
+        _method: PUT
+        pageuid: "[a-f0-9]{32}"
 
 api.multilang.delete_page_association:
-  pattern: /api/multilang/associated-pages/{pageuid}
-  defaults:
-    _action: deletePageAssociationAction
-    _controller: cloud.multilang.page_association.controller
-  requirements:
-    _method: DELETE
-    pageuid: "[a-f0-9]{32}"
+    pattern: /api/multilang/associated-pages/{pageuid}
+    defaults:
+        _action: deletePageAssociationAction
+        _controller: cloud.multilang.page_association.controller
+    requirements:
+        _method: DELETE
+        pageuid: "[a-f0-9]{32}"
 
