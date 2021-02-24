@@ -3,3 +3,4 @@ bundle:
     enable: true
     bundle_loader_recipes:
         event: [ BackBeeCloud\EntryPoint, onLoadEvents ]
+        custom: [ BackBeeCloud\EntryPoint, onLoadConfigurations ]

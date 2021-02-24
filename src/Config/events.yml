@@ -12,6 +12,7 @@ bbapplication.init:
         - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
         - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
         - [ BackBeePlanet\Listener\OptimizeImageListener, onApplicationInit ]
+        - [ '@app.sitemap.listener', onApplicationInit ]
 
 bbapplication.start:
     listeners:

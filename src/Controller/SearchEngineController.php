@@ -2,16 +2,22 @@
 
 namespace BackBeeCloud\Controller;
 
+use BackBee\Renderer\Exception\RendererException;
 use BackBeeCloud\UserPreference\UserPreferenceManager;
 use BackBee\Renderer\Renderer;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
+ * Class SearchEngineController
+ *
+ * @package BackBeeCloud\Controller
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SearchEngineController
 {
-    const USER_PREFERENCE_DATA_KEY = 'search-engines';
+    public const USER_PREFERENCE_DATA_KEY = 'search-engines';
 
     /**
      * @var Renderer
@@ -23,18 +29,27 @@ class SearchEngineController
      */
     protected $usrPrefMgr;
 
+    /**
+     * SearchEngineController constructor.
+     *
+     * @param Renderer              $renderer
+     * @param UserPreferenceManager $usrPrefMgr
+     */
     public function __construct(Renderer $renderer, UserPreferenceManager $usrPrefMgr)
     {
         $this->renderer = $renderer;
         $this->usrPrefMgr = $usrPrefMgr;
     }
 
-    public function robotsTxt()
+    /**
+     * @return Response
+     * @throws RendererException
+     */
+    public function robotsTxt(): Response
     {
         $data = $this->usrPrefMgr->dataOf(self::USER_PREFERENCE_DATA_KEY);
         $content = $this->renderer->partial('common/robots.txt.twig', [
-            'do_index' => isset($data['robots_index']) && true == $data['robots_index'],
-            'has_sitemap' => $this->renderer->getApplication()->getContainer()->has('bundle.sitemap'),
+            'do_index' => isset($data['robots_index']) && true === $data['robots_index'],
         ]);
 
         return new Response($content, Response::HTTP_OK, [

@@ -1,0 +1,17 @@
+index:
+    active: true
+    url_pattern: /sitemap.xml
+    decorator: BackBeePlanet\Sitemap\Decorator\SitemapIndex
+    collector: BackBeePlanet\Sitemap\Query\IndexCollector
+    cache-control:
+        max_age: 86400
+urlset:
+    active: true
+    url_pattern: /sitemap-{index}.xml
+    decorator: BackBeePlanet\Sitemap\Decorator\UrlSet
+    iterator-step: 1500   # memory limit consideration
+    limits:
+        num_loc_per_page: 50000
+    cache-control:
+        max_age: 86400
+excluded: [ ]

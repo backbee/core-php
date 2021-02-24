@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {% for part in this.sitemapLocationIterator(locations, step) %}
+        {% for location in part if this.sitemapUrlHelper.isExcluded(location.getUrl()) %}
+            <url>
+                <loc>{{ this.sitemapUrlHelper.isUrlExtensionRequired(bb.routing.getUri(location.getUrl(), null, site)) }}</loc>
+                <lastmod>{{ this.dateHelper(location.modified, 'c') }}</lastmod>
+                <priority>{{ this.sitemapLocationPriority(location) }}</priority>
+            </url>
+        {% endfor %}
+    {% endfor %}
+</urlset>

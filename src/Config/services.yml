@@ -499,7 +499,7 @@ services:
 
     # Translator override
     translator:
-        class: Symfony\Component\Translation
+        class: Symfony\Component\Translation\Translator
         factory: [ "BackBeeCloud\Translation\TranslatorFactory", getTranslator ]
         arguments:
             - "@service_container"
@@ -523,3 +523,20 @@ services:
     app.optimize_image.listener:
         class: BackBeePlanet\Listener\OptimizeImageListener
         arguments: [ '@app.optimize_image.manager' ]
+
+    # Sitemap
+    app.sitemap.manager:
+        class: BackBeePlanet\Sitemap\SitemapManager
+        arguments: [ '@bbapp', '@config' ]
+
+    app.sitemap.controller:
+        class: BackBeePlanet\Controller\SitemapController
+        arguments: [ '@bbapp', '@app.sitemap.manager', '@config' ]
+
+    app.sitemap.query_builder:
+        class: BackBeePlanet\Sitemap\Query\QueryBuilder
+        arguments: [ '@em', '@site' ]
+
+    app.sitemap.listener:
+        class: BackBeePlanet\Listener\SitemapListener
+        arguments: [ '@bbapp', '@app.sitemap.manager', '@config' ]
