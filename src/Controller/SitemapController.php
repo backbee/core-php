@@ -163,4 +163,27 @@ class SitemapController
             'step' => Collection::get($this->config->getSection('sitemaps'), $id . ':iterator-step', 1500),
         ];
     }
+
+    /**
+     * Get archive action.
+     *
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function getArchiveAction(Request $request): Response
+    {
+        $sitemap = $this->container->get('routing')->getUri(str_replace('.gz', '', $request->getPathInfo()));
+        $response = new Response();
+        $response
+            ->setContent(gzencode(file_get_contents($sitemap), 9))
+            ->setStatusCode(Response::HTTP_OK)
+            ->headers
+            ->set('content-type', 'application/gzip');
+        $response->headers->set('cache-control', 'no-cache');
+        $response->headers->set('pragma', 'no-cache');
+        $response->headers->set('expires', -1);
+
+        return $response;
+    }
 }
