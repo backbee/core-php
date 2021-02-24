@@ -513,7 +513,9 @@ class PageManager
             throw new LogicException('Home page cannot be deleted');
         }
 
-        $this->pageAssociationMgr->deleteAssociatedPage($page);
+        if ($this->multiLangMgr->isActive()) {
+            $this->pageAssociationMgr->deleteAssociatedPage($page);
+        }
         $this->repository->deletePage($page);
         $this->entityMgr->flush();
     }
