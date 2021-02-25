@@ -8,6 +8,7 @@ index:
 urlset:
     active: true
     url_pattern: /sitemap-{index}.xml
+    archive_pattern: /sitemap-{index}.xml.gz
     decorator: BackBeePlanet\Sitemap\Decorator\UrlSet
     iterator-step: 1500   # memory limit consideration
     limits:

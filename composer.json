@@ -37,7 +37,8 @@
         "filp/whoops": "^2.1",
         "symfony/security-csrf": "v2.7.*",
         "cocur/slugify": "^3.1",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-zlib": "*"
     },
     "autoload": {
         "psr-4": {

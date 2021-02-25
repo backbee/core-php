@@ -73,28 +73,76 @@ class SitemapController
      */
     public function indexAction(Request $request): Response
     {
-        $route = $request->attributes->get('_route');
-        $id = str_replace(SitemapListener::$ROUTE_PREFIX, '', $route);
-
+        $id = str_replace(SitemapListener::$ROUTE_PREFIX, '', $request->attributes->get('_route'));
         $decorator = $this->getDecorator($id);
+
         if (null === $decorator) {
             return new Response('Not found', Response::HTTP_NOT_FOUND);
         }
+
+        return $this->buildResponse($this->getSitemap($id, $decorator, $request));
+    }
+
+    /**
+     * Get archive action.
+     *
+     * @param Request $request
+     *
+     * @return Response
+     * @throws InvalidArgumentException
+     */
+    public function getArchiveAction(Request $request): Response
+    {
+        $id = str_replace(SitemapListener::$ARCHIVE_ROUTE_PREFIX, '', $request->attributes->get('_route'));
+        $decorator = $this->getDecorator($id);
+
+        if (null === $decorator) {
+            return new Response('Not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $sitemap = $this->getSitemap($id, $decorator, $request);
+
+        $response = new Response();
+        $response
+            ->setContent(gzencode($sitemap['urlset'], 9))
+            ->setStatusCode(Response::HTTP_OK)
+            ->headers
+            ->set('content-type', 'application/gzip');
+        $response->headers->set('cache-control', 'no-cache');
+        $response->headers->set('pragma', 'no-cache');
+        $response->headers->set('expires', -1);
+
+        return $response;
+    }
+
+    /**
+     * Get sitemap.
+     *
+     * @param string             $id
+     * @param DecoratorInterface $decorator
+     * @param Request            $request
+     *
+     * @return false|mixed|Response
+     * @throws InvalidArgumentException
+     */
+    private function getSitemap(string $id, DecoratorInterface $decorator, Request $request)
+    {
+        $pathInfo = (string)str_replace('.gz', '', $request->getPathInfo());
 
         if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
             $preset = $this->getPreset($decorator, $request->attributes->all());
             $params = $this->getParams($id);
             $sitemaps = $decorator->render($preset, $params);
-            if (!isset($sitemaps[$request->getPathInfo()])) {
+            if (!isset($sitemaps[$pathInfo])) {
                 return new Response('Not found', Response::HTTP_NOT_FOUND);
             }
 
-            $sitemap = $sitemaps[$request->getPathInfo()];
+            $sitemap = $sitemaps[$pathInfo];
 
             $this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
         }
 
-        return $this->buildResponse($sitemap);
+        return $sitemap;
     }
 
     /**
