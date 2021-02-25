@@ -6,7 +6,8 @@
         <loc>{{ this.sitemapUrlHelper.isUrlExtensionRequired(bb.routing.getUri(location.getUrl(), null, site)) }}</loc>
         <lastmod>{{ this.dateHelper(location.modified, 'c') }}</lastmod>
         <priority>{{ this.sitemapLocationPriority(location) }}</priority>
-    </url>{% endfor %}
+    </url>
+    {% endfor %}
 {% endfor %}
 
 </urlset>
