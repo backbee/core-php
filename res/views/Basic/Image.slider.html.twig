@@ -14,10 +14,10 @@
 >
 
   <figure class="figure {{imageClass}}">
-    <img src="{{path}}">
+    <img src="{{path}}" loading="lazy">
     {% set picto = this.getObject().getParamValue('picto') %}
     {% if picto != '' %}
-      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto">
+      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto" loading="lazy">
     {% endif %}
   </figure>
 
