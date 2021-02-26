@@ -3,7 +3,7 @@
   <div class="col-md-3">
     {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
     <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
-        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive" alt="{{img_alt}}" />
+        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive" alt="{{img_alt}}" loading="lazy" />
     </a>
   </div>
   <div class="col-md-9">
