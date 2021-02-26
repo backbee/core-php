@@ -6,6 +6,7 @@ use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Utils\StringUtils;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Exception;
 use RuntimeException;
 
 /**
@@ -33,7 +34,7 @@ class BaseCollector extends AbstractCollector
     /**
      * An array of arrays of pages indexed by their URLs.
      *
-     * @var Page[][]
+     * @var array
      */
     private $collection;
 
@@ -56,7 +57,7 @@ class BaseCollector extends AbstractCollector
      *
      * @param array $preset Optional, an array of preset values for discriminators.
      *
-     * @return Paginator[]         An array of matching pages indexed by their sitemap URLs.
+     * @return array An array of matching pages indexed by their sitemap URLs.
      */
     public function collect(array $preset = []): array
     {

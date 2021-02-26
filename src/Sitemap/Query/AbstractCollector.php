@@ -107,7 +107,7 @@ abstract class AbstractCollector implements CollectorInterface
     /**
      * Gets an array of discriminators accepted by this collector.
      *
-     * @return string[] An array of accepted discriminators.
+     * @return array An array of accepted discriminators.
      */
     public function getAcceptedDiscriminators(): array
     {
@@ -117,7 +117,7 @@ abstract class AbstractCollector implements CollectorInterface
     /**
      * Gets the discriminators found in the URL pattern.
      *
-     * @return string[] An array of discriminators to be used.
+     * @return array An array of discriminators to be used.
      */
     protected function getDiscriminatorsFromPattern(): array
     {

@@ -43,14 +43,14 @@ interface CollectorInterface extends ContainerAwareInterface
      *
      * @param array $preset Optional, an array of preset values for discriminators.
      *
-     * @return Paginator[]         An array of matching objects indexed by their sitemap URLs.
+     * @return array An array of matching objects indexed by their sitemap URLs.
      */
     public function collect(array $preset = []): array;
 
     /**
      * Gets an array of discriminators accepted by this collector.
      *
-     * @return string[] An array of accepted discriminators.
+     * @return array An array of accepted discriminators.
      */
     public function getAcceptedDiscriminators(): array;
 }

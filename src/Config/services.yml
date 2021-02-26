@@ -19,7 +19,7 @@ services:
 
     cloud.content_manager:
         class: BackBeeCloud\Entity\ContentManager
-        arguments: [ "@em", "@classcontent.manager", "@event.dispatcher" ]
+        arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp' ]
 
     cloud.tag_manager:
         class: BackBeeCloud\Entity\TagManager

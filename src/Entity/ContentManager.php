@@ -2,14 +2,24 @@
 
 namespace BackBeeCloud\Entity;
 
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ClassContentManager;
 use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Element\Image;
+use BackBee\ClassContent\Exception\RevisionConflictedException;
+use BackBee\ClassContent\Exception\RevisionMissingException;
+use BackBee\ClassContent\Exception\RevisionUptodateException;
+use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Dispatcher;
+use BackBee\Logging\Logger;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
 /**
@@ -37,27 +47,54 @@ class ContentManager
      */
     protected $uniqToken;
 
-    public function __construct(EntityManager $entyMgr, ClassContentManager $bbContentMgr, Dispatcher $eventDispatcher)
-    {
+    /**
+     * @var BBApplication
+     */
+    protected $bbApp;
+
+    /**
+     * ContentManager constructor.
+     *
+     * @param EntityManager       $entyMgr
+     * @param ClassContentManager $bbContentMgr
+     * @param Dispatcher          $eventDispatcher
+     * @param BBApplication       $bbApp
+     */
+    public function __construct(
+        EntityManager $entyMgr,
+        ClassContentManager $bbContentMgr,
+        Dispatcher $eventDispatcher,
+        BBApplication $bbApp
+    ) {
         $this->entyMgr = $entyMgr;
         $this->bbContentMgr = $bbContentMgr;
         $this->eventDispatcher = $eventDispatcher;
         $this->uniqToken = $this->entyMgr->getRepository(Revision::class)->getUniqToken();
+        $this->bbApp = $bbApp;
     }
 
     /**
      * Duplicates the provided content. Takes the drafted state if bbtoken is provided.
      *
-     * @param  AbstractClassContent $original
-     * @param  BBUserToken|null     $token
+     * @param AbstractClassContent $original
+     * @param BBUserToken|null     $token
+     * @param null                 $uid
+     * @param bool                 $putOnline
+     *
      * @return AbstractClassContent
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
+     * @throws OptimisticLockException
      */
-    public function duplicateContent(AbstractClassContent $original, BBUserToken $token = null, $uid = null, $putOnline = false)
-    {
+    public function duplicateContent(
+        AbstractClassContent $original,
+        BBUserToken $token = null,
+        $uid = null,
+        $putOnline = false
+    ) {
         $draft = $token
             ? $this->entyMgr->getRepository(Revision::class)->getDraft($original, $token)
-            : null
-        ;
+            : null;
         $original->setDraft($draft ?: $original->getDraft());
 
         $classname = AbstractClassContent::getClassnameByContentType($original->getContentType());
@@ -102,8 +139,10 @@ class ContentManager
     /**
      * Marks the given content as global.
      *
-     * @param  AbstractClassContent $content
+     * @param AbstractClassContent $content
+     *
      * @return self
+     * @throws OptimisticLockException
      */
     public function addGlobalContent(AbstractClassContent $content)
     {
@@ -120,12 +159,16 @@ class ContentManager
     /**
      * Returns true if the given page has at least one drafted content.
      *
-     * @param  Page    $page
+     * @param Page        $page
+     * @param BBUserToken $token
+     *
      * @return boolean
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     public function isDraftedPage(Page $page, BBUserToken $token)
     {
-        return false != $this->getPageContentDrafts($page, $token);
+        return false !== $this->getPageContentDrafts($page, $token);
     }
 
     /**
@@ -133,8 +176,9 @@ class ContentManager
      *
      * This method will checkout a new draft if no draft is found.
      *
-     * @param  AbstractClassContent $content
-     * @param  BBUserToken|null     $token
+     * @param AbstractClassContent $content
+     * @param BBUserToken|null     $token
+     *
      * @return AbstractClassContent
      */
     public function hydrateDraft(AbstractClassContent $content, BBUserToken $token = null)
@@ -150,20 +194,25 @@ class ContentManager
     /**
      * Returns all contents drafts of the provided page.
      *
-     * @param  Page        $page
-     * @param  BBUserToken $token
+     * @param Page        $page
+     * @param BBUserToken $token
+     *
      * @return array
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     public function getPageContentDrafts(Page $page, BBUserToken $token)
     {
-        return $this->entyMgr->getRepository(Revision::class)->findBy([
-            '_owner'   => UserSecurityIdentity::fromToken($this->uniqToken),
-            '_state'   => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
-            '_content' => array_merge(
-                $this->getGlobalContentsUids(),
-                $this->getUidsFromPage($page, $token)
-            ),
-        ]);
+        return $this->entyMgr->getRepository(Revision::class)->findBy(
+            [
+                '_owner' => UserSecurityIdentity::fromToken($this->uniqToken),
+                '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
+                '_content' => array_merge(
+                    $this->getGlobalContentsUids(),
+                    $this->getUidsFromPage($page, $token)
+                ),
+            ]
+        );
     }
 
     /**
@@ -171,15 +220,21 @@ class ContentManager
      *
      * Returns the number of commited contents.
      *
-     * @param  Page        $page
-     * @param  BBUserToken $token
+     * @param Page        $page
+     * @param BBUserToken $token
+     *
      * @return int
+     * @throws ClassNotFoundException
+     * @throws OptimisticLockException
+     * @throws RevisionConflictedException
+     * @throws RevisionMissingException
+     * @throws RevisionUptodateException
+     * @throws UnknownPropertyException
      */
     public function publishByPage(Page $page, BBUserToken $token)
     {
         $this->entyMgr->beginTransaction();
         foreach ($this->getDraftStageToDelete($page, $token) as $draft) {
-
             $content = $draft->getContent();
             $content->setDraft(null);
             if ($content instanceof ContentSet) {
@@ -198,7 +253,7 @@ class ContentManager
 
             $data = $draft->jsonSerialize();
             $result = [
-                'elements'   => [],
+                'elements' => [],
                 'parameters' => [],
             ];
             if ($content instanceof ContentSet) {
@@ -229,7 +284,7 @@ class ContentManager
 
             try {
                 $this->bbContentMgr->commit($content, $result);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -241,8 +296,7 @@ class ContentManager
             ->set('c._state', AbstractClassContent::STATE_NORMAL)
             ->where($qb->expr()->in('c._uid', $this->getUidsFromPage($page, $token)))
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
         $commitedCount += $result;
 
         // commit transaction
@@ -251,13 +305,24 @@ class ContentManager
         return $commitedCount;
     }
 
+    /**
+     * Reset by page.
+     *
+     * @param Page        $page
+     * @param BBUserToken $token
+     *
+     * @return int
+     * @throws ClassNotFoundException
+     * @throws OptimisticLockException
+     * @throws UnknownPropertyException
+     */
     public function resetByPage(Page $page, BBUserToken $token)
     {
         $this->entyMgr->beginTransaction();
 
         $cancelCount = 0;
 
-        $drafts =  array_merge(
+        $drafts = array_merge(
             $this->getDraftStageToDelete($page, $token),
             $this->getPageContentDrafts($page, $token)
         );
@@ -298,9 +363,12 @@ class ContentManager
      * Returns uids of every content on the given page. You must provide a token
      * to also get uids of drafted contents.
      *
-     * @param  Page             $page
-     * @param  BBUserToken|null $token
+     * @param Page             $page
+     * @param BBUserToken|null $token
+     *
      * @return array
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     public function getUidsFromPage(Page $page, BBUserToken $token = null)
     {
@@ -312,21 +380,28 @@ class ContentManager
      * to delete), else false.
      *
      * @return bool
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     public function hasGlobalContentDraft()
     {
-        return null !== $this->entyMgr->getRepository(Revision::class)->findOneBy([
-            '_content' => $this->getGlobalContentsUids(),
-            '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
-        ]);
+        return null !== $this->entyMgr->getRepository(Revision::class)->findOneBy(
+            [
+                '_content' => $this->getGlobalContentsUids(),
+                '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
+            ]
+        );
     }
 
     /**
      * Gathers recursively uids of every content and subcontent of the provided content.
      *
-     * @param  AbstractClassContent $content
-     * @param  BBUserToken|null     $token
+     * @param AbstractClassContent $content
+     * @param BBUserToken|null     $token
+     *
      * @return array
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     protected function gatherContentsUids(AbstractClassContent $content, BBUserToken $token = null)
     {
@@ -362,37 +437,85 @@ class ContentManager
      * Returns uids of global contents.
      *
      * @return array
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     protected function getGlobalContentsUids()
     {
-        return array_merge(...array_filter(
-            array_map(
-                function (GlobalContent $globalcontent) {
-                    $uids = [];
-                    if (null === $content = $globalcontent->getContent()) {
-                        return $uids;
-                    }
-
-                    $uids[] = $content->getUid();
-                    foreach ($content->getData() as $element) {
-                        if ($element instanceof AbstractClassContent) {
-                            $uids[] = $element->getUid();
+        return array_merge(
+            ...array_filter(
+                array_map(
+                    function (GlobalContent $globalcontent) {
+                        $uids = [];
+                        if (null === $content = $globalcontent->getContent()) {
+                            return $uids;
                         }
-                    }
 
-                    return $uids;
-                },
-                $this->entyMgr->getRepository(GlobalContent::class)->findAll()
+                        $uids[] = $content->getUid();
+                        foreach ($content->getData() as $element) {
+                            if ($element instanceof AbstractClassContent) {
+                                $uids[] = $element->getUid();
+                            }
+                        }
+
+                        return $uids;
+                    },
+                    $this->entyMgr->getRepository(GlobalContent::class)->findAll()
+                )
             )
-        ));
+        );
     }
 
+    /**
+     * @param Page        $page
+     * @param BBUserToken $token
+     *
+     * @return array|Revision[]
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
+     */
     protected function getDraftStageToDelete(Page $page, BBUserToken $token)
     {
-        return $this->entyMgr->getRepository(Revision::class)->findBy([
-            '_state'   => Revision::STATE_TO_DELETE,
-            '_owner'   => UserSecurityIdentity::fromToken($this->uniqToken),
-            '_content' => $this->getUidsFromPage($page, $token),
-        ]);
+        return $this->entyMgr->getRepository(Revision::class)->findBy(
+            [
+                '_state' => Revision::STATE_TO_DELETE,
+                '_owner' => UserSecurityIdentity::fromToken($this->uniqToken),
+                '_content' => $this->getUidsFromPage($page, $token),
+            ]
+        );
+    }
+
+    /**
+     * Get all image for an page with id and path for each image.
+     *
+     * @param Page $page
+     *
+     * @return array
+     */
+    public function getAllImageForAnPage(Page $page): array
+    {
+        $entries = [];
+
+        try {
+            $images = $this->entyMgr->getRepository(Image::class)->findBy(['_uid' => $this->getUidsFromPage($page)]);
+
+            if (false === empty($images)) {
+                foreach ($images as $image) {
+                    if (null !== $image->path) {
+                        $entries[] = [
+                            'uid' => $image->getUid(),
+                            'original_name' => $image->originalname,
+                            'path' => $image->path
+                        ];
+                    }
+                }
+            }
+        } catch (Exception $exception) {
+            $this->bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+        }
+
+        return $entries;
     }
 }
