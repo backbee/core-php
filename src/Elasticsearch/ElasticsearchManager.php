@@ -2,12 +2,14 @@
 
 namespace BackBeeCloud\Elasticsearch;
 
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Article\ArticleTitle;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Basic\Title;
+use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\ClassContent\Media\Video;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\KeyWord as Tag;
@@ -105,6 +107,7 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
                 : false
             ,
             'category' => $this->pageCategoryManager->getCategoryByPage($page),
+            'images' => $this->contentMgr->getAllImageForAnPage($page)
         ];
 
         $pageTag = $this->entityMgr->getRepository(PageTag::class)->findOneBy(['page' => $page]);
@@ -365,6 +368,47 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
     }
 
     /**
+     * Get all image for an page by uid.
+     *
+     * @param string $uid
+     *
+     * @return array
+     */
+    public function getAllImageForAnPageByUid(string $uid): array
+    {
+        $images = [];
+
+        try {
+            $result = $this->getClient()->search(
+                [
+                    'index' => $this->getIndexName(),
+                    'body' => [
+                        'query' => [
+                            'bool' => [
+                                'must' => [
+                                    [ 'match' => ['_id' => $uid] ],
+                                ]
+                            ],
+                        ],
+                        '_source' => ['images']
+                    ],
+                ]
+            );
+
+            foreach ($result['hits']['hits'] as $document) {
+                $images = $document['_source']['images'];
+            }
+
+        } catch (Exception $exception) {
+            $this->bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+        }
+
+        return $images;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function handle(JobInterface $job, SimpleWriterInterface $writer): void
@@ -434,6 +478,8 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      * @param Page $page
      *
      * @return null|string
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     protected function extractAbstractUidFromPage(Page $page)
     {
@@ -468,6 +514,8 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      * @param Page $page
      *
      * @return string
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     protected function extractTextsFromPage(Page $page): string
     {
@@ -523,6 +571,8 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      * @param Page $page
      *
      * @return string
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     protected function getFirstHeadingFromPage(Page $page): string
     {
@@ -544,6 +594,8 @@ class ElasticsearchManager extends PlanetElasticSearchManager implements JobHand
      * @param Page $page
      *
      * @return string|null
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     protected function extractImageUidFromPage(Page $page): ?string
     {
