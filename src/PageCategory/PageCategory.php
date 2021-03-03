@@ -23,7 +23,7 @@ class PageCategory
     protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="BackBee\NestedNode\Page", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="BackBee\NestedNode\Page", cascade={"persist"})
      * @ORM\JoinColumn(name="page_uid", referencedColumnName="uid", nullable=false)
      *
      * @var Page
@@ -37,23 +37,38 @@ class PageCategory
      */
     private $category;
 
+    /**
+     * PageCategory constructor.
+     *
+     * @param Page $page
+     * @param      $category
+     */
     public function __construct(Page $page, $category)
     {
         $this->page = $page;
         $this->category = $category;
     }
 
-    public function getPage()
+    /**
+     * @return Page
+     */
+    public function getPage(): Page
     {
         return $this->page;
     }
 
-    public function getCategory()
+    /**
+     * @return string
+     */
+    public function getCategory(): string
     {
         return $this->category;
     }
 
-    public function setCategory($category)
+    /**
+     * @param $category
+     */
+    public function setCategory($category): void
     {
         $this->category = $category;
     }
