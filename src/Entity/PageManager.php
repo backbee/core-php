@@ -2,9 +2,11 @@
 
 namespace BackBeeCloud\Entity;
 
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\BBApplication;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Basic\Image;
+use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\MetaData\MetaData;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\KeyWord;
@@ -20,6 +22,7 @@ use BackBeeCloud\MultiLang\PageAssociationManager;
 use BackBeeCloud\PageCategory\PageCategory;
 use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\PageType\TypeManager;
+use BackBeeCloud\SearchEngine\SearchEngineManager;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
@@ -105,6 +108,11 @@ class PageManager
     protected $pageAssociationMgr;
 
     /**
+     * @var SearchEngineManager
+     */
+    protected $searchEngineManager;
+
+    /**
      * PageManager constructor.
      *
      * @param BBApplication $app
@@ -121,6 +129,7 @@ class PageManager
         $this->multiLangMgr = $app->getContainer()->get('multilang_manager');
         $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
         $this->pageAssociationMgr = $app->getContainer()->get('cloud.multilang.page_association.manager');
+        $this->searchEngineManager = $app->getContainer()->get('core.search_engine.manager');
     }
 
     /**
@@ -175,6 +184,8 @@ class PageManager
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws TransactionRequiredException
+     * @throws ClassNotFoundException
+     * @throws UnknownPropertyException
      */
     public function format(Page $page, $strictDraftMode = false): array
     {
@@ -221,6 +232,7 @@ class PageManager
             'published_at' => $page->getPublishing()
                 ? $page->getPublishing()->format('Y-m-d H:i:s')
                 : null,
+            'search_engine_activated' => $this->searchEngineManager->googleSearchEngineIsActivated()
         ];
     }
 
@@ -297,8 +309,8 @@ class PageManager
         unset($criteria['page_uid']);
 
         if (0 === count($criteria) || (1 === count(
-                    $criteria
-                ) && isset($criteria['title'])) || isset($criteria['has_draft_only'])) {
+            $criteria
+        ) && isset($criteria['title'])) || isset($criteria['has_draft_only'])) {
             $query = [
                 'query' => [
                     'bool' => [
@@ -613,10 +625,10 @@ class PageManager
     {
         $seoData = [];
 
-        $metadatabag = $page->getMetaData() ?: [];
-        foreach ($metadatabag as $attr => $metadata) {
+        $metadataBag = $page->getMetaData() ?: [];
+        foreach ($metadataBag as $attr => $metadata) {
             if (($metadata->getAttribute('name') === $attr) && $value = $metadata->getAttribute('content')) {
-                $seoData[$attr] = $value;
+                $seoData[(string)$attr] = $value;
             }
         }
 
@@ -635,24 +647,32 @@ class PageManager
         }
 
         $elasticSearchResult = $elasticSearchResult['_source'];
-        if (!isset($seoData['title'])) {
-            $seoData['title'] = $elasticSearchResult['title'];
-        }
+
+        $seoData['title'] = $seoData['title'] ?: $elasticSearchResult['title'];
 
         if (
             !isset($seoData['description'])
             && $elasticSearchResult['abstract_uid']
             && $abstract = $this->entityMgr->find(ArticleAbstract::class, $elasticSearchResult['abstract_uid'])
         ) {
-            if (strlen($abstract->value) > 300) {
-                $seoData['description'] = mb_substr($abstract->value, 0, 300) . '...';
-            } else {
-                $seoData['description'] = $abstract->value;
-            }
             $seoData['description'] = strip_tags(
-                str_replace("\n", '', str_replace('&nbsp;', '', $seoData['description']))
+                str_replace(
+                    "\n",
+                    '',
+                    str_replace(
+                        '&nbsp;',
+                        '',
+                        strlen($abstract->value) > 300 ? mb_substr($abstract->value, 0, 300) . '...' : $abstract->value
+                    )
+                )
             );
         }
+
+        $searchEngine = $this->searchEngineManager->googleSearchEngineIsActivated();
+        $seoData['index'] = null !== $metadataBag->get('index') ?
+            $metadataBag->get('index')->getAttribute('content') : $searchEngine;
+        $seoData['follow'] = null !== $metadataBag->get('follow') ?
+            $metadataBag->get('follow')->getAttribute('content') : $searchEngine;
 
         if ('article' !== $elasticSearchResult['type']) {
             return $seoData;
@@ -672,7 +692,7 @@ class PageManager
      * @param QueryBuilder $qb
      * @param string       $value
      */
-    protected function filterByTitle(QueryBuilder $qb, string $value)
+    protected function filterByTitle(QueryBuilder $qb, string $value): void
     {
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $rootAlias = current($qb->getRootAliases());
@@ -689,7 +709,7 @@ class PageManager
      * @param QueryBuilder $qb
      * @param bool         $value
      */
-    protected function filterByIsOnline(QueryBuilder $qb, bool $value)
+    protected function filterByIsOnline(QueryBuilder $qb, bool $value): void
     {
         $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
         $rootAlias = current($qb->getRootAliases());
@@ -711,7 +731,7 @@ class PageManager
      * @throws EmptyPageSelectionException if there is at least one tag that does not exist
      *                                     or if there is no page that match the set of requested tags
      */
-    protected function filterByTags(QueryBuilder $qb, $tags)
+    protected function filterByTags(QueryBuilder $qb, $tags): void
     {
         $keywords = [];
         foreach (explode(',', $tags) as $tagId) {
@@ -765,7 +785,7 @@ class PageManager
      * @param QueryBuilder $qb
      * @param              $types
      */
-    protected function filterByType(QueryBuilder $qb, $types)
+    protected function filterByType(QueryBuilder $qb, $types): void
     {
         $uniqueNames = [];
         foreach (explode(',', $types) as $type) {
@@ -809,7 +829,7 @@ class PageManager
      * @param QueryBuilder $qb
      * @param string       $lang
      */
-    protected function filterByLang(QueryBuilder $qb, string $lang)
+    protected function filterByLang(QueryBuilder $qb, string $lang): void
     {
         $langEntity = $this->entityMgr->getRepository(Lang::class)->findOneBy(['lang' => $lang]);
 
@@ -849,7 +869,7 @@ class PageManager
      * @param QueryBuilder $qb
      * @param string       $category
      */
-    protected function filterByCategory(QueryBuilder $qb, string $category)
+    protected function filterByCategory(QueryBuilder $qb, string $category): void
     {
         $qbPageCategory = $this
             ->entityMgr
@@ -890,7 +910,7 @@ class PageManager
      * @throws InvalidArgumentException if provided value is not string or
      *                                   does not contain at least 2 characters
      */
-    protected function runSetTitle(Page $page, $value)
+    protected function runSetTitle(Page $page, $value): void
     {
         if (!is_string($value) || 2 > strlen($value)) {
             throw new InvalidArgumentException(
@@ -907,7 +927,7 @@ class PageManager
      *
      * @throws {@see ::genericRunSetDateTime}
      */
-    protected function runSetPublishedAt(Page $page, $value)
+    protected function runSetPublishedAt(Page $page, $value): void
     {
         $this->genericRunSetDateTime($page, 'setPublishing', $value);
     }
@@ -918,7 +938,7 @@ class PageManager
      *
      * @throws {@see ::genericRunSetDateTime}
      */
-    protected function runSetCreatedAt(Page $page, $value)
+    protected function runSetCreatedAt(Page $page, $value): void
     {
         $this->genericRunSetDateTime($page, 'setCreated', $value);
     }
@@ -929,7 +949,7 @@ class PageManager
      *
      * @throws {@see ::genericRunSetDateTime}
      */
-    protected function runSetModifiedAt(Page $page, $value)
+    protected function runSetModifiedAt(Page $page, $value): void
     {
         $this->genericRunSetDateTime($page, 'setModified', $value);
     }
@@ -969,11 +989,8 @@ class PageManager
      *
      * @throws Exception
      */
-    protected function runSetIsOnline(Page $page, $value)
+    protected function runSetIsOnline(Page $page, bool $value): void
     {
-        if (!is_bool($value)) {
-            throw new InvalidArgumentException('`is_online` must be type of boolean');
-        }
         $today = new DateTime();
         try {
             $page->setState($value ? Page::STATE_ONLINE : Page::STATE_OFFLINE);
@@ -992,7 +1009,7 @@ class PageManager
      * @param Page  $page
      * @param mixed $values
      */
-    protected function runSetTags(Page $page, $values)
+    protected function runSetTags(Page $page, $values): void
     {
         $pageTag = $this->getPageTag($page);
 
@@ -1017,6 +1034,8 @@ class PageManager
     }
 
     /**
+     * Run set SEO.
+     *
      * @param Page  $page
      * @param array $data
      *
@@ -1024,16 +1043,16 @@ class PageManager
      * @throws OptimisticLockException
      * @throws TransactionRequiredException
      */
-    protected function runSetSeo(Page $page, array $data)
+    protected function runSetSeo(Page $page, array $data): void
     {
         $currentSeo = $this->getPageSeoMetadata($page);
-        if (false !== $currentSeo) {
-            if (isset($data['title']) && $data['title'] === $currentSeo['title']) {
-                unset($data['title']);
-            }
+        $keys = ['title', 'description'];
 
-            if (isset($data['description']) && $data['description'] === $currentSeo['description']) {
-                unset($data['description']);
+        if (false !== $currentSeo) {
+            foreach ($keys as $key) {
+                if (isset($data[$key]) && $data[$key] === $currentSeo[$key]) {
+                    unset($data[$key]);
+                }
             }
         }
 
@@ -1046,14 +1065,20 @@ class PageManager
         $data = array_merge(
             [
                 'title' => $bag->get('title')
-                    ? $bag->get('title')->getAttribute('content', '')
+                    ? $bag->get('title')->getAttribute('content')
                     : '',
                 'description' => $bag->get('description')
-                    ? $bag->get('description')->getAttribute('content', '')
+                    ? $bag->get('description')->getAttribute('content')
                     : '',
                 'keywords' => $bag->get('keywords')
-                    ? $bag->get('keywords')->getAttribute('content', '')
+                    ? $bag->get('keywords')->getAttribute('content')
                     : '',
+                'index' => $bag->get('index')
+                    ? (bool)$bag->get('index')->getAttribute('content')
+                    : false,
+                'follow' => $bag->get('follow')
+                    ? (bool)$bag->get('follow')->getAttribute('content')
+                    : false,
             ],
             $data
         );
@@ -1072,7 +1097,7 @@ class PageManager
      * @param Page $page
      * @param      $typeName
      */
-    protected function runSetType(Page $page, $typeName)
+    protected function runSetType(Page $page, $typeName): void
     {
         $type = $this->typeMgr->find($typeName);
         if ($type === null) {
@@ -1092,7 +1117,7 @@ class PageManager
      * @throws InvalidArgumentException if provided value is not string or
      *                                   does not contain at least 2 characters
      */
-    protected function runSetLang(Page $page, $value)
+    protected function runSetLang(Page $page, $value): void
     {
         if ($this->currentLang instanceof Lang) {
             $this->multiLangMgr->associate($page, $this->currentLang);
@@ -1104,7 +1129,7 @@ class PageManager
      * @param Page $page
      * @param      $value
      */
-    protected function runSetUrl(Page $page, $value)
+    protected function runSetUrl(Page $page, $value): void
     {
         $page->setUrl($value);
     }
@@ -1113,7 +1138,7 @@ class PageManager
      * @param Page $page
      * @param      $value
      */
-    protected function runSetCategory(Page $page, $value)
+    protected function runSetCategory(Page $page, $value): void
     {
         if (false === $value) {
             return;
@@ -1124,9 +1149,6 @@ class PageManager
 
     /**
      * Create redirection for all URLs in $redirects to provided page's url.
-     *
-     * @param Page  $page
-     * @param array $redirects
      *
      * @param Page  $page
      * @param array $redirections

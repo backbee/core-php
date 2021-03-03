@@ -74,11 +74,6 @@ services:
         class: BackBeeCloud\Controller\NewsletterController
         arguments: [ "@em" ]
 
-    # Search Engine service
-    search_engine_controller:
-        class: BackBeeCloud\Controller\SearchEngineController
-        arguments: [ "@renderer", "@user_preference.manager" ]
-
     # Search service
     cloud.search_manager:
         class: BackBeeCloud\Search\SearchManager
@@ -540,3 +535,13 @@ services:
     app.sitemap.listener:
         class: BackBeePlanet\Listener\SitemapListener
         arguments: [ '@bbapp', '@app.sitemap.manager', '@config' ]
+
+    # Search engine
+    core.search_engine.controller:
+        class: BackBeeCloud\Controller\SearchEngineController
+        arguments: [ '@renderer', '@core.search_engine.manager' ]
+
+    core.search_engine.manager:
+        class: BackBeeCloud\SearchEngine\SearchEngineManager
+        arguments:
+            [ '@user_preference.manager' ]

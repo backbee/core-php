@@ -5,28 +5,40 @@ namespace BackBeeCloud\UserPreference;
 use BackBee\Bundle\Registry;
 use BackBeeCloud\MultiLang\MultiLangManager;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use InvalidArgumentException;
 
 /**
+ * Class UserPreferenceManager
+ *
+ * @package BackBeeCloud\UserPreference
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserPreferenceManager
 {
-    const REGISTRY_SCOPE = 'USER_PREFERENCES';
+    public const REGISTRY_SCOPE = 'USER_PREFERENCES';
 
     /**
      * @var EntityManager
      */
-    protected $entyMgr;
+    protected $entityMgr;
 
     /**
      * @var MultiLangManager
      */
-    protected $multilangManager;
+    protected $multiLangManager;
 
-    public function __construct(EntityManager $entyMgr, MultiLangManager $multilangManager)
+    /**
+     * UserPreferenceManager constructor.
+     *
+     * @param EntityManager    $entityMgr
+     * @param MultiLangManager $multiLangManager
+     */
+    public function __construct(EntityManager $entityMgr, MultiLangManager $multiLangManager)
     {
-        $this->entyMgr = $entyMgr;
-        $this->multilangManager = $multilangManager;
+        $this->entityMgr = $entityMgr;
+        $this->multiLangManager = $multiLangManager;
     }
 
     /**
@@ -37,7 +49,7 @@ class UserPreferenceManager
     public function all()
     {
         $result = [];
-        $all = $this->entyMgr->getRepository(Registry::class)->findBy(
+        $all = $this->entityMgr->getRepository(Registry::class)->findBy(
             [
                 'scope' => self::REGISTRY_SCOPE,
             ]
@@ -58,8 +70,10 @@ class UserPreferenceManager
      *
      * @param string $name
      * @param array  $data
+     *
+     * @throws OptimisticLockException
      */
-    public function setDataOf($name, array $data)
+    public function setDataOf($name, array $data): void
     {
         foreach ($data as $key => $value) {
             $this->addInto($name, $key, $value);
@@ -70,33 +84,36 @@ class UserPreferenceManager
      * Removes data associated to the given name.
      *
      * @param string $name
+     *
+     * @throws OptimisticLockException
      */
-    public function removeDataOf($name)
+    public function removeDataOf($name): void
     {
-        $rawData = $this->entyMgr->getRepository(Registry::class)->findBy(
+        $rawData = $this->entityMgr->getRepository(Registry::class)->findBy(
             [
                 'scope' => self::REGISTRY_SCOPE,
                 'type' => $name,
             ]
         );
         foreach ($rawData as $row) {
-            $this->entyMgr->remove($row);
+            $this->entityMgr->remove($row);
         }
 
-        $this->entyMgr->flush();
+        $this->entityMgr->flush();
     }
 
     /**
-     * Adds provided key and valud into provided name key in user preference.
+     * Adds provided key and value into provided name key in user preference.
      *
      * @param string $name
      * @param string $key
      * @param string $value
+     * @throws OptimisticLockException
      */
     public function addInto($name, $key, $value)
     {
         $this->isAuthorizedNameAndKey($name, $key, $value);
-        $registry = $this->entyMgr->getRepository(Registry::class)->findOneBy(
+        $registry = $this->entityMgr->getRepository(Registry::class)->findOneBy(
             [
                 'scope' => self::REGISTRY_SCOPE,
                 'type' => $name,
@@ -109,11 +126,11 @@ class UserPreferenceManager
             $registry->setType($name);
             $registry->setKey($key);
 
-            $this->entyMgr->persist($registry);
+            $this->entityMgr->persist($registry);
         }
 
         $registry->setValue($value);
-        $this->entyMgr->flush($registry);
+        $this->entityMgr->flush($registry);
     }
 
     /**
@@ -128,7 +145,7 @@ class UserPreferenceManager
     public function dataOf($name)
     {
         $result = [];
-        $rawData = $this->entyMgr->getRepository(Registry::class)->findBy(
+        $rawData = $this->entityMgr->getRepository(Registry::class)->findBy(
             [
                 'scope' => self::REGISTRY_SCOPE,
                 'type' => $name,
@@ -144,26 +161,35 @@ class UserPreferenceManager
     /**
      * Searches for a specific value of provided key name in user preferences.
      *
-     * Notes that it returns null if the resquested value does not exist.
+     * Notes that it returns null if the requested value does not exist.
      *
      * @param string $name
      * @param string $key
      *
      * @return string|null
      */
-    public function singleDataOf($name, $key)
+    public function singleDataOf(string $name, string $key): ?string
     {
         $data = $this->getDataOf($name);
 
-        return isset($data[$key]) ? $data[$key] : null;
+        return $data[$key] ?? null;
     }
 
+    /**
+     * Check if is authorized name and key.
+     *
+     * @param      $name
+     * @param null $key
+     * @param null $value
+     *
+     * @return bool
+     */
     protected function isAuthorizedNameAndKey($name, $key = null, $value = null)
     {
         $authorizedKeys = $this->authorizedNamesAndKeys();
-        $target = isset($authorizedKeys[$name]) ? $authorizedKeys[$name] : null;
+        $target = $authorizedKeys[$name] ?? null;
         if (null === $target) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     '[%s] %s is not authorized as user preference name',
                     __METHOD__,
@@ -177,7 +203,7 @@ class UserPreferenceManager
         }
 
         if (!in_array($key, array_keys($target))) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     '[%s] %s is not authorized as user preference %s keyname',
                     __METHOD__,
@@ -198,7 +224,7 @@ class UserPreferenceManager
 
         $result = (bool)$callback($value);
         if (!$result) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     '[%s] provided value is not valid for user preferences %s %s',
                     __METHOD__,
@@ -260,7 +286,7 @@ class UserPreferenceManager
             ],
         ];
 
-        foreach ($this->multilangManager->getActiveLangs() as $lang) {
+        foreach ($this->multiLangManager->getActiveLangs() as $lang) {
             $result['privacy-policy'][$lang['id'] . '_banner_message'] = 'is_string';
             $result['privacy-policy'][$lang['id'] . '_learn_more_url'] = 'is_string';
             $result['privacy-policy'][$lang['id'] . '_learn_more_link_title'] = 'is_string';
