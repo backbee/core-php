@@ -162,13 +162,13 @@ class ContentManager
      * @param Page        $page
      * @param BBUserToken $token
      *
-     * @return boolean
+     * @return bool
      * @throws ClassNotFoundException
      * @throws UnknownPropertyException
      */
-    public function isDraftedPage(Page $page, BBUserToken $token)
+    public function isDraftedPage(Page $page, BBUserToken $token): bool
     {
-        return false !== $this->getPageContentDrafts($page, $token);
+        return !empty($this->getPageContentDrafts($page, $token));
     }
 
     /**
