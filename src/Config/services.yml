@@ -12,6 +12,13 @@ parameters:
     user_right.super_admin_bundles_rights: [ ]
 
 services:
+    # Twig
+    twig.extension.intl:
+        class: Twig_Extensions_Extension_Intl
+        tags:
+            -
+                name: twig.extension
+    # BackBee
     cloud.page_manager:
         class: BackBeeCloud\Entity\PageManager
         arguments:

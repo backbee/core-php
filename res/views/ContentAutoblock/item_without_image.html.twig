@@ -19,7 +19,7 @@
 
   {% if display_published_at %}
     <p class="metadata-wrapper">
-        {{(publishing ? '<time class="time metadata-time" pubdate="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d') ~ '</time>' : '<em>Not yet published.</em>')|raw}}
+        {{(publishing ? '<time class="time metadata-time" pubdate="' ~ publishing.format('c') ~ '">' ~ publishing|localizeddate('short', 'none', locale=(this.getCurrentLang()|lower)) ~ '</time>' : '<em>Not yet published.</em>')|raw}}
     </p>
   {% endif %}
 

@@ -26,7 +26,7 @@
       <p class="metadata-wrapper text-{{align.value}}">
         {% if show_date.value == true %}
           {% set publishing = this.getCurrentPage().getPublishing() %}
-          {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing.format('Y.m.d - H:i') ~ '</time>' : '<em class="metadata-time" data-cloud-trans="not_yet_published">Not yet published</em>')|raw}}
+          {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing|localizeddate('short', 'short', locale=(this.getCurrentLang()|lower)) ~ '</time>' : '<em class="metadata-time" data-cloud-trans="not_yet_published">Not yet published</em>')|raw}}
         {% endif %}
         {% if show_tags.value == true %}
           {% set current_lang = this.getCurrentLang() %}
