@@ -10,25 +10,25 @@ use BackBee\Controller\Event\PostResponseEvent;
  */
 class ContentCategoryListener
 {
-
     /**
      * Default ordered content categories.
      *
      * @var array
      */
     private $defaultData = [
-        'block_category_basics'   => [
+        'block_category_basics' => [
             'pos' => 0,
             'contents_order' => [
-                'Basic/Title'     => 0,
-                'Text/Paragraph'  => 1,
-                'Basic/Image'     => 2,
-                'Text/Button'     => 3,
-                'Media/Video'     => 4,
-                'Basic/Slider'    => 5,
-                'Basic/Searchbar' => 6,
-                'Basic/Cards'     => 7,
-            ]
+                'Basic/Title' => 0,
+                'Text/Paragraph' => 1,
+                'Basic/Image' => 2,
+                'Text/Button' => 3,
+                'Media/Video' => 4,
+                'Basic/Slider' => 5,
+                'Basic/ResponsiveSlider' => 6,
+                'Basic/Searchbar' => 7,
+                'Basic/Cards' => 8,
+            ],
         ],
         'block_category_pages' => [
             'pos' => 1,
@@ -73,7 +73,7 @@ class ContentCategoryListener
     /**
      * Re-orders categories to set a custom order.
      *
-     * @param  PostResponseEvent $event
+     * @param PostResponseEvent $event
      */
     public function onGetCategoryPostCall(PostResponseEvent $event)
     {
@@ -101,7 +101,7 @@ class ContentCategoryListener
                 }
 
                 if (isset($config['pos'])) {
-                    $pos =intval($config['pos']);
+                    $pos = intval($config['pos']);
                 }
             } elseif ($this->strict) {
                 continue;
@@ -133,7 +133,7 @@ class ContentCategoryListener
      *
      * {@see ::onGetCategoryPostCall()} at line 45
      *
-     * @param  array  $content
+     * @param array $content
      *
      * @return array
      */
@@ -147,7 +147,7 @@ class ContentCategoryListener
     /**
      * Filters the set of contents.
      *
-     * @param  array $contents
+     * @param array $contents
      *
      * @return array
      */

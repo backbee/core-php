@@ -1,0 +1,114 @@
+{% set sliderId = "responsiveSlider_" ~ this.getObject().getUid() %}
+{% set dataForbidden = forbiddenPlugins ? forbiddenPlugins : 'click' %}
+
+{% if images != null and images is not iterable %}
+    {% set images = [images] %}
+{% endif %}
+
+{% set height = this.getObject().getParamValue('height') %}
+{% if height is not null %}
+    {% if not this.userAgentHelper.isDesktop() %}
+        {% set height = (height * 3 / 4) ~ 'px' %}
+    {% else %}
+        {% set height = height ~ 'px' %}
+    {% endif %}
+{% endif %}
+
+
+{% set oneSlideClass = only_slider.value ? ' one-by-one' : '' %}
+{% if only_slider.value %}
+    {% set displayNumDesktop = 1 %}
+    {% set displayNumMD = 1 %}
+    {% set activeSlider = 'true' %}
+    {% set activeSliderMD = 'true' %}
+    {% set activeSliderSM = 'true' %}
+{% else %}
+    {% set displayNumDesktop = (images|length) < 4 ? (images|length) : 4 %}
+    {% set displayNumMD = (images|length) < 2 ? (images|length) : 2 %}
+    {% set activeSlider = (images|length) < 5 ? 'false' : 'true' %}
+    {% set activeSliderMD = (images|length) < 3 ? 'false' : 'true' %}
+    {% set activeSliderSM = (images|length) < 2 ? 'false' : 'true' %}
+{% endif %}
+
+{% if (images|length) > 4 %}
+    {% set showDotsClass = ' pb-5' %}
+{% elseif (images|length) > 2 %}
+    {% set showDotsClass = ' pb-5 pb-lg-0' %}
+{% else %}
+    {% set showDotsClass = ' pb-0' %}
+{% endif %}
+
+{% set reducedWidthClass = reduiced_width.value ? ' mx-slider' : '' %}
+
+
+<div data-forbidden-plugins="{{ dataForbidden }}" {{ this.bbcontent(null, {'class': 'content block-slider' ~ showDotsClass})|raw }}>
+
+    {% if images|length == 0 %}
+        {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+
+        {% if bb.token == null and autoplay.value and ((images|length) > 4 or only_slider.value) %}
+            {% set autoplayOn = true %}
+        {% endif %}
+
+        <div id="{{ sliderId }}"
+             class="reponsive owl-carousel{{ reducedWidthClass }}{{ oneSlideClass }}{{ activeSlider == 'false' ? ' mb-0' : '' }}{{ long_description.value ? ' extra-text' : '' }}{{ activeSlider == 'true' ? ' px-5' : '' }}{{ bg_color.value ? ' px-5 pt-5 pb-2 has-bg-color ' ~ bg_color.value : '' }}{{ full_figure.value ? ' full-figure' : '' }}{% if height is not null and dots.value == true %} resized-slider{% endif %} resize-element slider-wrapper slider-fw slider-loader slider-{{ this.getObject().getParamValue('navigation') }} slider{% if thumbnail %} slider-main{% endif %}"
+             {% if height is not null %}style="height: {{ height }};"{% endif %}
+        >
+            {% for image in images %}
+                {% if image.image.path is not empty %}
+                    {{ this.render(image, 'slider', {'in_fluid': false, 'colsize': 4, 'slider_id': sliderId, 'show_caption': true})|raw }}
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <script>
+          (function () {
+            var callback = function () {
+              var $slider = $('#{{ sliderId }}')
+              var $navLeft = '<i {% block data_left_attributes %}{% endblock %} class="arrow_carrot-left_alt2"></i>'
+              var $navRight = '<i {% block data_right_attributes %}{% endblock %} class="arrow_carrot-right_alt2"></i>'
+
+              $slider.owlCarousel({
+                loop: true,
+                margin: 20,
+                lazyLoad: true,
+                navText: [$navLeft, $navRight],
+                responsiveClass: true,
+                dotsEach: 1,
+                responsive: {
+                  0: {
+                    items: 1,
+                    nav: false,
+                    touchDrag: {{ activeSliderSM }},
+                    mouseDrag: {{ activeSliderSM }},
+                    loop: {{ activeSliderSM }}
+                  },
+                  576: {
+                    items: {{ displayNumMD }},
+                    nav: false,
+                    loop: {{ activeSliderMD }},
+                    touchDrag: {{ activeSliderMD }},
+                    mouseDrag: {{ activeSliderMD }}
+                  },
+                  992: {
+                    items: {{ displayNumDesktop }},
+                    dots: {{ activeSlider }},
+                    mouseDrag: {{ activeSlider }},
+                    nav: {{ activeSlider }},
+                    loop: {{ activeSlider }}
+                  },
+                },
+                autoplay: {{ autoplayOn ? 'true' : 'false' }},
+              })
+            }
+
+            if (window.$) {
+              callback()
+            } else {
+              document.addEventListener('DOMContentLoaded', callback, false)
+            }
+          })()
+        </script>
+    {% endif %}
+</div>
