@@ -1,5 +1,5 @@
 {
-    "name": "backbee-planet/core-php",
+    "name": "backbee/core-php",
     "description": "Core PHP of BackBee Planet",
     "keywords": [],
     "type": "library",
@@ -17,14 +17,18 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@gitlab.lp-lab.com:backbee-planet/common-components.git"
+            "url": "git@gitlab.com:lp-digital/backbee/common-components.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@gitlab.com:lp-digital/backbee/bundles/hauth-bundle.git"
         }
     ],
     "require": {
         "php": ">=5.6.0",
         "backbee/backbee-php": "^1.3",
-        "backbee-planet/common-components": "^v3.6.0",
-        "lp-digital/hauth-bundle": "^0.1.0",
+        "backbee/common-components": "^v3.6.0",
+        "backbee-bundle/hauth-bundle": "^0.1.0",
         "guzzlehttp/guzzle": "^6.0",
         "jenssegers/agent": "^2.5.0",
         "google/recaptcha": "^1.1",
