@@ -231,12 +231,6 @@ services:
         class: BackBeeCloud\Listener\ClassContent\DisqusListener
         arguments: [ '@bbapp', '@em' ]
 
-    elasticsearch.manager:
-        class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp" ]
-        tags:
-            - { name: worker.job_handler, dispatch_event: false }
-
     cloud.auto_height_content.listener:
         class: BackBeeCloud\Listener\ClassContent\AutoHeightContentListener
         arguments:
@@ -591,3 +585,13 @@ services:
         class: BackBeeCloud\Listener\MenuListener
         arguments:
             [ '@bbapp' ]
+
+    # Elasticsearch
+    elasticsearch.manager:
+        class: BackBeeCloud\Elasticsearch\ElasticsearchManager
+        arguments: [ "@bbapp" ]
+        tags:
+            - { name: worker.job_handler, dispatch_event: false }
+
+    elasticsearch.query:
+        class: BackBeeCloud\Elasticsearch\ElasticsearchQuery

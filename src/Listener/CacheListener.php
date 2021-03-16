@@ -3,11 +3,9 @@
 namespace BackBeeCloud\Listener;
 
 use BackBeeCloud\UserAgentHelper;
-use BackBeePlanet\GlobalSettings;
-use BackBeePlanet\RedisManager;
+use BackBeePlanet\Redis\RedisManager;
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

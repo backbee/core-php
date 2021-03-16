@@ -198,21 +198,29 @@ class ContentManager
      * @param BBUserToken $token
      *
      * @return array
-     * @throws ClassNotFoundException
-     * @throws UnknownPropertyException
      */
-    public function getPageContentDrafts(Page $page, BBUserToken $token)
+    public function getPageContentDrafts(Page $page, BBUserToken $token): array
     {
-        return $this->entyMgr->getRepository(Revision::class)->findBy(
-            [
-                '_owner' => UserSecurityIdentity::fromToken($this->uniqToken),
-                '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
-                '_content' => array_merge(
-                    $this->getGlobalContentsUids(),
-                    $this->getUidsFromPage($page, $token)
-                ),
-            ]
-        );
+        $contents = [];
+
+        try {
+            $contents = $this->entyMgr->getRepository(Revision::class)->findBy(
+                [
+                    '_owner' => UserSecurityIdentity::fromToken($this->uniqToken),
+                    '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
+                    '_content' => array_merge(
+                        $this->getGlobalContentsUids(),
+                        $this->getUidsFromPage($page, $token)
+                    ),
+                ]
+            );
+        } catch (Exception $exception) {
+            $this->bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+        }
+
+        return $contents;
     }
 
     /**
@@ -367,12 +375,20 @@ class ContentManager
      * @param BBUserToken|null $token
      *
      * @return array
-     * @throws ClassNotFoundException
-     * @throws UnknownPropertyException
      */
-    public function getUidsFromPage(Page $page, BBUserToken $token = null)
+    public function getUidsFromPage(Page $page, BBUserToken $token = null): array
     {
-        return $this->gatherContentsUids($page->getContentSet(), $token);
+        $contents = [];
+
+        try {
+            $contents = $this->gatherContentsUids($page->getContentSet(), $token);
+        } catch (Exception $exception) {
+            $this->bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+        }
+
+        return $contents;
     }
 
     /**

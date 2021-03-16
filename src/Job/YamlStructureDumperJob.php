@@ -72,7 +72,7 @@ class YamlStructureDumperJob implements JobInterface
         return $this->mail;
     }
 
-     /**
+    /**
      * Return the domain
      *
      * @return string
@@ -95,6 +95,6 @@ class YamlStructureDumperJob implements JobInterface
      */
     public function unserialize($serialized)
     {
-        list($this->siteId, $this->themeName, $this->mail, $this->domain) = unserialize($serialized);
+        [$this->siteId, $this->themeName, $this->mail, $this->domain] = unserialize($serialized);
     }
 }

@@ -1,19 +1,22 @@
 <?php
 
-namespace BackBeeCloud\Job;
-
-use BackBeePlanet\Job\JobInterface;
+namespace BackBeePlanet\Job;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
-class MediaImageMigrationJob implements JobInterface
+class ElasticsearchJob implements JobInterface
 {
     /**
      * @var string
      */
     protected $siteId;
 
+    /**
+     * Creates new instance of ElasticsearchJob.
+     *
+     * @param string $siteId
+     */
     public function __construct($siteId)
     {
         $this->siteId = $siteId;

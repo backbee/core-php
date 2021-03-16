@@ -7,17 +7,25 @@ use BackBeeCloud\ExecutionHelper;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\Structure\StructureBuilder;
 use BackBeePlanet\Importer\ImportJob;
-use BackBeePlanet\Importer\ImportManager as BaseImportManager;
 use BackBeePlanet\Importer\ReaderInterface;
+use BackBeePlanet\Importer\WordpressReader;
 use BackBeePlanet\Job\JobInterface;
 use BackBee\NestedNode\Page;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
+use InvalidArgumentException;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
-class ImportManager extends BaseImportManager implements JobHandlerInterface
+class ImportManager implements JobHandlerInterface
 {
+    const SUPPORTED_TYPE = [
+        'wordpress' => WordpressReader::class,
+    ];
+
     /**
      * @var EntityManager
      */
@@ -28,6 +36,12 @@ class ImportManager extends BaseImportManager implements JobHandlerInterface
      */
     protected $structBuilder;
 
+    /**
+     * ImportManager constructor.
+     *
+     * @param EntityManager    $entyMgr
+     * @param StructureBuilder $structBuilder
+     */
     public function __construct(EntityManager $entyMgr, StructureBuilder $structBuilder)
     {
         $this->entyMgr = $entyMgr;
@@ -37,13 +51,18 @@ class ImportManager extends BaseImportManager implements JobHandlerInterface
     /**
      * Runs the import process.
      *
-     * @param  ReaderInterface $reader
-     * @param  mixed           $source
+     * @param ReaderInterface       $reader
+     * @param mixed                 $source
+     * @param SimpleWriterInterface $writer
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
     public function import(ReaderInterface $reader, $source, SimpleWriterInterface $writer)
     {
         if (!$reader->verify($source)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 '[%s] the provided source is not supported by "%s" importer (%s).',
                 __METHOD__,
                 $reader->name(),
@@ -65,7 +84,7 @@ class ImportManager extends BaseImportManager implements JobHandlerInterface
 
         $count = $importStatus->importedCount();
         foreach ($reader->collect($source) as $row) {
-            if (false == $row) {
+            if (false === $row) {
                 break;
             }
 
@@ -74,7 +93,7 @@ class ImportManager extends BaseImportManager implements JobHandlerInterface
                 $writer->write(sprintf(
                     '- already imported article "%s", skipped.',
                     html_entity_decode($row['page']['title'])
-                ), 'c2');
+                ));
 
                 $this->entyMgr->clear();
                 gc_collect_cycles();
@@ -146,5 +165,34 @@ class ImportManager extends BaseImportManager implements JobHandlerInterface
     public function supports(JobInterface $job)
     {
         return $job instanceof ImportJob;
+    }
+
+    /**
+     * Returns an instance of reader depending of the requested type. It can return
+     * null if the type does not match any reader.
+     *
+     * @param  string $type
+     * @return ReaderInterface|null
+     */
+    public function getReaderOf($type)
+    {
+        $reader = null;
+        if ($this->isSupportedType($type)) {
+            $classname = self::SUPPORTED_TYPE[$type];
+            $reader = new $classname();
+        }
+
+        return $reader;
+    }
+
+    /**
+     * Returns true if the given type is supported, else false.
+     *
+     * @param  string $type
+     * @return bool
+     */
+    public function isSupportedType($type): bool
+    {
+        return array_key_exists($type, self::SUPPORTED_TYPE);
     }
 }

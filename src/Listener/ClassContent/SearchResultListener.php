@@ -35,85 +35,9 @@ class SearchResultListener
 
             $contents = [];
             $esQuery = [];
-            if (is_string($query) && 0 < strlen(trim($query))) {
-                $esQuery = [
-                    'query' => [
-                        'bool' => [
-                            'should' => [
-                                [
-                                    'match' => [
-                                        'title' => [
-                                            'query' => $query,
-                                            'boost' => 5,
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'title.raw' => [
-                                            'query' => $query,
-                                            'boost' => 5,
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'title.folded' => [
-                                            'query' => $query,
-                                            'boost' => 5,
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'contents' => [
-                                            'query' => $query,
-                                            'boost' => 3,
-                                            'fuzziness' => 'AUTO',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'contents.folded' => [
-                                            'query' => $query,
-                                            'boost' => 3,
-                                            'fuzziness' => 'AUTO',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'tags' => [
-                                            'query' => $query,
-                                            'boost' => 2,
-                                            'fuzziness' => 'AUTO',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'tags.raw' => [
-                                            'query' => $query,
-                                            'boost' => 2,
-                                            'fuzziness' => 'AUTO',
-                                        ],
-                                    ],
-                                ],
-                                [
-                                    'match' => [
-                                        'tags.folded' => [
-                                            'query' => $query,
-                                            'boost' => 2,
-                                            'fuzziness' => 'AUTO',
-                                        ],
-                                    ],
-                                ],
-                            ],
-                            'minimum_should_match' => 1,
-                        ],
-                    ],
-                ];
+            if (0 < strlen(trim($query))) {
+                $esQuery = $app->getContainer()->get('elasticsearch.query')->getDefaultBooleanQuery($query);
+                $esQuery['query']['bool']['minimum_should_match'] = 1;
             }
 
             $searchEvent = new SearchEvent($esQuery);
