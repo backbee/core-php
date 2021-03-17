@@ -2,9 +2,8 @@
 
 namespace BackBeeCloud\Structure\ContentHandler;
 
-use BackBeeCloud\ImageHandlerInterface;
+use BackBee\FileSystem\ImageHandlerInterface;
 use BackBeeCloud\Structure\ContentHandlerInterface;
-use BackBeeCloud\Structure\ContentHandler\ParameterHandler;
 use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Image;

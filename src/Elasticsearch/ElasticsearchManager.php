@@ -130,7 +130,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      *
      * @return ElasticsearchManager
      */
-    public function deletePage(Page $page): ElasticsearchManager
+    public function deletePage(Page $page)
     {
         $this->getClient()->delete(['index' => $this->getIndexName(), 'id' => $page->getUid()]);
 
@@ -161,11 +161,11 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     /**
      * Searches pages against the provided body.
      *
-     * @param array   $body
-     * @param integer $start
-     * @param integer $limit
-     * @param array   $sort
-     * @param bool    $formatResult
+     * @param array    $body
+     * @param int|null $start
+     * @param int  $limit
+     * @param array    $sort
+     * @param bool     $formatResult
      *
      * @return ElasticsearchCollection
      */

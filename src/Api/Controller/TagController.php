@@ -4,10 +4,9 @@ namespace BackBeeCloud\Api\Controller;
 
 use BackBeeCloud\Api\DataFormatter\TagDataFormatter;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
-use BackBeeCloud\Entity\TagManager;
+use BackBeeCloud\Tag\TagManager;
 use BackBeeCloud\Listener\RequestListener;
 use BackBeeCloud\Security\UserRightConstants;
-use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\Security\SecurityContext;
 use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,6 +35,8 @@ class TagController extends AbstractController
 
         $this->tagManager = $tagManager;
         $this->dataFormatter = $dataFormatter;
+
+        parent::__construct($securityContext->getApplication());
     }
 
     public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM, Request $request)

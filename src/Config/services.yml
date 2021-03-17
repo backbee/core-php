@@ -37,15 +37,15 @@ services:
         arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp' ]
 
     cloud.tag_manager:
-        class: BackBeeCloud\Entity\TagManager
-        arguments: [ "@em", "@elasticsearch.manager" ]
+        class: BackBeeCloud\Tag\TagManager
+        arguments: [ "@em", "@elasticsearch.manager", "@backbee.logger" ]
 
     cloud.image_listener:
         class: BackBeeCloud\Listener\ImageListener
         arguments: [ "@cloud.file_handler" ]
 
     cloud.file_handler:
-        class: BackBeeCloud\ImageFilesystemHandler
+        class: BackBee\FileSystem\ImageFilesystemHandler
         arguments: [ "@bbapp" ]
 
     user_preference.manager:
@@ -201,6 +201,11 @@ services:
         class: BackBeeCloud\Security\GroupType\GroupTypeRightManager
         arguments:
             - "@em"
+
+    core.user_right.installer:
+        class: BackBeeCloud\Security\UserRightInstaller
+        arguments:
+            [ '@em', '@cloud.group_type.manager', '@cloud.user_manager', '@backbee.logger' ]
 
     # Page type services
     cloud.page_type.manager:
@@ -595,6 +600,8 @@ services:
 
     elasticsearch.query:
         class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
+        arguments:
+            [ '@bbapp' ]
 
     # Template
     core.template.manager:

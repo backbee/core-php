@@ -1,6 +1,6 @@
 <?php
 
-namespace BackBeeCloud;
+namespace BackBeePlanet\Standalone;
 
 use BackBee\BBApplication;
 use BackBee\Security\Token\BBUserToken;
@@ -43,6 +43,11 @@ abstract class AbstractApplication extends BBApplication
         return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'res';
     }
 
+    /**
+     * Get base dir.
+     *
+     * @return string
+     */
     public function getBaseDir()
     {
         return $this->getBaseDirectory();

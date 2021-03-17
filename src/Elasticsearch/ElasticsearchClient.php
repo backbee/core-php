@@ -16,6 +16,7 @@ use Elasticsearch\ClientBuilder;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Exception;
 use Generator;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use function in_array;
 
 /**
@@ -210,13 +211,13 @@ class ElasticsearchClient
     /**
      * Gets all pages of current application and index these.
      *
-     * @param bool $memoryHardCleanup
+     * @param bool              $memoryHardCleanup
+     * @param SymfonyStyle|null $output
      *
      * @return self
      * @see ::indexPage
-     *
      */
-    public function indexAllPages(bool $memoryHardCleanup = false): self
+    public function indexAllPages(bool $memoryHardCleanup = false, ?SymfonyStyle $output = null): self
     {
         foreach ($this->getAllPages() as $page) {
             if ($page->getState() === Page::STATE_DELETED) {
@@ -233,6 +234,9 @@ class ElasticsearchClient
                 }
             } else {
                 $this->indexPage($page);
+                if ($output) {
+                    $output->progressAdvance();
+                }
             }
 
 
@@ -519,8 +523,48 @@ class ElasticsearchClient
                 yield $this->entityMgr->find(Page::class, $row['uid']);
             }
         } catch (Exception $exception) {
-            $this->logger->error(sprintf('%s : %s :%s', __CLASS__, __FUNCTION__, $exception->getMessage()));
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
+    }
+
+    /**
+     * Get total of undeleted pages.
+     *
+     * @return int
+     */
+    public function getTotalOfUndeletedPages(): int
+    {
+        $total = 0;
+
+        try {
+            $total = $this
+                ->entityMgr
+                ->getRepository(Page::class)
+                ->createQueryBuilder('p')
+                ->select('count(p._uid)')
+                ->where('p._state != :state')
+                ->setParameter('state', Page::STATE_DELETED)
+                ->getQuery()
+                ->getSingleScalarResult();
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
+        return $total;
     }
 
     /**
@@ -548,19 +592,5 @@ class ElasticsearchClient
     {
         return null === $this->getAnalyzerRegistry() ?
             self::DEFAULT_ANALYZER : $this->getAnalyzerRegistry()->getValue();
-    }
-
-    /**
-     * Delete index.
-     */
-    public function deleteIndex(): void
-    {
-        try {
-            if ($this->getClient()->indices()->exists(['index' => $this->getIndexName()])) {
-                $this->getClient()->indices()->delete(['index' => $this->getIndexName()]);
-            }
-        } catch (Exception $exception) {
-            $this->logger->error(sprintf('%s : %s :%s', __CLASS__, __FUNCTION__, $exception->getMessage()));
-        }
     }
 }

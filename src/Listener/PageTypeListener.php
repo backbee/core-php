@@ -19,7 +19,9 @@ class PageTypeListener
         $pageType = $event->getTarget();
         $typeMgr = $event->getApplication()->getContainer()->get('cloud.page_type.manager');
 
-        $pageType->setType($typeMgr->find($pageType->getTypeName()) ?: $typeMgr->getDefaultType());
+        if ($type = ($typeMgr->find($pageType->getTypeName()) ?: $typeMgr->getDefaultType())) {
+            $pageType->setType($type);
+        }
     }
 
     public static function onGetCategoryPostCall(PostResponseEvent $event)

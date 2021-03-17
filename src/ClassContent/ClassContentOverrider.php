@@ -2,16 +2,24 @@
 
 namespace BackBeeCloud\ClassContent;
 
+use ArrayObject;
+use BackBee\BBApplication;
 use BackBeeCloud\Utils\YamlReaderInterface;
 use BackBeeCloud\Utils\YamlWriterInterface;
-use BackBee\BBApplication;
+use Exception;
+use RuntimeException;
+use SplObjectStorage;
 
 /**
+ * Class ClassContentOverrider
+ *
+ * @package BackBeeCloud\ClassContent
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ClassContentOverrider
 {
-    const FOLDER_NAME = 'classcontents_overrider';
+    public const FOLDER_NAME = 'classcontents_overrider';
 
     /**
      * @var BBApplication
@@ -38,13 +46,23 @@ class ClassContentOverrider
      */
     private $cacheDirectory;
 
+    /**
+     * ClassContentOverrider constructor.
+     *
+     * @param BBApplication       $app
+     * @param array               $overrideDefinitions
+     * @param YamlReaderInterface $yamlReader
+     * @param YamlWriterInterface $yamlWriter
+     *
+     * @throws Exception
+     */
     public function __construct(
         BBApplication $app,
         array $overrideDefinitions,
         YamlReaderInterface $yamlReader,
         YamlWriterInterface $yamlWriter
     ) {
-        $this->overrideDefinitions = new \SplObjectStorage();
+        $this->overrideDefinitions = new SplObjectStorage();
         foreach ($overrideDefinitions as $definition) {
             $this->addDefinition($definition);
         }
@@ -56,12 +74,20 @@ class ClassContentOverrider
         $this->initCacheDirectory($app->getCacheDir());
     }
 
-    public function addDefinition(OverrideDefinitionInterface $definition)
+    /**
+     * Add definition.
+     *
+     * @param OverrideDefinitionInterface $definition
+     */
+    public function addDefinition(OverrideDefinitionInterface $definition): void
     {
         $this->overrideDefinitions->attach($definition);
     }
 
-    public function generate()
+    /**
+     * Generate.
+     */
+    public function generate(): void
     {
         foreach ($this->overrideDefinitions as $definition) {
             $this->handleDefinition($definition);
@@ -70,7 +96,12 @@ class ClassContentOverrider
         $this->app->unshiftClassContentDir($this->cacheDirectory);
     }
 
-    protected function handleDefinition(OverrideDefinitionInterface $definition)
+    /**
+     * Handle definition.
+     *
+     * @param OverrideDefinitionInterface $definition
+     */
+    protected function handleDefinition(OverrideDefinitionInterface $definition): void
     {
         $contentType = $definition->getContentType();
         $sourceYamlPath = sprintf(
@@ -80,7 +111,7 @@ class ClassContentOverrider
         );
         $data = $this->yamlReader->read($sourceYamlPath);
 
-        $target = new \ArrayObject($data[$this->getNameFromContentType($contentType)]);
+        $target = new ArrayObject($data[$this->getNameFromContentType($contentType)]);
         foreach ($definition->getTransformations() as $transformation) {
             $transformation->apply($target);
         }
@@ -92,12 +123,26 @@ class ClassContentOverrider
         $this->yamlWriter->write($filepath, $data);
     }
 
-    protected function getNameFromContentType($contentType)
+    /**
+     * Get name from content type.
+     *
+     * @param $contentType
+     *
+     * @return string
+     */
+    protected function getNameFromContentType($contentType): string
     {
         return basename($contentType);
     }
 
-    protected function getClassContentDirectoryBySourceName($sourceName)
+    /**
+     * Get class content directory by source name.
+     *
+     * @param $sourceName
+     *
+     * @return string
+     */
+    protected function getClassContentDirectoryBySourceName($sourceName): string
     {
         foreach ($this->app->getClassContentDir() as $directory) {
             if (false !== strpos($directory, $sourceName)) {
@@ -105,31 +150,40 @@ class ClassContentOverrider
             }
         }
 
-        throw new \RuntimeException(sprintf(
-            'Unable to find classcontent repository for the provided source name "%s".',
-            $sourceName
-        ));
+        return dirname($this->app->getBundle('core')->getBaseDirectory()) . '/res/ClassContent';
     }
 
-    protected function initCacheDirectory($basedir)
+    /**
+     * Init cache directory.
+     *
+     * @param $basedir
+     */
+    protected function initCacheDirectory($basedir): void
     {
         if (!is_dir($basedir) || !is_writable($basedir)) {
-            throw new \RuntimeException(sprintf(
-                'Cache base directory "%s" does not exist or is not writtable.',
-                $basedir
-            ));
+            throw new RuntimeException(
+                sprintf(
+                    'Cache base directory "%s" does not exist or is not writtable.',
+                    $basedir
+                )
+            );
         }
 
         $this->cacheDirectory = sprintf('%s/%s', $basedir, self::FOLDER_NAME);
         $this->mkdirOnce($this->cacheDirectory);
     }
 
-    protected function mkdirOnce($path)
+    /**
+     * Create folder.
+     *
+     * @param $path
+     */
+    protected function mkdirOnce($path): void
     {
         $umask = umask();
         umask(0);
         if (!is_dir($path) && !mkdir($path, 0777)) {
-            throw new \RuntimeException("Error occurs while creating {$path}.");
+            throw new RuntimeException("Error occurs while creating {$path}.");
         }
 
         umask($umask);
