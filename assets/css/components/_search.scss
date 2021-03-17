@@ -1,0 +1,27 @@
+// Search
+
+// Search Bar
+.search-btn {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border: 1px solid $border-color;
+    i {
+        color: $text-color;
+    }
+}
+
+// Search Results
+ul.list-result {
+    li {
+        padding: $spacer 0;
+        &:not(:last-of-type) {
+            border-bottom: 1px solid $border-color;
+        }
+    }
+    span.image-placeholder {
+        display: block;
+        background-color: $secondary-color;
+        width: 100%;
+        padding-top: 60%;
+    }
+}

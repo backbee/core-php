@@ -1,0 +1,83 @@
+// Button
+
+.btn {
+    padding-left: $btn-padding-x;
+    padding-right: $btn-padding-x;
+
+    * {
+        @include transition($btn-transition);
+    }
+
+    @include media-breakpoint-down(sm) {
+        padding-left: $btn-padding-x-mobile;
+        padding-right: $btn-padding-x-mobile;
+    }
+
+    &.btn-square {
+        @extend .rounded-0;
+    }
+
+    &.btn-rounded {
+        border-radius: $btn-rounded-radius;
+    }
+
+    &.color-primary {
+        @include btn-color($primary-color);
+        &.btn-outline {
+            @include outline-btn-color($primary-color);
+        }
+    }
+
+    &.color-secondary {
+        @include btn-color($secondary-color);
+        &.btn-outline {
+            @include outline-btn-color($secondary-color);
+        }
+    }
+
+    &.color-text {
+        @include btn-color($text-color);
+        &.btn-outline {
+            @include outline-btn-color($text-color);
+        }
+    }
+
+    &.color-background {
+        @include btn-color($background-color);
+        &.btn-outline {
+            @include outline-btn-color($background-color);
+        }
+    }
+
+    &.btn-sm {
+        padding-left: $btn-padding-x-sm;
+        padding-right: $btn-padding-x-sm;
+
+        @include media-breakpoint-down(sm) {
+            padding-left: $btn-padding-x-sm-mobile;
+            padding-right: $btn-padding-x-sm-mobile;
+        }
+    }
+
+    &.btn-lg {
+        padding: $btn-padding-y-lg $btn-padding-x-lg;
+
+        @include media-breakpoint-down(sm) {
+            padding-left: $btn-padding-x-lg-mobile;
+            padding-right: $btn-padding-x-lg-mobile;
+        }
+    }
+
+    // Older version
+    &.btn-primary, &.btn-color2, &.btn-color6 {
+        @extend .btn.color-primary;
+    }
+
+    &.btn-secondary, &.btn-color3, &.btn-color7 {
+        @extend .btn.color-secondary;
+    }
+
+    &.btn-color1, &.btn-color5 {
+        @extend .btn.color-background;
+    }
+}

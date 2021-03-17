@@ -1,0 +1,22 @@
+// Metadata
+
+.metadata-wrapper {
+    color: $text-color;
+    font-size: $metadata-font-size;
+    font-family: $font-sans;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    .metadata-tag a {
+        color: $primary-color;
+    }
+    [class*=metadata-] + [class*=metadata-]:before {
+        content: "";
+        display: inline-block;
+        margin: 0 $dot-margin-x;
+        width: $dot-size;
+        height: $dot-size;
+        background-color: $dot-color;
+        border-radius: 50%;
+        vertical-align: middle;
+    }
+}

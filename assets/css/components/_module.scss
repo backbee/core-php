@@ -1,0 +1,35 @@
+/***********************************************/
+/* ©BackBee - v1.0.0 FEBRUARY 2018 - LP Digital*/
+// content block
+
+// Reset
+@import 'reset';
+
+// Content
+@import 'icon-font';
+@import 'strate';
+@import 'image';
+@import 'type';
+@import 'rte';
+@import 'button';
+@import 'bb-content';
+@import 'pager';
+@import 'grid';
+@import 'liner-spacer';
+@import 'autoblock';
+@import 'metadata';
+@import 'map';
+@import 'social-network';
+@import 'search';
+@import 'card';
+@import 'cookie';
+@import 'login-helper';
+@import 'reponsive-slider';
+
+// Libraries
+// Slider - Owl Carousel
+@import '../node_modules/owl.carousel/src/scss/owl.carousel';
+@import '../node_modules/owl.carousel/src/scss/owl.theme.default';
+@import 'libs/slider-owl';
+// Lightbox - Lightbox2
+@import 'libs/lightbox';

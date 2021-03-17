@@ -1,0 +1,149 @@
+// ©BackBee - v1.0.0 FEBRUARY 2018 - LP Digital*/
+//
+// SASS mixins
+
+// Browser prefixes
+// Transform
+@mixin transform($transforms) {
+    -webkit-transform: $transforms;
+    -moz-transform: $transforms;
+    -ms-transform: $transforms;
+    transform: $transforms;
+}
+
+// Transition
+@mixin transition($transition) {
+    -webkit-transition: $transition;
+    -moz-transition: $transition;
+    -ms-transition: $transition;
+    -o-transition: $transition;
+    transition: $transition;
+}
+
+// Opacity
+@mixin opacity($opacity) {
+    opacity: $opacity;
+    $opacity-ie: $opacity * 100;
+    filter: alpha(opacity=$opacity-ie); //IE8
+}
+
+// Scale
+@mixin scale($ratio) {
+    -webkit-transform: scale($ratio);
+        -ms-transform: scale($ratio); // IE9 only
+         -o-transform: scale($ratio);
+            transform: scale($ratio);
+}
+
+// Rotate
+@mixin rotate($deg) {
+    -webkit-transform: rotate($deg);
+        -ms-transform: rotate($deg); // IE9 only
+         -o-transform: rotate($deg);
+            transform: rotate($deg);
+}
+
+// Blur
+@mixin blur($blur){
+    filter: blur($blur);
+    -moz-filter: blur($blur);
+    -webkit-filter: blur($blur);
+    -o-filter: blur($blur);
+}
+
+// Translate
+@mixin translate3d ($x, $y, $z) {
+    @include transform(translate3d($x, $y, $z));
+}
+
+// Button color
+@mixin btn-color($color) {
+    background-color: $color;
+    border-color: $color;
+    color: set-auto-text-color($color);
+    border-width: $btn-border-width;
+
+    &:hover, &:focus, &:active {
+        background-color: darken($color, 5%);
+        border-color: darken($color, 5%);
+        color: set-auto-text-color($color);
+    }
+}
+
+// Outline button
+@mixin outline-btn-color($color) {
+    color: $color;
+    border-color: $color;
+    background-color: transparent;
+
+    * {
+        color: $color;
+    }
+
+    &:hover, &:focus, &:active {
+        background-color: $color;
+        border-color: $color;
+        color: set-auto-text-color($color);
+
+        * {
+            color: set-auto-text-color($color);
+        }
+    }
+}
+
+// Background color
+@mixin bg-color($color) {
+    background-color: $color;
+
+    &, * {
+        color: set-auto-text-color($color);
+    }
+
+    &.bordered {
+        border-color: $color;
+        background: transparent;
+        &, * {
+            color: $color;
+        }
+    }
+
+    &.transparency {
+        background-color: rgba($color, .6);
+        &.bordered {
+            border-color: rgba($color, .6);
+            background: transparent;
+            &, * {
+                color: $color;
+            }
+        }
+    }
+}
+
+// Padding vertical
+@mixin padding-y($padding) {
+    padding-top: $padding;
+    padding-bottom: $padding;
+}
+
+// Placeholder
+@mixin placeholder($color, $style) {
+    &::-moz-placeholder {
+      color: $color;
+      font-style: $style;
+      opacity: 1; // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526
+    }
+    &:-ms-input-placeholder {
+      color: $color;
+      font-style: $style;
+    }
+    &::-webkit-input-placeholder  {
+      color: $color;
+      font-style: $style;
+    }
+  }
+
+// Shadow
+@mixin box-shadow($shadow) {
+    -webkit-box-shadow: $shadow; // iOS <4.3 & Android <4.1
+            box-shadow: $shadow;
+}

@@ -1,0 +1,98 @@
+// Strate (row)
+
+.has-bg-color {
+    &.color-primary {
+        @include bg-color($bg-color1);
+    }
+
+    &.color-secondary {
+        @include bg-color($bg-color2);
+    }
+
+    &.color-text {
+        @include bg-color($bg-color3);
+    }
+
+    &.color-background {
+        @include bg-color($bg-color4);
+    }
+}
+
+// Background video (YouTube)
+.background-video-row {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    .bg-video-wrapper {
+        pointer-events: none;
+        iframe {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: auto;
+            opacity: 0;
+            @include transition(opacity 1s ease-out);
+            @include media-breakpoint-down(xs) {
+                display: none;
+            }
+        }
+    }
+}
+
+// Background blur
+.bg-blur {
+    overflow: hidden;
+    position: relative;
+    &:before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: inherit;
+        @include blur(5px);
+        top: 0;
+    }
+}
+
+.row-overlay {
+    position: relative;
+
+    &:after {
+        content: "";
+        background-color: rgba(0,0,0,.4);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    > [class*="container"] {
+        position: relative;
+        z-index: 10;
+
+        .is-mobile & {
+            z-index: 9999; // on the top of cloud overlay
+        }
+    }
+}
+
+.align-item-center .row:not(.auto-height) {
+    display: flex;
+    align-items: center;
+}
+
+// Older version
+.bg-color2, .bg-color6 {
+    @extend .has-bg-color.color-primary;
+}
+
+.bg-color3, .bg-color7 {
+    @extend .has-bg-color.color-secondary;
+}
+
+.bg-color1, .bg-color5 {
+    @extend .has-bg-color.color-background;
+}

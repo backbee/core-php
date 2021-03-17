@@ -1,0 +1,27 @@
+// Pagination
+
+// Pagination
+.pagination {
+    border-top: $liner-width solid;
+    border-color: $border-color;
+    margin-top: $spacer;
+    padding-top: $spacer;
+    justify-content: center;
+    .page-item {
+        .page-link {
+            @include transition($color-transition);
+            color: $primary-color;
+            padding: 0;
+            width: $pagination-size;
+            height: $pagination-size;
+            line-height: $pagination-size;
+        }
+        &.active {
+            .page-link {
+                color: set-auto-text-color($primary-color);
+                background-color: $primary-color;
+                border-color: $primary-color;
+            }
+        }
+    }
+}

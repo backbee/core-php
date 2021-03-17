@@ -1,0 +1,33 @@
+// Liner & Spacer
+
+.cloud-spacer {
+    min-height: $spacer-min-h;
+}
+
+.cloud-liner {
+    position: relative;
+    min-height: $liner-min-h;
+    &:after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        border-top: 1px solid $border-color;
+    }
+
+    &.dotted:after {
+        border: none;
+        background-image: linear-gradient(to right, $border-color 30%, rgba($border-color,0) 0%);
+        background-position: bottom;
+        background-size: 6px 2px;
+        background-repeat: repeat-x;
+        height: 2px;
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .cloud-liner {
+        min-height: unset;
+    }
+}

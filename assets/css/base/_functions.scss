@@ -1,0 +1,18 @@
+// ©BackBee - v1.0.0 FEBRUARY 2018 - LP Digital*/
+//
+// SASS functions
+
+// Set button text color
+@function set-auto-text-color($color) {
+  $red: red($color);
+  $green: green($color);
+  $blue: blue($color);
+  
+  $brightness: ($red * 299 + $green * 587 + $blue * 114) / 1000;
+
+  @if ($brightness < 125) {
+    @return $btn-label-color-light;
+  } @else {
+    @return $btn-label-color-dark;
+  }
+}

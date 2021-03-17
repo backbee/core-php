@@ -595,3 +595,7 @@ services:
 
     elasticsearch.query:
         class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
+
+    # Template
+    core.template.manager:
+        class: BackBee\Template\TemplateManager

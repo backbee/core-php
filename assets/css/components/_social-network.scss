@@ -1,0 +1,29 @@
+// Social network
+
+.social-list {
+    margin-bottom: 0;
+    li a {
+        display: inline-block;
+        text-align: center;
+        font-size: $social-icon-size;
+        line-height: $social-btn-size;
+        width: $social-btn-size;
+        height: $social-btn-size;
+        border-radius: 100%;
+        border-width: $social-border-width;
+        padding: 0;
+        margin: 0;
+    }
+}
+
+// Share
+
+.btn-social-share {
+    &:not(:last-child) {
+        margin-right: $spacer / 2;
+    }
+
+    .fb-share-button {
+        line-height: 1rem;
+    }
+}

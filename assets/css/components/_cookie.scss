@@ -1,0 +1,15 @@
+#privacy-policy-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #3e3e3e;
+    color: $white;
+    padding: $spacer;
+    z-index: 1;
+
+    a {
+        color: $white;
+        text-decoration: underline;
+    }
+}
