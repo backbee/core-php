@@ -2,118 +2,152 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\Entity\Lang;
 use BackBee\BBApplication;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Site\Site;
+use BackBeeCloud\Entity\Lang;
+use Doctrine\ORM\EntityManager;
+use Exception;
 
 /**
- * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
+ * Class MenuListener
+ *
+ * @package BackBeeCloud\Listener
+ *
+ * @author  Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  */
 class MenuListener
 {
     /**
+     * @var BBApplication
+     */
+    private static $bbApp;
+
+    /**
+     * @var EntityManager
+     */
+    private static $entityManager;
+
+    /**
+     * MenuListener constructor.
+     *
+     * @param BBApplication $bbApp
+     */
+    public function __construct(BBApplication $bbApp)
+    {
+        self::$bbApp = $bbApp;
+        self::$entityManager = $bbApp->getEntityManager();
+    }
+
+    /**
      * Occurs on `basic.menu.persist`
      *
-     * @param  Event  $event
+     * @param Event $event
      */
-    public static function onPrePersist(Event $event)
+    public static function onPrePersist(Event $event): void
     {
         $menu = $event->getTarget();
-        $app = $event->getApplication();
-
         $param = $menu->getParam('items');
-        if (false == $param['value']) {
-            $homepage = $app
-                ->getEntityManager()
-                ->getRepository(Page::class)
-                ->getRoot($app->getEntityManager()->getRepository(Site::class)->findOneBy([]))
-            ;
 
-            $menu->setParam('items', [
+        if (false === $param['value']) {
+            $homepage = self::$entityManager->getRepository(Page::class)->getRoot(
+                self::$entityManager->getRepository(Site::class)->findOneBy([])
+            );
+            $menu->setParam(
+                'items',
                 [
-                    'id'    => $homepage->getUid(),
-                    'url'   => $homepage->getUrl(),
-                    'label' => $homepage->getTitle(),
-                ],
-            ]);
+                    [
+                        'id' => $homepage->getUid(),
+                        'url' => $homepage->getUrl(),
+                        'label' => $homepage->getTitle(),
+                    ],
+                ]
+            );
         }
     }
 
     /**
      * Called on `basic.menu.render` event.
      *
-     * @param  RendererEvent  $event
+     * @param RendererEvent $event
      */
-    public static function onRender(RendererEvent $event)
+    public static function onRender(RendererEvent $event): void
     {
-        $app = $event->getApplication();
-        $entyMgr = $app->getEntityManager();
-        $bbtoken = $app->getBBUserToken();
         $renderer = $event->getRenderer();
-
         $block = $event->getTarget();
         $items = $block->getParamValue('items');
-
         $validItems = [];
-        foreach ($items as $item) {
-            if (
-                false != $item['id']
-                && null !== $page = self::getPageByUid($item['id'], $app)
-            ) {
-                $item['url'] = $page->getUrl();
-                $item['label'] = $page->getTitle();
-                $item['is_online'] = $page->isOnline();
-                $item['is_current'] = $renderer->getCurrentPage() === $page;
 
-                $validChildren = [];
-                if (isset($item['children'])) {
-                    foreach ((array) $item['children'] as $child) {
-                        if (
-                            false != $item['id']
-                            && null !== $page = self::getPageByUid($child['id'], $app)
-                        ) {
-                            $child['url'] = $page->getUrl();
-                            $child['label'] = $page->getTitle();
-                            $child['is_online'] = $page->isOnline();
-                            $child['is_current'] = $renderer->getCurrentPage() === $page;
-                            $validChildren[] = $child;
+        try {
+            foreach ($items as $item) {
+                if (false !== $item['id'] && null !== ($page = self::getPageByUid($item['id']))) {
+                    $item['url'] = $page->getUrl();
+                    $item['label'] = $page->getTitle();
+                    $item['is_online'] = $page->isOnline();
+                    $item['is_current'] = $renderer->getCurrentPage() === $page;
+
+                    $validChildren = [];
+                    if (isset($item['children'])) {
+                        foreach ((array)$item['children'] as $child) {
+                            if (null !== ($page = self::getPageByUid($child['id'], self::$bbApp))) {
+                                $child['url'] = $page->getUrl();
+                                $child['label'] = $page->getTitle();
+                                $child['is_online'] = $page->isOnline();
+                                $child['is_current'] = $renderer->getCurrentPage() === $page;
+                                $validChildren[] = $child;
+                            }
                         }
                     }
+
+                    $item['children'] = $validChildren;
+                    $validItems[] = $item;
                 }
-
-                $item['children'] = $validChildren;
-                $validItems[] = $item;
             }
-        }
 
-        if (null !== $bbtoken) {
-            $block->setParam('items', $validItems);
-            $entyMgr->flush($block->getDraft() ?: $block);
-        }
+            if (null !== self::$bbApp->getBBUserToken()) {
+                $block->setParam('items', $validItems);
+                self::$entityManager->flush($block->getDraft() ?: $block);
+            }
 
-        $renderer->assign('items', $validItems);
+            $renderer->assign('items', $validItems);
+        } catch (Exception $exception) {
+            self::$bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+        }
     }
 
-    protected static function getPageByUid($uid = null, BBApplication $app)
+    /**
+     * Get page by uid.
+     *
+     * @param string|null $uid
+     *
+     * @return Page|null
+     */
+    private static function getPageByUid(?string $uid = null): ?Page
     {
-        $bbtoken = $app->getBBUserToken();
-        $entyMgr = $app->getEntityManager();
-        $multilangMgr = $app->getContainer()->get('multilang_manager');
-        if (null !== $page = $entyMgr->find(Page::class, (string) $uid)) {
-            if (null === $bbtoken && !$page->isOnline()) {
-                return null;
-            }
+        $page = null;
+        $multiLangMgr = self::$bbApp->getContainer()->get('multilang_manager');
 
-            if (
-                $page->isRoot()
-                && null !== $currentLang = $multilangMgr->getCurrentLang()
-            ) {
-                $lang = $entyMgr->find(Lang::class, $currentLang);
-                $page = $multilangMgr->getRootByLang($lang);
+        try {
+            if (null !== ($page = self::$entityManager->find(Page::class, $uid))) {
+                if (null === self::$bbApp->getBBUserToken() && !$page->isOnline()) {
+                    return null;
+                }
+
+                if ($page->isRoot() &&
+                    null !== ($currentLang = $multiLangMgr->getCurrentLang()) &&
+                    null !== ($lang = self::$entityManager->find(Lang::class, $currentLang))
+                ) {
+                    $page = $multiLangMgr->getRootByLang($lang);
+                }
             }
+        } catch (Exception $exception) {
+            self::$bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
         }
 
         return $page;

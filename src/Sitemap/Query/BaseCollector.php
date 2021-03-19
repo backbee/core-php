@@ -45,11 +45,11 @@ class BaseCollector extends AbstractCollector
      */
     public function getQueryBuilder()
     {
-        if (!$this->getContainer()->has('app.sitemap.query_builder')) {
+        if (!$this->getContainer()->has('core.sitemap.query_builder')) {
             throw new RuntimeException('Undefined sitemap query builder service.');
         }
 
-        return $this->getContainer()->get('app.sitemap.query_builder');
+        return $this->getContainer()->get('core.sitemap.query_builder');
     }
 
     /**

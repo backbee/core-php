@@ -10,13 +10,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <link rel="canonical" href="{{ bb.routing.getUri(this.getCurrentPage().getUrl(), '', this.getCurrentSite()) }}"/>
 
-    {{ this.seoMetadata(this.getCurrentPage())|raw }}
+{% if this.knowledgeGraphHelper.isKnowledgeGraphEnabled() %}
+    {{ this.knowledgeGraphHelper.getSeoMetadata(this.getCurrentPage)|raw }}
+    {{ this.knowledgeGraphHelper.getMetaGoogleSiteVerification()|raw }}
+    {{ this.knowledgeGraphHelper.getGraph(this.getCurrentPage)|raw }}
+{% endif %}
+<!--##FAVICON_SPOT##-->
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">
+{% endblock %}
 
-    <!--##FAVICON_SPOT##-->
-
-    {% block stylesheets %}
-        <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">
-    {% endblock %}
     <script>
       window.onDocumentReady = function (fn) {
         // Sanity check

@@ -2,34 +2,53 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\UserPreference\UserPreferenceManager;
+use BackBee\Renderer\Exception\RendererException;
 use BackBee\Renderer\Renderer;
+use BackBeeCloud\UserPreference\UserPreferenceManager;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
+ * Class FaviconListener
+ *
+ * @package BackBeeCloud\Listener
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class FaviconListener
 {
-    const FAVICON_LOCATION_TAG = '<!--##FAVICON_SPOT##-->';
+    public const FAVICON_LOCATION_TAG = '<!--##FAVICON_SPOT##-->';
 
     /**
      * @var UserPreferenceManager
      */
-    protected $userPreferenceManager;
+    protected static $userPreferenceManager;
 
     /**
      * @var Renderer
      */
-    protected $renderer;
+    protected static $renderer;
 
+    /**
+     * FaviconListener constructor.
+     *
+     * @param UserPreferenceManager $userPreferenceManager
+     * @param Renderer              $renderer
+     */
     public function __construct(UserPreferenceManager $userPreferenceManager, Renderer $renderer)
     {
-        $this->userPreferenceManager = $userPreferenceManager;
-        $this->renderer = $renderer;
+        self::$userPreferenceManager = $userPreferenceManager;
+        self::$renderer = $renderer;
     }
 
-    public function onKernelResponse(FilterResponseEvent $event)
+    /**
+     * On kernel response.
+     *
+     * @param FilterResponseEvent $event
+     *
+     * @throws RendererException
+     */
+    public function onKernelResponse(FilterResponseEvent $event): void
     {
         $response = $event->getResponse();
         if ($response instanceof JsonResponse) {
@@ -41,15 +60,18 @@ class FaviconListener
             return;
         }
 
-        if ($faviconData = $this->userPreferenceManager->dataOf('favicon')) {
+        if ($faviconData = self::$userPreferenceManager->dataOf('favicon')) {
             $response->setContent(
                 str_replace(
                     self::FAVICON_LOCATION_TAG,
-                    $this->renderer->partial(
+                    self::$renderer->partial(
                         'common/_favicon_part.html.twig',
-                        array_map(function ($url) {
-                            return str_replace(['http:', 'https:'], '', $url);
-                        }, $faviconData)
+                        array_map(
+                            static function ($url) {
+                                return str_replace(['http:', 'https:'], '', $url);
+                            },
+                            $faviconData
+                        )
                     ),
                     $response->getContent()
                 )

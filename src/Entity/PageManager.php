@@ -7,6 +7,7 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
+use BackBee\KnowledgeGraph\SeoMetadataManager;
 use BackBee\MetaData\MetaData;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\KeyWord;
@@ -31,12 +32,15 @@ use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\TransactionRequiredException;
-use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
 
 /**
+ * Class PageManager
+ *
+ * @package BackBeeCloud\Entity
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
@@ -45,79 +49,85 @@ class PageManager
     /**
      * @var BBUserToken|null
      */
-    protected $bbToken;
+    private $bbToken;
 
     /**
      * @var EntityManager
      */
-    protected $entityMgr;
+    private $entityMgr;
 
     /**
      * @var TypeManager
      */
-    protected $typeMgr;
+    private $typeMgr;
 
     /**
      * @var ContentManager
      */
-    protected $contentMgr;
+    private $contentMgr;
 
     /**
      * @var PageRepository
      */
-    protected $repository;
+    private $repository;
 
     /**
      * @var ElasticsearchManager
      */
-    protected $elsMgr;
+    private $elsMgr;
 
     /**
      * @var TagManager
      */
-    protected $tagMgr;
+    private $tagMgr;
 
     /**
      * @var bool
      */
-    protected $hydratePage = true;
+    private $hydratePage = true;
 
     /**
      * @var null|Page
      */
-    protected $currentPage;
+    private $currentPage;
 
     /**
      * @var MultiLangManager
      */
-    protected $multiLangMgr;
+    private $multiLangMgr;
 
     /**
      * @var null|Lang
      */
-    protected $currentLang;
+    private $currentLang;
 
     /**
      * @var PageCategoryManager
      */
-    protected $pageCategoryManager;
+    private $pageCategoryManager;
 
     /**
      * @var PageAssociationManager
      */
-    protected $pageAssociationMgr;
+    private $pageAssociationMgr;
 
     /**
      * @var SearchEngineManager
      */
-    protected $searchEngineManager;
+    private $searchEngineManager;
+
+    /**
+     * @var SeoMetadataManager
+     */
+    private $seoMetadataManager;
 
     /**
      * PageManager constructor.
      *
-     * @param BBApplication $app
+     * @param BBApplication      $app
+     * @param SeoMetadataManager $seoMetadataManager
      */
-    public function __construct(BBApplication $app)
+    public function __construct(BBApplication $app, SeoMetadataManager $seoMetadataManager)
     {
         $this->bbToken = $app->getBBUserToken();
         $this->entityMgr = $app->getEntityManager();
@@ -130,12 +140,13 @@ class PageManager
         $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
         $this->pageAssociationMgr = $app->getContainer()->get('cloud.multilang.page_association.manager');
         $this->searchEngineManager = $app->getContainer()->get('core.search_engine.manager');
+        $this->seoMetadataManager = $seoMetadataManager;
     }
 
     /**
      * Enables page hydratation on new page creation.
      */
-    public function enablePageHydratation()
+    public function enablePageHydratation(): void
     {
         $this->hydratePage = true;
     }
@@ -143,7 +154,7 @@ class PageManager
     /**
      * Disables page hydratation on new page creation.
      */
-    public function disablePageHydratation()
+    public function disablePageHydratation(): void
     {
         $this->hydratePage = false;
     }
@@ -181,15 +192,12 @@ class PageManager
      *                              on global contents to determine if page is drafted
      *
      * @return array
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
      * @throws ClassNotFoundException
      * @throws UnknownPropertyException
      */
     public function format(Page $page, $strictDraftMode = false): array
     {
-        $pageSeo = $this->getPageSeoMetadata($page);
+        $pageSeo = $this->seoMetadataManager->getPageSeoMetadata($page);
         $type = $this->typeMgr->findByPage($page);
         $result = $this->elsMgr->getClient()->get(
             [
@@ -232,7 +240,7 @@ class PageManager
             'published_at' => $page->getPublishing()
                 ? $page->getPublishing()->format('Y-m-d H:i:s')
                 : null,
-            'search_engine_activated' => $this->searchEngineManager->googleSearchEngineIsActivated()
+            'search_engine_activated' => $this->searchEngineManager->googleSearchEngineIsActivated(),
         ];
     }
 
@@ -266,7 +274,7 @@ class PageManager
      *
      * @return Page|null
      */
-    public function get($uid): ?Page
+    public function get(string $uid): ?Page
     {
         return $this->repository->find($uid);
     }
@@ -309,8 +317,8 @@ class PageManager
         unset($criteria['page_uid']);
 
         if (0 === count($criteria) || (1 === count(
-            $criteria
-        ) && isset($criteria['title'])) || isset($criteria['has_draft_only'])) {
+                    $criteria
+                ) && isset($criteria['title'])) || isset($criteria['has_draft_only'])) {
             $query = [
                 'query' => [
                     'bool' => [
@@ -540,10 +548,12 @@ class PageManager
      * @param array $data
      *
      * @return Page
+     * @throws ClassNotFoundException
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws QueryException
      * @throws TransactionRequiredException
+     * @throws UnknownPropertyException
      * @throws \BackBee\Exception\InvalidArgumentException
      */
     public function duplicate(Page $page, array $data): Page
@@ -611,81 +621,6 @@ class PageManager
                 ],
             ]
         );
-    }
-
-    /**
-     * @param Page $page
-     *
-     * @return array
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws TransactionRequiredException
-     */
-    public function getPageSeoMetadata(Page $page): array
-    {
-        $seoData = [];
-
-        $metadataBag = $page->getMetaData() ?: [];
-        foreach ($metadataBag as $attr => $metadata) {
-            if (($metadata->getAttribute('name') === $attr) && $value = $metadata->getAttribute('content')) {
-                $seoData[(string)$attr] = $value;
-            }
-        }
-
-        $elasticSearchResult = null;
-
-        try {
-            $elasticSearchResult = $this->elsMgr->getClient()->get(
-                [
-                    'id' => $page->getUid(),
-                    'index' => $this->elsMgr->getIndexName(),
-                    '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
-                ]
-            );
-        } catch (Missing404Exception $e) {
-            return $seoData;
-        }
-
-        $elasticSearchResult = $elasticSearchResult['_source'];
-
-        $seoData['title'] = $seoData['title'] ?: $elasticSearchResult['title'];
-
-        if (
-            !isset($seoData['description'])
-            && $elasticSearchResult['abstract_uid']
-            && $abstract = $this->entityMgr->find(ArticleAbstract::class, $elasticSearchResult['abstract_uid'])
-        ) {
-            $seoData['description'] = strip_tags(
-                str_replace(
-                    "\n",
-                    '',
-                    str_replace(
-                        '&nbsp;',
-                        '',
-                        strlen($abstract->value) > 300 ? mb_substr($abstract->value, 0, 300) . '...' : $abstract->value
-                    )
-                )
-            );
-        }
-
-        $searchEngine = $this->searchEngineManager->googleSearchEngineIsActivated();
-        $seoData['index'] = null !== $metadataBag->get('index') ?
-            $metadataBag->get('index')->getAttribute('content') : $searchEngine;
-        $seoData['follow'] = null !== $metadataBag->get('follow') ?
-            $metadataBag->get('follow')->getAttribute('content') : $searchEngine;
-
-        if ('article' !== $elasticSearchResult['type']) {
-            return $seoData;
-        }
-
-        if (
-            $elasticSearchResult['image_uid']
-            && $image = $this->entityMgr->find(Image::class, $elasticSearchResult['image_uid'])
-        ) {
-            $seoData['image_url'] = $image->image->path;
-        }
-
-        return $seoData;
     }
 
     /**
@@ -969,7 +904,7 @@ class PageManager
 
         try {
             $datetime = new DateTime($value);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             throw new InvalidArgumentException(
                 sprintf(
                     '[%s - %s] Failed to create an instance of DateTime, "%s" is not valid.',
@@ -1000,7 +935,7 @@ class PageManager
             if (false === $value && !$page->isRoot() && $page->getPublishing() <= $today) {
                 $page->setPublishing();
             }
-        } catch (LogicException $e) {
+        } catch (LogicException $exception) {
             throw new LogicException('Home page cannot be offline');
         }
     }
@@ -1038,14 +973,10 @@ class PageManager
      *
      * @param Page  $page
      * @param array $data
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
      */
     protected function runSetSeo(Page $page, array $data): void
     {
-        $currentSeo = $this->getPageSeoMetadata($page);
+        $currentSeo = $this->seoMetadataManager->getPageSeoMetadata($page);
         $keys = ['title', 'description'];
 
         if (false !== $currentSeo) {

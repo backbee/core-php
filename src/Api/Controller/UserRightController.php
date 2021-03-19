@@ -2,14 +2,18 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBee\BBApplication;
 use BackBeeCloud\Entity\PageManager;
 use BackBeeCloud\Security\UserRightManager;
-use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
+ * Class UserRightController
+ *
+ * @package BackBeeCloud\Api\Controller
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserRightController extends AbstractController
@@ -24,6 +28,13 @@ class UserRightController extends AbstractController
      */
     private $pageManager;
 
+    /**
+     * UserRightController constructor.
+     *
+     * @param UserRightManager $userRightManager
+     * @param PageManager      $pageManager
+     * @param BBApplication    $app
+     */
     public function __construct(UserRightManager $userRightManager, PageManager $pageManager, BBApplication $app)
     {
         parent::__construct($app);
@@ -32,7 +43,14 @@ class UserRightController extends AbstractController
         $this->pageManager = $pageManager;
     }
 
-    public function getCurrentUserRightsCollection(Request $request)
+    /**
+     * Get current user rights collection.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function getCurrentUserRightsCollection(Request $request): JsonResponse
     {
         $page = null;
         if ($request->query->get('contextual_page_uid')) {
@@ -50,14 +68,21 @@ class UserRightController extends AbstractController
         );
     }
 
-    public function getCurrentUserAuthorizedCategoriesCollection(Request $request)
+    /**
+     * Get current user authorized categories collection.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function getCurrentUserAuthorizedCategoriesCollection(Request $request): JsonResponse
     {
         $this->assertIsAuthenticated();
 
         return new JsonResponse(
             $this->userRightManager->getUserAuthorizedCategories(
                 $this->getUser(),
-                $request->query->get('contextual_page_type', null)
+                $request->query->get('contextual_page_type')
             ),
             Response::HTTP_OK
         );

@@ -2,24 +2,34 @@
 
 namespace BackBeeCloud\MultiLang;
 
+use BackBee\BBApplication;
+use BackBee\Exception\BBException;
+use BackBee\NestedNode\Page;
+use BackBee\Site\Site;
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
+use BackBeeCloud\SiteStatusManager;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
 use BackBeePlanet\RedisManager;
-use BackBee\BBApplication;
-use BackBee\NestedNode\Page;
-use BackBee\Site\Site;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
+use Exception;
 use InvalidArgumentException;
 use LogicException;
 
 /**
+ * Class MultiLangManager
+ *
+ * @package BackBeeCloud\MultiLang
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class MultiLangManager implements JobHandlerInterface
@@ -32,95 +42,156 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * @var EntityManager
      */
-    protected $entyMgr;
+    protected $entityMgr;
 
     /**
      * @var array
      */
     protected $availables;
 
+    /**
+     * @var SiteStatusManager
+     */
+    protected $siteStatusMgr;
+
+    /**
+     * MultiLangManager constructor.
+     *
+     * @param BBApplication     $app
+     */
     public function __construct(BBApplication $app)
     {
         $this->app = $app;
-        $this->entyMgr = $app->getEntityManager();
+        $this->entityMgr = $app->getEntityManager();
         $this->siteStatusMgr = $app->getContainer()->get('site_status.manager');
         $this->availables = (new GlobalSettings())->langs();
     }
 
-    public function isActive()
+    /**
+     * Is active.
+     *
+     * @return bool
+     */
+    public function isActive(): bool
     {
         return null !== $this->getDefaultLang();
     }
 
-    public function getCurrentLang()
+    /**
+     * Get current long.
+     *
+     * @return string|null
+     * @throws BBException
+     */
+    public function getCurrentLang(): ?string
     {
         $request = $this->app->getRequest();
-
         $page = null;
-        $pageUid = $request->query->get('page_uid', null);
-        if (null !== $pageUid) {
-            $page = $this->entyMgr->find(Page::class, $pageUid);
+        $pageUid = $request->query->get('page_uid');
+
+        try {
+            if (null !== $pageUid) {
+                $page = $this->entityMgr->find(Page::class, $pageUid);
+            }
+
+            if (null === $page) {
+                $page = $this->entityMgr->getRepository(Page::class)->findOneBy(
+                    [
+                        '_url' => $this->app->getRequest()->getPathInfo(),
+                    ]
+                );
+            }
+        } catch (Exception $exception) {
+            $this->app->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
         }
 
-        if (null === $page) {
-            $page = $this->entyMgr->getRepository(Page::class)->findOneBy([
-                '_url' => $this->app->getRequest()->getPathInfo(),
-            ]);
-        }
+        $lang = null;
 
-        $lang  = null;
         if (null !== $page) {
             $lang = $this->getLangByPage($page);
         }
 
         if (
-            null === $lang
-            && 1 === preg_match('~^/([a-z]{2})/~', $request->getPathInfo(), $matches)
+            null === $lang &&
+            1 === preg_match('~^/([a-z]{2})/~', $request->getPathInfo(), $matches) &&
+            $this->getLang($matches[1])
         ) {
-            if ($this->getLang($matches[1])) {
-                $lang = $matches[1];
-            }
+            $lang = $matches[1];
         }
 
         return $lang;
     }
 
-    public function getAllLangs()
+    /**
+     * Get all languages.
+     *
+     * @return array
+     */
+    public function getAllLangs(): array
     {
         $result = [];
-        foreach ($this->availables as $id => $label) {
-            $data = [
-                'id'         => $id,
-                'label'      => $label,
-                'is_active'  => false,
-                'is_default' => false,
-            ];
-            if ($lang = $this->entyMgr->find(Lang::class, $id)) {
-                $data['is_active'] = $lang->isActive();
-                $data['is_default'] = $lang->isDefault();
-            }
 
-            $result[] = $data;
+        try {
+            foreach ($this->availables as $id => $label) {
+                $data = [
+                    'id' => $id,
+                    'label' => $label,
+                    'is_active' => false,
+                    'is_default' => false,
+                ];
+
+                if ($lang = $this->entityMgr->find(Lang::class, $id)) {
+                    $data['is_active'] = $lang->isActive();
+                    $data['is_default'] = $lang->isDefault();
+                }
+
+                $result[] = $data;
+            }
+        } catch (Exception $exception) {
+            $this->app->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
         }
 
         return $result;
     }
 
-    public function getActiveLangs()
+    /**
+     * Get active language.
+     *
+     * @return array
+     */
+    public function getActiveLangs(): array
     {
-        return array_filter($this->getAllLangs(), function (array $lang) {
+        return array_filter($this->getAllLangs(), static function (array $lang) {
             return $lang['is_active'];
         });
     }
 
-    public function isLangActive($lang)
+    /**
+     * Check if lang is active.
+     *
+     * @param $lang
+     *
+     * @return bool
+     */
+    public function isLangActive($lang): bool
     {
         $lang = $lang instanceof Lang ? $lang->getLang() : $lang;
 
-        return in_array($lang, array_column($this->getActiveLangs(), 'id'));
+        return in_array($lang, array_column($this->getActiveLangs(), 'id'), true);
     }
 
-    public function getLang($id)
+    /**
+     * Get lang by id.
+     *
+     * @param $id
+     *
+     * @return array|null
+     */
+    public function getLang($id): ?array
     {
         $result = null;
         foreach ($this->getAllLangs() as $lang) {
@@ -134,7 +205,12 @@ class MultiLangManager implements JobHandlerInterface
         return $result;
     }
 
-    public function getDefaultLang()
+    /**
+     * Get default lang.
+     *
+     * @return array|null
+     */
+    public function getDefaultLang(): ?array
     {
         $result = null;
         foreach ($this->getAllLangs() as $lang) {
@@ -148,13 +224,18 @@ class MultiLangManager implements JobHandlerInterface
         return $result;
     }
 
-    public function setDefaultLang($id)
+    /**
+     * Set default lang.
+     *
+     * @param $id
+     */
+    public function setDefaultLang($id): void
     {
         if (null !== $this->getDefaultLang()) {
             throw new LogicException('You have already defined a default lang.');
         }
 
-        if (null === $lang = $this->getLang($id)) {
+        if (null === $this->getLang($id)) {
             throw new InvalidArgumentException(sprintf('Lang \'%s\' does not exist', $id));
         }
 
@@ -162,6 +243,16 @@ class MultiLangManager implements JobHandlerInterface
         $this->siteStatusMgr->lock();
     }
 
+    /**
+     * Update lang.
+     *
+     * @param $id
+     * @param $newIsActive
+     *
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TransactionRequiredException
+     */
     public function updateLang($id, $newIsActive)
     {
         $data = $this->getLang($id);
@@ -169,7 +260,7 @@ class MultiLangManager implements JobHandlerInterface
             throw new InvalidArgumentException(sprintf('Lang "%s" does not exist', $id));
         }
 
-        $lang = $this->entyMgr->find(Lang::class, $id);
+        $lang = $this->entityMgr->find(Lang::class, $id);
         if (false === $newIsActive) {
             if ($data['is_default']) {
                 throw new LogicException(sprintf('You cannot disable the default lang \'%s\'.', $id));
@@ -177,10 +268,10 @@ class MultiLangManager implements JobHandlerInterface
 
             if (null !== $lang) {
                 $lang->disable();
-                $this->entyMgr->flush($lang);
+                $this->entityMgr->flush($lang);
                 $root = $this->getRootByLang($lang);
                 $root->setState(Page::STATE_OFFLINE);
-                $this->entyMgr->flush($root);
+                $this->entityMgr->flush($root);
             }
 
             RedisManager::removePageCache($this->getSite()->getLabel());
@@ -194,28 +285,28 @@ class MultiLangManager implements JobHandlerInterface
 
         if (null !== $lang) {
             $lang->enable();
-            $this->entyMgr->flush($lang);
+            $this->entityMgr->flush($lang);
             $root = $this->getRootByLang($lang);
             $root->setState(Page::STATE_ONLINE);
-            $this->entyMgr->flush($root);
+            $this->entityMgr->flush($root);
 
             RedisManager::removePageCache($this->getSite()->getLabel());
 
             return;
         }
 
-        $this->entyMgr->beginTransaction();
+        $this->entityMgr->beginTransaction();
 
         $lang = new Lang($id);
         $lang->enable();
-        $this->entyMgr->persist($lang);
-        $this->entyMgr->flush($lang);
+        $this->entityMgr->persist($lang);
+        $this->entityMgr->flush($lang);
 
         $rootUrl = sprintf('/%s/', $lang->getLang());
-        $root = $this->entyMgr->getRepository(Page::class)->findOneBy(['_url' => $rootUrl]);
+        $root = $this->entityMgr->getRepository(Page::class)->findOneBy(['_url' => $rootUrl]);
         if (null === $root) {
             $root = $this->app->getContainer()->get('cloud.page_manager')->duplicate(
-                $this->entyMgr->getRepository(Page::class)->getRoot($this->getSite()),
+                $this->entityMgr->getRepository(Page::class)->getRoot($this->getSite()),
                 [
                     'title' => 'Home',
                     'url' => $rootUrl,
@@ -224,66 +315,103 @@ class MultiLangManager implements JobHandlerInterface
                 ]
             );
             $root->setState(Page::STATE_ONLINE);
-            $this->entyMgr->getRepository(Page::class)->saveWithSection($root, $root->getSection());
-            $this->entyMgr->flush();
+            $this->entityMgr->getRepository(Page::class)->saveWithSection($root, $root->getSection());
+            $this->entityMgr->flush();
 
-            $pageRedirection = $this->entyMgr->getRepository(PageRedirection::class)->findOneBy([
-                'toRedirect' => '/',
-            ]);
+            $pageRedirection = $this->entityMgr->getRepository(PageRedirection::class)->findOneBy(
+                [
+                    'toRedirect' => '/',
+                ]
+            );
             if (null !== $pageRedirection) {
-                $this->entyMgr->remove($pageRedirection);
+                $this->entityMgr->remove($pageRedirection);
             }
 
-            $this->entyMgr->flush();
+            $this->entityMgr->flush();
         }
 
         $this->app->getContainer()->get('cloud.global_content_factory')->duplicateLogoForLang($id);
 
-        $this->entyMgr->commit();
+        $this->entityMgr->commit();
 
         RedisManager::removePageCache($this->getSite()->getLabel());
     }
 
-    public function associate(Page $page, Lang $lang)
+    /**
+     * Associate page with this lang.
+     *
+     * @param Page $page
+     * @param Lang $lang
+     *
+     * @return PageLang
+     */
+    public function associate(Page $page, Lang $lang): PageLang
     {
-        $pagelang = $this->getAssociation($page);
-        if (null !== $pagelang) {
-            throw new LogicException(sprintf(
-                'Page #%s is already associated to language "%s"',
-                $page->getUid(),
-                $pagelang->getLang()->getLang()
-            ));
+        $pageLang = $this->getAssociation($page);
+        if (null !== $pageLang) {
+            throw new LogicException(
+                sprintf(
+                    'Page #%s is already associated to language "%s"',
+                    $page->getUid(),
+                    $pageLang->getLang()->getLang()
+                )
+            );
         }
 
         if (!$lang->isActive()) {
             throw new InvalidArgumentException(sprintf('Lang "%s" is not active', $lang->getLang()));
         }
 
-        $pagelang = new PageLang($page, $lang);
-        $this->entyMgr->persist($pagelang);
+        $pageLang = new PageLang($page, $lang);
+        $this->entityMgr->persist($pageLang);
 
-        return $pagelang;
+        return $pageLang;
     }
 
-    public function getAssociation(Page $page)
+    /**
+     * Get association by page.
+     *
+     * @param Page $page
+     *
+     * @return PageLang|null
+     */
+    public function getAssociation(Page $page): ?PageLang
     {
-        return $this->entyMgr->getRepository(PageLang::class)->findOneBy([
-            'page' => $page,
-        ]);
+        return $this->entityMgr->getRepository(PageLang::class)->findOneBy(
+            [
+                'page' => $page,
+            ]
+        );
     }
 
-    public function getLangByPage(Page $page)
+    /**
+     * Get lang by page.
+     *
+     * @param Page $page
+     *
+     * @return string|null
+     */
+    public function getLangByPage(Page $page): ?string
     {
         $association = $this->getAssociation($page);
 
         return $association ? $association->getLang()->getLang() : null;
     }
 
-    public function getRootByLang(Lang $lang)
+    /**
+     * Get root page by lang.
+     *
+     * @param Lang $lang
+     *
+     * @return Page|null
+     */
+    public function getRootByLang(Lang $lang): ?Page
     {
-        return $this->entyMgr->getRepository(Page::class)->findOneBy([
-            '_url' => sprintf('/%s/', $lang->getLang()),
-        ]);
+        return $this->entityMgr->getRepository(Page::class)->findOneBy(
+            [
+                '_url' => sprintf('/%s/', $lang->getLang()),
+            ]
+        );
     }
 
     /**
@@ -294,7 +422,7 @@ class MultiLangManager implements JobHandlerInterface
      *
      * @throws OptimisticLockException
      */
-    public function handle(JobInterface $job, SimpleWriterInterface $writer)
+    public function handle(JobInterface $job, SimpleWriterInterface $writer): void
     {
         if (null !== $this->getDefaultLang()) {
             $writer->write(sprintf('Default lang of site "%s" is already defined.', $job->siteId()));
@@ -309,51 +437,55 @@ class MultiLangManager implements JobHandlerInterface
         $this->app->getContainer()->get('cloud.global_content_factory')->duplicateMenuForLang($job->lang());
 
         // define lang as default
-        $this->entyMgr->getRepository(Lang::class)->createQueryBuilder('l')
+        $this->entityMgr->getRepository(Lang::class)->createQueryBuilder('l')
             ->update()
             ->set('l.default', ':default')
             ->setParameter('default', true)
             ->where('l.lang = :id')
             ->setParameter('id', $job->lang())
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
 
         $writer->write(sprintf('Defined "%s" as default lang.', $job->lang()));
         $writer->write('');
 
         $this->siteStatusMgr->updateLockProgressPercent(15);
-        $this->entyMgr->clear();
+        $this->entityMgr->clear();
 
         // update all pages URLs
         $maxPages = $this->app->getContainer()->get('cloud.page_manager')->count();
         $pagesCount = 0;
 
-        $defaultLang = $this->entyMgr->getRepository(Lang::class)->findOneBy(['default' => true]);
-        $root = $this->entyMgr->getRepository(Page::class)->findOneBy([
-            '_url' => sprintf('/%s/', $defaultLang->getLang()),
-        ]);
-        $pageIterator = $this->entyMgr->getRepository(Page::class)->createQueryBuilder('p')->getQuery()->iterate();
+        $defaultLang = $this->getDefaultLangEntity();
+
+        $root = $this->entityMgr->getRepository(Page::class)->findOneBy(
+            [
+                '_url' => sprintf('/%s/', $defaultLang->getLang()),
+            ]
+        );
+        $pageIterator = $this->entityMgr->getRepository(Page::class)->createQueryBuilder('p')->getQuery()->iterate();
         foreach ($pageIterator as $row) {
             $page = $row[0];
             if ($root !== $page && '/' !== $page->getUrl() && null === $this->getAssociation($page)) {
-                $this->entyMgr->getRepository(Page::class)->insertNodeAsLastChildOf($page, $root);
+                $this->entityMgr->getRepository(Page::class)->insertNodeAsLastChildOf($page, $root);
                 $newUrl = sprintf('/%s%s', $defaultLang->getLang(), $page->getUrl());
                 $pageRedirection = new PageRedirection($page->getUrl(), $newUrl);
-                $this->entyMgr->persist($pageRedirection);
+                $this->entityMgr->persist($pageRedirection);
                 $this->associate($page, $defaultLang);
                 $page->setUrl($newUrl);
-                $this->entyMgr->flush();
+                $this->entityMgr->flush();
 
-                $writer->write(sprintf(
-                    '> Migrated page #%s "%s" to default lang.',
-                    $page->getUid(),
-                    $page->getTitle()
-                ));
+                $writer->write(
+                    sprintf(
+                        '> Migrated page #%s "%s" to default lang.',
+                        $page->getUid(),
+                        $page->getTitle()
+                    )
+                );
             }
 
             $pagesCount++;
-            $this->siteStatusMgr->updateLockProgressPercent(15 + (int) (((($pagesCount / $maxPages) * 100 * 84) / 100)));
+            $this->siteStatusMgr->updateLockProgressPercent(15 + (int)(((($pagesCount / $maxPages) * 100 * 84) / 100)));
         }
 
         $this->siteStatusMgr->updateLockProgressPercent(100);
@@ -368,16 +500,38 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * Returns true if the provided job is supported, else false.
      *
-     * @param  JobInterface $job
+     * @param JobInterface $job
+     *
      * @return bool
      */
-    public function supports(JobInterface $job)
+    public function supports(JobInterface $job): bool
     {
         return $job instanceof MultiLangJob;
     }
 
+    /**
+     * Get site.
+     *
+     * @return EntityRepository|object|null
+     */
     private function getSite()
     {
-        return $this->entyMgr->getRepository(Site::class)->findOneBy([]);
+        return $this->entityMgr->getRepository(Site::class)->findOneBy([]);
+    }
+
+    /**
+     * Get default lang entity.
+     *
+     * @return Lang
+     */
+    private function getDefaultLangEntity(): Lang
+    {
+        $lang = $this->entityMgr->getRepository(Lang::class)->findOneBy(['default' => true]);
+
+        if (null === $lang) {
+            throw new InvalidArgumentException('Cannot find the default lang');
+        }
+
+        return $lang;
     }
 }

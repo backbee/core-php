@@ -4,11 +4,9 @@ namespace BackBeePlanet\Listener;
 
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
-use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\OptimizeImage\OptimizeImageManager;
 use BackBeePlanet\OptimizeImage\OptimizeImageUtils;
-use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @author Michel Baptista <michel.baptista@lp-digital.fr>
@@ -33,7 +31,7 @@ class OptimizeImageListener
     /**
      * On Application init.
      */
-    public function onApplicationInit(): void
+    public static function onApplicationInit(): void
     {
         $settings = (array)(new GlobalSettings())->optimizeimage();
 
@@ -78,9 +76,9 @@ class OptimizeImageListener
         $renderer = $event->getRenderer();
         $renderer->assign('image_full_width_path', $image->image->path);
         $image->image->path = $this->optimizeImageManager->getOptimizeImagePath(
-            (string) $image->image->path,
-            (bool) $renderer->getParam('in_fluid'),
-            (int) $renderer->getParam('colsize')
+            (string)$image->image->path,
+            (bool)$renderer->getParam('in_fluid'),
+            (int)$renderer->getParam('colsize')
         );
     }
 

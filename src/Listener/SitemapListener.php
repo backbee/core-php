@@ -136,7 +136,7 @@ class SitemapListener
                     'pattern' => $pattern,
                     'defaults' => [
                         '_action' => 'indexAction',
-                        '_controller' => 'app.sitemap.controller',
+                        '_controller' => 'core.sitemap.controller',
                     ],
                 ],
             ]
@@ -158,7 +158,7 @@ class SitemapListener
                     'pattern' => $archivePattern,
                     'defaults' => [
                         '_action' => 'getArchiveAction',
-                        '_controller' => 'app.sitemap.controller',
+                        '_controller' => 'core.sitemap.controller',
                     ],
                 ],
             ]

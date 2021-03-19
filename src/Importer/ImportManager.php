@@ -4,7 +4,6 @@ namespace BackBeeCloud\Importer;
 
 use BackBeeCloud\Entity\ImportStatus;
 use BackBeeCloud\ExecutionHelper;
-use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\Structure\StructureBuilder;
 use BackBeePlanet\Importer\ImportJob;
@@ -13,7 +12,6 @@ use BackBeePlanet\Importer\ReaderInterface;
 use BackBeePlanet\Job\JobInterface;
 use BackBee\NestedNode\Page;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>

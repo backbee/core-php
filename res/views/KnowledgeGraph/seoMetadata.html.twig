@@ -1,0 +1,38 @@
+{% set page = this.getCurrentPage() %}
+{% set title = (metadata.title != false ? metadata.title : page.getTitle() ~ ' - ' ~ this.sitename() ) %}
+{% set description = metadata.description != false ? metadata.description : schema_context.getData()['abstract'] %}
+{% set image_url = (metadata.image_url != false) ? metadata.image_url : ((schema_context.getData()['image']['url'] is not empty) ? this.getUri(schema_context.getData()['image']['url']) : false) %}
+<!-- Knowledge Graph - metadata -->
+    <title>{{ title|striptags|raw }}</title>
+    <meta name="title" content="{{ title|striptags|raw }}"/>
+    <meta property="og:title" content="{{ title|striptags|raw }}"/>
+    <meta name="twitter:title" content="{{ title|striptags|raw }}"/>
+{% if description != false %}
+    <meta name="description" content="{{ description|striptags|raw }}"/>
+    <meta property="og:description" content="{{ description|striptags|raw }}"/>
+    <meta property="twitter:description" content="{{ description|striptags|raw }}"/>
+{% endif %}
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="{{ this.getUri(page.getUrl(), false) }}"/>
+    <meta name="twitter:url" content="{{ this.getUri(page.getUrl(), false) }}"/>
+{% if image_url != false %}
+    <meta property="og:image" content="{{ this.getCdnImageUrl(image_url) }}"/>
+    <meta name="twitter:card" content="{{ (schema_context.getConfig()['twitter_card']) ? schema_context.getConfig()['twitter_card'] : 'summary' }}"/>
+    <meta name="twitter:image" content="{{ this.getCdnImageUrl(image_url) }}">
+{% endif %}
+{% if metadata.locale != false %}
+    <meta property="og:locale" content="{{ metadata.locale }}"/>
+{% endif %}
+    <meta property="og:site_name" content="{{ this.sitename()|raw }}"/>
+    <meta name="twitter:site" content="{{ this.sitename()|raw }}"/>
+{% if not metadata_robots is null %}
+    <meta name="robots" content="{{ metadata_robots }}">
+{% endif %}
+
+{% if multilang_equivalent_pages is not null and not multilang_equivalent_pages is empty %}
+    <link rel="alternate" href="{{ this.getUri(this.knowledgeGraphHelper.getDefaultPageByLang(page).getUrl(), false) }}" hreflang="x-default"/>
+    <link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ this.getCurrentLang() }}"/>
+    {% for lang, page in multilang_equivalent_pages %}<link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ lang }}"/>{% endfor %}
+{% endif %}
+
+    <!-- End Knowledge Graph - metadata -->

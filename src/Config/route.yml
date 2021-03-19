@@ -40,14 +40,14 @@ cloud.robots_txt:
 
 # ACL API
 
-cloud.api.acl.get:
-    pattern: /api/acl-permissions/{id}
-    defaults:
-        _action: get
-        _controller: cloud.api.acl_controller
-    requirements:
-        _method: GET
-        id: \d+
+#cloud.api.acl.get:
+#    pattern: /api/acl-permissions/{id}
+#    defaults:
+#        _action: get
+#        _controller: cloud.api.acl_controller
+#    requirements:
+#        _method: GET
+#        id: \d+
 
 # MailChimp API
 
@@ -403,6 +403,16 @@ cloud.hauth.authenticate:
     requirements:
         _method: POST
 
+# Knowledge Graph API
+
+cloud.api.knowledge_graph.parameters:
+    pattern: /api/knowledge-graph/parameters
+    defaults:
+        _action: getParameters
+        _controller: cloud.api.knowledge_graph.controller
+    requirements:
+        _method: GET
+
 # Site API
 
 api.site.work_progress:
@@ -626,4 +636,3 @@ api.multilang.delete_page_association:
     requirements:
         _method: DELETE
         pageuid: "[a-f0-9]{32}"
-
