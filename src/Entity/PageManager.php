@@ -24,17 +24,18 @@ use BackBeeCloud\PageCategory\PageCategory;
 use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\PageType\TypeManager;
 use BackBeeCloud\SearchEngine\SearchEngineManager;
+use BackBeeCloud\Tag\TagManager;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use Psr\Log\LoggerInterface;
+use function count;
 
 /**
  * Class PageManager
@@ -122,12 +123,18 @@ class PageManager
     private $seoMetadataManager;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * PageManager constructor.
      *
      * @param BBApplication      $app
      * @param SeoMetadataManager $seoMetadataManager
+     * @param LoggerInterface    $logger
      */
-    public function __construct(BBApplication $app, SeoMetadataManager $seoMetadataManager)
+    public function __construct(BBApplication $app, SeoMetadataManager $seoMetadataManager, LoggerInterface $logger)
     {
         $this->bbToken = $app->getBBUserToken();
         $this->entityMgr = $app->getEntityManager();
@@ -141,6 +148,7 @@ class PageManager
         $this->pageAssociationMgr = $app->getContainer()->get('cloud.multilang.page_association.manager');
         $this->searchEngineManager = $app->getContainer()->get('core.search_engine.manager');
         $this->seoMetadataManager = $seoMetadataManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -195,7 +203,7 @@ class PageManager
      * @throws ClassNotFoundException
      * @throws UnknownPropertyException
      */
-    public function format(Page $page, $strictDraftMode = false): array
+    public function format(Page $page, bool $strictDraftMode = false): array
     {
         $pageSeo = $this->seoMetadataManager->getPageSeoMetadata($page);
         $type = $this->typeMgr->findByPage($page);
@@ -316,9 +324,10 @@ class PageManager
 
         unset($criteria['page_uid']);
 
-        if (0 === count($criteria) || (1 === count(
-                    $criteria
-                ) && isset($criteria['title'])) || isset($criteria['has_draft_only'])) {
+        if (
+            0 === count($criteria) ||
+            (1 === count($criteria) && isset($criteria['title'])) || isset($criteria['has_draft_only'])
+        ) {
             $query = [
                 'query' => [
                     'bool' => [
@@ -390,10 +399,10 @@ class PageManager
             $formattedSort = [];
             $sort = 0 === count($criteria) && false !== $sort ? $sort : ['modified_at' => 'desc'];
             foreach ($sort as $attr => $order) {
-                if (!in_array($attr, $sortValidAttrNames, true)) {
+                if (!\in_array($attr, $sortValidAttrNames, true)) {
                     throw new InvalidArgumentException(sprintf('Pages are not sortable by %s .', $attr));
                 }
-                if (!in_array($order, $sortValidOrder, true)) {
+                if (!\in_array($order, $sortValidOrder, true)) {
                     throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
                 }
                 $formattedSort[] = $attr . ':' . $order;
@@ -444,11 +453,6 @@ class PageManager
      * @param array $data
      *
      * @return Page
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws QueryException
-     * @throws TransactionRequiredException
-     * @throws \BackBee\Exception\InvalidArgumentException
      */
     public function create(array $data): Page
     {
@@ -456,12 +460,23 @@ class PageManager
         $uid = $data['uid'] ?? null;
 
         $page = new Page($uid);
-
         $page->setSite($this->getSite());
         $page->setLayout($this->getLayout());
-        $page->setParent($this->getRootPage());
-        $page->setState(Page::STATE_OFFLINE);
-        $page->setPosition($this->count() + 1);
+
+        try {
+            $page->setParent($this->getRootPage());
+            $page->setState(Page::STATE_OFFLINE);
+            $page->setPosition($this->count() + 1);
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
 
         unset($data['is_online'], $data['uid']);
 
@@ -491,32 +506,43 @@ class PageManager
     }
 
     /**
+     * Update page.
+     *
      * @param Page  $page    The page to update
      * @param array $data    The data to use to update the page
      * @param bool  $doFlush If true, PageManager will invoke EntityManager::flush()
-     *
-     * @throws OptimisticLockException
      */
     public function update(Page $page, array $data, $doFlush = true): void
     {
-        $autoUpdateModified = !isset($data['modified_at']);
+        try {
+            $autoUpdateModified = !isset($data['modified_at']);
 
-        foreach ($data as $attr => $value) {
-            $setter = 'runSet' . implode('', array_map('ucfirst', explode('_', $attr)));
-            if (method_exists($this, $setter)) {
-                $this->{$setter}($page, $value);
-                if ($autoUpdateModified) {
-                    $page->setModified(new DateTime());
+            foreach ($data as $attr => $value) {
+                $setter = 'runSet' . implode('', array_map('ucfirst', explode('_', $attr)));
+                if (method_exists($this, $setter)) {
+                    $this->{$setter}($page, $value);
+                    if ($autoUpdateModified) {
+                        $page->setModified(new DateTime());
+                    }
+                } else {
+                    throw new InvalidArgumentException(
+                        "`$attr` attribute does not exist or is not allowed to be changed"
+                    );
                 }
-            } else {
-                throw new InvalidArgumentException(
-                    "`$attr` attribute does not exist or is not allowed to be changed"
-                );
             }
-        }
 
-        if (true === $doFlush) {
-            $this->entityMgr->flush();
+            if (true === $doFlush) {
+                $this->entityMgr->flush();
+            }
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
     }
 
@@ -549,10 +575,8 @@ class PageManager
      *
      * @return Page
      * @throws ClassNotFoundException
-     * @throws ORMException
      * @throws OptimisticLockException
      * @throws QueryException
-     * @throws TransactionRequiredException
      * @throws UnknownPropertyException
      * @throws \BackBee\Exception\InvalidArgumentException
      */
@@ -847,7 +871,7 @@ class PageManager
      */
     protected function runSetTitle(Page $page, $value): void
     {
-        if (!is_string($value) || 2 > strlen($value)) {
+        if (!\is_string($value) || 2 > \strlen($value)) {
             throw new InvalidArgumentException(
                 '`title` must be type of string and contain at least 2 characters'
             );
@@ -1083,18 +1107,27 @@ class PageManager
      *
      * @param Page  $page
      * @param array $redirections
-     *
-     * @throws OptimisticLockException
      */
     protected function handleRedirections(Page $page, array $redirections = []): void
     {
-        foreach ($redirections as $redirection) {
-            $redirection = '/' . preg_replace('~^/~', '', $redirection);
-            $pageRedirection = new PageRedirection($redirection, $page->getUrl());
-            $this->entityMgr->persist($pageRedirection);
-        }
+        try {
+            foreach ($redirections as $redirection) {
+                $redirection = '/' . preg_replace('~^/~', '', $redirection);
+                $pageRedirection = new PageRedirection($redirection, $page->getUrl());
+                $this->entityMgr->persist($pageRedirection);
+            }
 
-        $this->entityMgr->flush();
+            $this->entityMgr->flush();
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
     }
 
     /**
@@ -1168,35 +1201,45 @@ class PageManager
     }
 
     /**
+     * Prepare data with lang.
+     *
      * @param array $data
      *
      * @return array
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
      */
     protected function prepareDataWithLang(array $data): array
     {
-        if (isset($data['lang'])) {
-            $lang = $data['lang'];
-            unset($data['lang']);
-            $data = ['lang' => $lang] + $data;
+        try {
+            if (isset($data['lang'])) {
+                $lang = $data['lang'];
+                unset($data['lang']);
+                $data = ['lang' => $lang] + $data;
 
-            $langEntity = $this->entityMgr->find(Lang::class, $lang);
-            if (null === $langEntity || !$langEntity->isActive()) {
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'Lang "%s" does not exist or is not activated',
-                        $lang
-                    )
-                );
+                $langEntity = $this->entityMgr->find(Lang::class, $lang);
+                if (null === $langEntity || !$langEntity->isActive()) {
+                    throw new InvalidArgumentException(
+                        sprintf(
+                            'Lang "%s" does not exist or is not activated',
+                            $lang
+                        )
+                    );
+                }
+            } elseif (null !== $defaultLang = $this->multiLangMgr->getDefaultLang()) {
+                $data['lang'] = $defaultLang['id'];
             }
-        } elseif (null !== $defaultLang = $this->multiLangMgr->getDefaultLang()) {
-            $data['lang'] = $defaultLang['id'];
-        }
 
-        if (isset($data['lang'])) {
-            $this->currentLang = $this->entityMgr->find(Lang::class, $data['lang']);
+            if (isset($data['lang'])) {
+                $this->currentLang = $this->entityMgr->find(Lang::class, $data['lang']);
+            }
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
         return $data;

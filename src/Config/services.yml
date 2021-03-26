@@ -26,6 +26,7 @@ services:
         arguments:
             - "@bbapp"
             - "@core.knowledge_graph.seo_metadata.manager"
+            - "@backbee.logger"
 
     core.page.page_from_raw_data:
         class: BackBeeCloud\Page\PageFromRawData

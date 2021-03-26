@@ -13,6 +13,7 @@ use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeeCloud\MultiLang\PageAssociationManager;
 use BackBeeCloud\SearchEngine\SearchEngineManager;
 use Doctrine\ORM\EntityManager;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Exception;
 use function strlen;
 
@@ -110,13 +111,17 @@ class SeoMetadataManager
 
         $this
             ->setMetadata()
-            ->getElasticSearchResult($page->getUid())
-            ->setTitle()
-            ->setDescription()
-            ->setSearchEngineOptions();
+            ->getElasticSearchResult($page->getUid());
 
-        if ('article' === $this->esResult['_source']['type']) {
-            $this->setImageUrl();
+        if ($this->esResult) {
+            $this
+                ->setTitle()
+                ->setDescription()
+                ->setSearchEngineOptions();
+
+            if ('article' === $this->esResult['_source']['type']) {
+                $this->setImageUrl();
+            }
         }
 
         return $this->seoData;
@@ -189,13 +194,17 @@ class SeoMetadataManager
      */
     private function getElasticSearchResult(string $pageUid): self
     {
-        $this->esResult = $this->elasticsearchManager->getClient()->get(
-            [
-                'id' => $pageUid,
-                'index' => $this->elasticsearchManager->getIndexName(),
-                '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
-            ]
-        );
+        try {
+            $this->esResult = $this->elasticsearchManager->getClient()->get(
+                [
+                    'id' => $pageUid,
+                    'index' => $this->elasticsearchManager->getIndexName(),
+                    '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
+                ]
+            );
+        } catch (Missing404Exception $exception) {
+            $this->esResult = null;
+        }
 
         return $this;
     }
@@ -223,10 +232,10 @@ class SeoMetadataManager
                             '&nbsp;',
                             '',
                             strlen($abstract->value) > 300 ? mb_substr(
-                                $abstract->value,
-                                0,
-                                300
-                            ) . '...' : $abstract->value
+                                    $abstract->value,
+                                    0,
+                                    300
+                                ) . '...' : $abstract->value
                         )
                     )
                 );
