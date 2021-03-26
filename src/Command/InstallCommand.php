@@ -74,8 +74,7 @@ class InstallCommand extends AbstractCommand
     {
         $this
             ->setName('backbee:install')
-            ->setAliases(['bb:in'])
-            ->setDescription('[bb:in] - Installs everything to get BackBee Standalone ready for use');
+            ->setDescription('Installs everything to get BackBee Standalone ready for use.');
     }
 
     /**

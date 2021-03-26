@@ -24,9 +24,8 @@ class ClearAllCacheCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('backbee:clear-all-cache')
-            ->setAliases(['bb:cc'])
-            ->setDescription('[bb:cc] - Removes all caches (file, database and redis)');
+            ->setName('backbee:cc')
+            ->setDescription('Removes all caches (file, database and redis).');
     }
 
     /**

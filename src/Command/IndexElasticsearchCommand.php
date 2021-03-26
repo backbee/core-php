@@ -24,9 +24,8 @@ class IndexElasticsearchCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('backbee:index-elasticsearch')
-            ->setAliases(['bb:ie'])
-            ->setDescription('[bb:ie] - Indexes all pages and tags into Elasticsearch');
+            ->setName('backbee:ie')
+            ->setDescription('Indexes all pages and tags into Elasticsearch.');
     }
 
     /**

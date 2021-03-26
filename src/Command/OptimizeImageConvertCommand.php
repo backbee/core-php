@@ -36,9 +36,8 @@ class OptimizeImageConvertCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('backbee:optimize-image-convert')
-            ->setAliases(['bb:oic'])
-            ->setDescription('[bb:oic] - Tries to convert all site images in order to optimize them')
+            ->setName('backbee:oic')
+            ->setDescription('Tries to convert all site images in order to optimize them.')
             ->addOption('memory-limit', null, InputOption::VALUE_REQUIRED, 'The memory limit to set', 1);
     }
 

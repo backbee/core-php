@@ -25,9 +25,8 @@ class InstallUserRightsCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('backbee:install-user-rights')
-            ->setAliases(['bb:iur'])
-            ->setDescription('[bb:iur] - Install user rights if it is not yet done');
+            ->setName('backbee:iur')
+            ->setDescription('Install user rights if it is not yet done.');
     }
 
     /**

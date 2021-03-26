@@ -30,9 +30,8 @@ class RunJobCommand extends AbstractCommand implements SimpleWriterInterface
     protected function configure(): void
     {
         $this
-            ->setName('worker:run-job')
-            ->setAliases(['wo:rj'])
-            ->setDescription('[wo:rj] - Tries to get job from redis and executes it');
+            ->setName('worker:rj')
+            ->setDescription('Tries to get job from redis and executes it.');
     }
 
     /**

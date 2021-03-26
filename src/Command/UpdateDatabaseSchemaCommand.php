@@ -25,9 +25,8 @@ class UpdateDatabaseSchemaCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('backbee:update-database-schema')
-            ->setAliases(['bb:uds'])
-            ->setDescription('[bb:uds] - Updates database schema with entities from bundles and BackBee Standalone');
+            ->setName('backbee:uds')
+            ->setDescription('Updates database schema with entities from bundles and BackBee Standalone.');
     }
 
     /**

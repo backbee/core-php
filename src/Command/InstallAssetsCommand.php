@@ -23,9 +23,8 @@ class InstallAssetsCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('backbee:install-assets')
-            ->setAliases(['bb:ia'])
-            ->setDescription('[bb:ia] - Install or update project front assets');
+            ->setName('backbee:ia')
+            ->setDescription('Install or update project front assets.');
     }
 
     /**

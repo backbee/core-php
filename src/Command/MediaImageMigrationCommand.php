@@ -23,9 +23,8 @@ class MediaImageMigrationCommand extends AbstractCommand
     protected function configure(): void
     {
         $this
-            ->setName('worker:media-image-migration')
-            ->setAliases(['bb:mim'])
-            ->setDescription('[bb:mim] - Convert Media/Image to Basic/Image if needed');
+            ->setName('worker:mim')
+            ->setDescription('Convert Media/Image to Basic/Image if needed.');
     }
 
     /**
