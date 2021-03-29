@@ -15,7 +15,7 @@ Icons:
                 instagram: { 'placeholder': 'https://instagram.com/username', 'url': '', 'enable': false }
                 pinterest: { 'placeholder': 'https://pinterest.com/username', 'url': '', 'enable': false }
                 flickr: { 'placeholder': 'https://www.flickr.com/photos/userid', 'url': '', 'enable': false }
-            tab: yaml_block_default
+            tab: yaml_block_socials
         align:
             type: selectButton
             label: yaml_block_socials_position
