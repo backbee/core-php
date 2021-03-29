@@ -1,77 +1,77 @@
 Newsletter:
-  properties:
-    name: yaml_block_newsletter
-    description: ~
-    category: [block_category_more]
-    form_width: 400
-  parameters:
-    connector:
-      type: newsletter
-      value: {}
-      tab: yaml_block_newsletter_login
-    title:
-      type: text
-      label: yaml_block_newsletter_title
-      tab: yaml_block_general_tab
-      value: 'Newsletter'
-    description:
-      type: textarea
-      label: yaml_block_newsletter_description
-      value: ''
-      tab: yaml_block_general_tab
-    placeholder:
-      type: text
-      label: yaml_block_newsletter_placeholder
-      value: yaml_block_newsletter_placeholder_value
-      tab: yaml_block_general_tab
-    confirmation:
-      type: textarea
-      label: yaml_block_newsletter_confirmation_message
-      value: yaml_block_newsletter_confirmation_message_value
-      tab: yaml_block_general_tab
-    button_title:
-      type: text
-      label: yaml_block_newsletter_button_title
-      value: yaml_block_newsletter_button_title_value
-      tab: yaml_block_newsletter_button
-      group:
-        id: text
-    button_align:
-      type: selectButton
-      label: yaml_block_newsletter_position
-      buttons:
-        left: {'icon': 'icon-align-left'}
-        center: {'icon': 'icon-align-center'}
-        right: {'icon': 'icon-align-right'}
-      value: 'center'
-      tab: yaml_block_newsletter_button
-      group:
-        id: align
-    button_color:
-      type: color
-      label: yaml_block_newsletter_color
-      value: color6
-      tab: yaml_block_newsletter_button
-      group:
-        id: color
-    button_style:
-      type: radio
-      inline: true
-      options:
-        btn-full: yaml_block_button_full_color
-        btn-border: yaml_block_button_line_color
-      value: btn-full
-      tab: yaml_block_newsletter_button
-      group:
-        id: style
-    button_size:
-      type: select
-      label: yaml_block_newsletter_size
-      options:
-        xs: yaml_block_newsletter_small
-        md: yaml_block_newsletter_medium
-        lg: yaml_block_newsletter_large
-      value: md
-      tab: yaml_block_newsletter_button
-      group:
-        id: size
+    properties:
+        name: yaml_block_newsletter
+        description: ~
+        category: [ block_category_more ]
+        form_width: 400
+    parameters:
+        connector:
+            type: newsletter
+            value: { }
+            tab: yaml_block_newsletter_login
+        title:
+            type: text
+            label: yaml_block_newsletter_title
+            tab: yaml_block_general_tab
+            value: 'Newsletter'
+        description:
+            type: textarea
+            label: yaml_block_newsletter_description
+            value: ''
+            tab: yaml_block_general_tab
+        placeholder:
+            type: text
+            label: yaml_block_newsletter_placeholder
+            value: yaml_block_newsletter_placeholder_value
+            tab: yaml_block_general_tab
+        confirmation:
+            type: textarea
+            label: yaml_block_newsletter_confirmation_message
+            value: yaml_block_newsletter_confirmation_message_value
+            tab: yaml_block_general_tab
+        button_title:
+            type: text
+            label: yaml_block_newsletter_button_title
+            value: yaml_block_newsletter_button_title_value
+            tab: yaml_block_newsletter_button
+            group:
+                id: text
+        button_align:
+            type: selectButton
+            label: yaml_block_newsletter_position
+            buttons:
+                left: { 'icon': 'icon-align-left' }
+                center: { 'icon': 'icon-align-center' }
+                right: { 'icon': 'icon-align-right' }
+            value: 'center'
+            tab: yaml_block_newsletter_button
+            group:
+                id: align
+        button_color:
+            type: color
+            label: yaml_block_newsletter_color
+            value: color6
+            tab: yaml_block_newsletter_button
+            group:
+                id: color
+        button_style:
+            type: radio
+            inline: true
+            options:
+                btn-full: yaml_block_button_full_color
+                btn-border: yaml_block_button_line_color
+            value: btn-full
+            tab: yaml_block_newsletter_button
+            group:
+                id: style
+        button_size:
+            type: select
+            label: yaml_block_newsletter_size
+            options:
+                xs: yaml_block_newsletter_small
+                md: yaml_block_newsletter_medium
+                lg: yaml_block_newsletter_large
+            value: md
+            tab: yaml_block_newsletter_button
+            group:
+                id: size
