@@ -2,9 +2,8 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBeeCloud\Design\FontManager;
-use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
+use BackBeeCloud\Design\FontManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**

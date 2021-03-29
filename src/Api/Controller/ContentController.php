@@ -3,11 +3,14 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\AbstractContent;
-use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\ClassContentManager;
 use BackBee\ClassContent\Revision;
 use BackBee\NestedNode\Page;
+use BackBeeCloud\Elasticsearch\ElasticsearchManager;
+use BackBeeCloud\Entity\PageManager;
+use DateTime;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,22 +20,22 @@ use Symfony\Component\HttpFoundation\Response;
 class ContentController extends AbstractController
 {
     /**
-     * @var \BackBee\ClassContent\ClassContentManager
+     * @var ClassContentManager
      */
     protected $contentMgr;
 
     /**
-     * @var \BackBeeCloud\Elasticsearch\ElasticsearchManager
+     * @var ElasticsearchManager
      */
     protected $elasticsearchMgr;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     protected $entyMgr;
 
     /**
-     * @var \BackBeeCloud\Entity\PageManager
+     * @var PageManager
      */
     protected $pageMgr;
 
@@ -58,14 +61,20 @@ class ContentController extends AbstractController
         $classname = AbstractContent::getClassnameByContentType($type);
         $content = $this->entyMgr->find($classname, $uid);
         if (null === $content) {
-            return new JsonResponse([
-                'error'  => 'not_found',
-                'reason' => "Content with uid `{$uid}` does not exist.",
-            ], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(
+                [
+                    'error' => 'not_found',
+                    'reason' => "Content with uid `{$uid}` does not exist.",
+                ], Response::HTTP_NOT_FOUND
+            );
         }
 
         $this->entyMgr->beginTransaction();
-        $draft = $this->entyMgr->getRepository(Revision::class)->getDraft($content, $this->securityContext->getToken(), true);
+        $draft = $this->entyMgr->getRepository(Revision::class)->getDraft(
+            $content,
+            $this->securityContext->getToken(),
+            true
+        );
         $draft->setState(Revision::STATE_TO_DELETE);
         $this->entyMgr->flush();
         $this->entyMgr->commit();
@@ -78,13 +87,15 @@ class ContentController extends AbstractController
         $this->assertIsAuthenticated();
 
         $page = $this->entyMgr->find(Page::class, $pageuid);
-        if (false == $page) {
+        if (false === $page) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
-        return new Response('', Response::HTTP_NO_CONTENT, [
+        return new Response(
+            '', Response::HTTP_NO_CONTENT, [
             'X-Published-Count' => $this->runCommitPage($page),
-        ]);
+        ]
+        );
     }
 
     public function getPagesToCommit()
@@ -94,7 +105,7 @@ class ContentController extends AbstractController
         $result = [];
         foreach ($this->pageMgr->getPagesWithDraftContents() as $page) {
             $result[] = [
-                'uid'   => $page->getUid(),
+                'uid' => $page->getUid(),
                 'title' => $page->getTitle(),
             ];
         }
@@ -102,9 +113,11 @@ class ContentController extends AbstractController
         $max = count($result);
         $end = $max - 1;
 
-        return new JsonResponse($result, Response::HTTP_OK, [
+        return new JsonResponse(
+            $result, Response::HTTP_OK, [
             'Content-Range' => $max ? "0-$end/$max" : '-/-',
-        ]);
+        ]
+        );
     }
 
     public function reset($pageuid)
@@ -112,24 +125,28 @@ class ContentController extends AbstractController
         $this->assertIsAuthenticated();
 
         $page = $this->entyMgr->find('BackBee\NestedNode\Page', $pageuid);
-        if (false == $page) {
+        if (false === $page) {
             return $this->getPageNotFoundResponse($pageuid);
         }
 
         $count = $this->contentMgr->resetByPage($page, $this->securityContext->getToken());
         $this->elasticsearchMgr->indexPage($page);
 
-        return new Response('', Response::HTTP_NO_CONTENT, [
+        return new Response(
+            '', Response::HTTP_NO_CONTENT, [
             'X-Rollback-Count' => $count,
-        ]);
+        ]
+        );
     }
 
     protected function getPageNotFoundResponse($pageuid)
     {
-        return new JsonResponse([
-            'error'  => 'not_found',
-            'reason' => "Page with uid `{$pageuid}` does not exist.",
-        ], Response::HTTP_NOT_FOUND);
+        return new JsonResponse(
+            [
+                'error' => 'not_found',
+                'reason' => "Page with uid `{$pageuid}` does not exist.",
+            ], Response::HTTP_NOT_FOUND
+        );
     }
 
     protected function runCommitPage(Page $page)
@@ -137,7 +154,7 @@ class ContentController extends AbstractController
         $commitedCount = $this->contentMgr->publishByPage($page, $this->securityContext->getToken());
 
         if (0 < $commitedCount) {
-            $page->setModified(new \DateTime());
+            $page->setModified(new DateTime());
         }
 
         $this->entyMgr->flush($page);

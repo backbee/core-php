@@ -6,7 +6,7 @@ use BackBee\BBApplication;
 use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Config\Config;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Utils\Collection\Collection;
+use BackBee\Util\Collection\Collection;
 use DateTime;
 use DateTimeZone;
 

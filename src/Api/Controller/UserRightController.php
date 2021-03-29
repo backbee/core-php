@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package BackBeeCloud\Api\Controller
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserRightController extends AbstractController
 {

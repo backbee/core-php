@@ -5,12 +5,14 @@ namespace BackBee\Console;
 use BackBee\BBApplication;
 use BackBeePlanet\Standalone\Application;
 use BackBeePlanet\Standalone\StandaloneHelper;
+use Exception;
 use ReflectionClass;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use BackBee\Command\AbstractCommand;
+use function dirname;
 
 /**
  * Class BackBeeConsole
@@ -37,7 +39,7 @@ class BackBeeConsole extends ConsoleApplication
     public function initApplication(): void
     {
         $bootstrapFilepath = StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'bootstrap.yml';
-        if (is_readable($bootstrapFilepath)) {
+        if (StandaloneHelper::configDir() && is_readable($bootstrapFilepath)) {
             Application::setRepositoryDir(StandaloneHelper::repositoryDir());
             $this->bbApplication = new Application();
         }
@@ -59,28 +61,51 @@ class BackBeeConsole extends ConsoleApplication
     public function doRun(InputInterface $input, OutputInterface $output): int
     {
         if (!$this->commandsRegistered) {
-            foreach ($this->getApplication()->getBundles() as $bundle) {
-                if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
-                    continue;
-                }
-                $finder = new Finder();
-                $finder->files()->name(null === $this->bbApplication ? 'InstallCommand.php' : '*Command.php')->in($dir);
-                $ns = (new ReflectionClass($bundle))->getNamespaceName() . '\\Command';
-                foreach ($finder as $file) {
-                    if ($relativePath = $file->getRelativePath()) {
-                        $ns .= '\\' . str_replace('/', '\\', $relativePath);
+            if ($this->bbApplication) {
+                foreach ($this->bbApplication->getBundles() as $bundle) {
+                    if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
+                        continue;
                     }
-                    $reflexionClass = new ReflectionClass($ns . '\\' . $file->getBasename('.php'));
-                    $instance = $reflexionClass->newInstance($file->getBasename('.php'));
-                    if ($reflexionClass->isSubclassOf(AbstractCommand::class)) {
-                        $instance->setBBApp($this->bbApplication);
-                        $this->add($instance);
-                    }
+                    $this->addCommand(
+                        $dir,
+                        (new ReflectionClass($bundle))->getNamespaceName()
+                    );
                 }
+            } elseif (is_dir($dir = dirname(__DIR__) . '/Command')) {
+                $this->addCommand(
+                    $dir,
+                    'BackBee'
+                );
             }
             $this->commandsRegistered = true;
         }
 
         return parent::doRun($input, $output);
+    }
+
+    /**
+     * Add command.
+     *
+     * @param string $dir
+     * @param string $namespaceName
+     */
+    private function addCommand(string $dir, string $namespaceName): void
+    {
+        $finder = new Finder();
+        $finder->files()->name(null === $this->bbApplication ? 'InstallCommand.php' : '*Command.php')->in($dir);
+        $ns = $namespaceName . '\\Command';
+        foreach ($finder as $file) {
+            if ($relativePath = $file->getRelativePath()) {
+                $ns .= '\\' . str_replace('/', '\\', $relativePath);
+            }
+            try {
+                $reflexionClass = new ReflectionClass($ns . '\\' . $file->getBasename('.php'));
+                $instance = $reflexionClass->newInstance($file->getBasename('.php'));
+                if ($reflexionClass->isSubclassOf(AbstractCommand::class)) {
+                    $instance->setBBApp($this->bbApplication);
+                    $this->add($instance);
+                }
+            } catch (Exception $exception) {}
+        }
     }
 }

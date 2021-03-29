@@ -14,15 +14,19 @@ use BackBee\ClassContent\Exception\RevisionUptodateException;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Dispatcher;
-use BackBee\Logging\Logger;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 
 /**
+ * Class ContentManager
+ *
+ * @package BackBeeCloud\Entity
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentManager
@@ -53,24 +57,32 @@ class ContentManager
     protected $bbApp;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * ContentManager constructor.
      *
      * @param EntityManager       $entyMgr
      * @param ClassContentManager $bbContentMgr
      * @param Dispatcher          $eventDispatcher
      * @param BBApplication       $bbApp
+     * @param LoggerInterface     $logger
      */
     public function __construct(
         EntityManager $entyMgr,
         ClassContentManager $bbContentMgr,
         Dispatcher $eventDispatcher,
-        BBApplication $bbApp
+        BBApplication $bbApp,
+        LoggerInterface $logger
     ) {
         $this->entyMgr = $entyMgr;
         $this->bbContentMgr = $bbContentMgr;
         $this->eventDispatcher = $eventDispatcher;
         $this->uniqToken = $this->entyMgr->getRepository(Revision::class)->getUniqToken();
         $this->bbApp = $bbApp;
+        $this->logger = $logger;
     }
 
     /**
@@ -90,7 +102,7 @@ class ContentManager
         AbstractClassContent $original,
         BBUserToken $token = null,
         $uid = null,
-        $putOnline = false
+        bool $putOnline = false
     ) {
         $draft = $token
             ? $this->entyMgr->getRepository(Revision::class)->getDraft($original, $token)
@@ -396,17 +408,30 @@ class ContentManager
      * to delete), else false.
      *
      * @return bool
-     * @throws ClassNotFoundException
-     * @throws UnknownPropertyException
      */
-    public function hasGlobalContentDraft()
+    public function hasGlobalContentDraft(): bool
     {
-        return null !== $this->entyMgr->getRepository(Revision::class)->findOneBy(
-            [
-                '_content' => $this->getGlobalContentsUids(),
-                '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
-            ]
-        );
+        $revisions = false;
+
+        try {
+            $revisions = $this->entyMgr->getRepository(Revision::class)->findOneBy(
+                [
+                    '_content' => $this->getGlobalContentsUids(),
+                    '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED, Revision::STATE_TO_DELETE],
+                ]
+            );
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
+        return null !== $revisions;
     }
 
     /**

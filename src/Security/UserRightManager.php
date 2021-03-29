@@ -13,6 +13,8 @@ use BackBeePlanet\GlobalSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class UserRightManager
@@ -48,6 +50,11 @@ class UserRightManager
     private $pageCategoryManager;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var array
      */
     private $superAdminBundleRights;
@@ -58,18 +65,21 @@ class UserRightManager
      * @param SecurityContext        $securityContext
      * @param EntityManagerInterface $entityManager
      * @param PageCategoryManager    $pageCategoryManager
+     * @param LoggerInterface        $logger
      * @param array                  $superAdminBundleRights
      */
     public function __construct(
         SecurityContext $securityContext,
         EntityManagerInterface $entityManager,
         PageCategoryManager $pageCategoryManager,
+        LoggerInterface $logger,
         array $superAdminBundleRights = []
     ) {
         $this->securityContext = $securityContext;
         $this->entityManager = $entityManager;
         $this->pageCategoryManager = $pageCategoryManager;
         $this->superAdminBundleRights = $superAdminBundleRights;
+        $this->logger = $logger;
     }
 
     /**
@@ -79,7 +89,6 @@ class UserRightManager
      * @param Page|null $contextualPage
      *
      * @return array
-     * @throws QueryException
      */
     public function getUserRights(User $user, Page $contextualPage = null): array
     {
@@ -201,7 +210,6 @@ class UserRightManager
      * @param Page|null $contextualPage
      *
      * @return array
-     * @throws QueryException
      */
     public function getUserPageRights(User $user, Page $contextualPage = null): array
     {
@@ -236,7 +244,16 @@ class UserRightManager
             return $pageRights;
         }
 
-        $pageType = $this->getPageTypeUniqueNameByPage($contextualPage);
+        $pageType = null;
+
+        try {
+            $pageType = $this->getPageTypeUniqueNameByPage($contextualPage);
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+        }
+
         $category = $this->pageCategoryManager->getCategoryByPage($contextualPage);
         $subject = $contextualPage->isOnline(true)
             ? UserRightConstants::ONLINE_PAGE

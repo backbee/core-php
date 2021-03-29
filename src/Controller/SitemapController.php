@@ -7,7 +7,7 @@ use BackBee\Config\Config;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Site\Site;
-use BackBee\Utils\Collection\Collection;
+use BackBee\Util\Collection\Collection;
 use BackBeePlanet\Listener\SitemapListener;
 use BackBeePlanet\Sitemap\Decorator\DecoratorInterface;
 use BackBeePlanet\Sitemap\SitemapManager;

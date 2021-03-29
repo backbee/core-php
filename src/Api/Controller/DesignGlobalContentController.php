@@ -2,9 +2,9 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBee\BBApplication;
 use BackBeeCloud\Design\GlobalContentManager;
 use BackBeeCloud\Security\UserRightConstants;
-use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -49,10 +49,12 @@ class DesignGlobalContentController extends AbstractController
             || !$request->request->has('footerColor')
             || !$request->request->has('copyrightColor')
         ) {
-            return new JsonResponse([
-                'error' => 'bad_request',
-                'reason' => "'header', 'hasHeaderMargin', 'footer' and 'copyright' parameters are required to update global content.",
-            ], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => "'header', 'hasHeaderMargin', 'footer' and 'copyright' parameters are required to update global content.",
+                ], Response::HTTP_BAD_REQUEST
+            );
         }
 
         $headerColor = $request->request->get('headerColor');
@@ -66,10 +68,12 @@ class DesignGlobalContentController extends AbstractController
             $this->globalContentManager->updateFooterBackgroundColor($footerColor);
             $this->globalContentManager->updateCopyrightBackgroundColor($copyrightColor);
         } catch (\InvalidArgumentException $exception) {
-            return new JsonResponse([
-                'error' => 'bad_request',
-                'reason' => $exception->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => $exception->getMessage(),
+                ], Response::HTTP_BAD_REQUEST
+            );
         }
 
         return new Response('', Response::HTTP_NO_CONTENT);

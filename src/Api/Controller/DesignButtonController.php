@@ -2,9 +2,9 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBee\BBApplication;
 use BackBeeCloud\Design\ButtonManager;
 use BackBeeCloud\Security\UserRightConstants;
-use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,10 +48,12 @@ class DesignButtonController extends AbstractController
         );
 
         if (!$request->request->has('font') || !$request->request->has('shape')) {
-            return new JsonResponse([
-                'error' => 'bad_request',
-                'reason' => "'font' and 'shape' parameters are required to update Button settings.",
-            ], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => "'font' and 'shape' parameters are required to update Button settings.",
+                ], Response::HTTP_BAD_REQUEST
+            );
         }
 
         $fontValue = $request->request->get('font');
@@ -61,10 +63,12 @@ class DesignButtonController extends AbstractController
             $this->buttonManager->updateFont($fontValue);
             $this->buttonManager->updateShape($shapeValue);
         } catch (\InvalidArgumentException $exception) {
-            return new JsonResponse([
-                'error' => 'bad_request',
-                'reason' => $exception->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => $exception->getMessage(),
+                ], Response::HTTP_BAD_REQUEST
+            );
         }
 
         return new Response('', Response::HTTP_NO_CONTENT);

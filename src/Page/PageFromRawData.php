@@ -157,7 +157,7 @@ class PageFromRawData
      *
      * @return object|null
      */
-    private function getContentWithDraft(string $classname, string $uid): ?object
+    private function getContentWithDraft(string $classname, string $uid)
     {
         return $this->entityManager->find($classname, $uid);
     }
