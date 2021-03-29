@@ -1,0 +1,46 @@
+// RTE with picto
+
+.with-picto.paragraph {
+    align-items: center;
+
+    .image-picto {
+        margin-right: $spacer / 2;
+        flex-shrink: 0;
+
+        &.picto-24 {
+            width: 24px;
+        }
+        &.picto-32 {
+            width: 32px;
+        }
+        &.picto-64 {
+            width: 64px;
+        }
+        &.picto-96 {
+            width: 96px;
+        }
+    }
+
+    .rte-text {
+        min-width: 5rem;
+    }
+
+    &.picto-right {
+        flex-direction: row-reverse;
+        .image-picto {
+            margin-right: 0;
+            margin-left: $spacer / 2;
+        }
+        .rte-text {
+            text-align: right;
+        }
+    }
+
+    &.picto-center {
+        justify-content: center;
+    }
+}
+
+.paragraph, .lead {
+    @include padding-y($spacer / 4);
+}

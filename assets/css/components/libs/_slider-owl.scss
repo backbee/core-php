@@ -1,0 +1,285 @@
+// Slider (Owl Carousel : https://owlcarousel2.github.io/OwlCarousel2/)
+
+.slider-container {
+    max-width: 770px;
+    margin: 0 auto 3em auto;
+}
+.owl-carousel {
+    $slider-std-btn-w: 44px;
+    $slider-std-btn-h: 75px;
+
+    width:auto;
+
+    &.resized-slider {
+        margin-bottom: 40px;
+    }
+
+    .slider-item {
+        @include clearfix;
+        background-size: cover;
+        background-position: 50% 50%;
+        margin: 0;
+
+        .figure {
+            display: block;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+
+
+            &:after {
+                content:"";
+                display: block;
+                padding-bottom: 75%;
+            }
+
+            &.image-fullwidth:after {
+                padding-bottom: 50%;
+            }
+
+            img {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                @include transform(translate3d(-50%, -50%, 0) scale(1.3));
+            }
+        }
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.25);
+    }
+
+    .slider-item {
+        & + & {
+            display: none;
+        }
+        .slider-content {
+            position: absolute;
+            left: 0;
+            right: 0;
+            padding: 3em 3.5em;
+
+            &.text-top {
+                top: 0;
+            }
+
+            &.text-middle {
+                top: 50%;
+                @include translate3d(0,-50%,0);
+            }
+
+            &.text-bottom {
+                bottom: 0;
+            }
+
+            &.hover-display {
+                margin-top: 10px;
+                @include transition(all 300ms linear);
+            }
+
+            .paragraph {
+                color: #fff;
+            }
+
+        }
+
+        .image-overlay.hover-display,
+        .button.hover-display,
+        .lead.hover-display {
+            opacity: 0;
+            @include transition(all 300ms linear);
+        }
+
+        &:hover {
+            .hover-display {
+                opacity: 1;
+                margin-top: 0;
+            }
+        }
+    }
+
+    .owl-stage-outer, .owl-stage, .owl-item, .slider-item {
+        height: 100%;
+    }
+
+    //dots
+    .owl-dots {
+        text-align: center;
+        padding-top: 1em;
+        .owl-dot {
+            display: inline-block;
+            span {
+                width: 1pc;
+                height: 1pc;
+                margin: 5px;
+                background: $secondary-color;
+                display: block;
+                -webkit-backface-visibility: visible;
+                @include transition(all .2s ease);
+                border-radius: 30px;
+            }
+            &.active span, &:hover span {
+                background: $primary-color;
+            }
+        }
+    }
+
+    .owl-nav {
+        opacity: 0;
+        @include transition(all .2s ease);
+
+        button {
+            //.bg-opacity(@brand-primary,90%);
+            background-color: rgba(#000, .25);
+            //
+            position: absolute; top: 50%; margin: -$slider-std-btn-h/2 0 0 0;
+            //
+            font-size: 2em;
+            height: $slider-std-btn-h;
+            width: $slider-std-btn-w;
+            line-height: $slider-std-btn-h;
+            text-align: center;
+            padding: 0;
+            @include transition(all 250ms ease);
+            //
+            &:hover, &:focus {
+                background-color: rgba(#000, .5);
+                i {color:#fff;}
+            }
+            //
+            &.disabled {
+                @include opacity(0.25);
+                cursor:not-allowed;
+            }
+            &, i {color:#fff;}
+            //
+            &.owl-prev {
+                left:0;
+            }
+            &.owl-next {
+                right:0;
+            }
+        }
+        i {
+            height: $slider-std-btn-h;
+            width: $slider-std-btn-w;
+            line-height: $slider-std-btn-h;
+            margin: 0;
+            font-size: $slider-std-btn-w;
+            color: $primary-color;
+            //
+            &.fa-angle-left {margin-left:-4px; margin-top:-1px;}
+            &.fa-angle-right {margin-right:-4px; margin-top:-1px;}
+        }
+        //
+        @include media-breakpoint-down(xs) {display:none;}
+        //
+    }//END NAV
+
+    &:hover {
+        .owl-nav {
+            opacity: 1;
+            @include transition(all 300ms linear);
+        }
+    }
+
+    //FORMAT
+    &.slider-square {
+        .slider-item {
+            .figure {
+                &:after {
+                    padding-bottom: 90%;
+                }
+            }
+        }
+    }
+
+    &.slider-landscape {
+        .slider-item {
+            .figure {
+                &:after {
+                    padding-bottom: 60%;
+                }
+            }
+        }
+    }
+
+    &.slider-banner {
+        .slider-item {
+            .figure {
+                &:after {
+                    padding-bottom: 45%;
+                }
+            }
+        }
+    }
+
+    //THUMBNAIL
+    &.slider-thumbnail {
+        $thumbnail-margin : 60px;
+        margin: 0 $thumbnail-margin;
+        padding-top: 20px;
+
+        > .slider-item {
+            width: 25%;
+        }
+
+        .slider-item {
+            figure {
+                overflow: hidden;
+                position: relative;
+
+                img {
+                    @include scale(1.3);
+                    @include transition(all 250ms ease);
+                    top: 0;
+                    left: 0;
+                }
+            }
+
+            &:hover {
+                img {
+                    @include scale(1.5);
+                }
+            }
+        }
+
+        .current {
+            .slider-item {
+                border: 2px solid $primary-color;
+
+                figure {
+                    img {
+                        @include scale(1.3);
+                    }
+                }
+            }
+        }
+
+        .owl-nav {
+            display: none;
+        }
+    }
+
+    //Full width
+    &.slider-fw {
+
+        .owl-nav {
+            div {
+                height: $slider-std-btn-h;
+            }
+        }
+    }
+
+}
+.slider-shownav {
+    .owl-nav {
+        @include opacity(1);
+    }
+}

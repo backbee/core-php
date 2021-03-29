@@ -17,7 +17,6 @@ bbapplication.init:
 bbapplication.start:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\HAuthListener, onApplicationStart ]
         - [ BackBeeCloud\Listener\CoreListener, onApplicationStart, -50 ]
 
 bbapplication.stop:
@@ -258,7 +257,7 @@ rest.controller.pagecontroller.deleteaction.postcall:
     listeners:
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
-        - [ BackBeeCloud\Elasticsearch\ElasticsearchListener, onPageDeletePostcall ]
+        - [ BackBeeCloud\Listener\ElasticsearchListener, onPageDeletePostcall ]
         - [ BackBeeCloud\Listener\PageListener, onPageDeletePostcall ]
 
 rest.controller.resourcecontroller.uploadaction.postcall:
@@ -420,12 +419,6 @@ nestednode.page.postrender:
     listeners:
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\PageListener, onPostRender ]
-
-# HAuthBundle listeners
-bundle.hauth.started:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\HAuthListener, onBundleStart ]
 
 # User listeners
 rest.user.creation:

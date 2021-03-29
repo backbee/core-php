@@ -8,7 +8,7 @@ use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Text\Paragraph;
 use BackBee\NestedNode\Page;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
-use BackBeePlanet\ElasticsearchManager;
+use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**

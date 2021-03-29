@@ -1,0 +1,53 @@
+// Page Article
+
+// Pager article
+ul.pager {
+    list-style: none;
+    left: 0;
+    right: 0;
+    top: 0;
+    padding: 0;
+    margin: 0;
+    li {
+        position: relative;
+        a {
+            color: $text-color;
+            display: block;
+            text-decoration: none;
+            width: $pager-w;
+            @include transition($color-transition);
+
+            @include media-breakpoint-down(md) {
+                width: $pager-w-md;
+            }
+
+            &:hover {
+                background: $secondary-color;
+            }
+            span {
+                font-size: 2.5em;
+                line-height: $pager-h;
+                @include media-breakpoint-down(md) {
+                    font-size: 1.5em;
+                    line-height: $pager-h-md;
+                }
+            }
+        }
+    }
+}
+
+.ml-article-title {
+    margin-left: $pager-w + 1rem;
+    
+    @include media-breakpoint-down(md) {
+        margin-left: $pager-w-md + 1rem;
+    }
+}
+
+.mr-article-title {
+    margin-right: $pager-w + 1rem;
+
+    @include media-breakpoint-down(md) {
+        margin-right: $pager-w-md + 1rem;
+    }
+}

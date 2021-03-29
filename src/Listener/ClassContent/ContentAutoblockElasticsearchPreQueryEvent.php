@@ -2,15 +2,20 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
+use ArrayObject;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\Event\Event;
 
 /**
+ * Class ContentAutoblockElasticsearchPreQueryEvent
+ *
+ * @package BackBeeCloud\Listener\ClassContent
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentAutoblockElasticsearchPreQueryEvent extends Event
 {
-    const EVENT_NAME = 'contentautoblock.elasticsearch.prequery';
+    public const EVENT_NAME = 'contentautoblock.elasticsearch.prequery';
 
     /**
      * @var ContentAutoblock
@@ -18,11 +23,17 @@ class ContentAutoblockElasticsearchPreQueryEvent extends Event
     private $content;
 
     /**
-     * @var \ArrayObject
+     * @var ArrayObject
      */
     private $esQuery;
 
-    public function __construct(ContentAutoblock $content, \ArrayObject $esQuery)
+    /**
+     * ContentAutoblockElasticsearchPreQueryEvent constructor.
+     *
+     * @param ContentAutoblock $content
+     * @param ArrayObject      $esQuery
+     */
+    public function __construct(ContentAutoblock $content, ArrayObject $esQuery)
     {
         parent::__construct($content, [$esQuery]);
 
@@ -30,12 +41,22 @@ class ContentAutoblockElasticsearchPreQueryEvent extends Event
         $this->esQuery = $esQuery;
     }
 
-    public function getContentAutoblock()
+    /**
+     * Get content auto block.
+     *
+     * @return ContentAutoblock
+     */
+    public function getContentAutoblock(): ContentAutoblock
     {
         return $this->content;
     }
 
-    public function getElasticsearchQuery()
+    /**
+     * Get elastic search query.
+     *
+     * @return ArrayObject
+     */
+    public function getElasticsearchQuery(): ArrayObject
     {
         return $this->esQuery;
     }

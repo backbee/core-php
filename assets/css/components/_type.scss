@@ -1,0 +1,78 @@
+// Text & Header
+
+h1, h2, h3, h4, h5, h6, .is-h1, .is-h2, .is-h3, .is-h4, .is-h5, .is-h6, p {
+    margin:0;
+    padding:0;
+    line-height: 1.5;
+
+    a {
+        text-decoration: none;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+h1, h2, h3, h4, h5, h6, .is-h1, .is-h2, .is-h3, .is-h4, .is-h5, .is-h6 {
+    font-family: $font-title;
+}
+
+.paragraph, .chapo, .lead {
+    color: $text-color;
+    h1, h2, h3, .is-h1, .is-h2, .is-h3, .bigtext, .smalltext, p, ol, ul, blockquote {
+        &:not(:first-child) {
+            margin-top: $spacer;
+        }
+        &:not(:last-child) {
+            margin-bottom: $spacer / 2;
+        }
+        &:last-of-type {
+            margin-bottom: 0;
+        }
+    }
+
+    ol, ul {
+        li:not(:last-of-type) {
+            margin-bottom: $spacer / 2;
+        }
+    }
+
+    a {
+        &, & span {
+            color: inherit;
+            text-decoration: underline;
+        }
+        &:hover {
+            &, & span {
+                text-decoration: none;
+            }
+        }
+    }
+}
+
+.paragraph {
+    &.has-bg-color {
+        padding: $bg-padding;
+
+        &.bordered {
+            border: 1px solid;
+            background: transparent !important;
+        }
+
+        &.color-primary {
+            @include bg-color($bg-color1);
+        }
+
+        &.color-secondary {
+            @include bg-color($bg-color2);
+        }
+
+        &.color-text {
+            @include bg-color($bg-color3);
+        }
+
+        &.color-background {
+            @include bg-color($bg-color4);
+        }
+    }
+}

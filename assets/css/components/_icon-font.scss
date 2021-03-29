@@ -1,0 +1,129 @@
+$icomoon-font-family: "backbee-default" !default;
+$icomoon-font-path: "fonts/backbee" !default;
+
+$icon_search: "\e900";
+$arrow_carrot-left: "\e902";
+$arrow_carrot-right: "\e903";
+$arrow_carrot-left_alt2: "\e904";
+$arrow_carrot-right_alt2: "\e905";
+$icon_ul: "\e90e";
+$social_facebook: "\e906";
+$social_flickr: "\e907";
+$social_instagram: "\e908";
+$social_linkedin: "\e909";
+$social_pinterest: "\e90a";
+$social_twitter: "\e90b";
+$social_youtube: "\e90c";
+$social_snapchat: "\e90d";
+
+@font-face {
+  font-family: '#{$icomoon-font-family}';
+  src:  url('#{$icomoon-font-path}/#{$icomoon-font-family}.eot?442e2z');
+  src:  url('#{$icomoon-font-path}/#{$icomoon-font-family}.eot?442e2z#iefix') format('embedded-opentype'),
+    url('#{$icomoon-font-path}/#{$icomoon-font-family}.ttf?442e2z') format('truetype'),
+    url('#{$icomoon-font-path}/#{$icomoon-font-family}.woff?442e2z') format('woff'),
+    url('#{$icomoon-font-path}/#{$icomoon-font-family}.svg?442e2z##{$icomoon-font-family}') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+.icon_search,
+.arrow_carrot-left,
+.arrow_carrot-right,
+.arrow_carrot-left_alt2,
+.arrow_carrot-right_alt2,
+.social_facebook,
+.social_flickr,
+.social_instagram,
+.social_linkedin,
+.social_pinterest,
+.social_twitter,
+.social_youtube,
+.social_snapchat,
+.icon_ul {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: '#{$icomoon-font-family}' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  font-size: 1.5rem;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon_search {
+  &:before {
+    content: $icon_search;
+  }
+}
+.arrow_carrot-left {
+  &:before {
+    content: $arrow_carrot-left;
+  }
+}
+.arrow_carrot-right {
+  &:before {
+    content: $arrow_carrot-right;
+  }
+}
+.arrow_carrot-left_alt2 {
+  &:before {
+    content: $arrow_carrot-left_alt2;
+  }
+}
+.arrow_carrot-right_alt2 {
+  &:before {
+    content: $arrow_carrot-right_alt2;
+  }
+}
+.social_facebook {
+  &:before {
+    content: $social_facebook;
+  }
+}
+.social_flickr {
+  &:before {
+    content: $social_flickr;
+  }
+}
+.social_instagram {
+  &:before {
+    content: $social_instagram;
+  }
+}
+.social_linkedin {
+  &:before {
+    content: $social_linkedin;
+  }
+}
+.social_pinterest {
+  &:before {
+    content: $social_pinterest;
+  }
+}
+.social_twitter {
+  &:before {
+    content: $social_twitter;
+  }
+}
+.social_youtube {
+  &:before {
+    content: $social_youtube;
+  }
+}
+.social_snapchat {
+  &:before {
+    content: $social_snapchat;
+  }
+}
+.icon_ul {
+  &:before {
+    content: $icon_ul;
+  }
+}

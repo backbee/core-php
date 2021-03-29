@@ -1,0 +1,63 @@
+// BB Content
+
+.bb-content {
+    &.content {
+        .colcontentset & ~ & {
+            margin-top: $spacer;
+            .no-gutters & {
+                margin-top: 0;
+            }
+        }
+
+        .colcontentset a:not(:last-child) & {
+            margin-bottom: $spacer;
+            .no-gutters & {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    @include media-breakpoint-down(sm) {
+        .colcontentset {
+            margin-bottom: $spacer / 2;
+        }
+
+        .no-gutters .colcontentset {
+            margin-bottom: 0;
+        }
+
+        .colcontentset a:not(:last-child) & {
+            margin-bottom: $spacer / 2 !important;
+        }
+    }
+
+    .bb-spacer {
+        height: $spacer;
+    }
+
+    .cloudcontentset {
+        position: relative;
+        padding-top: $cloudcontentset-py;
+        padding-bottom: $cloudcontentset-py;
+
+        &.is-spacer {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    }
+
+}
+
+.no-gutters.row {
+    .bb-content {
+        &.button, &.paragraph, &.searchbar-wrapper, &.contact-form {
+            padding: .5rem 1rem;
+        }
+    }
+}
+
+.auto-height.row {
+    .colcontentset {
+        height: 100%;
+    }
+}

@@ -2,18 +2,32 @@
 
 namespace BackBeeCloud\ClassContent;
 
+use BackBee\BBApplication;
 use BackBeeCloud\Utils\FilesystemYamlReader;
 use BackBeeCloud\Utils\FilesystemYamlWriter;
-use BackBee\BBApplication;
+use Exception;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
+ * Class ClassContentOverriderFactory
+ *
+ * @package BackBeeCloud\ClassContent
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ClassContentOverriderFactory
 {
-    const CLASSCONTENT_OVERRIDE_DEFINITION_TAG = 'classcontent_overrider.definition';
+    public const CLASSCONTENT_OVERRIDE_DEFINITION_TAG = 'classcontent_overrider.definition';
 
+    /**
+     * Create class content overrider.
+     *
+     * @param ContainerBuilder $container
+     * @param BBApplication    $app
+     *
+     * @return ClassContentOverrider
+     * @throws Exception
+     */
     public static function createClassContentOverrider(ContainerBuilder $container, BBApplication $app)
     {
         $definitions = [];

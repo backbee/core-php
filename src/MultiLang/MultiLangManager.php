@@ -15,7 +15,7 @@ use BackBeeCloud\SiteStatusManager;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
-use BackBeePlanet\RedisManager;
+use BackBeePlanet\Redis\RedisManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
@@ -420,7 +420,9 @@ class MultiLangManager implements JobHandlerInterface
      * @param JobInterface          $job
      * @param SimpleWriterInterface $writer
      *
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws TransactionRequiredException
      */
     public function handle(JobInterface $job, SimpleWriterInterface $writer): void
     {

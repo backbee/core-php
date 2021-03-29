@@ -1,152 +1,101 @@
 <?php
 
-namespace BackBeePlanet\Command;
+namespace BackBee\Command;
 
-use BackBee\BBApplication;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\CloudContentSet;
 use BackBeePlanet\OptimizeImage\OptimizeImageManager;
 use BackBeePlanet\OptimizeImage\OptimizeImageUtils;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\OptimisticLockException;
-use Symfony\Component\Filesystem\Filesystem;
-use Webmozart\Console\Api\Args\Args;
-use Webmozart\Console\Api\IO\IO;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class ConvertCommandHandler
+ * Class OptimizeImageConvertCommand
  *
- * @package BackBeePlanet\Command
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @package BackBee\Command
+ *
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class ConvertCommandHandler
+class OptimizeImageConvertCommand extends AbstractCommand
 {
-    /**
-     * @var BBApplication
-     */
-    protected $app;
-
     /**
      * @var OptimizeImageManager
      */
     protected $optimizeImageManager;
 
     /**
-     * @var EntityManager
-     */
-    protected $entityManager;
-
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    /**
-     * @var Args
-     */
-    protected $args;
-
-    /**
-     * @var IO
+     * @var SymfonyStyle
      */
     protected $io;
 
     /**
-     * ConvertCommandHandler constructor.
-     *
-     * @param BBApplication $app
+     * {@inheritDoc}
      */
-    public function __construct(BBApplication $app)
+    protected function configure(): void
     {
-        $this->app = $app;
-        $this->entityManager = $app->getEntityManager();
-        $this->optimizeImageManager = $app->getContainer()->get('app.optimize_image.manager');
-        $this->filesystem = new Filesystem();
+        $this
+            ->setName('backbee:oic')
+            ->setDescription('Tries to convert all site images in order to optimize them.')
+            ->addOption('memory-limit', null, InputOption::VALUE_REQUIRED, 'The memory limit to set', 1);
     }
 
     /**
-     * Print help command.
-     *
-     * @param Args $args
-     * @param IO   $io
-     *
-     * @return int
+     * {@inheritDoc}
      */
-    public function handle(Args $args, IO $io): int
+    protected function execute(InputInterface $input, OutputInterface $output): ?int
     {
-        $io->writeLine(
-            '<info>Run `console optimize-image --help` to display the list of available images command.</info>'
-        );
-
-        return 0;
-    }
-
-    /**
-     * Execute the command.
-     *
-     * @param Args $args
-     * @param IO   $io
-     *
-     * @return int
-     * @throws OptimisticLockException
-     */
-    public function handleConvert(Args $args, IO $io): int
-    {
-        $this->args = $args;
-        $this->io = $io;
+        $this->optimizeImageManager = $this->getContainer()->get('app.optimize_image.manager');
+        $this->io = new SymfonyStyle($input, $output);
 
         // memory limit options
-        if (null !== $limit = $args->getOption('memory-limit')) {
+        if (null !== ($limit = $input->getOption('memory-limit'))) {
             ini_set('memory_limit', $limit);
         }
 
         // convert Basic\Image
-        $this->io->writeLine('<c1>Converting Basic\Image...</c1>');
+        $this->io->section('Converting Basic\Image');
         $this->cleanMemoryUsage();
-        $contents = $this->entityManager->getRepository(Image::class)->findAll();
-        $this->convertImages($contents);
+        $this->convertImages();
         $this->cleanMemoryUsage();
-        $this->io->writeLine('<c1>Basic\Image has been successfully converted.</c1>');
-        $this->io->writeLine('');
+        $this->io->success('Basic\Image has been successfully converted.');
 
         // convert CloudContentSet
-        $this->io->writeLine('<c1>Converting CloudContentSet...</c1>');
+        $this->io->section('Converting CloudContentSet');
         $this->cleanMemoryUsage();
-        $contents = $this->entityManager->getRepository(CloudContentSet::class)->findAll();
-        $this->convertCloudContentSets($contents);
+        $this->convertCloudContentSets();
         $this->cleanMemoryUsage();
-        $this->io->writeLine('<c1>CloudContentSet has been successfully converted.</c1>');
+        $this->io->success('CloudContentSet has been successfully converted.');
 
         return 0;
     }
 
     /**
      * Convert images.
-     *
-     * @param array $contents
-     *
-     * @throws OptimisticLockException
      */
-    protected function convertImages(array $contents): void
+    protected function convertImages(): void
     {
+        $contents = $this->getEntityManager()->getRepository(Image::class)->findAll();
+
         // set count
         $count = 1;
 
         foreach ($contents as $content) {
             if (0 === ($count % 20)) {
                 $this->cleanMemoryUsage();
-                $this->entityManager->flush();
+                $this->getEntityManager()->flush();
             }
 
-            $starttime = microtime(true);
+            $startTime = microtime(true);
 
             // get media path
             $filePath = $this->optimizeImageManager->getMediaPath($content->image->path);
 
             // skipping obsolete image
             if (
-                (empty($content->image->path))
-                || (false === $this->optimizeImageManager->isValidToOptimize($filePath))
+                (empty($content->image->path)) ||
+                (false === $this->optimizeImageManager->isValidToOptimize($filePath))
             ) {
                 continue;
             }
@@ -167,42 +116,41 @@ class ConvertCommandHandler
             $content->image->originalname = $imageData['originalname'];
 
             // save image
-            $this->entityManager->persist($content);
+            $this->getEntityManager()->persist($content);
 
-            $this->io->writeLine(
+            $this->io->text(
                 sprintf(
-                    '    > Converting image <c2>"%s"</c2> (memory usage: %s - duration: %ss)',
+                    'Converting image "%s" (memory usage: %s - duration: %ss)',
                     $content->image->path,
                     $this->getPrettyMemoryUsage(),
-                    number_format(microtime(true) - $starttime, 3)
+                    number_format(microtime(true) - $startTime, 3)
                 )
             );
 
             $count++;
         }
 
-        $this->entityManager->flush();
-        $this->entityManager->clear();
+        $this->getEntityManager()->flush();
+        $this->getEntityManager()->clear();
     }
 
     /**
      * Convert cloud content sets.
-     *
-     * @param array $contents
-     * @throws OptimisticLockException
      */
-    protected function convertCloudContentSets(array $contents): void
+    protected function convertCloudContentSets(): void
     {
+        $contents = $this->getEntityManager()->getRepository(CloudContentSet::class)->findAll();
+
         // set count
         $count = 1;
 
         foreach ($contents as $content) {
             if (0 === ($count % 20)) {
                 $this->cleanMemoryUsage();
-                $this->entityManager->flush();
+                $this->getEntityManager()->flush();
             }
 
-            $starttime = microtime(true);
+            $startTime = microtime(true);
 
             // get bg image path
             $bgImagePath = $content->getParam('bg_image');
@@ -231,22 +179,22 @@ class ConvertCommandHandler
             $content->setParam('bg_image', $imageData['path']);
 
             // save bg image
-            $this->entityManager->persist($content);
+            $this->getEntityManager()->persist($content);
 
-            $this->io->writeLine(
+            $this->io->text(
                 sprintf(
-                    '    > Converting bg image <c2>"%s"</c2> (memory usage: %s - duration: %ss)',
+                    'Converting bg image "%s" (memory usage: %s - duration: %ss)',
                     $imageData['path'],
                     $this->getPrettyMemoryUsage(),
-                    number_format(microtime(true) - $starttime, 3)
+                    number_format(microtime(true) - $startTime, 3)
                 )
             );
 
             $count++;
         }
 
-        $this->entityManager->flush();
-        $this->entityManager->clear();
+        $this->getEntityManager()->flush();
+        $this->getEntityManager()->clear();
     }
 
     /**

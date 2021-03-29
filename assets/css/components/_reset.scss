@@ -1,0 +1,57 @@
+// Reset
+
+body {
+    font-family: $font-sans;
+    background-color: $background-color;
+    color: $text-color;
+    overflow-x: hidden;
+}
+
+figure {
+    margin: 0;
+}
+
+img, embed, object, video, canvas {
+    max-width:100%;
+    height:auto;
+}
+
+a {
+    color: $text-color;
+}
+
+.form-control {
+    border-color: $border-color;
+    color: $text-color;
+}
+
+.fixed-bottom, .fixed-top {
+    z-index: 9990;
+}
+
+.row {
+    position: relative;
+}
+
+.dropdown {
+    cursor: pointer;
+}
+
+.g-recaptcha {
+    margin-bottom: $spacer;
+    & > div {
+        margin: 0 auto;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    .hidden-xs {
+        display: none !important;
+    }
+}
+
+@include media-breakpoint-only(md) {
+    .hidden-sm {
+        display: none !important;
+    }
+}

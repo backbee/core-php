@@ -6,8 +6,8 @@ use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Event\Event;
+use BackBee\FileSystem\ImageHandlerInterface;
 use BackBee\Renderer\Event\RendererEvent;
-use BackBeeCloud\ImageHandlerInterface;
 use Cocur\Slugify\Slugify;
 
 /**

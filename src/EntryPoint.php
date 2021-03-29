@@ -1,8 +1,7 @@
 <?php
 
-namespace BackBeeCloud;
+namespace BackBee;
 
-use BackBee\BBApplication;
 use BackBee\Bundle\AbstractBundle;
 use BackBee\Config\Config;
 use BackBeeCloud\Translation\HasTranslatableResourceInterface;
@@ -84,9 +83,11 @@ class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterf
     }
 
     /**
-     * {@inheritdoc}
+     * Get translation directory.
+     *
+     * @return string
      */
-    public function getTranslationDirectory()
+    public function getTranslationDirectory(): string
     {
         return dirname($this->getBaseDirectory()) . '/res/translations';
     }

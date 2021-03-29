@@ -26,6 +26,7 @@ services:
         arguments:
             - "@bbapp"
             - "@core.knowledge_graph.seo_metadata.manager"
+            - "@backbee.logger"
 
     core.page.page_from_raw_data:
         class: BackBeeCloud\Page\PageFromRawData
@@ -37,15 +38,15 @@ services:
         arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp' ]
 
     cloud.tag_manager:
-        class: BackBeeCloud\Entity\TagManager
-        arguments: [ "@em", "@elasticsearch.manager" ]
+        class: BackBeeCloud\Tag\TagManager
+        arguments: [ "@em", "@elasticsearch.manager", "@backbee.logger" ]
 
     cloud.image_listener:
         class: BackBeeCloud\Listener\ImageListener
         arguments: [ "@cloud.file_handler" ]
 
     cloud.file_handler:
-        class: BackBeeCloud\ImageFilesystemHandler
+        class: BackBee\FileSystem\ImageFilesystemHandler
         arguments: [ "@bbapp" ]
 
     user_preference.manager:
@@ -202,6 +203,11 @@ services:
         arguments:
             - "@em"
 
+    core.user_right.installer:
+        class: BackBeeCloud\Security\UserRightInstaller
+        arguments:
+            [ '@em', '@cloud.group_type.manager', '@cloud.user_manager', '@backbee.logger' ]
+
     # Page type services
     cloud.page_type.manager:
         class: BackBeeCloud\PageType\TypeManager
@@ -230,12 +236,6 @@ services:
     cloud.disqus_listener:
         class: BackBeeCloud\Listener\ClassContent\DisqusListener
         arguments: [ '@bbapp', '@em' ]
-
-    elasticsearch.manager:
-        class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp" ]
-        tags:
-            - { name: worker.job_handler, dispatch_event: false }
 
     cloud.auto_height_content.listener:
         class: BackBeeCloud\Listener\ClassContent\AutoHeightContentListener
@@ -591,3 +591,19 @@ services:
         class: BackBeeCloud\Listener\MenuListener
         arguments:
             [ '@bbapp' ]
+
+    # Elasticsearch
+    elasticsearch.manager:
+        class: BackBeeCloud\Elasticsearch\ElasticsearchManager
+        arguments: [ "@bbapp" ]
+        tags:
+            - { name: worker.job_handler, dispatch_event: false }
+
+    elasticsearch.query:
+        class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
+        arguments:
+            [ '@bbapp' ]
+
+    # Template
+    core.template.manager:
+        class: BackBee\Template\TemplateManager

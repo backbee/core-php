@@ -1,0 +1,118 @@
+// ©BackBee - v1.0.0 FEBRUARY 2018 - LP Digital*/
+//
+// SASS variables
+
+/* Font */
+$font-sans:                     $font-family-sans-serif;
+
+$font-title:                    $font-sans;
+
+$metadata-font-size:            $font-size-sm; // $font-size-base * .875
+$autoblock-title-font:          22px;
+
+/* General */
+
+/* Colors */
+$theme-color1:                  $primary-color;
+$theme-color2:                  $secondary-color;
+$theme-color3:                  $text-color;
+$theme-color4:                  $background-color;
+
+$bg-color1:                     $theme-color1;
+$bg-color2:                     $theme-color2;
+$bg-color3:                     $theme-color3;
+$bg-color4:                     $theme-color4;
+$bg-color5:                     transparent;
+
+$border-color:                  $secondary-color;
+
+$hn-color:                      $text-color;
+
+/* Button */
+$btn-color1:                    $theme-color1;
+$btn-color2:                    $theme-color2;
+$btn-color3:                    $theme-color3;
+$btn-color4:                    $theme-color4;
+
+$btn-rounded-radius:            ceil( $btn-line-height * $font-size-base / 2 + $btn-padding-y );
+$btn-rounded-radius-sm:         ceil( $btn-line-height-sm * $font-size-sm / 2 + $btn-padding-y-sm );
+$btn-rounded-radius-lg:         ceil( $btn-line-height-lg * $font-size-lg / 2 + $btn-padding-y-lg );
+
+$btn-border-width:              1px;
+$liner-width:                   1px;
+
+$btn-padding-x:                 $input-btn-padding-x * 3;
+$btn-padding-x-mobile:          $input-btn-padding-x * 2;
+
+$btn-padding-x-sm:              $input-btn-padding-x-sm * 3;
+$btn-padding-x-sm-mobile:       $input-btn-padding-x-sm * 2;
+
+$btn-padding-x-lg:              $input-btn-padding-x-lg * 3;
+$btn-padding-x-lg-mobile:       $input-btn-padding-x-lg * 2;
+$btn-padding-y-lg:              .8rem;
+
+$color-transition:              $btn-transition;
+
+$btn-label-color-dark:          $text-color;
+$btn-label-color-light:         $background-color;
+
+/* Navigation */
+$nav-brand-height:              80px;
+
+$navbar-header-height:          100px;
+$navbar-header-height-md:       60px;
+
+$offset-main:                   $navbar-header-height + 32px;
+$offset-main-md:                $navbar-header-height-md + 16px;
+
+$submenu-box-shadow:            0 0 4px 1px rgba(160,160,160,0.3);
+
+$nav-link-color:                $text-color;
+$nav-link-hover-color:          $primary-color;
+
+$transition-navbar:             all 250ms ease-in-out;
+
+$navbar-toggler-color:          $nav-link-color;
+
+$navbar-box-shadow:             0 1px 2px 0px hsla(0,0%,63%,.3);
+
+/* Social network */
+$social-btn-size:               3rem;
+$social-icon-size:              1.125rem;
+$social-border-width:           1px;
+
+/* Strate */
+$bg-padding:                    $spacer;
+$container-small-mw:            800px;
+
+$cloudcontentset-py:            $spacer / 2;
+
+/* Pager */
+$pager-w:                       4rem;
+$pager-h:                       6rem;
+
+$pager-w-md:                    2rem;
+$pager-h-md:                    4rem;
+
+$pagination-size:               3rem;
+$paginatoin-margin-x:           $spacer / 2;
+
+/* Spacer & Liner */
+$spacer-min-h:                  40px;
+$liner-min-h:                   $spacer-min-h;
+
+/* Metadata dot */
+$dot-size:                      5px;
+$dot-margin-x:                  .5em;
+$dot-color:                     $secondary-color;
+
+/* Google Map */
+$map-h-md:                      420px;
+$map-h-sm:                      $map-h-md * .75;
+$map-h-lg:                      $map-h-md * 1.25;
+$map-set-autoheight-min-h:      $spacer-min-h;
+
+/* Image */
+$image-text-padding:            $spacer $spacer * 2;
+$image-text-margin:             $spacer / 2;
+$image-set-autoheight-min-h:    $spacer-min-h;

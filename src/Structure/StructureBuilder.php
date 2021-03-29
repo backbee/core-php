@@ -21,7 +21,6 @@ class StructureBuilder
 
     protected $entyMgr;
     protected $pageMgr;
-    protected $themeCore;
     protected $schemaParser;
     protected $contentBuilder;
     protected $elasticsearchMgr;
@@ -35,7 +34,6 @@ class StructureBuilder
     {
         $this->schemaParser = $schemaParser;
         $this->entyMgr = $app->getEntityManager();
-        $this->themeCore = $app->getBundle('theme');
         $this->pageMgr = $app->getContainer()->get('cloud.page_manager');
         $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->contentBuilder = $app->getContainer()->get('cloud.structure.content_builder');

@@ -3,9 +3,8 @@
 namespace BackBeeCloud;
 
 use BackBeeCloud\Listener\CacheListener;
-use BackBeeCloud\UserAgentHelper;
 use BackBeePlanet\GlobalSettings;
-use BackBeePlanet\RedisManager;
+use BackBeePlanet\Redis\RedisManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 

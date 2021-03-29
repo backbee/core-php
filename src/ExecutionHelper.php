@@ -13,7 +13,7 @@ class ExecutionHelper
      * @param  int $size
      * @return string
      */
-    public function formatByte($size)
+    public function formatByte($size): string
     {
         $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
 

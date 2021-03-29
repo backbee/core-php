@@ -40,6 +40,6 @@ class MediaImageMigrationJob implements JobInterface
      */
     public function unserialize($serialized)
     {
-        list($this->siteId) = unserialize($serialized);
+        [$this->siteId] = unserialize($serialized);
     }
 }

@@ -1,0 +1,27 @@
+// Align card
+@include media-breakpoint-up(sm) {
+    .stretch-card {
+        &.row {
+            align-items: stretch !important;
+
+            .colcontentset {
+                &, & .card-block, & .card {
+                    height: 100%;
+                }
+
+                .card-body {
+                    &.has-btn .card-text {
+                        margin-bottom: 60px;
+                    }
+
+                    .btn {
+                        bottom: 20px;
+                        left: 50%;
+                        position: absolute;
+                        @include transform(translateX(-50%));
+                    }
+                }
+            }
+        }
+    }
+}

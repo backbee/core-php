@@ -2,7 +2,6 @@
 
 namespace BackBeeCloud\Listener;
 
-use ArrayObject;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Event\Event;
@@ -14,6 +13,10 @@ use BackBeeCloud\Revision\RevisionManager;
 use Exception;
 
 /**
+ * Class ContentAutoblockListener
+ *
+ * @package BackBeeCloud\Listener
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentAutoblockListener
@@ -72,55 +75,13 @@ class ContentAutoblockListener
         $request = $app->getRequest();
         $block = $event->getTarget();
 
-        $esQuery = new ArrayObject(
-            [
-                'query' => [
-                    'bool' => [],
-                ],
-            ]
+        $elasticsearchQuery = $app->getContainer()->get('elasticsearch.query');
+        $esQuery = $elasticsearchQuery->getBaseQuery(null, true);
+        $esQuery = $app->getContainer()->get('elasticsearch.query')->getSearchQueryByTag(
+            $esQuery,
+            $block->getParamValue('tags'),
+            true
         );
-
-        // Building must clause
-        $mustClauses = [
-            ['match' => ['is_pullable' => true]],
-        ];
-        if (null === $app->getBBUserToken()) {
-            $mustClauses[] = ['match' => ['is_online' => true]];
-        }
-
-        $esQuery['query']['bool']['must'] = $mustClauses;
-
-        // Building should clause
-        $validTags = [];
-        $tagRepository = $app->getEntityManager()->getRepository(Tag::class);
-        foreach ($block->getParamValue('tags') as $data) {
-            if (is_array($data)) {
-                if (empty($tag = $tagRepository->find($data['uid']))) {
-                    ;
-                    continue;
-                }
-                $validTags[] = $tag->getKeyWord();
-                $validTags = array_merge($validTags, self::getTagAllChildren($tag));
-            } elseif (is_string($data) && $tagRepository->exists($data)) {
-                $validTags[] = $data;
-            }
-        }
-
-        if (false !== $validTags) {
-            $criteria['tags'] = implode(',', $validTags);
-        }
-
-        $shouldClauses = [];
-        foreach ($validTags as $tag) {
-            $shouldClauses[] = [
-                'match' => ['tags.raw' => strtolower($tag)],
-            ];
-        }
-
-        if (false !== $shouldClauses) {
-            $esQuery['query']['bool']['should'] = $shouldClauses;
-            $esQuery['query']['bool']['minimum_should_match'] = 1;
-        }
 
         // Pagination data process
         $start = (int)$block->getParamValue('start');
@@ -132,12 +93,6 @@ class ContentAutoblockListener
 
         if ($block->getParamValue('pagination')) {
             $start = ($currentPaginationPage * $limit) - $limit;
-        }
-
-        if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
-            $esQuery['query']['bool']['must'][]['prefix'] = [
-                'url' => sprintf('/%s/', $currentLang),
-            ];
         }
 
         $sortCriteria = ['modified_at:desc'];
@@ -190,13 +145,8 @@ class ContentAutoblockListener
             $count = $pages->countMax();
             $nbPage = ceil(($count ?: 1) / $limit);
             $startPagination = 1;
-
-            $refNum = self::MAX_PAGE % 2 === 0
-                ? self::MAX_PAGE / 2
-                : (self::MAX_PAGE - 1) / 2;
-            $midNum = self::MAX_PAGE % 2 === 0
-                ? $refNum - 1
-                : $refNum;
+            $refNum = self::MAX_PAGE % 2 === 0 ? self::MAX_PAGE / 2 : (self::MAX_PAGE - 1) / 2;
+            $midNum = self::MAX_PAGE % 2 === 0 ? $refNum - 1 : $refNum;
 
             if ($nbPage > self::MAX_PAGE) {
                 if ($nbPage - $currentPaginationPage > $refNum) {
@@ -238,29 +188,5 @@ class ContentAutoblockListener
     public static function getAutoblockId(ContentAutoblock $autoblock)
     {
         return substr($autoblock->getUid(), 0, self::AUTOBLOCK_ID_LENGTH);
-    }
-
-    /**
-     * Get tag all children.
-     *
-     * @param Tag|null $tag
-     *
-     * @return array
-     */
-    protected static function getTagAllChildren(Tag $tag = null): array
-    {
-        if (!$tag) {
-            return [];
-        }
-        $children = [];
-        foreach ($tag->getChildren()->toArray() as $child) {
-            if ($child->getChildren()->toArray()) {
-                $children = array_merge($children, self::getTagAllChildren($child));
-            }
-
-            $children[] = $child->getKeyWord();
-        }
-
-        return array_unique($children);
     }
 }

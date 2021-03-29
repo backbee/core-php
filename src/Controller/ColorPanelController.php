@@ -4,7 +4,7 @@ namespace BackBeeCloud\Controller;
 
 use BackBeeCloud\ThemeColor\ColorPanelCssGenerator;
 use BackBeeCloud\UserAgentHelper;
-use BackBeePlanet\RedisManager;
+use BackBeePlanet\Redis\RedisManager;
 use BackBee\Site\Site;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;

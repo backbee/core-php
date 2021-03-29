@@ -1,0 +1,117 @@
+.owl-carousel {
+    .owl-nav {
+        @include media-breakpoint-down(xs) {
+            display: block;
+        }
+
+        button {
+            &.owl-next,
+            &.owl-prev {
+                &:hover,
+                &:focus {
+                    background-color: transparent;
+
+                    i {
+                        color: unset;
+                    }
+                }
+            }
+
+            i {
+                color: unset;
+            }
+        }
+    }
+
+    .owl-dots {
+        padding-top: .5rem;
+    }
+
+    .slider-item {
+        .slider-content {
+            padding: 0 .5rem;
+            background-color: rgba(0,0,0,.2);
+        }
+
+        .figure img {
+            transform: translate3d(-50%, -50%, 0) scale(1);
+        }
+    }
+
+    &.full-figure {
+        .slider-item .figure img {
+            height: 100%;
+            width: auto;
+            max-width: unset;
+        }
+    }
+
+    &.reponsive {
+        .owl-nav button {
+            i {
+                font-size: 2rem;
+            }
+        }
+
+        .owl-dots .owl-dot {
+            padding: 5px !important;
+
+            span {
+                width: 10px;
+                height: 10px;
+                background-color: darken($secondary-color, 20);
+            }
+        }
+
+        .owl-item {
+            a {
+                figure {
+                    &,
+                    & img {
+                        @include transition(all 150ms ease-in-out);
+                    }
+
+                    &:hover {
+                        transform: scale(1.01);
+
+                        img {
+                            box-shadow: 0 0 8px 1px rgba(black, 0.2);
+                        }
+                    }
+                }
+            }
+        }
+
+        .owl-stage-outer {
+            padding-bottom: 3rem;
+
+            figcaption {
+                font-size: 12px;
+                line-height: 1.2;
+                text-align: center;
+            }
+        }
+
+        .slider-item {
+            background-color: rgba(black, .1);
+        }
+
+        &.extra-text {
+            .owl-stage-outer {
+                padding-bottom: 6rem;
+            }
+        }
+    }
+
+    &.one-by-one {
+        .slider-item {
+            background-color: transparent;
+        }
+    }
+
+}
+
+.mx-slider {
+    margin-left: 20%;
+    margin-right: 20%;
+}

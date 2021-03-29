@@ -1,6 +1,6 @@
 bundle:
-    name: BackBee Cloud CorePHP
+    name: BackBee Core PHP
     enable: true
     bundle_loader_recipes:
-        event: [ BackBeeCloud\EntryPoint, onLoadEvents ]
-        custom: [ BackBeeCloud\EntryPoint, onLoadConfigurations ]
+        event: [ BackBee\EntryPoint, onLoadEvents ]
+        custom: [ BackBee\EntryPoint, onLoadConfigurations ]
