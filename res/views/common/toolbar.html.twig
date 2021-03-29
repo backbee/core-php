@@ -124,7 +124,7 @@
           i.setAttribute('id', 'cloud-starter-overlay'), j.setAttribute('class', 'loader-wrapper'), k.setAttribute('class', 'loader'), j.appendChild(k), i.appendChild(j), document.body.appendChild(i)
         }
         document.addEventListener('keydown', function f (i) {a || ('keyB' === i.code || 66 === i.which) && i.ctrlKey && i.altKey && (d(), c('css', '{{ appCssUrl }}', function () {c('js', '{{ appJsUrl }}')}), a = !0)})
-        var g = function (i) {a || (b.push(new Date().getTime()), 5 < b.length && b.shift(), 5 === b.length && 1 > (b[4] - b[0]) / 1e3 && (a = !0, d(), c('css', '{{ appCssUrl }}', function () {c('js', '{{ appJsUrl }}')}), i.preventDefault()))},
+        var g = function () {b = []},
           h = function () {b = []}
         window.navigator.msPointerEnabled ? (document.addEventListener('MSPointerDown', g), document.addEventListener('MSPointerMove', h)) : (document.addEventListener('touchstart', g), document.addEventListener('touchmove', h))
       })()
