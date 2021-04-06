@@ -5,6 +5,10 @@ namespace BackBeePlanet\Importer;
 use BackBeePlanet\Job\JobInterface;
 
 /**
+ * Class ImportJob
+ *
+ * @package BackBeePlanet\Importer
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ImportJob implements JobInterface
@@ -31,7 +35,7 @@ class ImportJob implements JobInterface
      * @param string                   $type
      * @param string|array<string>|int $source
      */
-    public function __construct($siteId, $type, $source)
+    public function __construct(string $siteId, string $type, $source)
     {
         $this->siteId = $siteId;
         $this->type = $type;
@@ -41,7 +45,7 @@ class ImportJob implements JobInterface
     /**
      * {@inehritdoc}
      */
-    public function siteId()
+    public function siteId(): string
     {
         return $this->siteId;
     }
@@ -51,7 +55,7 @@ class ImportJob implements JobInterface
      *
      * @return string
      */
-    public function type()
+    public function type(): string
     {
         return $this->type;
     }
@@ -69,7 +73,7 @@ class ImportJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function serialize(): ?string
     {
         return serialize(
             [
@@ -83,12 +87,8 @@ class ImportJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
-        [
-            $this->siteId,
-            $this->type,
-            $this->source
-        ] = unserialize($serialized);
+        [$this->siteId, $this->type, $this->source] = unserialize($serialized);
     }
 }

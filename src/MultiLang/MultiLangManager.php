@@ -17,7 +17,6 @@ use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
 use BackBeePlanet\Redis\RedisManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
@@ -514,9 +513,9 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * Get site.
      *
-     * @return EntityRepository|object|null
+     * @return Site|null
      */
-    private function getSite()
+    private function getSite(): ?Site
     {
         return $this->entityMgr->getRepository(Site::class)->findOneBy([]);
     }

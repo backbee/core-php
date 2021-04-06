@@ -5,25 +5,33 @@ namespace BackBeePlanet\Job;
 use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\Redis\RedisManager;
 use Predis\Client;
+use RuntimeException;
 
 /**
+ * Class JobManager
+ *
+ * @package BackBeePlanet\Job
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class JobManager
 {
-    const JOBS_REDIS_KEY = 'jobs';
-    const LOW_PRIORITY_JOBS_REDIS_KEY = 'low_priority_jobs';
+    public const JOBS_REDIS_KEY = 'jobs';
+    public const LOW_PRIORITY_JOBS_REDIS_KEY = 'low_priority_jobs';
 
     /**
      * @var Client
      */
     protected $redisClient;
 
+    /**
+     * JobManager constructor.
+     */
     public function __construct()
     {
         $settings = (new GlobalSettings())->redis();
         if (!isset($settings['jobs_db'])) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf(
                     '[%s] failed to build Redis Client because parameter "jobs_db" is missing from redis settings.',
                     __METHOD__
@@ -41,7 +49,7 @@ class JobManager
      * @param JobInterface $job
      * @param bool         $lowPriorityFlag
      */
-    public function pushJob(JobInterface $job, $lowPriorityFlag = false)
+    public function pushJob(JobInterface $job, bool $lowPriorityFlag = false): void
     {
         $this->redisClient->lpush(
             false === $lowPriorityFlag ? self::JOBS_REDIS_KEY : self::LOW_PRIORITY_JOBS_REDIS_KEY,
@@ -56,7 +64,7 @@ class JobManager
      *
      * @return JobInterface|null
      */
-    public function pullJob($lowPriorityFlag = false)
+    public function pullJob(bool $lowPriorityFlag = false): ?JobInterface
     {
         $queue = false === $lowPriorityFlag
             ? self::JOBS_REDIS_KEY
