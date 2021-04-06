@@ -40,6 +40,7 @@ class RunJobCommand extends AbstractCommand implements SimpleWriterInterface
     protected function execute(InputInterface $input, OutputInterface $output): ?int
     {
         $this->io = new SymfonyStyle($input, $output);
+        $job = $this->getJob();
 
         if (null === $this->getJob()) {
             $this->io->section('Start of "worker run-jobs" command');
@@ -62,12 +63,12 @@ class RunJobCommand extends AbstractCommand implements SimpleWriterInterface
         }
 
         foreach ($handlers as $handler) {
-            if ($handler->supports($this->getJob())) {
-                $handler->handle($this->getJob(), $this);
+            if ($handler->supports($job)) {
+                $handler->handle($job, $this);
             }
         }
 
-        RedisManager::removePageCache($this->getJob()->siteId());
+        RedisManager::removePageCache($job->siteId());
 
         $this->io->success(
             sprintf(

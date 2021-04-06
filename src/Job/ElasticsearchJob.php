@@ -3,7 +3,11 @@
 namespace BackBeePlanet\Job;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * Class ElasticsearchJob
+ *
+ * @package BackBeePlanet\Job
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class ElasticsearchJob implements JobInterface
 {
@@ -17,15 +21,15 @@ class ElasticsearchJob implements JobInterface
      *
      * @param string $siteId
      */
-    public function __construct($siteId)
+    public function __construct(string $siteId)
     {
         $this->siteId = $siteId;
     }
 
     /**
-     * {@inehritdoc}
+     * {@inheritdoc}
      */
-    public function siteId()
+    public function siteId(): string
     {
         return $this->siteId;
     }
@@ -33,7 +37,7 @@ class ElasticsearchJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function serialize(): ?string
     {
         return serialize([$this->siteId]);
     }
@@ -41,7 +45,7 @@ class ElasticsearchJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
         [$this->siteId] = unserialize($serialized);
     }

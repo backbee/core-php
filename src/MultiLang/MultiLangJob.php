@@ -5,6 +5,10 @@ namespace BackBeeCloud\MultiLang;
 use BackBeePlanet\Job\JobInterface;
 
 /**
+ * Class MultiLangJob
+ *
+ * @package BackBeeCloud\MultiLang
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class MultiLangJob implements JobInterface
@@ -25,16 +29,16 @@ class MultiLangJob implements JobInterface
      * @param string $siteId
      * @param string $lang
      */
-    public function __construct($siteId, $lang)
+    public function __construct(string $siteId, string $lang)
     {
         $this->siteId = $siteId;
         $this->lang = $lang;
     }
 
     /**
-     * {@inehritdoc}
+     * {@inheritdoc}
      */
-    public function siteId()
+    public function siteId(): string
     {
         return $this->siteId;
     }
@@ -44,7 +48,7 @@ class MultiLangJob implements JobInterface
      *
      * @return string
      */
-    public function lang()
+    public function lang(): string
     {
         return $this->lang;
     }
@@ -52,22 +56,21 @@ class MultiLangJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function serialize(): ?string
     {
-        return serialize([
-            $this->siteId,
-            $this->lang,
-        ]);
+        return serialize(
+            [
+                $this->siteId,
+                $this->lang,
+            ]
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
-        list(
-            $this->siteId,
-            $this->lang
-        ) = unserialize($serialized);
+        [$this->siteId, $this->lang] = unserialize($serialized);
     }
 }

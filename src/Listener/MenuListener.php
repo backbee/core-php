@@ -51,7 +51,7 @@ class MenuListener
         $menu = $event->getTarget();
         $param = $menu->getParam('items');
 
-        if (false === $param['value']) {
+        if (empty($param['value'])) {
             $homepage = self::$entityManager->getRepository(Page::class)->getRoot(
                 self::$entityManager->getRepository(Site::class)->findOneBy([])
             );

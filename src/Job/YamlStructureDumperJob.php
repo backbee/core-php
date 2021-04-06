@@ -5,6 +5,10 @@ namespace BackBeeCloud\Job;
 use BackBeePlanet\Job\JobInterface;
 
 /**
+ * Class YamlStructureDumperJob
+ *
+ * @package BackBeeCloud\Job
+ *
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  */
 class YamlStructureDumperJob implements JobInterface
@@ -34,9 +38,10 @@ class YamlStructureDumperJob implements JobInterface
      *
      * @param string $siteId
      * @param string $themeName
-     * $param string $mail
+     * @param string $mail
+     * @param string $domain
      */
-    public function __construct($siteId, $themeName, $mail, $domain)
+    public function __construct(string $siteId, string $themeName, string $mail, string $domain)
     {
         $this->siteId = $siteId;
         $this->themeName = $themeName;
@@ -45,9 +50,9 @@ class YamlStructureDumperJob implements JobInterface
     }
 
     /**
-     * {@inehritdoc}
+     * {@inheritDoc}
      */
-    public function siteId()
+    public function siteId(): string
     {
         return $this->siteId;
     }
@@ -57,7 +62,7 @@ class YamlStructureDumperJob implements JobInterface
      *
      * @return string
      */
-    public function themeName()
+    public function themeName(): string
     {
         return $this->themeName;
     }
@@ -67,7 +72,7 @@ class YamlStructureDumperJob implements JobInterface
      *
      * @return string
      */
-    public function mail()
+    public function mail(): string
     {
         return $this->mail;
     }
@@ -77,7 +82,7 @@ class YamlStructureDumperJob implements JobInterface
      *
      * @return string
      */
-    public function domain()
+    public function domain(): string
     {
         return $this->domain;
     }
@@ -85,7 +90,7 @@ class YamlStructureDumperJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function serialize(): ?string
     {
         return serialize([$this->siteId, $this->themeName, $this->mail, $this->domain]);
     }
@@ -93,7 +98,7 @@ class YamlStructureDumperJob implements JobInterface
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
         [$this->siteId, $this->themeName, $this->mail, $this->domain] = unserialize($serialized);
     }
