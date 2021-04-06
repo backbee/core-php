@@ -7,7 +7,7 @@ use BackBee\NestedNode\Page;
 use BackBee\NestedNode\Repository\PageQueryBuilder;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
-use BackBee\Utils\Numeric;
+use BackBee\Util\Numeric;
 use DateInterval;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;

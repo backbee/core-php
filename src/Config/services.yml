@@ -35,7 +35,7 @@ services:
 
     cloud.content_manager:
         class: BackBeeCloud\Entity\ContentManager
-        arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp' ]
+        arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp', '@backbee.logger' ]
 
     cloud.tag_manager:
         class: BackBeeCloud\Tag\TagManager
@@ -164,6 +164,7 @@ services:
             - "@security.context"
             - "@em"
             - "@cloud.page_category.manager"
+            - "@backbee.logger"
             - "%user_right.super_admin_bundles_rights%"
 
     cloud.api.user_right.listener:

@@ -3,10 +3,8 @@
 namespace BackBeePlanet\Sitemap\Query;
 
 use BackBee\Exception\BBException;
-use BackBee\NestedNode\Page;
-use BackBee\Utils\StringUtils;
+use BackBee\Util\StringUtils;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Exception;
 use RuntimeException;
 
 /**

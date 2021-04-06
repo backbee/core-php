@@ -198,10 +198,7 @@ class PageManager
      * @param Page $page            The page to format
      * @param bool $strictDraftMode If false, it will perform additional check
      *                              on global contents to determine if page is drafted
-     *
      * @return array
-     * @throws ClassNotFoundException
-     * @throws UnknownPropertyException
      */
     public function format(Page $page, bool $strictDraftMode = false): array
     {

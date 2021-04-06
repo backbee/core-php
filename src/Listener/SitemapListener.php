@@ -5,7 +5,7 @@ namespace BackBeePlanet\Listener;
 use BackBee\BBApplication;
 use BackBee\Config\Config;
 use BackBee\Routing\RouteCollection;
-use BackBee\Utils\Collection\Collection;
+use BackBee\Util\Collection\Collection;
 use BackBeePlanet\Sitemap\Decorator\DecoratorInterface;
 use BackBeePlanet\Sitemap\Query\BaseCollector;
 use BackBeePlanet\Sitemap\SitemapManager;

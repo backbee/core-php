@@ -2,8 +2,6 @@
 
 namespace BackBeeCloud\ThemeColor;
 
-use BackBeeCloud\ThemeColor\ThemeColorInterface;
-
 /**
  * @author Sachan Nilleti <sachan.nilleti@lp-digital.fr>
  */

@@ -2,15 +2,24 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBeeCloud\Security\UserRightConstants;
-use BackBeeCloud\ThemeColor\ColorPanelManager;
 use BackBee\BBApplication;
+use BackBeeCloud\Security\UserRightConstants;
+use BackBeeCloud\ThemeColor\ColorPanel;
+use BackBeeCloud\ThemeColor\ColorPanelManager;
+use Exception;
+use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @author Sachan Nilleti <sachan.nilleti@lp-digital.fr>
+ * Class ColorPanelController
+ *
+ * @package BackBeeCloud\Api\Controller
+ *
+ * @author  Sachan Nilleti <sachan.nilleti@lp-digital.fr>
+ *
+ * @SWG\Tag(name="Color panel")
  */
 class ColorPanelController extends AbstractController
 {
@@ -19,6 +28,12 @@ class ColorPanelController extends AbstractController
      */
     protected $colorPanelManager;
 
+    /**
+     * ColorPanelController constructor.
+     *
+     * @param ColorPanelManager $colorPanelManager
+     * @param BBApplication     $app
+     */
     public function __construct(ColorPanelManager $colorPanelManager, BBApplication $app)
     {
         parent::__construct($app);
@@ -26,20 +41,80 @@ class ColorPanelController extends AbstractController
         $this->colorPanelManager = $colorPanelManager;
     }
 
-    public function getAction()
+    /**
+     * @SWG\Get (
+     *     path="/api/color-panel",
+     *     tags={"Color panel"},
+     *     description="Get color panel.",
+     *     @SWG\Response(
+     *         response="200",
+     *         description="OK",
+     *         examples={"application/json": {{"primary":{"id":"color-primary","color":"#39829d"},"secondary":{"id":"color-secondary","color":"#e0e1e6"},"textColor":{"id":"color-text","color":"#515256"},"backgroundColor":{"id":"color-background","color":"#ffffff"},"customColors":{}}}}
+     *     )
+     * )
+     *
+     * @return JsonResponse
+     */
+    public function getAction(): JsonResponse
     {
         $this->assertIsAuthenticated();
 
-        return new JsonResponse($this->colorPanelManager->getColorPanel());
+        return new JsonResponse(
+            $this->colorPanelManager->getColorPanel()
+        );
     }
 
-    public function getAllColorsAction()
+    /**
+     * @SWG\Get (
+     *     path="/api/color-panel/colors",
+     *     tags={"Color panel"},
+     *     description="Get all colors.",
+     *     @SWG\Response(
+     *         response="200",
+     *         description="OK",
+     *         examples={"application/json": {{"id":"color-primary","color":"#39829d"},{"id":"color-secondary","color":"#e0e1e6"},{"id":"color-text","color":"#515256"},{"id":"color-background","color":"#ffffff"}}}
+     *     )
+     * )
+     *
+     * @return JsonResponse
+     */
+    public function getAllColorsAction(): JsonResponse
     {
         $this->assertIsAuthenticated();
 
-        return new JsonResponse($this->colorPanelManager->getColorPanel()->getAllColors());
+        return new JsonResponse(
+            $this->colorPanelManager->getColorPanel()->getAllColors()
+        );
     }
 
+    /**
+     * @SWG\Put (
+     *     path="/api/color-panel",
+     *     tags={"Color panel"},
+     *     description="Update color panel.",
+     *     consumes={"application/x-www-form-urlencoded"},
+     *     @SWG\Parameter (in="formData", name="primary", type="string", required=true),
+     *     @SWG\Parameter (
+     *         in="formData",
+     *         name="custom_colors",
+     *         type="array",
+     *         @SWG\Items(type="string"),
+     *         required=false
+     *     ),
+     *     @SWG\Response (
+     *         response="204",
+     *         description="No Content",
+     *     ),
+     *     @SWG\Response (
+     *         response="400",
+     *         description="Bad Request",
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse|Response
+     */
     public function putAction(Request $request)
     {
         $this->denyAccessUnlessGranted(
@@ -51,17 +126,51 @@ class ColorPanelController extends AbstractController
 
         try {
             $this->colorPanelManager->updateColorPanel($data);
-        } catch (\Exception $exception) {
-            return new JsonResponse([
-                'error'  => 'bad_request',
-                'reason' => $exception->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+        } catch (Exception $exception) {
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => $exception->getMessage(),
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
-        return new Response(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(
+            null,
+            Response::HTTP_NO_CONTENT
+        );
     }
 
-    public function changeThemeColorAction(Request $request)
+    /**
+     * @SWG\Put (
+     *     path="/api/color-panel/change-theme",
+     *     tags={"Color panel"},
+     *     description="Change theme color.",
+     *     consumes={"application/x-www-form-urlencoded"},
+     *     @SWG\Parameter (in="formData", name="primary", type="string", required=true),
+     *     @SWG\Parameter (
+     *         in="formData",
+     *         name="custom_colors",
+     *         type="array",
+     *         @SWG\Items(type="string"),
+     *         required=false
+     *     ),
+     *     @SWG\Response (
+     *         response="204",
+     *         description="No Content",
+     *     ),
+     *     @SWG\Response (
+     *         response="400",
+     *         description="Bad Request",
+     *     )
+     * )
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function changeThemeColorAction(Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
@@ -72,14 +181,23 @@ class ColorPanelController extends AbstractController
         $conservePrimaryColor = $request->request->get('conserve_primary_color');
 
         try {
-            $this->colorPanelManager->changeThemeColor($uniqueName, $conservePrimaryColor);
-        } catch (\Exception $exception) {
-            return new JsonResponse([
-                'error'  => 'bad_request',
-                'reason' => $exception->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+            $this->colorPanelManager->changeThemeColor(
+                $uniqueName,
+                $conservePrimaryColor
+            );
+        } catch (Exception $exception) {
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => $exception->getMessage(),
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
-        return new Response(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(
+            null,
+            Response::HTTP_NO_CONTENT
+        );
     }
 }

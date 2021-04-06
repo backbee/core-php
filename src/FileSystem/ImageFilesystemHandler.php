@@ -39,7 +39,7 @@ class ImageFilesystemHandler implements ImageHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function upload($filename, $filepath, bool $removeFile = true): ?string
+    public function upload(string $filename, string $filepath, bool $removeFile = true): ?string
     {
         if (!is_file($filepath) || !is_readable($filepath)) {
             return null;
@@ -51,7 +51,7 @@ class ImageFilesystemHandler implements ImageHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function uploadFromUrl($url, $filename = null): ?string
+    public function uploadFromUrl(string $url, ?string $filename = null): ?string
     {
         $newPath = null;
         if (false !== $rawContent = file_get_contents($url)) {
@@ -72,7 +72,7 @@ class ImageFilesystemHandler implements ImageHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function delete($path, bool $throwException = false): void
+    public function delete(string $path, bool $throwException = false): void
     {
         $filepath = str_replace(
             ['\\/', '"', static::MEDIA_BASE_URI],
@@ -87,7 +87,7 @@ class ImageFilesystemHandler implements ImageHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function duplicate($path, $newName): ?string
+    public function duplicate(string $path, string $newName): ?string
     {
         $filepath = str_replace(
             ['\\/', '"', static::MEDIA_BASE_URI],

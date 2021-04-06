@@ -2,13 +2,10 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBeeCloud\Security\UserRightConstants;
+use BackBee\BBApplication;
 use BackBeeCloud\ThemeColor\ColorPanelManager;
 use BackBeeCloud\ThemeColor\ThemeColorManager;
-use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @author Sachan Nilleti <sachan.nilleti@lp-digital.fr>
@@ -25,8 +22,11 @@ class ThemeColorController extends AbstractController
      */
     protected $colorPanelManager;
 
-    public function __construct(ThemeColorManager $themeColorManager, ColorPanelManager $colorPanelManager, BBApplication $app)
-    {
+    public function __construct(
+        ThemeColorManager $themeColorManager,
+        ColorPanelManager $colorPanelManager,
+        BBApplication $app
+    ) {
         parent::__construct($app);
 
         $this->themeColorManager = $themeColorManager;

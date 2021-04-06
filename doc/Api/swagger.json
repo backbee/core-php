@@ -1,0 +1,119 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "BackBee API",
+        "description": "This documentation lists all the routes used by the BackBee Toolbar.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/color-panel": {
+            "get": {
+                "tags": [
+                    "Color panel"
+                ],
+                "description": "Get color panel.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "examples": {
+                            "application/json": [
+                                {
+                                    "primary": {
+                                        "id": "color-primary",
+                                        "color": "#39829d"
+                                    },
+                                    "secondary": {
+                                        "id": "color-secondary",
+                                        "color": "#e0e1e6"
+                                    },
+                                    "textColor": {
+                                        "id": "color-text",
+                                        "color": "#515256"
+                                    },
+                                    "backgroundColor": {
+                                        "id": "color-background",
+                                        "color": "#ffffff"
+                                    },
+                                    "customColors": []
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Color panel"
+                ],
+                "description": "Update color panel.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "parameters": [
+                    {
+                        "name": "primary",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "custom_colors",
+                        "in": "formData",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
+        "/api/color-panel/colors": {
+            "get": {
+                "tags": [
+                    "Color panel"
+                ],
+                "description": "Get all colors.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "examples": {
+                            "application/json": [
+                                {
+                                    "id": "color-primary",
+                                    "color": "#39829d"
+                                },
+                                {
+                                    "id": "color-secondary",
+                                    "color": "#e0e1e6"
+                                },
+                                {
+                                    "id": "color-text",
+                                    "color": "#515256"
+                                },
+                                {
+                                    "id": "color-background",
+                                    "color": "#ffffff"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {},
+    "tags": [
+        {
+            "name": "Color panel"
+        }
+    ]
+}

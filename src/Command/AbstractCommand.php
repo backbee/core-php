@@ -84,7 +84,7 @@ class AbstractCommand extends Command
      */
     protected function getEntityManager(): EntityManagerInterface
     {
-        return $this->getBBApp()->getEntityManager();
+        return $this->bbApp->getEntityManager();
     }
 
     /**
