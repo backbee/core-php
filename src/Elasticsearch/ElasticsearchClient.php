@@ -4,11 +4,11 @@ namespace BackBeeCloud\Elasticsearch;
 
 use BackBee\BBApplication;
 use BackBee\Bundle\Registry;
+use BackBee\Config\Config;
 use BackBee\Logging\Logger;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
-use BackBeePlanet\GlobalSettings;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Elasticsearch\Client;
@@ -30,7 +30,7 @@ use function in_array;
 class ElasticsearchClient
 {
     public const DEFAULT_ANALYZER = 'standard';
-    public const ELASTICSEARCH_INDEX_NAME = 'backbee_planet';
+    public const ELASTICSEARCH_INDEX_NAME = 'backbee';
 
     /**
      * @var BBApplication
@@ -61,12 +61,13 @@ class ElasticsearchClient
      * ElasticsearchManager constructor.
      *
      * @param BBApplication $bbApp
+     * @param Config        $config
      */
-    public function __construct(BBApplication $bbApp)
+    public function __construct(BBApplication $bbApp, Config $config)
     {
         $this->bbApp = $bbApp;
         $this->entityMgr = $bbApp->getEntityManager();
-        $this->settings = (new GlobalSettings())->elasticsearch();
+        $this->settings = $config->getSection('elasticsearch');
         $this->logger = $bbApp->getLogging();
     }
 

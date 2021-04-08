@@ -5,7 +5,6 @@ namespace BackBee\Command;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeePlanet\Job\JobManager;
-use BackBeePlanet\Redis\RedisManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -44,7 +43,7 @@ class RunJobCommand extends AbstractCommand implements SimpleWriterInterface
 
         if (null === $this->getJob()) {
             $this->io->section('Start of "worker run-jobs" command');
-            $jobMgr = new JobManager();
+            $jobMgr = new JobManager($this->getContainer()->get('core.redis.manager'));
             $job = $jobMgr->pullJob();
             if (null === $job) {
                 $this->io->success('No jobs in queue found.');
@@ -68,7 +67,7 @@ class RunJobCommand extends AbstractCommand implements SimpleWriterInterface
             }
         }
 
-        RedisManager::removePageCache($job->siteId());
+        $this->getContainer()->get('core.redis.manager')->removePageCache($job->siteId());
 
         $this->io->success(
             sprintf(

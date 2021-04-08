@@ -6,24 +6,22 @@ use BackBee\ClassContent\Basic\Title;
 use BackBee\ClassContent\Content\HighlightContent;
 use BackBee\ClassContent\Element\File;
 use BackBee\Event\Event;
+use BackBee\HttpClient\UserAgent;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
-use BackBeeCloud\UserAgentHelper;
-use BackBeePlanet\GlobalSettings;
 
 /**
+ * Class ContentListener
+ *
+ * @package BackBeeCloud\Listener\ClassContent
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentListener
 {
     public const YOUTUBE_URL_REGEX = '(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"\'>]+)(&start=([0-9]+))?(&end=([0-9]+))?';
     public const YOUTUBE_EMBED_BASE_URL = 'https://www.youtube.com/embed/';
-
-    /**
-     * @var string
-     */
-    private static $imgCdnHost;
 
     /**
      * Occurs on `basic.slider.prepersist` to ensure that slider newly created is empty.
@@ -152,28 +150,14 @@ class ContentListener
             )
         );
 
-        if (UserAgentHelper::isDesktop()) {
+        if (UserAgent::isDesktop()) {
             return;
         }
 
-        $param = $content->getParamValue('responsive_' . UserAgentHelper::getDeviceType());
+        $param = $content->getParamValue('responsive_' . UserAgent::getDeviceType());
         if (isset($param['nb_item_max']) && 0 === $param['nb_item_max']) {
             $event->getRenderer()->assign('hide_content', true);
             $event->stopPropagation();
         }
-    }
-
-    /**
-     * Get image CDN host.
-     *
-     * @return string
-     */
-    protected static function getImageCdnHost(): string
-    {
-        if (null === self::$imgCdnHost) {
-            self::$imgCdnHost = (new GlobalSettings())->cdn()['image_domain'];
-        }
-
-        return self::$imgCdnHost;
     }
 }

@@ -5,6 +5,7 @@ namespace BackBeeCloud\Structure;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractContent;
 use BackBee\ClassContent\CloudContentSet;
+use BackBee\Config\Config;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
 use BackBeeCloud\Design\ButtonManager;
@@ -17,7 +18,6 @@ use BackBeeCloud\Job\YamlStructureDumperJob;
 use BackBeeCloud\ThemeColor\Color;
 use BackBeeCloud\ThemeColor\ColorPanelManager;
 use BackBeeCloud\ThemeColor\ThemeColorManager;
-use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\Job\JobInterface;
 use Doctrine\ORM\EntityManager;
 use Swift_Mailer;
@@ -31,7 +31,7 @@ use ZipArchive;
  *
  * @package BackBeeCloud\Structure
  *
- * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
+ * @author  Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  */
 class YamlStructureDumperManager implements JobHandlerInterface
 {
@@ -90,7 +90,13 @@ class YamlStructureDumperManager implements JobHandlerInterface
 
     protected $cdnFilePath;
 
-    public function __construct(BBApplication $app)
+    /**
+     * YamlStructureDumperManager constructor.
+     *
+     * @param BBApplication $app
+     * @param Config        $config
+     */
+    public function __construct(BBApplication $app, Config $config)
     {
         $container = $app->getContainer();
 
@@ -105,7 +111,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
         $this->designColorPanelManager = $app->getContainer()->get('cloud.color_panel.manager');
         $this->designThemeColorManager = $app->getContainer()->get('cloud.theme_color.manager');
 
-        $cdnSettings = (new GlobalSettings())->cdn();
+        $cdnSettings = $config->getSection('cdn');
         $this->cdnFilePath = $cdnSettings['image_domain'];
     }
 
@@ -229,9 +235,9 @@ class YamlStructureDumperManager implements JobHandlerInterface
      * @param string $to
      * @param string $fileUrl
      */
-    protected function sendMail($to, $fileUrl)
+    protected function sendMail(string $to, string $fileUrl): void
     {
-        $mailerConfig = (new GlobalSettings())->mailer();
+        $mailerConfig = $this->app->getConfig()->getSection('mailer');
 
         $text = str_replace('http://', '', $fileUrl);
 
@@ -290,7 +296,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
     /**
      * Compute page for retrieve this data
      *
-     * @param Page $page
+     * @param Page     $page
      * @param PageType $pageType
      *
      * @return array

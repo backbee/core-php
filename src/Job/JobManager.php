@@ -2,8 +2,7 @@
 
 namespace BackBeePlanet\Job;
 
-use BackBeePlanet\GlobalSettings;
-use BackBeePlanet\Redis\RedisManager;
+use BackBee\Cache\RedisManager;
 use Predis\Client;
 use RuntimeException;
 
@@ -22,14 +21,16 @@ class JobManager
     /**
      * @var Client
      */
-    protected $redisClient;
+    private $redisClient;
 
     /**
      * JobManager constructor.
+     *
+     * @param RedisManager $redisClient
      */
-    public function __construct()
+    public function __construct(RedisManager $redisClient)
     {
-        $settings = (new GlobalSettings())->redis();
+        $settings = $redisClient->getConfig();
         if (!isset($settings['jobs_db'])) {
             throw new RuntimeException(
                 sprintf(
@@ -39,7 +40,7 @@ class JobManager
             );
         }
 
-        $this->redisClient = RedisManager::getClient();
+        $this->redisClient = $redisClient->getClient();
         $this->redisClient->select($settings['jobs_db']);
     }
 

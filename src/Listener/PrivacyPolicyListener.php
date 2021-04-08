@@ -2,10 +2,13 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeePlanet\GlobalSettings;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
+ * Class PrivacyPolicyListener
+ *
+ * @package BackBeeCloud\Listener
+ *
  * @author Eric Chau <eriic.chau@gmail.com>
  */
 class PrivacyPolicyListener
@@ -13,14 +16,14 @@ class PrivacyPolicyListener
     /**
      * Called on "kernel.response" event.
      *
-     * @param  FilterResponseEvent $event
+     * @param FilterResponseEvent $event
      */
-    public static function onKernelResponse(FilterResponseEvent $event)
+    public static function onKernelResponse(FilterResponseEvent $event): void
     {
         $app = $event->getKernel()->getApplication();
         if (
             null === $app->getBBUserToken()
-            || !(new GlobalSettings())->isPrivacyPolicyEnabled()
+            || !$app->getAppParameter('privacy_policy')
         ) {
             return;
         }

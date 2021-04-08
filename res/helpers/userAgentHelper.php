@@ -2,23 +2,38 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBeeCloud\UserAgentHelper as RealUserAgentHelper;
+use BackBee\HttpClient\UserAgent;
+use BackBee\Renderer\AbstractRenderer;
 
 /**
+ * Class userAgentHelper
+ *
+ * @package BackBee\Renderer\Helper
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class userAgentHelper extends AbstractHelper
 {
     /**
-     * @var userAgentHelper
+     * @var UserAgent
      */
     protected $userAgentHelper;
 
-    public function __construct()
+    /**
+     * userAgentHelper constructor.
+     *
+     * @param AbstractRenderer $renderer
+     */
+    public function __construct(AbstractRenderer $renderer)
     {
-        $this->userAgentHelper = new RealUserAgentHelper();
+        $this->userAgentHelper = new UserAgent();
+
+        parent::__construct($renderer);
     }
 
+    /**
+     * @return UserAgent
+     */
     public function __invoke()
     {
         return $this->userAgentHelper;

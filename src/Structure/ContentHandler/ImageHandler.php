@@ -2,13 +2,17 @@
 
 namespace BackBeeCloud\Structure\ContentHandler;
 
-use BackBee\FileSystem\ImageHandlerInterface;
-use BackBeeCloud\Structure\ContentHandlerInterface;
-use BackBeePlanet\GlobalSettings;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Image;
+use BackBee\Config\Config;
+use BackBee\FileSystem\ImageHandlerInterface;
+use BackBeeCloud\Structure\ContentHandlerInterface;
 
 /**
+ * Class ImageHandler
+ *
+ * @package BackBeeCloud\Structure\ContentHandler
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ImageHandler implements ContentHandlerInterface
@@ -23,10 +27,26 @@ class ImageHandler implements ContentHandlerInterface
      */
     protected $paramHandler;
 
-    public function __construct(ImageHandlerInterface $imgUploadHandler, ParameterHandler $paramHandler)
-    {
+    /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
+     * ImageHandler constructor.
+     *
+     * @param ImageHandlerInterface $imgUploadHandler
+     * @param ParameterHandler      $paramHandler
+     * @param Config                $config
+     */
+    public function __construct(
+        ImageHandlerInterface $imgUploadHandler,
+        ParameterHandler $paramHandler,
+        Config $config
+    ) {
         $this->imgUploadHandler = $imgUploadHandler;
         $this->paramHandler = $paramHandler;
+        $this->config = $config;
     }
 
     /**
@@ -38,9 +58,7 @@ class ImageHandler implements ContentHandlerInterface
             return;
         }
 
-        $settings = (new GlobalSettings())->cdn();
-
-        if (isset($data['path']) && false != $data['path']) {
+        if (isset($data['path']) && false !== $data['path']) {
             if (1 === preg_match('~^https?://~', $data['path'])) {
                 $content->image->path = $this->imgUploadHandler->uploadFromUrl($data['path']);
             } else {
@@ -60,16 +78,16 @@ class ImageHandler implements ContentHandlerInterface
      */
     public function handleReverse(AbstractClassContent $content, array $config = [], $handleParameters = false)
     {
-        $result = isset($config['current_data']) ? $config['current_data'] : [];
+        $result = $config['current_data'] ?? [];
 
-        $settings = (new GlobalSettings())->cdn();
+        $settings = $this->config->getSection('cdn');
 
         $filename = '';
         if ($path = ltrim($content->image->path, '/')) {
             $filename = $config['uploadCallback']($settings['image_domain'] . '/' . $path);
         }
 
-        $result['path'] = false == $filename ? '' : $config['themeName'] . '/' . $filename;
+        $result['path'] = false === $filename ? '' : $config['themeName'] . '/' . $filename;
 
         if ($handleParameters) {
             $result = array_merge($result, $this->paramHandler->handleReverse($content));

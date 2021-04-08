@@ -2,28 +2,52 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeePlanet\GlobalSettings;
+use BackBee\BBApplication;
 use BackBee\Bundle\Registry;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
 use BackBee\Routing\Route;
+use Exception;
+use LogicException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
+use function dirname;
 
 /**
+ * Class CoreListener
+ *
+ * @package BackBeeCloud\Listener
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class CoreListener
 {
     /**
+     * @var BBApplication
+     */
+    private static $bbApp;
+
+    /**
+     * CoreListener constructor.
+     *
+     * @param BBApplication $bbApp
+     */
+    public function __construct(BBApplication $bbApp)
+    {
+        self::$bbApp = $bbApp;
+    }
+
+    /**
      * Called on `bbapplication.init` event.
      *
-     * @param  Event  $event
+     * @param Event $event
      */
-    public static function onApplicationInit(Event $event)
+    public static function onApplicationInit(Event $event): void
     {
         $app = $event->getTarget();
         if ($app->isRestored()) {
@@ -31,7 +55,7 @@ class CoreListener
         }
 
         $baseDir = $app->getBundle('core')->getBaseDirectory();
-        $resDir = realpath($baseDir . '/../res');
+        $resDir = dirname($baseDir) . '/res';
         $app->getRenderer()->addLayoutDir($resDir . DIRECTORY_SEPARATOR . 'Layout');
         $app->getRenderer()->addScriptDir($resDir . DIRECTORY_SEPARATOR . 'views');
         $app->getRenderer()->addHelperDir($resDir . DIRECTORY_SEPARATOR . 'helpers');
@@ -44,9 +68,9 @@ class CoreListener
      *
      * It **MUST** occur before service container dump.
      *
-     * @param  Event  $event
+     * @param Event $event
      */
-    public static function forceClassContentLoadOnApplicationInit(Event $event)
+    public static function forceClassContentLoadOnApplicationInit(Event $event): void
     {
         $app = $event->getTarget();
         $container = $app->getContainer();
@@ -71,7 +95,7 @@ class CoreListener
                 $metadata[] = $entyMgr->getClassMetadata($classname);
                 $classnames[AbstractClassContent::getShortClassname($classname)] = $classname;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return;
         }
 
@@ -79,18 +103,23 @@ class CoreListener
         $container->setParameter('all_classcontents_classnames', $classnames);
     }
 
-    public static function onApplicationStart(Event $event)
+    /**
+     * On application start.
+     *
+     * @param Event $event
+     */
+    public static function onApplicationStart(Event $event): void
     {
         $app = $event->getApplication();
 
         // Checks that site is not suspended
-        $entyMgr = $app->getEntityManager();
-        $isSuspended = null !== $entyMgr->getRepository(Registry::class)->findOneBy([
+        $isSuspended = null !== $app->getEntityManager()->getRepository(Registry::class)->findOneBy([
             'scope' => 'GLOBAL',
-            'type'  => 'site',
-            'key'   => 'status',
+            'type' => 'site',
+            'key' => 'status',
             'value' => 'suspended',
         ]);
+
         if ($isSuspended) {
             throw new SiteSuspendedException();
         }
@@ -104,7 +133,7 @@ class CoreListener
 
         try {
             $app->getContainer()->get('site_status.manager')->getLockProgress();
-        } catch (\LogicException $e) {
+        } catch (LogicException $e) {
             return;
         }
 
@@ -114,37 +143,49 @@ class CoreListener
     /**
      * This listener listen to 'kernel.controller' event to prevent \BackBee\Controller\FrontController::defaultAction
      * sending response by itself.
+     *
+     * @param FilterControllerEvent $event
      */
-    public static function onKernelController(FilterControllerEvent $event)
+    public static function onKernelController(FilterControllerEvent $event): void
     {
         $event->getRequest()->attributes->set('sendResponse', false);
     }
 
-    public static function onAuthenticationException(GetResponseForExceptionEvent $event)
+    /**
+     * On authentication exception.
+     *
+     * @param GetResponseForExceptionEvent $event
+     */
+    public static function onAuthenticationException(GetResponseForExceptionEvent $event): void
     {
         if (!($event->getException() instanceof UsernameNotFoundException)) {
             return;
         }
 
         $response = new Response();
-        $response->setStatusCode(Response::HTTP_UNAUTHORIZED, 'Invalid authentication informations');
+        $response->setStatusCode(Response::HTTP_UNAUTHORIZED, 'Invalid authentication information');
         $event->setResponse($response);
     }
 
-    public static function onKernelException(GetResponseForExceptionEvent $event)
+    /**
+     * On kernel exception.
+     *
+     * @param GetResponseForExceptionEvent $event
+     *
+     * @throws Exception
+     */
+    public static function onKernelException(GetResponseForExceptionEvent $event): void
     {
         $exception = $event->getException();
 
         $request = Request::createFromGlobals();
-        $isDevMode = (new GlobalSettings())->isDevMode();
+        $isDevMode = self::$bbApp->getAppParameter('dev_mode');
         if ($isDevMode || $request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')) {
-            $whoops = new \Whoops\Run();
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
+            $whoops = new Run();
+            $whoops->pushHandler(new PrettyPageHandler());
             $whoops->register();
 
             throw $exception;
         }
-
-        error_log(sprintf('[%s] %s', get_class($exception), $exception->getMessage()));
     }
 }

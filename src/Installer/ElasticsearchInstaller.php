@@ -1,28 +1,28 @@
 <?php
 
-namespace BackBeeCloud\Elasticsearch;
+namespace BackBee\Installer;
 
-use BackBee\BBApplication;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Trait IndexElasticsearchTrait
+ * Class ElasticsearchInstaller
  *
- * @package BackBeeCloud\Elasticsearch
+ * @package BackBee\Installer
  *
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-trait IndexElasticsearchTrait
+class ElasticsearchInstaller extends AbstractInstaller
 {
     /**
      * Index elasticsearch.
      *
-     * @param BBApplication     $app
-     * @param SymfonyStyle|null $io
+     * @param SymfonyStyle $io
      */
-    protected function indexElasticsearch(BBApplication $app, SymfonyStyle $io): void
+    public function index(SymfonyStyle $io): void
     {
-        $elasticsearchManager = $app->getContainer()->get('elasticsearch.manager');
+        $io->section('Index elasticsearch');
+
+        $elasticsearchManager = $this->getApplication()->getContainer()->get('elasticsearch.manager');
 
         $io->text('Delete and create index');
         $elasticsearchManager->resetIndex();
@@ -39,5 +39,7 @@ trait IndexElasticsearchTrait
         $io->text('Reindexing all tags');
         $elasticsearchManager->indexAllTags();
         $io->newLine();
+
+        $io->success('Contents are now indexed into Elasticsearch.');
     }
 }

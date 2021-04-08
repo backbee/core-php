@@ -2,11 +2,10 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
-use BackBeePlanet\GlobalSettings;
 use BackBee\KnowledgeGraph\KnowledgeGraphManager;
 use BackBee\KnowledgeGraph\SeoMetadataManager;
+use BackBee\Renderer\Exception\RendererException;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -51,7 +50,7 @@ class knowledgeGraphHelper extends AbstractHelper
      */
     public function isKnowledgeGraphEnabled(): bool
     {
-        return (new GlobalSettings())->isKnowledgeGraphEnabled();
+        return $this->getRenderer()->getApplication()->getAppParameter('knowledge_graph');
     }
 
     /**
@@ -77,6 +76,7 @@ class knowledgeGraphHelper extends AbstractHelper
 
     /**
      * @return string|null
+     * @throws RendererException
      */
     public function getMetaGoogleSiteVerification(): ?string
     {
@@ -85,7 +85,6 @@ class knowledgeGraphHelper extends AbstractHelper
 
     /**
      * @return Request
-     * @throws BBException
      */
     protected function getRequest(): Request
     {

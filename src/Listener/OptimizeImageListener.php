@@ -4,11 +4,14 @@ namespace BackBeePlanet\Listener;
 
 use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
-use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\OptimizeImage\OptimizeImageManager;
 use BackBeePlanet\OptimizeImage\OptimizeImageUtils;
 
 /**
+ * Class OptimizeImageListener
+ *
+ * @package BackBeePlanet\Listener
+ *
  * @author Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class OptimizeImageListener
@@ -26,23 +29,6 @@ class OptimizeImageListener
     public function __construct(OptimizeImageManager $optimizeImageManager)
     {
         $this->optimizeImageManager = $optimizeImageManager;
-    }
-
-    /**
-     * On Application init.
-     */
-    public static function onApplicationInit(): void
-    {
-        $settings = (array)(new GlobalSettings())->optimizeimage();
-
-        if (false === $settings) {
-            throw new \RuntimeException(
-                sprintf(
-                    '[%s] Incomplete settings provided inside global_settings.',
-                    self::class
-                )
-            );
-        }
     }
 
     /**

@@ -57,7 +57,7 @@ services:
 
     site_option.manager:
         class: BackBeeCloud\SiteOption\OptionManager
-        arguments: [ "@em" ]
+        arguments: [ '@em', '@config' ]
 
     content.category_listener:
         class: BackBeeCloud\Listener\ContentCategoryListener
@@ -88,7 +88,7 @@ services:
     # Newsletter service
     newsletter_controller:
         class: BackBeeCloud\Controller\NewsletterController
-        arguments: [ "@em" ]
+        arguments: [ '@bbapp', '@em' ]
 
     # Search service
     cloud.search_manager:
@@ -161,6 +161,7 @@ services:
     cloud.api.user_right.manager:
         class: BackBeeCloud\Security\UserRightManager
         arguments:
+            - '@bbapp'
             - "@security.context"
             - "@em"
             - "@cloud.page_category.manager"
@@ -207,7 +208,11 @@ services:
     core.user_right.installer:
         class: BackBeeCloud\Security\UserRightInstaller
         arguments:
-            [ '@em', '@cloud.group_type.manager', '@cloud.user_manager', '@backbee.logger' ]
+            - '@em'
+            - '@cloud.group_type.manager'
+            - '@cloud.user_manager'
+            - '@backbee.logger'
+            - '@config'
 
     # Page type services
     cloud.page_type.manager:
@@ -260,7 +265,7 @@ services:
     # MultiLang service
     multilang_manager:
         class: BackBeeCloud\MultiLang\MultiLangManager
-        arguments: [ "@bbapp" ]
+        arguments: [ '@bbapp', '@config', '@core.redis.manager' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 
@@ -303,7 +308,7 @@ services:
 
     yaml_structure_dumper.manager:
         class: BackBeeCloud\Structure\YamlStructureDumperManager
-        arguments: [ "@bbapp" ]
+        arguments: [ '@bbapp', '@config' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 
@@ -322,6 +327,7 @@ services:
         arguments:
             - "@cloud.file_handler"
             - "@structure.parameter_handler"
+            - '@config'
         tags:
             - { name: structure.content_handler, dispatch_event: false }
 
@@ -362,10 +368,6 @@ services:
 
     cloud.global_content_factory:
         class: BackBeeCloud\Structure\GlobalContentFactory
-        arguments: [ "@bbapp" ]
-
-    cloud.hauth.controller:
-        class: BackBeeCloud\Controller\HAuthController
         arguments: [ "@bbapp" ]
 
     # Security services
@@ -471,7 +473,10 @@ services:
 
     cloud.color_panel_css_genrator.controller:
         class: BackBeeCloud\Controller\ColorPanelController
-        arguments: [ "@cloud.color_panel.css_generator", "@em" ]
+        arguments:
+            - '@cloud.color_panel.css_generator'
+            - '@em'
+            - '@core.redis.manager'
 
     cloud.theme_color.listener:
         class: BackBeeCloud\Listener\ThemeColorListener
@@ -534,7 +539,7 @@ services:
     # Optimize image
     app.optimize_image.manager:
         class: BackBeePlanet\OptimizeImage\OptimizeImageManager
-        arguments: [ '@bbapp' ]
+        arguments: [ '@bbapp', '@config' ]
 
     app.optimize_image.listener:
         class: BackBeePlanet\Listener\OptimizeImageListener
@@ -605,6 +610,66 @@ services:
         arguments:
             [ '@bbapp' ]
 
-    # Template
-    core.template.manager:
-        class: BackBee\Template\TemplateManager
+    # Installer
+    core.installer.page:
+        class: BackBee\Installer\PageInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.keyword:
+        class: BackBee\Installer\KeywordInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.site:
+        class: BackBee\Installer\SiteInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.layout:
+        class: BackBee\Installer\LayoutInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.sudoer:
+        class: BackBee\Installer\SudoerInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.database:
+        class: BackBee\Installer\DatabaseInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.repository:
+        class: BackBee\Installer\RepositoryInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.assets:
+        class: BackBee\Installer\AssetsInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.user_rights:
+        class: BackBee\Installer\UserRightsInstaller
+        arguments: [ '@bbapp' ]
+
+    core.installer.elasticsearch:
+        class: BackBee\Installer\ElasticsearchInstaller
+        arguments: [ '@bbapp' ]
+
+    # Standalone
+    core.standalone.abstract_standalone.helper:
+        class: BackBeePlanet\Standalone\AbstractStandaloneHelper
+        arguments:
+            [ '@config', '@backbee.logger' ]
+
+    # Redis
+    core.redis.manager:
+        class: BackBee\Cache\RedisManager
+        arguments:
+            [ '@config', '@backbee.logger' ]
+
+    # Listener
+    core.cache.listener:
+        class: BackBeeCloud\Listener\CacheListener
+        arguments:
+            [ '@core.redis.manager' ]
+
+    core.listener:
+        class: BackBeeCloud\Listener\CoreListener
+        arguments:
+            [ '@bbapp' ]

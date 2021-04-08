@@ -2,7 +2,6 @@
 
 namespace BackBeeCloud\ReCaptcha;
 
-use BackBeePlanet\GlobalSettings;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Renderer\Event\RendererEvent;
 use ReCaptcha\ReCaptcha;
@@ -11,6 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 /**
+ * Class ReCaptchaListener
+ *
+ * @package BackBeeCloud\ReCaptcha
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ReCaptchaListener
@@ -23,12 +26,12 @@ class ReCaptchaListener
      *
      *  To inject 'recaptcha_sitekey' to view if current host is authorized.
      *
-     * @param  RendererEvent $event
+     * @param RendererEvent $event
      */
-    public static function onContentRequireReCaptchaRender(RendererEvent $event)
+    public static function onContentRequireReCaptchaRender(RendererEvent $event): void
     {
-        $settings = (new GlobalSettings())->reCaptcha();
-        if (false == $settings) {
+        $settings = $event->getApplication()->getConfig()->getSection('recaptcha');
+        if (false === $settings) {
             return;
         }
 
@@ -56,19 +59,16 @@ class ReCaptchaListener
      *                                            or if the host name is different between
      *                                            reCAPTCHA and $_SERVER['SERVER_NAME']
      */
-    public static function onReCaptchaFormSubmissionPreCall(PreRequestEvent $event)
+    public static function onReCaptchaFormSubmissionPreCall(PreRequestEvent $event): void
     {
-        if (null !== $event->getApplication()->getBBUserToken()) {
-            return;
-        }
-
-        $settings = (new GlobalSettings())->reCaptcha();
-        if (false == $settings) {
-            return;
-        }
-
+        $app = $event->getApplication();
         $request = $event->getRequest();
-        if (!self::isAuthorizedHost($request->getHost(), $settings['authorized_hosts'])) {
+
+        if (
+            null !== $app->getBBUserToken() ||
+            false === ($settings = $app->getConfig()->getSection('recaptcha')) ||
+            !self::isAuthorizedHost($request->getHost(), $settings['authorized_hosts'])
+        ) {
             return;
         }
 
@@ -77,14 +77,14 @@ class ReCaptchaListener
             $request->request->get('g-recaptcha-response'),
             $request->getClientIp()
         );
+
         if ($response->isSuccess() && $response->getHostName() === $request->getHost()) {
             return;
         }
 
         $errMsg = $response->isSuccess()
             ? 'not-matching-host-name'
-            : implode(', ', $response->getErrorCodes())
-        ;
+            : implode(', ', $response->getErrorCodes());
 
         throw new RecaptchaFailedValidationException($errMsg);
     }
@@ -93,30 +93,34 @@ class ReCaptchaListener
      * Listens to "kernel.exception" to catch and handle RecaptchaFailedValidationException
      * by transforming it into an instance of Response.
      *
-     * @param  GetResponseForExceptionEvent $event The event to use
+     * @param GetResponseForExceptionEvent $event The event to use
      */
-    public static function onRecaptchaFailedValidationException(GetResponseForExceptionEvent $event)
+    public static function onRecaptchaFailedValidationException(GetResponseForExceptionEvent $event): void
     {
         $exception = $event->getException();
         if (!($exception instanceof RecaptchaFailedValidationException)) {
             return;
         }
 
-        $event->setResponse(new JsonResponse([
-            'error'  => 'bad_request',
-            'reason' => str_replace('-', ' ', $event->getException()->getMessage())
-        ], Response::HTTP_BAD_REQUEST));
+        $event->setResponse(
+            new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => str_replace('-', ' ', $event->getException()->getMessage()),
+                ], Response::HTTP_BAD_REQUEST
+            )
+        );
     }
 
     /**
      * Checks if the provided host is authorized.
      *
-     * @param  string  $host            The host to check
-     * @param  array   $authorizedHosts The list of authorized hosts
+     * @param string $host            The host to check
+     * @param array  $authorizedHosts The list of authorized hosts
      *
      * @return bool true if the host is authorized, false otherwise
      */
-    protected static function isAuthorizedHost($host, array $authorizedHosts)
+    protected static function isAuthorizedHost(string $host, array $authorizedHosts): bool
     {
         foreach ($authorizedHosts as $authorized) {
             $pattern = str_replace('.', '\.', $authorized);

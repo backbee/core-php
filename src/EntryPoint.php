@@ -64,6 +64,15 @@ class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterf
                 $app->getConfig()->getSection('knowledge_graph') ?? []
             )
         );
+
+        // Optimize image
+        $app->getConfig()->setSection(
+            'optimize_image',
+            array_replace_recursive(
+                $config->getRawSection('optimize_image') ?? [],
+                $app->getConfig()->getSection('optimize_image') ?? []
+            )
+        );
     }
 
     /**

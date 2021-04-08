@@ -31,6 +31,8 @@ use stdClass;
  */
 class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInterface
 {
+    public const INDEX_BASE_NAME = 'backbee_standalone_';
+
     /**
      * @var ContentManager
      */
@@ -63,13 +65,21 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      */
     public function __construct(BBApplication $app)
     {
-        parent::__construct($app);
+        parent::__construct($app, $app->getContainer()->get('config'));
 
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
         $this->pagetypeMgr = $app->getContainer()->get('cloud.page_type.manager');
         $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
         $this->elasticSearchQuery = $app->getContainer()->get('elasticsearch.query');
         $this->bbtoken = $app->getBBUserToken();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIndexName(): string
+    {
+        return self::INDEX_BASE_NAME . str_replace(' ', '', strtolower($this->getSiteName()));
     }
 
     /**

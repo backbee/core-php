@@ -26,11 +26,6 @@ class OptimizeImageConvertCommand extends AbstractCommand
     protected $optimizeImageManager;
 
     /**
-     * @var SymfonyStyle
-     */
-    protected $io;
-
-    /**
      * {@inheritDoc}
      */
     protected function configure(): void
@@ -47,7 +42,7 @@ class OptimizeImageConvertCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output): ?int
     {
         $this->optimizeImageManager = $this->getContainer()->get('app.optimize_image.manager');
-        $this->io = new SymfonyStyle($input, $output);
+        $io = new SymfonyStyle($input, $output);
 
         // memory limit options
         if (null !== ($limit = $input->getOption('memory-limit'))) {
@@ -55,18 +50,18 @@ class OptimizeImageConvertCommand extends AbstractCommand
         }
 
         // convert Basic\Image
-        $this->io->section('Converting Basic\Image');
+        $io->section('Converting Basic\Image');
         $this->cleanMemoryUsage();
         $this->convertImages();
         $this->cleanMemoryUsage();
-        $this->io->success('Basic\Image has been successfully converted.');
+        $io->success('Basic\Image has been successfully converted.');
 
         // convert CloudContentSet
-        $this->io->section('Converting CloudContentSet');
+        $io->section('Converting CloudContentSet');
         $this->cleanMemoryUsage();
         $this->convertCloudContentSets();
         $this->cleanMemoryUsage();
-        $this->io->success('CloudContentSet has been successfully converted.');
+        $io->success('CloudContentSet has been successfully converted.');
 
         return 0;
     }

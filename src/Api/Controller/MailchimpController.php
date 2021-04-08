@@ -3,103 +3,156 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBee\BBApplication;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use GuzzleHttp\Client;
-
 use DrewM\MailChimp\MailChimp;
-
-use BackBeePlanet\GlobalSettings;
+use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
+ * Class MailchimpController
+ *
+ * @package BackBeeCloud\Api\Controller
+ *
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  */
 class MailchimpController extends AbstractController
 {
     /**
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var Request
      */
-    protected $request;
+    private $request;
 
-    public function __construct(BBApplication $app)
+    /**
+     * @var BBApplication
+     */
+    private $bbApp;
+
+    /**
+     * MailchimpController constructor.
+     *
+     * @param BBApplication $bbApp
+     */
+    public function __construct(BBApplication $bbApp)
     {
-        parent::__construct($app);
+        parent::__construct($bbApp);
 
-        $this->request = $app->getRequest();
+        $this->bbApp = $bbApp;
+        $this->request = $bbApp->getRequest();
     }
 
-    public function getInformation()
+    /**
+     * Get information.
+     *
+     * @return JsonResponse
+     */
+    public function getInformation(): JsonResponse
     {
         $this->assertIsAuthenticated();
 
-        $mailchimpConfig = (new GlobalSettings())->mailchimp();
+        $mailchimpConfig = $this->bbApp->getConfig()->getSection('mailchimp');
 
-        return new JsonResponse([
-            'client_id'    => $mailchimpConfig['client_id'],
-            'redirect_url' => $mailchimpConfig['redirect_url'],
-            'origin'       => $mailchimpConfig['origin'],
-        ]);
+        return new JsonResponse(
+            [
+                'client_id' => $mailchimpConfig['client_id'],
+                'redirect_url' => $mailchimpConfig['redirect_url'],
+                'origin' => $mailchimpConfig['origin'],
+            ]
+        );
     }
 
-    public function getToken($code)
+    /**
+     * Get token.
+     *
+     * @param $code
+     *
+     * @return JsonResponse
+     * @throws GuzzleException
+     */
+    public function getToken($code): JsonResponse
     {
         $this->assertIsAuthenticated();
 
-        $mailchimpConfig = (new GlobalSettings())->mailchimp();
-
+        $mailchimpConfig = $this->bbApp->getConfig()->getSection('mailchimp');
         $client = new Client();
+        $response = null;
 
         try {
-            $res = $client->request('POST', 'https://login.mailchimp.com/oauth2/token', [
-                'form_params' => [
-                    'grant_type'    => 'authorization_code',
-                    'client_id'     => $mailchimpConfig['client_id'],
-                    'client_secret' => $mailchimpConfig['client_secret'],
-                    'redirect_uri'  => $mailchimpConfig['redirect_url'],
-                    'code'          => $code,
+            $res = $client->request(
+                'POST',
+                'https://login.mailchimp.com/oauth2/token',
+                [
+                    'form_params' => [
+                        'grant_type' => 'authorization_code',
+                        'client_id' => $mailchimpConfig['client_id'],
+                        'client_secret' => $mailchimpConfig['client_secret'],
+                        'redirect_uri' => $mailchimpConfig['redirect_url'],
+                        'code' => $code,
+                    ],
                 ]
-            ]);
-        } catch (\Exception $e) {
-            return Response::create('', 400);
+            );
+        } catch (Exception $exception) {
+            return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
         }
 
         $tokenData = json_decode($res->getBody(), true);
+
         try {
-            $resDataCenter = $client->request('GET', 'https://login.mailchimp.com/oauth2/metadata', [
-                'headers' => [
-                    'User-Agent'    => 'oauth2-draft-v10',
-                    'Accept'        => 'application/json',
-                    'Authorization' => 'OAuth ' . $tokenData['access_token']
+            $resDataCenter = $client->request(
+                'GET',
+                'https://login.mailchimp.com/oauth2/metadata',
+                [
+                    'headers' => [
+                        'User-Agent' => 'oauth2-draft-v10',
+                        'Accept' => 'application/json',
+                        'Authorization' => 'OAuth ' . $tokenData['access_token'],
+                    ],
                 ]
-            ]);
-        } catch (\Exception $e) {
-            return Response::create('', 400);
+            );
+            $dataCenterData = json_decode($resDataCenter->getBody(), true);
+            $response = new JsonResponse(
+                [
+                    'token' => $tokenData['access_token'],
+                    'dc' => $dataCenterData['dc'],
+                    'account_name' => $dataCenterData['accountname'],
+                    'api_endpoint' => $dataCenterData['api_endpoint'],
+                ]
+            );
+        } catch (Exception $exception) {
+            $response = new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
         }
 
-        $dataCenterData = json_decode($resDataCenter->getBody(), true);
-
-        return new JsonResponse([
-            'token'        => $tokenData['access_token'],
-            'dc'           => $dataCenterData['dc'],
-            'account_name' => $dataCenterData['accountname'],
-            'api_endpoint' => $dataCenterData['api_endpoint'],
-        ]);
+        return $response;
     }
 
-    public function getLists($token)
+    /**
+     * Get list.
+     *
+     * @param $token
+     *
+     * @return JsonResponse
+     */
+    public function getLists($token): JsonResponse
     {
         $this->assertIsAuthenticated();
 
-        $dc = $this->request->get('dc', null);
+        $response = null;
+        $dc = $this->request->get('dc');
 
         if (null === $dc) {
-            return Response::create('', 400);
+            $response = new JsonResponse('dc parameter is null', Response::HTTP_BAD_REQUEST);
+        } else {
+            try {
+                $mailchimp = new MailChimp($token . '-' . $dc);
+                $lists = $mailchimp->get('lists');
+                $response = new JsonResponse($lists['lists']);
+            } catch (Exception $exception) {
+                $response = new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+            }
         }
 
-        $mailchimp = new MailChimp($token . '-' . $dc);
-
-        $lists = $mailchimp->get('lists');
-
-        return new JsonResponse($lists['lists']);
+        return $response;
     }
 }

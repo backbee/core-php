@@ -2,8 +2,6 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBeePlanet\GlobalSettings;
-
 /**
  * Class isPrivacyPolicyEnabled
  *
@@ -18,6 +16,6 @@ class isPrivacyPolicyEnabled extends AbstractHelper
      */
     public function __invoke(): bool
     {
-        return (new GlobalSettings())->isPrivacyPolicyEnabled();
+        return $this->getRenderer()->getApplication()->getAppParameter('privacy_policy');
     }
 }

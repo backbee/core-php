@@ -2,36 +2,62 @@
 
 namespace BackBeeCloud\SiteOption;
 
-use BackBeePlanet\GlobalSettings;
 use BackBee\Bundle\Registry;
+use BackBee\Config\Config;
 use Doctrine\ORM\EntityManager;
+use function in_array;
 
 /**
+ * Class OptionManager
+ *
+ * @package BackBeeCloud\SiteOption
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class OptionManager
 {
-    const REGISTRY_SCOPE = 'GLOBAL';
-    const REGISTRY_TYPE = 'site_options';
+    public const REGISTRY_SCOPE = 'GLOBAL';
+    public const REGISTRY_TYPE = 'site_options';
 
+    /**
+     * @var array|null
+     */
     protected $options;
+
+    /**
+     * @var Registry\Repository
+     */
     protected $repository;
 
-    public function __construct(EntityManager $entyMgr)
+    /**
+     * OptionManager constructor.
+     *
+     * @param EntityManager $entityManager
+     * @param Config        $config
+     */
+    public function __construct(EntityManager $entityManager, Config $config)
     {
-        $this->options = (array) (new GlobalSettings())->siteOptions();
-        $this->repository = $entyMgr->getRepository(Registry::class);
+        $this->options = $config->getSection('site_options');
+        $this->repository = $entityManager->getRepository(Registry::class);
     }
 
-    public function isActiveOption($name)
+    /**
+     * Is active option.
+     *
+     * @param $name
+     *
+     * @return bool
+     */
+    public function isActiveOption($name): bool
     {
-        return in_array($name, $this->options)
-            ? null !== $this->repository->findOneBy([
-                'scope' => self::REGISTRY_SCOPE,
-                'type'  => self::REGISTRY_TYPE,
-                'key'   => $name,
-            ])
-            : false
-        ;
+        return in_array($name, $this->options, true)
+            ? null !== $this->repository->findOneBy(
+                [
+                    'scope' => self::REGISTRY_SCOPE,
+                    'type' => self::REGISTRY_TYPE,
+                    'key' => $name,
+                ]
+            )
+            : false;
     }
 }

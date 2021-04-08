@@ -3,6 +3,7 @@
 namespace BackBeeCloud\Security;
 
 use BackBee\Bundle\Registry;
+use BackBee\Config\Config;
 use BackBee\Security\Group;
 use BackBeeCloud\Security\GroupType\GroupType;
 use BackBeeCloud\Security\GroupType\GroupTypeManager;
@@ -12,6 +13,10 @@ use Exception;
 use Psr\Log\LoggerInterface;
 
 /**
+ * Class UserRightInstaller
+ *
+ * @package BackBeeCloud\Security
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserRightInstaller
@@ -41,26 +46,40 @@ class UserRightInstaller
     private $logger;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * UserRightInstaller constructor.
      *
      * @param EntityManagerInterface $entityManager
      * @param GroupTypeManager       $groupTypeManager
      * @param UserManager            $userManager
      * @param LoggerInterface        $logger
+     * @param Config                 $config
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         GroupTypeManager $groupTypeManager,
         UserManager $userManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Config $config
     ) {
         $this->entityManager = $entityManager;
         $this->groupTypeManager = $groupTypeManager;
         $this->userManager = $userManager;
         $this->logger = $logger;
+        $this->config = $config;
     }
 
-    public function install(array $rawGroupTypes, $defaultGroupTypeId)
+    /**
+     * Install.
+     *
+     * @param array $rawGroupTypes
+     * @param       $defaultGroupTypeId
+     */
+    public function install(array $rawGroupTypes, $defaultGroupTypeId): void
     {
         if ($this->isInstalled()) {
             return;
@@ -80,7 +99,12 @@ class UserRightInstaller
         $this->entityManager->commit();
     }
 
-    public function isInstalled()
+    /**
+     * Check if installed.
+     *
+     * @return bool
+     */
+    public function isInstalled(): bool
     {
         if (null === $registry = $this->getRegistryEntity()) {
             return false;
@@ -89,6 +113,11 @@ class UserRightInstaller
         return (bool)$registry->getValue();
     }
 
+    /**
+     * Sync group types.
+     *
+     * @param $rawGroupTypes
+     */
     public function syncGroupTypes($rawGroupTypes): void
     {
         $this->entityManager->beginTransaction();
@@ -119,10 +148,21 @@ class UserRightInstaller
             $this->entityManager->flush();
             $this->entityManager->commit();
         } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
     }
 
-    private function removeGroups()
+    /**
+     * Remove groups.
+     */
+    private function removeGroups(): void
     {
         foreach ($this->entityManager->getRepository(Group::class)->findAll() as $group) {
             $this->entityManager->remove($group);
@@ -131,7 +171,13 @@ class UserRightInstaller
         $this->entityManager->flush();
     }
 
-    private function buildGroupTypes(array $rawGroupTypes, $defaultGroupTypeId)
+    /**
+     * Build group types.
+     *
+     * @param array $rawGroupTypes
+     * @param       $defaultGroupTypeId
+     */
+    private function buildGroupTypes(array $rawGroupTypes, $defaultGroupTypeId): void
     {
         // gathering users...
         $users = $this->userManager->getAll();
@@ -159,7 +205,10 @@ class UserRightInstaller
         $this->entityManager->flush();
     }
 
-    private function cleanAcl()
+    /**
+     * Clean acl.
+     */
+    private function cleanAcl(): void
     {
         try {
             $this->entityManager->getConnection()->executeUpdate('SET foreign_key_checks = 0;');
@@ -170,10 +219,21 @@ class UserRightInstaller
             $this->entityManager->getConnection()->executeUpdate('TRUNCATE acl_security_identities;');
             $this->entityManager->getConnection()->executeUpdate('SET foreign_key_checks = 1;');
         } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
     }
 
-    private function markAsInstalled()
+    /**
+     * Mark as installed.
+     */
+    private function markAsInstalled(): void
     {
         $registry = new Registry();
         $registry->setScope(self::REGISTRY_SCOPE);
@@ -181,10 +241,15 @@ class UserRightInstaller
         $registry->setKey(self::REGISTRY_KEY);
         $registry->setValue(1);
         $this->entityManager->persist($registry);
-        $this->entityManager->flush($registry);
+        $this->entityManager->flush();
     }
 
-    private function getRegistryEntity()
+    /**
+     * Get registry entity.
+     *
+     * @return Registry|null
+     */
+    private function getRegistryEntity(): ?Registry
     {
         return $this->entityManager->getRepository(Registry::class)->findOneBy(
             [
@@ -195,27 +260,55 @@ class UserRightInstaller
         );
     }
 
-    private function createGroupTypeFromRawData($id, array $data, array $users = [])
+    /**
+     * Create group type from raw data.
+     *
+     * @param       $id
+     * @param array $data
+     * @param array $users
+     *
+     * @return GroupType
+     */
+    private function createGroupTypeFromRawData($id, array $data, array $users = []): GroupType
     {
-        $groupType = $this->groupTypeManager->create(
-            $id,
-            $id . '_description',
-            $data['is_opened'],
-            $data['read_only'],
-            $data['features_rights'] ?? [],
-            $data['pages_rights'] ?? [],
-            $users
-        );
+        $groupType = null;
 
-        $this->updateGroupTypeName(
-            $groupType,
-            $data['name'] ?? null
-        );
+        try {
+            $groupType = $this->groupTypeManager->create(
+                $id,
+                $id . '_description',
+                $data['is_opened'],
+                $data['read_only'],
+                $data['features_rights'] ?? [],
+                $data['pages_rights'] ?? [],
+                $users
+            );
+
+            $this->updateGroupTypeName(
+                $groupType,
+                $data['name'] ?? null
+            );
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
 
         return $groupType;
     }
 
-    private function updateGroupTypeName(GroupType $groupType, $newName = null)
+    /**
+     * Update group type name.
+     *
+     * @param GroupType $groupType
+     * @param null      $newName
+     */
+    private function updateGroupTypeName(GroupType $groupType, $newName = null): void
     {
         if ($newName && $newName !== $groupType->getName()) {
             $group = $this->getGroupByGroupType($groupType);
@@ -223,19 +316,38 @@ class UserRightInstaller
         }
     }
 
-    private function getGroupByGroupType(GroupType $groupType)
+    /**
+     * Get group by group type.
+     *
+     * @param GroupType $groupType
+     *
+     * @return Group|null
+     */
+    private function getGroupByGroupType(GroupType $groupType): ?Group
     {
+        $groupId = 1;
         $qb = $this->entityManager->getRepository(GroupType::class)->createQueryBuilder('gt');
 
-        $groupId = (int)$qb
-            ->select('g._id')
-            ->join('gt.group', 'g')
-            ->where(
-                $qb->expr()->eq('gt.id', ':id')
-            )
-            ->setParameter('id', $groupType->getId())
-            ->getQuery()
-            ->getSingleScalarResult();
+        try {
+            $groupId = (int)$qb
+                ->select('g._id')
+                ->join('gt.group', 'g')
+                ->where(
+                    $qb->expr()->eq('gt.id', ':id')
+                )
+                ->setParameter('id', $groupType->getId())
+                ->getQuery()
+                ->getSingleScalarResult();
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
 
         return $this->entityManager->find(Group::class, $groupId);
     }

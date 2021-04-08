@@ -1,0 +1,23 @@
+original:
+    quality: 70
+    resize: 1920
+formats:
+    lg:
+        options:
+            resize: 1200
+        colsizes:
+            - 12
+    md:
+        options:
+            resize: 768
+        colsizes:
+            - 6
+            - 8
+    sm:
+        options:
+            resize: 576
+        colsizes:
+            - 1
+            - 2
+            - 3
+            - 4
