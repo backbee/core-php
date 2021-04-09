@@ -24,7 +24,7 @@ class SearchResultType extends AbstractType
      */
     public function isProtected()
     {
-        return true;
+        return false;
     }
 
     /**

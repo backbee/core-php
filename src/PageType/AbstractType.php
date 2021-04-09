@@ -2,8 +2,6 @@
 
 namespace BackBeeCloud\PageType;
 
-use BackBee\NestedNode\Page;
-
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
