@@ -2,34 +2,70 @@
 
 namespace BackBeeCloud\PageType;
 
-use BackBeeCloud\Entity\PageType;
-use BackBeeCloud\Structure\SchemaParserInterface;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\CloudContentSet;
 use BackBee\ClassContent\ColContentSet;
 use BackBee\DependencyInjection\Container;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
+use BackBeeCloud\Entity\ContentManager;
+use BackBeeCloud\Entity\PageType;
+use BackBeeCloud\Structure\ContentBuilder;
+use BackBeeCloud\Structure\SchemaParserInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
+ * Class TypeManager
+ *
+ * @package BackBeeCloud\PageType
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class TypeManager
 {
-    const CACHE_KEY = 'page.type_manager.cache';
-    const PAGE_TYPE_TAG = 'page.type';
-    const CUSTOM_CONTENTS_SCHEMA_NAME = 'custom_contents';
+    public const CACHE_KEY = 'page.type_manager.cache';
+    public const PAGE_TYPE_TAG = 'page.type';
+    public const CUSTOM_CONTENTS_SCHEMA_NAME = 'custom_contents';
 
-    protected $entyMgr;
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityMgr;
+
+    /**
+     * @var ContentManager
+     */
     protected $contentMgr;
+
+    /**
+     * @var ContentBuilder
+     */
     protected $contentBuilder;
+
+    /**
+     * @var SchemaParserInterface
+     */
     protected $schemaParser;
+
+    /**
+     * @var array
+     */
     protected $types = [];
+
+    /**
+     * @var string
+     */
     protected $defaultType;
 
+    /**
+     * TypeManager constructor.
+     *
+     * @param Container             $dic
+     * @param SchemaParserInterface $schemaParser
+     */
     public function __construct(Container $dic, SchemaParserInterface $schemaParser)
     {
-        $this->entyMgr = $dic->get('em');
+        $this->entityMgr = $dic->get('em');
         $this->contentMgr = $dic->get('cloud.content_manager');
         $this->contentBuilder = $dic->get('cloud.structure.content_builder');
         $this->schemaParser = $schemaParser;
@@ -37,14 +73,28 @@ class TypeManager
         $this->initTemplateTypes($dic);
     }
 
-    protected function add(TypeInterface $type)
+    /**
+     * Add type.
+     *
+     * @param TypeInterface $type
+     *
+     * @return $this
+     */
+    protected function add(TypeInterface $type): TypeManager
     {
         $this->types[] = $type;
 
         return $this;
     }
 
-    public function all($excludeProtected = false)
+    /**
+     * Get all types.
+     *
+     * @param bool $excludeProtected
+     *
+     * @return array
+     */
+    public function all(bool $excludeProtected = false): array
     {
         if (false === $excludeProtected) {
             return $this->types;
@@ -60,11 +110,19 @@ class TypeManager
         return $types;
     }
 
-    public function associate(Page $page, TypeInterface $type)
+    /**
+     * Associate page and type.
+     *
+     * @param Page          $page
+     * @param TypeInterface $type
+     *
+     * @return PageType|null
+     */
+    public function associate(Page $page, TypeInterface $type): ?PageType
     {
         if (null === $association = $this->getAssociation($page)) {
             $association = new PageType($page, $type);
-            $this->entyMgr->persist($association);
+            $this->entityMgr->persist($association);
         }
 
         $association->setType($type);
@@ -72,45 +130,73 @@ class TypeManager
         return $association;
     }
 
+    /**
+     * Find type.
+     *
+     * @param $uniqueName
+     *
+     * @return mixed|null
+     */
     public function find($uniqueName)
     {
-        return isset($this->types[$uniqueName]) ? $this->types[$uniqueName] : null;
+        return $this->types[$uniqueName] ?? null;
     }
 
+    /**
+     * Find type by page.
+     *
+     * @param Page $page
+     *
+     * @return TypeInterface|object|string|null
+     */
     public function findByPage(Page $page)
     {
         $association = $this->getAssociation($page);
+        $type = $this->defaultType ?: null;
 
-        return $association
-            ? $association->getType()
-            : ($this->defaultType ?: null)
-        ;
+        return $association ? $association->getType() : $type;
     }
 
+    /**
+     * Get association.
+     *
+     * @param Page $page
+     *
+     * @return PageType|null
+     */
     public function getAssociation(Page $page)
     {
-        $uow = $this->entyMgr->getUnitOfWork();
+        $uow = $this->entityMgr->getUnitOfWork();
         if ($uow->isScheduledForInsert($page)) {
             foreach ($uow->getScheduledEntityInsertions() as $entity) {
                 if ($entity instanceof PageType && $page === $entity->getPage()) {
                     return $entity;
                 }
             }
-
             return null;
         }
 
-        return $this->entyMgr->getRepository('BackBeeCloud\Entity\PageType')->findOneBy([
-            'page' => $page,
-        ]);
+        return $this->entityMgr->getRepository(PageType::class)->findOneBy(['page' => $page]);
     }
 
-    public function getDefaultType()
+    /**
+     * Get default type.
+     *
+     * @return string
+     */
+    public function getDefaultType(): string
     {
         return $this->defaultType;
     }
 
-    public function hydratePageContentsByType(TypeInterface $type, Page $page, BBUserToken $token = null)
+    /**
+     * Hydrate page contents by type.
+     *
+     * @param TypeInterface    $type
+     * @param Page             $page
+     * @param BBUserToken|null $token
+     */
+    public function hydratePageContentsByType(TypeInterface $type, Page $page, BBUserToken $token = null): void
     {
         if ($type instanceof TemplateCustomType) {
             $this->contentBuilder->hydrateContents($page, $type->contentsRawData(), $token);
@@ -118,10 +204,16 @@ class TypeManager
             return;
         }
 
-        $this->defaultPageContentHydratation($type, $page, $token);
+        $this->defaultPageContentHydratation($type, $page);
     }
 
-    protected function defaultPageContentHydratation(TypeInterface $type, Page $page, BBUserToken $token = null)
+    /**
+     * Default page content hydratation.
+     *
+     * @param TypeInterface $type
+     * @param Page          $page
+     */
+    protected function defaultPageContentHydratation(TypeInterface $type, Page $page): void
     {
         $mainContainer = $page->getContentSet()->first();
         $mainContainer->clear();
@@ -132,25 +224,30 @@ class TypeManager
                     continue;
                 }
 
-                $this->entyMgr->persist($content);
+                $this->entityMgr->persist($content);
                 if (is_callable($callback)) {
                     $callback($content, $page);
                 }
 
                 $colcontainer = new ColContentSet();
                 $colcontainer->push($content);
-                $this->entyMgr->persist($colcontainer);
+                $this->entityMgr->persist($colcontainer);
 
                 $container = new CloudContentSet();
                 $container->push($colcontainer);
-                $this->entyMgr->persist($container);
+                $this->entityMgr->persist($container);
 
                 $mainContainer->push($container);
             }
         }
     }
 
-    private function initTemplateTypes(Container $dic)
+    /**
+     * Init template types.
+     *
+     * @param Container $dic
+     */
+    private function initTemplateTypes(Container $dic): void
     {
         $cache = $dic->get('cache.control');
         if ($dic->isRestored() && $result = $cache->load(self::CACHE_KEY)) {
@@ -179,9 +276,6 @@ class TypeManager
         }
 
         $data = $this->schemaParser->getSchema(self::CUSTOM_CONTENTS_SCHEMA_NAME);
-        if (false == $data) {
-            return;
-        }
 
         foreach ($data['schema']['pages'] as $page) {
             if (!isset($page['custom_type'])) {

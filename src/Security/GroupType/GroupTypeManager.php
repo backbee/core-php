@@ -4,8 +4,6 @@ namespace BackBeeCloud\Security\GroupType;
 
 use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\PageType\TypeManager;
-use BackBeeCloud\Security\GroupType\GroupType;
-use BackBeeCloud\Security\GroupType\GroupTypeRightManager;
 use BackBeeCloud\Security\UserRightConstants;
 use BackBee\Security\Group;
 use BackBee\Security\User;

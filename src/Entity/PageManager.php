@@ -22,6 +22,7 @@ use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeeCloud\MultiLang\PageAssociationManager;
 use BackBeeCloud\PageCategory\PageCategory;
 use BackBeeCloud\PageCategory\PageCategoryManager;
+use BackBeeCloud\PageType\HomeType;
 use BackBeeCloud\PageType\TypeManager;
 use BackBeeCloud\SearchEngine\SearchEngineManager;
 use BackBeeCloud\Tag\TagManager;
@@ -426,6 +427,20 @@ class PageManager
             $qb
                 ->andWhere($qb->expr()->neq('p._url', ':url'))
                 ->setParameter('url', '/');
+        }
+
+        if (null === ($criteria['type'] ?? null)) {
+            $types = array_filter(
+                array_map(
+                    static function ($type) {
+                        return false === $type->isProtected() || $type->uniqueName() === (new HomeType)->uniqueName() ?
+                            $type->uniqueName() : null;
+                        }, array_values($this->typeMgr->all()
+                    )
+                )
+            );
+
+            $criteria['type'] = implode(',', $types);
         }
 
         try {
