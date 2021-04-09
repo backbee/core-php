@@ -66,10 +66,13 @@ class BackBeeConsole extends ConsoleApplication
                     if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
                         continue;
                     }
-                    $this->addCommand(
-                        $dir,
-                        (new ReflectionClass($bundle))->getNamespaceName()
-                    );
+                    try {
+                        $this->addCommand(
+                            $dir,
+                            (new ReflectionClass($bundle))->getNamespaceName()
+                        );
+                    } catch (Exception $exception) {
+                    }
                 }
             } elseif (is_dir($dir = dirname(__DIR__) . '/Command')) {
                 $this->addCommand(
@@ -92,7 +95,7 @@ class BackBeeConsole extends ConsoleApplication
     private function addCommand(string $dir, string $namespaceName): void
     {
         $finder = new Finder();
-        $finder->files()->name(null === $this->bbApplication ? 'InstallCommand.php' : '*Command.php')->in($dir);
+        $finder->files()->name($this->bbApplication === null ? 'InstallCommand.php' : '*Command.php')->in($dir);
         $ns = $namespaceName . '\\Command';
         foreach ($finder as $file) {
             if ($relativePath = $file->getRelativePath()) {
@@ -100,12 +103,13 @@ class BackBeeConsole extends ConsoleApplication
             }
             try {
                 $reflexionClass = new ReflectionClass($ns . '\\' . $file->getBasename('.php'));
-                $instance = $reflexionClass->newInstance($file->getBasename('.php'));
                 if ($reflexionClass->isSubclassOf(AbstractCommand::class)) {
+                    $instance = $reflexionClass->newInstance($file->getBasename('.php'));
                     $instance->setBBApp($this->bbApplication);
                     $this->add($instance);
                 }
-            } catch (Exception $exception) {}
+            } catch (Exception $exception) {
+            }
         }
     }
 }
