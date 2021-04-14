@@ -14,12 +14,6 @@
             "email": "djoudi.bensid@lp-digital.fr"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@gitlab.com:lp-digital/backbee/backbee-php.git"
-        }
-    ],
     "require": {
         "php": ">=7.1",
         "cocur/slugify": "^3.1",
