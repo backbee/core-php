@@ -22,7 +22,7 @@
     ],
     "require": {
         "php": ">=7.1",
-        "backbee/backbee-php": "^1.4",
+        "backbee/backbee-php": "dev-issue/45",
         "cocur/slugify": "^3.1",
         "drewm/mailchimp-api": "^2.4",
         "elasticsearch/elasticsearch": "v7.4.1",

@@ -50,6 +50,12 @@ class CommandLineConfig extends DefaultApplicationConfig
         Application::setRepositoryDir(StandaloneHelper::repositoryDir());
         $app = new Application();
 
+        // injecting Standalone others commands...
+        $app->getEventDispatcher()->addListener(CommandLineReadyEvent::EVENT_NAME, [
+            CommandLineListener::class,
+            'onCommandLineReady',
+        ]);
+
         $app->getEventDispatcher()->dispatch(
             CommandLineReadyEvent::EVENT_NAME,
             new CommandLineReadyEvent($this, $app)

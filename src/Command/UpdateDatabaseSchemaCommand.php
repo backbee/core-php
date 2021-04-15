@@ -2,8 +2,6 @@
 
 namespace BackBee\Command;
 
-use BackBeePlanet\Standalone\StandaloneHelper;
-use BackBeePlanet\Standalone\UpdateDatabaseSchemaTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -17,8 +15,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class UpdateDatabaseSchemaCommand extends AbstractCommand
 {
-    use UpdateDatabaseSchemaTrait;
-
     /**
      * {@inheritDoc}
      */
@@ -36,13 +32,9 @@ class UpdateDatabaseSchemaCommand extends AbstractCommand
     {
         $io = new SymfonyStyle($input, $output);
 
-        $io->note('You may need to run "backbee:clear-all-cache" first.');
+        $io->note('You may need to run "backbee:cc" first.');
 
-        $this->updateDatabaseSchema($this->getBBApp());
-
-        $io->success(
-            sprintf('Update of "%s" application database schema is now done.', StandaloneHelper::appname())
-        );
+        $this->getContainer()->get('core.installer.database')->updateDatabaseSchema($io);
 
         return 0;
     }

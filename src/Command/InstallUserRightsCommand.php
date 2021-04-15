@@ -2,8 +2,6 @@
 
 namespace BackBee\Command;
 
-use BackBeePlanet\Standalone\ManageUserRightsTrait;
-use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -17,8 +15,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class InstallUserRightsCommand extends AbstractCommand
 {
-    use ManageUserRightsTrait;
-
     /**
      * {@inheritDoc}
      */
@@ -36,13 +32,7 @@ class InstallUserRightsCommand extends AbstractCommand
     {
         $io = new SymfonyStyle($input, $output);
 
-        try {
-            $this->installUserRights($this->getBBApp());
-        } catch (Exception $exception) {
-            $io->error(sprintf('<error>[%s] %s</error>', get_class($exception), $exception->getMessage()));
-        }
-
-        $io->success('User right successfully installed.');
+        $this->getBBApp()->getContainer()->get('core.installer.user_rights')->install($io);
 
         return 0;
     }

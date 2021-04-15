@@ -3,12 +3,19 @@
 namespace BackBee\Command;
 
 use BackBee\BBApplication;
+use BackBee\Config\Config;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Standalone\StandaloneHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Yaml\Yaml;
+use function call_user_func_array;
 
 /**
  * Class AbstractCommand
@@ -28,6 +35,26 @@ class AbstractCommand extends Command
      * @var null|JobInterface
      */
     private $job;
+
+    /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
+     * @var InputInterface
+     */
+    protected static $input;
+
+    /**
+     * @var OutputInterface
+     */
+    protected static $output;
+
+    /**
+     * @var Command
+     */
+    protected static $command;
 
     /**
      * Set BBApplication.
@@ -98,11 +125,109 @@ class AbstractCommand extends Command
     }
 
     /**
+     * Get config.
+     *
+     * @return Config
+     */
+    protected function getConfig(): Config
+    {
+        return $this->bbApp->getConfig();
+    }
+
+    /**
      * Cleanup.
      */
     protected function cleanup(): void
     {
         exec(sprintf('rm -rf %s/*', StandaloneHelper::cacheDir()));
         exec(sprintf('chmod -R 777 %s/*', StandaloneHelper::logDir()));
+    }
+
+    /**
+     * @param Command $command
+     */
+    protected static function setCommand(Command $command): void
+    {
+        self::$command = $command;
+    }
+
+    /**
+     * @return InputInterface
+     */
+    public static function getInput(): InputInterface
+    {
+        return self::$input;
+    }
+
+    /**
+     * @param InputInterface $input
+     */
+    public static function setInput(InputInterface $input): void
+    {
+        self::$input = $input;
+    }
+
+    /**
+     * @return OutputInterface
+     */
+    public static function getOutput(): OutputInterface
+    {
+        return self::$output;
+    }
+
+    /**
+     * @param OutputInterface $output
+     */
+    public static function setOutput(OutputInterface $output): void
+    {
+        self::$output = $output;
+    }
+
+    /**
+     * Parse yaml.
+     *
+     * @param string         $filename
+     * @param array|string[] $srcCb
+     *
+     * @return mixed
+     */
+    public static function parseYaml(string $filename, array $srcCb = InstallCommand::CONFIG_DIST_YAML)
+    {
+        return Yaml::parse(file_get_contents(call_user_func_array($srcCb, []) . DIRECTORY_SEPARATOR . $filename));
+    }
+
+    /**
+     * Ask for.
+     *
+     * @param string $message
+     * @param bool   $isHidden
+     * @param string $messageValidator
+     * @param null   $defaultValue
+     *
+     * @return bool|mixed|string|null
+     */
+    public static function askFor(
+        string $message,
+        bool $isHidden = false,
+        $defaultValue = null,
+        string $messageValidator = 'Value is required'
+    ) {
+        $helper = self::$command->getHelper('question');
+        $question = new Question($message, $defaultValue);
+        $question->setValidator(function ($answer) use ($messageValidator) {
+            if (empty($answer)) {
+                throw new RuntimeException(
+                    $messageValidator
+                );
+            }
+
+            return $answer;
+        });
+
+        if ($isHidden) {
+            $question->setHidden($isHidden);
+        }
+
+        return $helper->ask(self::$input, self::$output, $question);
     }
 }

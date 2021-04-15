@@ -3,6 +3,8 @@
 namespace BackBeeCloud\MultiLang;
 
 use BackBee\BBApplication;
+use BackBee\Cache\RedisManager;
+use BackBee\Config\Config;
 use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
@@ -12,10 +14,8 @@ use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\SiteStatusManager;
-use BackBeePlanet\GlobalSettings;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
-use BackBeePlanet\Redis\RedisManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -36,34 +36,42 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * @var BBApplication
      */
-    protected $app;
+    private $app;
 
     /**
      * @var EntityManager
      */
-    protected $entityMgr;
+    private $entityMgr;
 
     /**
      * @var array
      */
-    protected $availables;
+    private $available;
 
     /**
      * @var SiteStatusManager
      */
-    protected $siteStatusMgr;
+    private $siteStatusMgr;
+
+    /**
+     * @var RedisManager
+     */
+    private $redisManager;
 
     /**
      * MultiLangManager constructor.
      *
-     * @param BBApplication     $app
+     * @param BBApplication         $app
+     * @param Config                $config
+     * @param RedisManager $redisManager
      */
-    public function __construct(BBApplication $app)
+    public function __construct(BBApplication $app, Config $config, RedisManager $redisManager)
     {
         $this->app = $app;
         $this->entityMgr = $app->getEntityManager();
         $this->siteStatusMgr = $app->getContainer()->get('site_status.manager');
-        $this->availables = (new GlobalSettings())->langs();
+        $this->available = $config->getSection('languages');
+        $this->redisManager = $redisManager;
     }
 
     /**
@@ -133,7 +141,7 @@ class MultiLangManager implements JobHandlerInterface
         $result = [];
 
         try {
-            foreach ($this->availables as $id => $label) {
+            foreach ($this->available as $id => $label) {
                 $data = [
                     'id' => $id,
                     'label' => $label,
@@ -238,7 +246,7 @@ class MultiLangManager implements JobHandlerInterface
             throw new InvalidArgumentException(sprintf('Lang \'%s\' does not exist', $id));
         }
 
-        (new JobManager())->pushJob(new MultiLangJob($this->getSite()->getLabel(), $id));
+        (new JobManager($this->redisManager))->pushJob(new MultiLangJob($this->getSite()->getLabel(), $id));
         $this->siteStatusMgr->lock();
     }
 
@@ -273,7 +281,7 @@ class MultiLangManager implements JobHandlerInterface
                 $this->entityMgr->flush($root);
             }
 
-            RedisManager::removePageCache($this->getSite()->getLabel());
+            $this->redisManager->removePageCache($this->getSite()->getLabel());
 
             return;
         }
@@ -289,7 +297,7 @@ class MultiLangManager implements JobHandlerInterface
             $root->setState(Page::STATE_ONLINE);
             $this->entityMgr->flush($root);
 
-            RedisManager::removePageCache($this->getSite()->getLabel());
+            $this->redisManager->removePageCache($this->getSite()->getLabel());
 
             return;
         }
@@ -333,7 +341,7 @@ class MultiLangManager implements JobHandlerInterface
 
         $this->entityMgr->commit();
 
-        RedisManager::removePageCache($this->getSite()->getLabel());
+        $this->redisManager->removePageCache($this->getSite()->getLabel());
     }
 
     /**

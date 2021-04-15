@@ -3,14 +3,25 @@
 namespace BackBee\Renderer\Helper;
 
 use BackBee\ClassContent\Element\Image;
-use BackBeePlanet\GlobalSettings;
+use Exception;
 
 /**
+ * Class rssImageHelper
+ *
+ * @package BackBee\Renderer\Helper
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class rssImageHelper extends AbstractHelper
 {
-    public function __invoke(array $imgData)
+    /**
+     * Invoke.
+     *
+     * @param array $imgData
+     *
+     * @return string
+     */
+    public function __invoke(array $imgData): string
     {
         if (null === $stat = $imgData['stat']) {
             $stat = [];
@@ -27,9 +38,19 @@ class rssImageHelper extends AbstractHelper
 
             $entyMgr = $this->_renderer->getApplication()->getEntityManager();
 
-            $img = $entyMgr->find(Image::class, $imgData['uid']);
-            $img->setParam('stat', $stat);
-            $entyMgr->flush($img);
+            try {
+                $img = $entyMgr->find(Image::class, $imgData['uid']);
+                $img->setParam('stat', $stat);
+                $entyMgr->flush($img);
+            } catch (Exception $exception) {
+                $this->getRenderer()->getApplication()->getLogging()->error(
+                    sprintf(
+                        '%s : %s : %s',
+                        __CLASS__, __FUNCTION__,
+                        $exception->getMessage()
+                    )
+                );
+            }
         }
 
         return sprintf(

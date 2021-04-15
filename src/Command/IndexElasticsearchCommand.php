@@ -2,7 +2,6 @@
 
 namespace BackBee\Command;
 
-use BackBeeCloud\Elasticsearch\IndexElasticsearchTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -16,8 +15,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class IndexElasticsearchCommand extends AbstractCommand
 {
-    use IndexElasticsearchTrait;
-
     /**
      * {@inheritDoc}
      */
@@ -35,9 +32,7 @@ class IndexElasticsearchCommand extends AbstractCommand
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->indexElasticsearch($this->getBBApp(), $io);
-
-        $io->success('Contents are now re-indexed into Elasticsearch.');
+        $this->getBBApp()->getContainer()->get('core.installer.elasticsearch')->index($io);
 
         $this->cleanup();
 

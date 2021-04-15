@@ -4,9 +4,13 @@ namespace BackBee\Renderer\Helper;
 
 use BackBee\Renderer\AbstractRenderer;
 use BackBee\Site\Site;
-use BackBeePlanet\GlobalSettings;
+use Exception;
 
 /**
+ * Class getCdnUri
+ *
+ * @package BackBee\Renderer\Helper
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class getCdnUri extends AbstractHelper
@@ -22,12 +26,14 @@ class getCdnUri extends AbstractHelper
      * getCdnUri constructor.
      *
      * @param AbstractRenderer $renderer
+     *
+     * @throws Exception
      */
     public function __construct(AbstractRenderer $renderer)
     {
         parent::__construct($renderer);
 
-        $settings = (new GlobalSettings())->cdn();
+        $settings = $renderer->getApplication()->getConfig()->getSection('cdn');
 
         if (isset($settings[static::CDN_SETTINGS_KEY]) && false !== $settings[static::CDN_SETTINGS_KEY]) {
             $this->site = new Site();
@@ -36,12 +42,14 @@ class getCdnUri extends AbstractHelper
     }
 
     /**
-     * @param       $uri
-     * @param false $preserveScheme
+     * Invoke.
+     *
+     * @param      $uri
+     * @param bool $preserveScheme
      *
      * @return string|string[]|null
      */
-    public function __invoke($uri, $preserveScheme = false)
+    public function __invoke($uri, bool $preserveScheme = false)
     {
         $url = $this->_renderer->getUri($uri, null, $this->site);
 

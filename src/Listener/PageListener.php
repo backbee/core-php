@@ -20,7 +20,6 @@ use BackBeeCloud\Entity\PageType;
 use BackBeeCloud\PageType\ArticleType;
 use BackBeeCloud\PageType\HomeType;
 use BackBeeCloud\PageType\SearchResultType;
-use BackBeePlanet\GlobalSettings;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
@@ -313,6 +312,8 @@ class PageListener
      * Occurs on `nestednode.page.render` to set the right layout name to use.
      *
      * @param RendererEvent $event
+     *
+     * @throws BBException
      */
     public static function onPageRender(RendererEvent $event): void
     {
@@ -349,34 +350,32 @@ class PageListener
             }
         }
 
-        if ((new GlobalSettings())->isPrivacyPolicyEnabled()) {
-            if ($data = $userPreferenceManager->dataOf('privacy-policy')) {
-                $multilangManager = $app->getContainer()->get('multilang_manager');
-                if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
-                    $currentLang = $multilangManager->getCurrentLang();
-                    foreach ($data as $key => $value) {
-                        $prefix = $currentLang . '_';
-                        if (1 === preg_match(sprintf('~^%s~', $prefix), $key)) {
-                            $renderer->assign(str_replace($prefix, '', $key), $value);
-                        }
+        if ($app->getAppParameter('privacy_policy') && $data = $userPreferenceManager->dataOf('privacy-policy')) {
+            $multilangManager = $app->getContainer()->get('multilang_manager');
+            if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
+                $currentLang = $multilangManager->getCurrentLang();
+                foreach ($data as $key => $value) {
+                    $prefix = $currentLang . '_';
+                    if (1 === preg_match(sprintf('~^%s~', $prefix), $key)) {
+                        $renderer->assign(str_replace($prefix, '', $key), $value);
                     }
-
-                    return;
                 }
 
-                $renderer->assign(
-                    'banner_message',
-                    $data['banner_message'] ?? null
-                );
-                $renderer->assign(
-                    'learn_more_url',
-                    $data['learn_more_url'] ?? null
-                );
-                $renderer->assign(
-                    'learn_more_link_title',
-                    $data['learn_more_link_title'] ?? null
-                );
+                return;
             }
+
+            $renderer->assign(
+                'banner_message',
+                $data['banner_message'] ?? null
+            );
+            $renderer->assign(
+                'learn_more_url',
+                $data['learn_more_url'] ?? null
+            );
+            $renderer->assign(
+                'learn_more_link_title',
+                $data['learn_more_link_title'] ?? null
+            );
         }
     }
 

@@ -3,7 +3,6 @@
 namespace BackBeePlanet\Standalone;
 
 use BackBeeCloud\Listener\ContentCategoryListener as BaseContentCategoryListener;
-use BackBeePlanet\Standalone\AbstractStandaloneHelper;
 use BackBee\Routing\RouteCollection;
 
 /**

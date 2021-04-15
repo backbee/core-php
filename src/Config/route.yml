@@ -395,14 +395,6 @@ cloud.api.tags.delete:
         uid: "[a-f0-9]{32}"
         _method: DELETE
 
-cloud.hauth.authenticate:
-    pattern: /social/authenticate
-    defaults:
-        _action: authenticateAction
-        _controller: cloud.hauth.controller
-    requirements:
-        _method: POST
-
 # Knowledge Graph API
 
 cloud.api.knowledge_graph.parameters:

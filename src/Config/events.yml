@@ -6,18 +6,17 @@ bbapplication.init:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit ]
         - [ BackBee\Renderer\Listener\TwigListener, onApplicationReady ]
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CoreListener, forceClassContentLoadOnApplicationInit, -7999 ]
-        - [ BackBeeCloud\Listener\CoreListener, onApplicationInit, 200 ]
+        - [ '@core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
+        - [ '@core.listener', onApplicationInit, 200 ]
         - [ BackBeeCloud\Listener\PageListener, onApplicationInit ]
         - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
         - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
-        - [ "@app.optimize_image.listener", onApplicationInit ]
         - [ '@core.sitemap.listener', onApplicationInit ]
 
 bbapplication.start:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CoreListener, onApplicationStart, -50 ]
+        - [ '@core.listener', onApplicationStart, -50 ]
 
 bbapplication.stop:
     listeners:
@@ -47,9 +46,9 @@ kernel.exception:
         - [ "@cloud.api.user_controller.listener", onKernelException, 100 ]
         - [ BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100 ]
         - [ @cloud.disqus_listener, onDisqusControlledException, 100 ]
-        - [ BackBeeCloud\Listener\CoreListener, onAuthenticationException, 100 ]
+        - [ '@core.listener', onAuthenticationException, 100 ]
         - [ "@api.multilang.listener", onMultiLangException, 100 ]
-        - [ BackBeeCloud\Listener\CoreListener, onKernelException, 50 ]
+        - [ '@core.listener', onKernelException, 50 ]
         - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100 ]
 
 kernel.controller:
@@ -59,7 +58,7 @@ kernel.controller:
         - [ @rest.listener.validation, onKernelController ]
         - [ @rest.listener.pagination, onKernelController ]
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CoreListener, onKernelController ]
+        - [ '@core.listener', onKernelController ]
         - [ "@cloud.api.user_right.listener", onKernelController ]
 
 kernel.response:
@@ -69,7 +68,7 @@ kernel.response:
         - [ "@cloud.theme_color.listener", onKernelResponse ]
         - [ "@cloud.favicon.listener", onKernelResponse ]
         - [ BackBeeCloud\Listener\PrivacyPolicyListener, onKernelResponse ]
-        - [ BackBeeCloud\Listener\CacheListener, onKernelResponse, -8000 ]
+        - [ '@core.cache.listener', onKernelResponse, -8000 ]
 
 # ClassContent listeners
 
@@ -239,24 +238,24 @@ rest.controller.classcontentcontroller.putaction.postcall:
 rest.controller.securitycontroller.deletesessionaction.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onLogoutPostCall ]
+        - [ '@core.cache.listener', onLogoutPostCall ]
 
 rest.controller.securitycontroller.authenticateaction.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onAuthenticationPostCall ]
+        - [ '@core.cache.listener', onAuthenticationPostCall ]
 
 rest.controller.classcontentcontroller.getcategorycollectionaction.postcall:
     listeners:
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\PageTypeListener, onGetCategoryPostCall ]
-        - [ @content.category_listener, onGetCategoryPostCall ]
-        - [ BackBeeCloud\Listener\CacheListener, onGetCategoryPostCall ]
+        - [ '@content.category_listener', onGetCategoryPostCall ]
+        - [ '@core.cache.listener', onGetCategoryPostCall ]
 
 rest.controller.pagecontroller.deleteaction.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
+        - [ '@core.cache.listener', onChangePostCall ]
         - [ BackBeeCloud\Listener\ElasticsearchListener, onPageDeletePostcall ]
         - [ BackBeeCloud\Listener\PageListener, onPageDeletePostcall ]
 
@@ -296,27 +295,27 @@ backbeecloud.api.controller.contentcontroller.delete.postcall:
 backbeecloud.api.controller.pagecontroller.put.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
+        - [ '@core.cache.listener', onChangePostCall ]
 
 backbeecloud.api.controller.tagcontroller.put.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
+        - [ '@core.cache.listener', onChangePostCall ]
 
 backbeecloud.api.controller.tagcontroller.delete.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
+        - [ '@core.cache.listener', onChangePostCall ]
 
 backbeecloud.api.controller.contentcontroller.publish.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onPublishPostCall ]
+        - [ '@core.cache.listener', onPublishPostCall ]
 
 backbeecloud.api.controller.contentcontroller.publishall.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onPublishAllPostCall ]
+        - [ '@core.cache.listener', onPublishAllPostCall ]
 
 backbeecloud.controller.contactcontroller.send.precall:
     listeners:
@@ -331,12 +330,12 @@ backbeecloud.controller.newslettercontroller.send.precall:
 backbeecloud.api.controller.userpreferencecontroller.put.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
+        - [ '@core.cache.listener', onChangePostCall ]
 
 backbeecloud.api.controller.userpreferencecontroller.delete.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\CacheListener, onChangePostCall ]
+        - [ '@core.cache.listener', onChangePostCall ]
 
 rest.controller.usercontroller.getcollectionaction.postcall:
     listeners:

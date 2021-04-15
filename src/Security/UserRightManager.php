@@ -2,6 +2,7 @@
 
 namespace BackBeeCloud\Security;
 
+use BackBee\BBApplication;
 use BackBee\NestedNode\Page;
 use BackBee\Security\SecurityContext;
 use BackBee\Security\User;
@@ -9,7 +10,6 @@ use BackBeeCloud\Entity\PageType;
 use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\Security\Authorization\Voter\UserRightPageAttribute;
 use BackBeeCloud\Security\GroupType\GroupTypeRight;
-use BackBeePlanet\GlobalSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
@@ -33,6 +33,11 @@ class UserRightManager
     public const CREATE_CONTENT_RIGHT = 'CREATE_CONTENT';
     public const EDIT_CONTENT_RIGHT = 'EDIT_CONTENT';
     public const DELETE_CONTENT_RIGHT = 'DELETE_CONTENT';
+
+    /**
+     * @var BBApplication
+     */
+    private $bbApp;
 
     /**
      * @var SecurityContext
@@ -62,6 +67,7 @@ class UserRightManager
     /**
      * UserRightManager constructor.
      *
+     * @param BBApplication          $bbApp
      * @param SecurityContext        $securityContext
      * @param EntityManagerInterface $entityManager
      * @param PageCategoryManager    $pageCategoryManager
@@ -69,12 +75,14 @@ class UserRightManager
      * @param array                  $superAdminBundleRights
      */
     public function __construct(
+        BBApplication $bbApp,
         SecurityContext $securityContext,
         EntityManagerInterface $entityManager,
         PageCategoryManager $pageCategoryManager,
         LoggerInterface $logger,
         array $superAdminBundleRights = []
     ) {
+        $this->bbApp = $bbApp;
         $this->securityContext = $securityContext;
         $this->entityManager = $entityManager;
         $this->pageCategoryManager = $pageCategoryManager;
@@ -158,7 +166,7 @@ class UserRightManager
                     self::DELETE_CONTENT_RIGHT,
                 ],
                 $this->superAdminBundleRights,
-                (new GlobalSettings())->isKnowledgeGraphEnabled() ? [UserRightConstants::KNOWLEDGE_GRAPH_FEATURE] : []
+                $this->bbApp->getAppParameter('knowledge_graph') ? [UserRightConstants::KNOWLEDGE_GRAPH_FEATURE] : []
             )
         );
     }

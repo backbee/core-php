@@ -17,7 +17,7 @@ use function dirname;
 /**
  * Class BackBeeConsole
  *
- * @package BackBeePlanet\Console
+ * @package BackBee\Console
  *
  * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */

@@ -4,13 +4,17 @@ namespace BackBeePlanet\OptimizeImage;
 
 use BackBee\BBApplication;
 use BackBee\ClassContent\Basic\Image;
-use BackBeeCloud\UserAgentHelper;
-use BackBeePlanet\GlobalSettings;
+use BackBee\Config\Config;
+use BackBee\HttpClient\UserAgent;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
 use function count;
 
 /**
+ * Class OptimizeImageManager
+ *
+ * @package BackBeePlanet\OptimizeImage
+ *
  * @author Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class OptimizeImageManager
@@ -18,10 +22,8 @@ class OptimizeImageManager
     public const CMD = 'convert %s%s%s';
     public const CODE_OK = 0;
     public const CODE_ERROR = 1;
-
     public const CMD_TRANSPARENCY_INFO = 'convert %s -format "%%[opaque]" info:';
     public const CMD_FRAMES_NUMBER = 'identify -format %%n %s';
-
     private const DEFAULT_SETTINGS = [
         'filter' => 'Triangle',
         'define' => 'filter:support=2',
@@ -53,16 +55,23 @@ class OptimizeImageManager
     private $settings;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * OptimizeImageManager constructor.
      *
      * @param BBApplication $app
+     * @param Config        $config
      *
      * @throws Exception
      */
-    public function __construct(BBApplication $app)
+    public function __construct(BBApplication $app, Config $config)
     {
         $this->filesystem = new Filesystem();
         $this->mediaDir = $app->getMediaDir();
+        $this->config = $config;
         $this->settings = $this->getSettings();
     }
 
@@ -92,7 +101,7 @@ class OptimizeImageManager
      */
     public function getSettings(): array
     {
-        $options = (array)((new GlobalSettings())->optimizeimage() ?? []);
+        $options = $this->config->getSection('optimize_image');
 
         if (null !== ($options['original'] ?? null) && null !== ($options['formats'] ?? null)) {
             $this->settings['original'] = $options['original'];
@@ -260,14 +269,14 @@ class OptimizeImageManager
         }
 
         return ' ' . (implode(
-            ' ',
-            array_map(
-                static function ($key) use ($options) {
-                    return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
-                },
-                array_keys($options)
-            )
-        )) . ' ';
+                ' ',
+                array_map(
+                    static function ($key) use ($options) {
+                        return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
+                    },
+                    array_keys($options)
+                )
+            )) . ' ';
     }
 
     //@TODO current media directory <> current web media
@@ -329,7 +338,7 @@ class OptimizeImageManager
         $colSizesSettings = $this->settings['colsizes'];
         $browserColSizesSettings = $this->settings['browsercolsizes'];
 
-        if (UserAgentHelper::isMobile()) {
+        if (UserAgent::isMobile()) {
             $size = $colSizesSettings[$browserColSizesSettings['min']];
         } elseif (null !== ($colSizesSettings[$colSize] ?? null)) {
             $size = $colSizesSettings[$colSize];
@@ -356,8 +365,8 @@ class OptimizeImageManager
     private function checkImageHasAlreadyBeenOptimized(string $path): bool
     {
         return 1 === preg_match(
-            '/.*_[' . sprintf("'%s'", implode("','", array_keys($this->settings['formats']))) . '].*/',
-            $path
-        );
+                '/.*_[' . sprintf("'%s'", implode("','", array_keys($this->settings['formats']))) . '].*/',
+                $path
+            );
     }
 }

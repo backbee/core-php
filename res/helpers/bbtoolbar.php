@@ -2,14 +2,14 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBeePlanet\GlobalSettings;
+use Exception;
 
 /**
  * Class bbtoolbar
  *
  * @package BackBee\Renderer\Helper
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class bbtoolbar extends AbstractHelper
 {
@@ -17,10 +17,12 @@ class bbtoolbar extends AbstractHelper
      * Invoke.
      *
      * @return string
+     * @throws Exception
      */
     public function __invoke(): string
     {
-        $settings = (new GlobalSettings())->cdn();
+        $settings = $this->getRenderer()->getApplication()->getConfig()->getSection('cdn');
+
         return $this->getRenderer()->partial(
             'common/toolbar.html.twig',
             [

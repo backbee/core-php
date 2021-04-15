@@ -2,7 +2,6 @@
 
 namespace BackBee\Command;
 
-use BackBeePlanet\Redis\RedisManager;
 use BackBeePlanet\Standalone\StandaloneHelper;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,7 +41,11 @@ class ClearAllCacheCommand extends AbstractCommand
             $io->error($exception->getMessage());
         }
 
-        RedisManager::removePageCache(StandaloneHelper::appname());
+        $this->getContainer()->get('core.redis.manager')->removePageCache(
+            StandaloneHelper::appName(
+                $this->getConfig()
+            )
+        );
         $io->section('Removed Redis page cache.');
 
         $this->cleanup();

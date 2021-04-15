@@ -1,32 +1,35 @@
 <?php
 
-namespace BackBeePlanet\Standalone;
+namespace BackBee\Installer;
 
-use BackBee\BBApplication;
-use BackBeeCloud\Security\UserRightInstaller;
 use Exception;
 use RuntimeException;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use function is_array;
+use function is_string;
 
 /**
- * Trait ManageUserRightsTrait
+ * Class UserRightsInstaller
  *
- * @package BackBeePlanet\Standalone
+ * @package BackBee\Installer
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-trait ManageUserRightsTrait
+class UserRightsInstaller extends AbstractInstaller
 {
     /**
-     * Install user right feature.
+     * Install.
      *
-     * @param BBApplication $app
+     * @param SymfonyStyle $io
      */
-    protected function installUserRights(BBApplication $app): void
+    public function install(SymfonyStyle $io): void
     {
+        $io->section('Install user rights');
+
         try {
-            $securityConfig = $app->getConfig()->getSecurityConfig();
+            $securityConfig = $this->getApplication()->getConfig()->getSecurityConfig();
         } catch (Exception $exception) {
-            $app->getLogging()->error(
+            $io->error(
                 sprintf(
                     '%s : %s :%s',
                     __CLASS__,
@@ -44,13 +47,16 @@ trait ManageUserRightsTrait
             throw new RuntimeException('"default_group_type" configuration is missing from security.yml.');
         }
 
-        $installer = $app->getContainer()->get('core.user_right.installer');
+        $installer = $this->getApplication()->getContainer()->get('core.user_right.installer');
 
         if ($installer->isInstalled()) {
             $installer->syncGroupTypes($securityConfig['group_types']);
+            $io->success('User right successfully updated.');
             return;
         }
 
         $installer->install($securityConfig['group_types'], $securityConfig['default_group_type']);
+
+        $io->success('User right successfully installed.');
     }
 }
