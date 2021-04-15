@@ -5,7 +5,6 @@ namespace BackBeeCloud\MultiLang;
 use BackBee\BBApplication;
 use BackBee\Cache\RedisManager;
 use BackBee\Config\Config;
-use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
 use BackBeeCloud\Entity\Lang;
@@ -88,7 +87,6 @@ class MultiLangManager implements JobHandlerInterface
      * Get current long.
      *
      * @return string|null
-     * @throws BBException
      */
     public function getCurrentLang(): ?string
     {

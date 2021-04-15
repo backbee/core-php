@@ -23,7 +23,7 @@ cdn:
     app_css_url: /static/back/css/app.css
     image_domain: null
     static_domain: null
-    app_rte_url: 'https://cdn.ckeditor.com/4.7.0/full-all/ckeditor.js'
+    app_rte_url: 'https://cdn.ckeditor.com/4.16.0/full-all/ckeditor.js'
 
 languages:
     cn: 中文
@@ -35,3 +35,4 @@ languages:
     nl: Nederlands
     pt: Português
     ru: русский
+    ar: عرب

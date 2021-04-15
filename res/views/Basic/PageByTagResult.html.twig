@@ -2,7 +2,7 @@
   <h2>
     {{ this.getObject().getParamValue('result_label') }}
     <strong>
-      {{ this.getTagTranslation(tag_entity, this.getCurrentLang())|capitalize }}
+      {{ this.getTagTranslation(tag_entity, this.getCurrentLang.getCode())|capitalize }}
     </strong>
   </h2>
 

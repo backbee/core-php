@@ -3,7 +3,7 @@
 {% set global_content_settings = this.getDesignSettings('global_content') %}
 {% set has_header_margin = global_content_settings['has_header_margin'] %}
 
-<html lang="{{ this.getCurrentLang() ?: 'en' }}">
+<html lang="{{ this.getCurrentLang.getCode() ?: 'fr' }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -144,7 +144,7 @@
     {% block main_content %}
         {{ this.render(this.globalContentFactory().getHeader())|raw }}
 
-        <main class="main" role="main" id="content">
+        <main class="main" role="main" id="content" dir="{{ this.getCurrentLang.getCode() == 'ar' ? 'rtl' : 'ltr' }}">
             {% block content %}{% endblock %}
         </main>
 
