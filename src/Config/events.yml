@@ -30,7 +30,7 @@ service.tagged.config_per_site:
 # Kernel listeners
 kernel.request:
     listeners:
-        - [ @profiler.listener, onKernelRequest ]
+        #- [ @profiler.listener, onKernelRequest ]
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\RequestListener, onKernelRequest ]
 
@@ -60,8 +60,8 @@ kernel.controller:
 
 kernel.response:
     listeners:
-        - [ @profiler.toolbar.listener, onKernelResponse ]
-        - [ @profiler.listener, onKernelResponse ]
+#        - [ @profiler.toolbar.listener, onKernelResponse ]
+#        - [ @profiler.listener, onKernelResponse ]
         - [ "@cloud.theme_color.listener", onKernelResponse ]
         - [ "@cloud.favicon.listener", onKernelResponse ]
         - [ BackBeeCloud\Listener\PrivacyPolicyListener, onKernelResponse ]
@@ -87,6 +87,7 @@ element.file.postremove:
 classcontent.onflush:
     listeners:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onFlushContent ]
+        - [ '@core.log.class_content.listener', onFlushContent ]
 
 classcontent.prerender:
     listeners:
