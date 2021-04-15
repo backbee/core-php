@@ -22,6 +22,7 @@
 namespace BackBeePlanet\Standalone;
 
 use BackBee\Config\Config;
+use BackBee\DependencyInjection\Container;
 use BackBeeCloud\Listener\CacheListener;
 use BackBee\HttpClient\UserAgent;
 use Exception;
@@ -124,7 +125,7 @@ abstract class AbstractStandaloneHelper
      *
      * @param $path
      */
-    public static function mkdirOnce($path)
+    public static function mkdirOnce($path): void
     {
         $umask = umask();
         umask(0);
@@ -138,14 +139,13 @@ abstract class AbstractStandaloneHelper
     /**
      * Get app name.
      *
-     * @param Config $config
+     * @param Container $container
      *
      * @return string
      */
-    public static function appName(Config $config): string
+    public static function appName(Container $container): string
     {
-        $app = $config->getSection('app');
-        return $app['name'] ?? basename(static::rootDir());
+        return $container->getParameter('app_name') ?? basename(static::rootDir());
     }
 
     /**
@@ -200,7 +200,7 @@ abstract class AbstractStandaloneHelper
             $requestUri = $request->getRequestUri();
             $key = sprintf(
                 '%s:%s[%s]',
-                static::appName($app->getConfig()),
+                static::appName($app->getContainer()),
                 $requestUri,
                 UserAgent::getDeviceType()
             );

@@ -52,7 +52,7 @@ class getCdnUri extends AbstractHelper
     {
         parent::__construct($renderer);
 
-        $settings = $renderer->getApplication()->getConfig()->getSection('cdn');
+        $settings = $renderer->getApplication()->getContainer()->getParameter('cdn');
 
         if (isset($settings[static::CDN_SETTINGS_KEY]) && false !== $settings[static::CDN_SETTINGS_KEY]) {
             $this->site = new Site();

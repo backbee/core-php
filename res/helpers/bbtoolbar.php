@@ -40,7 +40,7 @@ class bbtoolbar extends AbstractHelper
      */
     public function __invoke(): string
     {
-        $settings = $this->getRenderer()->getApplication()->getConfig()->getSection('cdn');
+        $settings = $this->getRenderer()->getApplication()->getContainer()->getParameter('cdn');
 
         return $this->getRenderer()->partial(
             'common/toolbar.html.twig',

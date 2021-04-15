@@ -204,8 +204,8 @@ class RepositoryInstaller extends AbstractInstaller
 
         // build bundles folder
         $filesystem = new Filesystem();
-        $originDir = StandaloneHelper::distDir() . DIRECTORY_SEPARATOR . 'bundles';
-        $targetDir = $configDir . DIRECTORY_SEPARATOR . 'bundles';
+        $originDir = StandaloneHelper::distDir() . DIRECTORY_SEPARATOR . 'bundle';
+        $targetDir = $configDir . DIRECTORY_SEPARATOR . 'bundle';
 
         if ($filesystem->exists($originDir) && false === $filesystem->exists($targetDir)) {
             $filesystem->mirror($originDir, $targetDir);

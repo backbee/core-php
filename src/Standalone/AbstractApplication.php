@@ -27,6 +27,10 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
+ * Class AbstractApplication
+ *
+ * @package BackBeePlanet\Standalone
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 abstract class AbstractApplication extends BBApplication
@@ -41,7 +45,7 @@ abstract class AbstractApplication extends BBApplication
      *
      * @param string $repositoryDir
      */
-    public static function setRepositoryDir($repositoryDir)
+    public static function setRepositoryDir(string $repositoryDir): void
     {
         self::$repositoryDir = $repositoryDir;
     }
@@ -49,15 +53,15 @@ abstract class AbstractApplication extends BBApplication
     /**
      * {@inheritdoc}
      */
-    public function getBaseRepository()
+    public function getBaseRepository(): string
     {
         return self::$repositoryDir;
     }
 
     /**
-     * {@inheritdoc}
+     * Get resource base dir.
      */
-    public function getResourceBaseDir()
+    public function getResourceBaseDir(): string
     {
         return $this->getBaseDir() . DIRECTORY_SEPARATOR . 'res';
     }
@@ -67,7 +71,7 @@ abstract class AbstractApplication extends BBApplication
      *
      * @return string
      */
-    public function getBaseDir()
+    public function getBaseDir(): string
     {
         return $this->getBaseDirectory();
     }
@@ -75,7 +79,7 @@ abstract class AbstractApplication extends BBApplication
     /**
      * {@inheritdoc}
      */
-    public function getBBUserToken()
+    public function getBBUserToken(): ?BBUserToken
     {
         $token = $this->getSecurityContext()->getToken();
 

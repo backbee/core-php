@@ -69,7 +69,7 @@ class knowledgeGraphHelper extends AbstractHelper
      */
     public function isKnowledgeGraphEnabled(): bool
     {
-        return $this->getRenderer()->getApplication()->getAppParameter('knowledge_graph');
+        return $this->getRenderer()->getApplication()->getContainer()->getParameter('knowledge_graph');
     }
 
     /**

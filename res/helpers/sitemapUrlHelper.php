@@ -54,7 +54,7 @@ class sitemapUrlHelper extends AbstractHelper
 
         $bbApp = $this->getRenderer()->getApplication();
         $this->excluded = $bbApp->getConfig()->getSitemapsConfig('excluded') ?? [];
-        $this->forceUrlExtension = $bbApp->getConfig()->getParametersConfig('force_url_extension') ?? false;
+        $this->forceUrlExtension = $bbApp->getContainer()->getParameter('force_url_extension') ?? false;
     }
 
     /**

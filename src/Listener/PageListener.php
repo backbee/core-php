@@ -369,10 +369,9 @@ class PageListener
             }
         }
 
-        if ($app->getAppParameter('privacy_policy') && $data = $userPreferenceManager->dataOf('privacy-policy')) {
+        if ($app->getContainer()->getParameter('privacy_policy') && $data = $userPreferenceManager->dataOf('privacy-policy')) {
             $multilangManager = $app->getContainer()->get('multilang_manager');
             if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
-                $currentLang = $multilangManager->getCurrentLang();
                 foreach ($data as $key => $value) {
                     $prefix = $currentLang . '_';
                     if (1 === preg_match(sprintf('~^%s~', $prefix), $key)) {

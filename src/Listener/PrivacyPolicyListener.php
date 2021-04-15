@@ -42,7 +42,7 @@ class PrivacyPolicyListener
         $app = $event->getKernel()->getApplication();
         if (
             null === $app->getBBUserToken()
-            || !$app->getAppParameter('privacy_policy')
+            || !$app->getContainer()->getParameter('privacy_policy')
         ) {
             return;
         }

@@ -130,7 +130,7 @@ class YamlStructureDumperManager implements JobHandlerInterface
         $this->designColorPanelManager = $app->getContainer()->get('cloud.color_panel.manager');
         $this->designThemeColorManager = $app->getContainer()->get('cloud.theme_color.manager');
 
-        $cdnSettings = $config->getSection('cdn');
+        $cdnSettings = $this->app->getContainer()->getParameter('cdn');
         $this->cdnFilePath = $cdnSettings['image_domain'];
     }
 

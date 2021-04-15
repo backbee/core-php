@@ -276,7 +276,7 @@ services:
     # MultiLang service
     multilang_manager:
         class: BackBeeCloud\MultiLang\MultiLangManager
-        arguments: [ '@bbapp', '@config', '@core.redis.manager' ]
+        arguments: [ '@bbapp', '@core.redis.manager' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 
@@ -338,7 +338,7 @@ services:
         arguments:
             - "@cloud.file_handler"
             - "@structure.parameter_handler"
-            - '@config'
+            - '@service_container'
         tags:
             - { name: structure.content_handler, dispatch_event: false }
 
@@ -688,3 +688,8 @@ services:
         class: BackBeeCloud\Listener\CoreListener
         arguments:
             [ '@bbapp' ]
+
+    core.class_content.video.listener:
+        class: BackBeeCloud\Listener\ClassContent\VideoListener
+        arguments:
+            [ '@core.class_content.media.video.manager', '@backbee.logger' ]

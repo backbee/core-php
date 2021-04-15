@@ -62,7 +62,7 @@ class ClearAllCacheCommand extends AbstractCommand
 
         $this->getContainer()->get('core.redis.manager')->removePageCache(
             StandaloneHelper::appName(
-                $this->getConfig()
+                $this->getContainer()
             )
         );
         $io->section('Removed Redis page cache.');

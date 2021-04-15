@@ -198,7 +198,7 @@ class CoreListener
         $exception = $event->getException();
 
         $request = Request::createFromGlobals();
-        $isDevMode = self::$bbApp->getAppParameter('dev_mode');
+        $isDevMode = self::$bbApp->getContainer()->getParameter('dev_mode');
         if ($isDevMode || $request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')) {
             $whoops = new Run();
             $whoops->pushHandler(new PrettyPageHandler());

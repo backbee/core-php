@@ -1,5 +1,4 @@
 # Application listeners
-
 bbapplication.init:
     listeners:
         - [ BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit, -8000 ]
@@ -23,14 +22,12 @@ bbapplication.stop:
         - [ BackBee\Bundle\Listener\BundleListener, onApplicationStop ]
 
 # Config listeners
-
 service.tagged.config_per_site:
     listeners:
         - [ @config.configurator, onGetServiceConfig ]
 
 
 # Kernel listeners
-
 kernel.request:
     listeners:
         - [ @profiler.listener, onKernelRequest ]
@@ -71,7 +68,6 @@ kernel.response:
         - [ '@core.cache.listener', onKernelResponse, -8000 ]
 
 # ClassContent listeners
-
 classcontent.include:
     listeners:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onInclude ]
@@ -208,7 +204,6 @@ comment.disqus.render:
         - [ '@cloud.disqus_listener', onRender ]
 
 # Controller listeners
-
 rest.controller.classcontentcontroller.getaction.postcall:
     listeners:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onPostCall ]
