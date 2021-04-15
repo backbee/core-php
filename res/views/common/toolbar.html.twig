@@ -8,16 +8,16 @@
      data-base-url="{{ this.getUri('/') }}"
      data-toolbar-selector="true"
      data-image-domain="{{ imageDomain }}"
-{% if bb.token != null %}
-     data-autostart
-     data-site-uid="{{ this.getCurrentPage().getSite().getUid() }}"
-     data-page-uid="{{ this.getCurrentPage().getUid() }}"
-     data-layout-uid="{{ this.getCurrentPage().getLayout().getUid() }}"
-     data-page-online="{{ this.getCurrentPage().isOnline() }}"
-     data-root-uid="{{ this.getCurrentPage().getRoot().getUid() }}"
-     data-parent-uid="{{ this.getCurrentPage().getParent().getUid() }}"
-     data-max-size="{{ this.getMaxFileSize() }}"
-{% endif %}>
+        {% if bb.token != null %}
+data-autostart
+    data-site-uid="{{ this.getCurrentPage().getSite().getUid() }}"
+    data-page-uid="{{ this.getCurrentPage().getUid() }}"
+    data-layout-uid="{{ this.getCurrentPage().getLayout().getUid() }}"
+    data-page-online="{{ this.getCurrentPage().isOnline() }}"
+    data-root-uid="{{ this.getCurrentPage().getRoot().getUid() }}"
+    data-parent-uid="{{ this.getCurrentPage().getParent().getUid() }}"
+    data-max-size="{{ this.getMaxFileSize() }}"
+        {% endif %}>
 </div>
 
 {% if bb.token != null %}
@@ -103,30 +103,33 @@
             animation: load8 1s infinite linear
         }
     </style>
-    <script>
-      (function () {
-        'use strict'
-        var a = !1, b = [], c = function (i, j, k) {
-          var l, m = document
-          switch (i) {
-            case'js':
-              l = m.createElement('script'), l.src = j
-              break
-            case'css':
-              l = m.createElement('link'), l.href = j, l.rel = 'stylesheet'
-              break
-            default:
-              return
-          }
-          k && l.addEventListener('load', k, !1), m.getElementsByTagName('head')[0].appendChild(l)
-        }, d = function () {
-          var i = document.createElement('div'), j = document.createElement('div'), k = document.createElement('div')
-          i.setAttribute('id', 'cloud-starter-overlay'), j.setAttribute('class', 'loader-wrapper'), k.setAttribute('class', 'loader'), j.appendChild(k), i.appendChild(j), document.body.appendChild(i)
-        }
-        document.addEventListener('keydown', function f (i) {a || ('keyB' === i.code || 66 === i.which) && i.ctrlKey && i.altKey && (d(), c('css', '{{ appCssUrl }}', function () {c('js', '{{ appJsUrl }}')}), a = !0)})
-        var g = function () {b = []},
-          h = function () {b = []}
-        window.navigator.msPointerEnabled ? (document.addEventListener('MSPointerDown', g), document.addEventListener('MSPointerMove', h)) : (document.addEventListener('touchstart', g), document.addEventListener('touchmove', h))
-      })()
-    </script>
+    {% if this.checkUserIP() %}
+        <script>
+          (function () {
+            'use strict'
+            var a = !1, b = [], c = function (i, j, k) {
+              var l, m = document
+              switch (i) {
+                case'js':
+                  l = m.createElement('script'), l.src = j
+                  break
+                case'css':
+                  l = m.createElement('link'), l.href = j, l.rel = 'stylesheet'
+                  break
+                default:
+                  return
+              }
+              k && l.addEventListener('load', k, !1), m.getElementsByTagName('head')[0].appendChild(l)
+            }, d = function () {
+              var i = document.createElement('div'), j = document.createElement('div'),
+                k = document.createElement('div')
+              i.setAttribute('id', 'cloud-starter-overlay'), j.setAttribute('class', 'loader-wrapper'), k.setAttribute('class', 'loader'), j.appendChild(k), i.appendChild(j), document.body.appendChild(i)
+            }
+            document.addEventListener('keydown', function f (i) {a || ('keyB' === i.code || 66 === i.which) && i.ctrlKey && i.altKey && (d(), c('css', '{{ appCssUrl }}', function () {c('js', '{{ appJsUrl }}')}), a = !0)})
+            var g = function () {b = []},
+              h = function () {b = []}
+            window.navigator.msPointerEnabled ? (document.addEventListener('MSPointerDown', g), document.addEventListener('MSPointerMove', h)) : (document.addEventListener('touchstart', g), document.addEventListener('touchmove', h))
+          })()
+        </script>
+    {% endif %}
 {% endif %}
