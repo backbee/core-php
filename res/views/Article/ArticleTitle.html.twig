@@ -26,10 +26,10 @@
       <p class="metadata-wrapper text-{{align.value}}">
         {% if show_date.value == true %}
           {% set publishing = this.getCurrentPage().getPublishing() %}
-          {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing|localizeddate('short', 'short', locale=(this.getCurrentLang()|lower)) ~ '</time>' : '<em class="metadata-time" data-cloud-trans="not_yet_published">Not yet published</em>')|raw}}
+          {{(publishing ? '<time class="time metadata-time" itemprop="datePublished" datetime="' ~ publishing.format('c') ~ '">' ~ publishing|localizeddate('short', 'short', locale=(this.getCurrentLang.getCode()|lower)) ~ '</time>' : '<em class="metadata-time" data-cloud-trans="not_yet_published">Not yet published</em>')|raw}}
         {% endif %}
         {% if show_tags.value == true %}
-          {% set current_lang = this.getCurrentLang() %}
+          {% set current_lang = this.getCurrentLang.getCode() %}
           {% for tag in this.getPageTags(this.getCurrentPage(), true) %}
             {% set route_name = 'cloud.search_by_tag' ~ (current_lang ? '_i18n' : '') %}
             <span class="metadata-tag"><a href="{{ this.generateUrlByRouteName(route_name, {'lang': current_lang, 'tagName': tag.keyWord|lower|url_encode}, null, false) }}">{{ this.getTagTranslation(tag, current_lang) }}</a></span>

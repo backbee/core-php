@@ -1,6 +1,6 @@
 <div {{ this.bbcontent()|raw }} data-forbidden-plugins="remove">
   <div class="form-group">
-    {% set current_lang = this.getCurrentLang() %}
+    {% set current_lang = this.getCurrentLang.getCode() %}
     <form action="{{ current_lang ? '/' ~ current_lang : '' }}/search" method="get" class="searchbar-wrapper">
       <div class="input-group">
         <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="{{this.getObject().getParamValue('input_placeholder')}}" />

@@ -1,4 +1,4 @@
-{% set current_lang = this.getCurrentLang() %}
+{% set current_lang = this.getCurrentLang.getCode() %}
 <form {{this.bbcontent(null, {class: 'content searchbar-wrapper'})|raw}} action="{{current_lang ? '/' ~ current_lang : ''}}/search" method="get">
   <div class="input-group">
     <input
