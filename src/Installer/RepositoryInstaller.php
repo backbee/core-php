@@ -40,7 +40,7 @@ class RepositoryInstaller extends AbstractInstaller
 
         $io->text('Data\'s folders are ready.');
 
-        // bootstrap.yml
+        // build bootstrap.yml
         $filepath = $configDir . DIRECTORY_SEPARATOR . 'bootstrap.yml';
         if (file_exists($filepath)) {
             $io->note(sprintf('%s already exists.', $filepath));
@@ -150,7 +150,7 @@ class RepositoryInstaller extends AbstractInstaller
 
         $io->newLine();
 
-        // services.yml
+        // build services.yml
         $filepath = $configDir . DIRECTORY_SEPARATOR . 'services.yml';
         if (file_exists($filepath)) {
             $io->note(sprintf('%s already exists.', $filepath));
@@ -170,7 +170,20 @@ class RepositoryInstaller extends AbstractInstaller
             $io->text(sprintf('%s has been generated.', $filepath));
         }
 
-        // bundles folder
+        $io->newLine();
+
+        // build recaptcha.yml
+        $filepath = $configDir . DIRECTORY_SEPARATOR . 'recaptcha.yml';
+        if (file_exists($filepath)) {
+            $io->note(sprintf('%s already exists.', $filepath));
+        } else {
+            file_put_contents($filepath, Yaml::dump(AbstractCommand::parseYaml('recaptcha.yml.dist'), 20));
+            $io->text(sprintf('%s has been generated.', $filepath));
+        }
+
+        $io->newLine();
+
+        // build bundles folder
         $filesystem = new Filesystem();
         $originDir = StandaloneHelper::distDir() . DIRECTORY_SEPARATOR . 'bundles';
         $targetDir = $configDir . DIRECTORY_SEPARATOR . 'bundles';
