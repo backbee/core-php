@@ -2,13 +2,18 @@
 
 namespace BackBeeCloud\Tag;
 
-use BackBeeCloud\Entity\Lang;
 use BackBee\NestedNode\KeyWord as Tag;
+use BackBeeCloud\Entity\Lang;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 
 /**
+ * Class TagLang
+ *
  * @ORM\Entity
  * @ORM\Table(name="tag_lang")
+ *
+ * @package BackBeeCloud\Tag
  *
  * @author Eric Chau <eriic.chau@gmail.com>
  */
@@ -35,7 +40,7 @@ class TagLang
      * @ORM\ManyToOne(targetEntity="BackBeeCloud\Entity\Lang")
      * @ORM\JoinColumn(name="lang", referencedColumnName="lang", nullable=false)
      *
-     * @var string
+     * @var Lang
      */
     protected $lang;
 
@@ -46,6 +51,13 @@ class TagLang
      */
     protected $translation;
 
+    /**
+     * TagLang constructor.
+     *
+     * @param Tag  $tag
+     * @param Lang $lang
+     * @param      $translation
+     */
     public function __construct(Tag $tag, Lang $lang, $translation)
     {
         $this->tag = $tag;
@@ -53,31 +65,56 @@ class TagLang
         $this->setTranslation($translation);
     }
 
-    public function getId()
+    /**
+     * Get id.
+     *
+     * @return int
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getTag()
+    /**
+     * Get tag.
+     *
+     * @return Tag
+     */
+    public function getTag(): Tag
     {
         return $this->tag;
     }
 
-    public function getLang()
+    /**
+     * Get lang.
+     *
+     * @return Lang
+     */
+    public function getLang(): Lang
     {
         return $this->lang;
     }
 
-    public function getTranslation()
+    /**
+     * Get translation.
+     *
+     * @return string
+     */
+    public function getTranslation(): string
     {
         return $this->translation;
     }
 
-    public function setTranslation($translation)
+    /**
+     * Set translation.
+     *
+     * @param $translation
+     */
+    public function setTranslation($translation): void
     {
         $translation = trim($translation);
-        if (false == $translation) {
-            throw new \RuntimeExeption('Tag translation cannot be an empty string.');
+        if (false === $translation) {
+            throw new InvalidArgumentException('Tag translation cannot be an empty string.');
         }
 
         $this->translation = $translation;
