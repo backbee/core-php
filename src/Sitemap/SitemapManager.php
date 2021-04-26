@@ -65,7 +65,7 @@ class SitemapManager
             $this->cache = $this->bbApp->getContainer()->get('cache.control');
         }
 
-        foreach ($this->config->getSection('sitemaps') as $id => $definition) {
+        foreach ($this->config->getSection('sitemaps') ?? [] as $id => $definition) {
             $cacheControl = Collection::get($definition, 'cache-control', []);
             $this->setCacheControl($id, $cacheControl);
         }
