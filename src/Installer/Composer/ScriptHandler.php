@@ -29,7 +29,14 @@ class ScriptHandler
 
         $destDir = sprintf('%s/web/static/back', $rootDir);
         $filesystem->mkdir($destDir);
-        $filesystem->mirror($distSourceDir, $destDir, null, ['override' => true, 'delete' => true]);
+        $filesystem->mirror(
+            $distSourceDir,
+            $destDir,
+            null, [
+                'override' => true,
+                'delete' => true
+            ]
+        );
     }
 
     /**
@@ -48,6 +55,14 @@ class ScriptHandler
 
         $destDir = sprintf('%s/res/dist', $rootDir);
         $filesystem->mkdir($destDir);
-        $filesystem->mirror($distSourceDir, $destDir, null, ['override' => true, 'delete' => false]);
+        $filesystem->mirror(
+            $distSourceDir,
+            $destDir,
+            null,
+            [
+                'override' => false,
+                'delete' => false
+            ]
+        );
     }
 }
