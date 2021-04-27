@@ -190,9 +190,9 @@ class SeoMetadataManager
      *
      * @param string $pageUid
      *
-     * @return $this
+     * @return void
      */
-    private function getElasticSearchResult(string $pageUid): self
+    private function getElasticSearchResult(string $pageUid): void
     {
         try {
             $this->esResult = $this->elasticsearchManager->getClient()->get(
@@ -205,8 +205,6 @@ class SeoMetadataManager
         } catch (Missing404Exception $exception) {
             $this->esResult = null;
         }
-
-        return $this;
     }
 
     /**
@@ -232,10 +230,10 @@ class SeoMetadataManager
                             '&nbsp;',
                             '',
                             strlen($abstract->value) > 300 ? mb_substr(
-                                    $abstract->value,
-                                    0,
-                                    300
-                                ) . '...' : $abstract->value
+                                $abstract->value,
+                                0,
+                                300
+                            ) . '...' : $abstract->value
                         )
                     )
                 );
@@ -252,9 +250,9 @@ class SeoMetadataManager
     /**
      * Set image url.
      *
-     * @return $this
+     * @return void
      */
-    private function setImageUrl(): self
+    private function setImageUrl(): void
     {
         try {
             if (
@@ -268,16 +266,14 @@ class SeoMetadataManager
                 sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
             );
         }
-
-        return $this;
     }
 
     /**
      * Set search engine options.
      *
-     * @return $this
+     * @return void
      */
-    private function setSearchEngineOptions(): self
+    private function setSearchEngineOptions(): void
     {
         $searchEngine = $this->searchEngineManager->googleSearchEngineIsActivated();
 
@@ -286,6 +282,5 @@ class SeoMetadataManager
         $this->seoData['follow'] = null === $this->pageMetadataBag->get('follow') ?
             $searchEngine : $this->pageMetadataBag->get('follow')->getAttribute('content');
 
-        return $this;
     }
 }
