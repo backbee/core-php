@@ -47,7 +47,7 @@ class getCurrentLang extends AbstractHelper
      */
     public function getCode(): ?string
     {
-        return $this->multiLangManager->getCurrentLang();
+        return $this->multiLangManager->getCurrentLang() ?? 'fr';
     }
 
     /**
