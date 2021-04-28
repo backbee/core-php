@@ -2,16 +2,20 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\Renderer\Helper\AbstractHelper;
 use BackBee\Renderer\Renderer;
+use Symfony\Component\Translation\Translator;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * Class trans
+ *
+ * @package BackBee\Renderer\Helper
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class trans extends AbstractHelper
 {
     /**
-     * @var \Symfony\Component\Translation\Translator
+     * @var Translator
      */
     protected $translator;
 
@@ -20,15 +24,35 @@ class trans extends AbstractHelper
      */
     protected $currentLang;
 
+    /**
+     * trans constructor.
+     *
+     * @param Renderer $renderer
+     */
     public function __construct(Renderer $renderer)
     {
         $this->setRenderer($renderer);
 
         $this->translator = $renderer->getApplication()->getContainer()->get('translator');
-        $this->currentLang = $renderer->getCurrentLang();
+        $this->currentLang = $renderer
+                ->getApplication()
+                ->getContainer()
+                ->get('multilang_manager')
+                ->getCurrentLang() ?? 'fr';
+
+        parent::__construct($renderer);
     }
 
-    public function __invoke($id, array $parameters = [], $locale = null)
+    /**
+     * Invoke.
+     *
+     * @param       $id
+     * @param array $parameters
+     * @param null  $locale
+     *
+     * @return string
+     */
+    public function __invoke($id, array $parameters = [], $locale = null): string
     {
         return $this->translator->trans($id, $parameters, null, $locale ?: $this->currentLang);
     }
