@@ -84,7 +84,7 @@ class MultiLangManager implements JobHandlerInterface
     }
 
     /**
-     * Get current long.
+     * Get current lang.
      *
      * @return string|null
      */

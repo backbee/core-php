@@ -269,6 +269,18 @@ class RepositoryInstaller extends AbstractInstaller
             $config['port'] = AbstractCommand::askFor('Mailer port: ');
         }
 
+        if (null === ($config['username'] = AbstractCommand::getInput()->getOption('mailer_username'))) {
+            $config['username'] = AbstractCommand::askFor('Mailer username: ');
+        }
+
+        if (null === ($config['password'] = AbstractCommand::getInput()->getOption('mailer_password'))) {
+            $config['password'] = AbstractCommand::askFor('Mailer password: ', true);
+        }
+
+        if (null === ($config['encryption'] = AbstractCommand::getInput()->getOption('mailer_encryption'))) {
+            $config['encryption'] = AbstractCommand::askFor('Mailer encryption: ');
+        }
+
         if (null === ($config['email_from'] = AbstractCommand::getInput()->getOption('mailer_from'))) {
             $config['email_from'] = AbstractCommand::askFor('Mailer from: ');
         }

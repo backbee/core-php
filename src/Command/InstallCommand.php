@@ -51,7 +51,9 @@ class InstallCommand extends AbstractCommand
             ->addOption('redis_host', null, InputOption::VALUE_OPTIONAL, 'The redis host to set.')
             ->addOption('mailer_host', null, InputOption::VALUE_OPTIONAL, 'The mailer host to set.')
             ->addOption('mailer_port', null, InputOption::VALUE_OPTIONAL, 'The mailer port to set.')
-            ->addOption('mailer_from', null, InputOption::VALUE_OPTIONAL, 'The mailer from to set.')
+            ->addOption('mailer_username', null, InputOption::VALUE_OPTIONAL, 'The mailer username from to set.')
+            ->addOption('mailer_password', null, InputOption::VALUE_OPTIONAL, 'The mailer password from to set.')
+            ->addOption('mailer_encryption', null, InputOption::VALUE_OPTIONAL, 'The mailer encryption from to set.')
             ->addOption('admin_username', null, InputOption::VALUE_OPTIONAL, 'The admin username to set.')
             ->addOption('admin_password', null, InputOption::VALUE_OPTIONAL, 'The admin password to set.')
         ;
