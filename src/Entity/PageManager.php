@@ -435,7 +435,9 @@ class PageManager
                     static function ($type) {
                         return false === $type->isProtected() || $type->uniqueName() === (new HomeType)->uniqueName() ?
                             $type->uniqueName() : null;
-                        }, array_values($this->typeMgr->all()
+                    },
+                    array_values(
+                        $this->typeMgr->all()
                     )
                 )
             );
@@ -599,7 +601,7 @@ class PageManager
         $data = $this->prepareDataWithLang($data);
         $data['title'] = $data['title'] ?? '';
         $data['tags'] = isset($data['tags']) ? (array)$data['tags'] : [];
-        $putContentOnline = isset($data['put_content_online']) ? (bool)$data['put_content_online'] : false;
+        $putContentOnline = isset($data['put_content_online']) && $data['put_content_online'];
         $isOnline = $data['is_online'] ?? false;
         $copy = new Page($data['uid'] ?? null);
         unset($data['type'], $data['is_online'], $data['put_content_online'], $data['uid']);
@@ -1040,12 +1042,8 @@ class PageManager
                 'keywords' => $bag->get('keywords')
                     ? $bag->get('keywords')->getAttribute('content')
                     : '',
-                'index' => $bag->get('index')
-                    ? (bool)$bag->get('index')->getAttribute('content')
-                    : false,
-                'follow' => $bag->get('follow')
-                    ? (bool)$bag->get('follow')->getAttribute('content')
-                    : false,
+                'index' => !$bag->get('index') || $bag->get('index')->getAttribute('content'),
+                'follow' => !$bag->get('follow') || $bag->get('follow')->getAttribute('content'),
             ],
             $data
         );
