@@ -60,12 +60,12 @@ class PageFromRawData
         $entries = $this->getESResult($page);
 
         foreach ($entries as $entry) {
-            $data['uid'] = $entry['_id'];
+            $this->data['uid'] = $entry['_id'];
             $page = $entry['_source'];
-            $data['type'] = $page['type'];
-            $data['title'] = $page['title'];
-            $data['contents'] = $page['contents'];
-            $data['url'] = $page['url'];
+            $this->data['type'] = $page['type'];
+            $this->data['title'] = $page['title'];
+            $this->data['contents'] = $page['contents'];
+            $this->data['url'] = $page['url'];
             $this->setAbstractData($page['abstract_uid'] ?? null);
             $this->setImageData($page['image'] ?? null);
             $this->data['tags'] = $page['tags'];
@@ -107,7 +107,6 @@ class PageFromRawData
         if (null === $mediaUid) {
             $this->data['image'] = null;
         } else {
-            $image = null;
             $media = $this->getContentWithDraft(AbstractClassContent::class, $mediaUid);
             if ($media instanceof Image && null !== ($image = $media->image)) {
                 $this->data['image'] = [
