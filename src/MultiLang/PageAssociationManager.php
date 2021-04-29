@@ -25,6 +25,7 @@ use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
 use BackBeeCloud\Elasticsearch\ElasticsearchManager;
+use BackBeeCloud\Elasticsearch\ElasticsearchQuery;
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageAssociation;
 use BackBeeCloud\Entity\PageLang;
@@ -61,20 +62,28 @@ class PageAssociationManager
     protected $elasticsearchMgr;
 
     /**
+     * @var ElasticsearchQuery
+     */
+    protected $elasticsearchQuery;
+
+    /**
      * PageAssociationManager constructor.
      *
      * @param EntityManager        $entryMgr
      * @param MultiLangManager     $multiLangMgr
      * @param ElasticsearchManager $elasticsearchMgr
+     * @param ElasticsearchQuery   $elasticsearchQuery
      */
     public function __construct(
         EntityManager $entryMgr,
         MultiLangManager $multiLangMgr,
-        ElasticsearchManager $elasticsearchMgr
+        ElasticsearchManager $elasticsearchMgr,
+        ElasticsearchQuery $elasticsearchQuery
     ) {
         $this->entityMgr = $entryMgr;
         $this->multiLangMgr = $multiLangMgr;
         $this->elasticsearchMgr = $elasticsearchMgr;
+        $this->elasticsearchQuery = $elasticsearchQuery;
     }
 
     /**
@@ -92,53 +101,50 @@ class PageAssociationManager
                 'bool' => [
                     'should' => [],
                     'must_not' => [
-                        ['match' => ['url' => '/']],
+                        [
+                            'match' => [
+                                'url' => '/'
+                            ]
+                        ],
                     ],
                 ],
             ],
         ];
 
         if ($term) {
-            $matchPart = ['query' => $term, 'boost' => 2];
-            $esQuery['query']['bool']['should'][] = ['match' => ['title' => $matchPart]];
-            $esQuery['query']['bool']['should'][] = ['match' => ['title.raw' => $matchPart]];
-            $esQuery['query']['bool']['should'][] = ['match' => ['title.folded' => $matchPart]];
-            $esQuery['query']['bool']['should'][] = ['match_phrase_prefix' => ['title' => $matchPart]];
-            $esQuery['query']['bool']['should'][] = ['match_phrase_prefix' => ['title.folded' => $matchPart]];
+            $esQuery = $this->elasticsearchQuery->getQueryToFilterByTitle($esQuery, $term);
         }
 
         $currentLang = $this->multiLangMgr->getLangByPage($page);
 
-        $langsToExclude = array_keys($this->getAssociatedPages($page));
-        $langsToExclude[] = $currentLang;
+        $langToExclude = array_keys($this->getAssociatedPages($page));
+        $langToExclude[] = $currentLang;
 
-        foreach ($langsToExclude as $lang) {
-            $esQuery['query']['bool']['must_not'][] = ['prefix' => ['url' => sprintf('/%s/', $lang)]];
-        }
+        $esQuery = $this->elasticsearchQuery->getQueryToFilterByLang($esQuery, $langToExclude, 'must_not');
 
         $qb = $this->entityMgr->getRepository(PageAssociation::class)->createQueryBuilder('pa');
-        $pageLangsToExclude = $qb
+        $pageLangToExclude = $qb
             ->select('pl.id as page_lang_id')
             ->join('pa.id', 'pl')
             ->join('pa.page', 'p')
             ->join(PageLang::class, 'ppl', Join::WITH, 'p._uid = ppl.page')
             ->join(Lang::class, 'ppl_l', Join::WITH, 'ppl.lang = ppl_l.lang')
             ->where($qb->expr()->eq('pl.lang', ':lang'))
-            ->orWhere($qb->expr()->in('ppl_l.lang', $langsToExclude))
+            ->orWhere($qb->expr()->in('ppl_l.lang', $langToExclude))
             ->setParameter('lang', $currentLang)
             ->getQuery()
             ->getResult();
 
         $pagesToExclude = [];
-        $pageLangsToExclude = array_values(array_unique(array_column($pageLangsToExclude, 'page_lang_id')));
+        $pageLangToExclude = array_values(array_unique(array_column($pageLangToExclude, 'page_lang_id')));
 
-        if (false !== $pageLangsToExclude && !empty($pageLangsToExclude)) {
+        if (false !== $pageLangToExclude && !empty($pageLangToExclude)) {
             $qb = $this->entityMgr->getRepository(PageAssociation::class)->createQueryBuilder('pa');
             $pagesToExclude = $qb
                 ->select('p._uid as page_uid')
                 ->join('pa.id', 'pl')
                 ->join('pa.page', 'p')
-                ->where($qb->expr()->in('pl.id', $pageLangsToExclude))
+                ->where($qb->expr()->in('pl.id', $pageLangToExclude))
                 ->getQuery()
                 ->getResult();
         }

@@ -25,19 +25,27 @@ use BackBee\ClassContent\Article\ArticleAbstract;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Text\Paragraph;
+use BackBee\Renderer\Exception\RendererException;
 use BackBee\Renderer\Renderer;
 use BackBee\Security\Token\BBUserToken;
+use DateTime;
 use Doctrine\ORM\EntityManager;
+use Exception;
+use Psr\Log\LoggerInterface;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * Class ResultItemHtmlFormatter
+ *
+ * @package BackBeeCloud\Search
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class ResultItemHtmlFormatter
 {
     /**
      * @var EntityManager
      */
-    protected $entyMgr;
+    protected $entityMgr;
 
     /**
      * @var Renderer
@@ -47,29 +55,58 @@ class ResultItemHtmlFormatter
     /**
      * @var null|BBUserToken
      */
-    protected $bbtoken;
+    protected $bbToken;
 
     /**
-     * Constructor.
-     *
-     * @param EntityManager    $entyMgr
-     * @param Renderer         $renderer
-     * @param BBUserToken|null $bbtoken
+     * @var LoggerInterface
      */
-    public function __construct(EntityManager $entyMgr, Renderer $renderer, BBUserToken $bbtoken = null)
-    {
-        $this->entyMgr = $entyMgr;
+    protected $logger;
+
+    /**
+     * ResultItemHtmlFormatter constructor.
+     *
+     * @param EntityManager    $entityMgr
+     * @param Renderer         $renderer
+     * @param LoggerInterface  $logger
+     * @param BBUserToken|null $bbToken
+     */
+    public function __construct(
+        EntityManager $entityMgr,
+        Renderer $renderer,
+        LoggerInterface $logger,
+        BBUserToken $bbToken = null
+    ) {
+        $this->entityMgr = $entityMgr;
         $this->renderer = $renderer;
-        $this->bbtoken = $bbtoken;
+        $this->logger = $logger;
+        $this->bbToken = $bbToken;
     }
 
+    /**
+     * Render item from raw data.
+     *
+     * @param array $pageRawData
+     * @param array $extraParams
+     *
+     * @return string|void
+     * @throws RendererException
+     */
     public function renderItemFromRawData(array $pageRawData, array $extraParams = [])
     {
         $params = $pageRawData['_source'];
 
-        $params['publishing'] = $params['published_at']
-            ? new \DateTime($params['published_at'])
-            : null;
+        try {
+            $params['publishing'] = $params['published_at'] ? new DateTime($params['published_at']) : null;
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
 
         if (null !== $abstractUid = $pageRawData['_source']['abstract_uid'] ?? null) {
             $abstract = $this->getContentWithDraft(ArticleAbstract::class, $abstractUid);
@@ -116,14 +153,35 @@ class ResultItemHtmlFormatter
         );
     }
 
+    /**
+     * Get content with draft.
+     *
+     * @param $classname
+     * @param $uid
+     *
+     * @return object|null
+     */
     protected function getContentWithDraft($classname, $uid)
     {
-        $content = $this->entyMgr->find($classname, $uid);
-        if (null !== $content && null !== $this->bbtoken) {
-            $draft = $this->entyMgr
-                ->getRepository(Revision::class)
-                ->getDraft($content, $this->bbtoken, false);
-            $content->setDraft($draft);
+        $content = null;
+
+        try {
+            $content = $this->entityMgr->find($classname, $uid);
+            if (null !== $content && null !== $this->bbToken) {
+                $draft = $this->entityMgr
+                    ->getRepository(Revision::class)
+                    ->getDraft($content, $this->bbToken);
+                $content->setDraft($draft);
+            }
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
         return $content;

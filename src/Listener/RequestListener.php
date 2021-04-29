@@ -32,7 +32,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
  */
 class RequestListener
 {
-    const COLLECTION_MAX_ITEM = 50;
+    const COLLECTION_MAX_ITEM = 5;
 
     /**
      * Executed on dispatch of `kernel.request` event.

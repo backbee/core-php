@@ -35,27 +35,24 @@ use BackBee\NestedNode\Repository\PageRepository;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
-use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
 use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeeCloud\MultiLang\PageAssociationManager;
-use BackBeeCloud\PageCategory\PageCategory;
 use BackBeeCloud\PageCategory\PageCategoryManager;
-use BackBeeCloud\PageType\HomeType;
 use BackBeeCloud\PageType\TypeManager;
 use BackBeeCloud\SearchEngine\SearchEngineManager;
 use BackBeeCloud\Tag\TagManager;
 use DateTime;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\Query\QueryException;
-use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
 use Psr\Log\LoggerInterface;
-use function count;
+use function is_string;
+use function strlen;
 
 /**
  * Class PageManager
@@ -221,7 +218,8 @@ class PageManager
      * Returns page count of current application
      *
      * @return int
-     * @throws QueryException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function count(): int
     {
@@ -323,182 +321,6 @@ class PageManager
     public function get(string $uid): ?Page
     {
         return $this->repository->find($uid);
-    }
-
-    /**
-     * Returns every page ordered by modified date (desc) of current application.
-     *
-     * @param array $criteria
-     * @param       $start
-     * @param       $limit
-     * @param array $sort
-     *
-     * @return array|ElasticsearchCollection|Paginator
-     */
-    public function getBy(array $criteria = [], $start, $limit, array $sort = [])
-    {
-        $lang = $criteria['lang'] ?? null;
-        if (null === $lang && isset($criteria['page_uid'])) {
-            $page = $this->get($criteria['page_uid']);
-            $lang = $page ? $this->multiLangMgr->getLangByPage($page) : null;
-            unset($criteria['lang']);
-        }
-
-        $tags = [];
-        $rawTags = (isset($criteria['tags']) && !empty($criteria['tags']) ? explode(',', $criteria['tags']) : []);
-        if (!empty($rawTags)) {
-            foreach ($rawTags as $tagId) {
-                if (null !== $tag = $this->entityMgr->getRepository(KeyWord::class)->find($tagId)) {
-                    $tags[] = $tag;
-                }
-            }
-        } else {
-            unset($criteria['tags']);
-        }
-
-        if (null === ($criteria['category'] ?? null)) {
-            unset($criteria['category']);
-        }
-
-        unset($criteria['page_uid']);
-
-        if (
-            0 === count($criteria) ||
-            (1 === count($criteria) && isset($criteria['title'])) || isset($criteria['has_draft_only'])
-        ) {
-            $query = [
-                'query' => [
-                    'bool' => [
-                        'must' => [],
-                        'should' => [],
-                    ],
-                ],
-            ];
-
-            if ($this->multiLangMgr->isActive()) {
-                $query['query']['bool']['must_not'] = [
-                    ['match' => ['url' => '/']],
-                ];
-            }
-
-            if (null !== ($criteria['category'] ?? null)) {
-                $query['query']['bool']['must'] = ['match' => ['category' => $criteria['category']]];
-            }
-
-            if (null !== ($criteria['type'] ?? null)) {
-                $query['query']['bool']['must'] = [['match' => ['type' => $criteria['type']]]];
-            }
-
-            if (null !== ($criteria['is_online'] ?? null) && 'all' !== $criteria['is_online']) {
-                $query['query']['bool']['must'][] = ['match' => ['is_online' => (bool)$criteria['is_online']]];
-            }
-
-            if (!empty($tags)) {
-                $query['query']['bool']['must'] = array_map(
-                    static function (KeyWord $tag) {
-                        return ['term' => ['tags.raw' => strtolower($tag->getKeyWord())]];
-                    },
-                    $tags
-                );
-            }
-
-            if ($lang && $lang !== 'all') {
-                $query['query']['bool']['must'][] = ['prefix' => ['url' => sprintf('/%s/', $lang)]];
-            }
-
-            if (isset($criteria['title'])) {
-                $title = str_replace('%', '', $criteria['title']);
-                $query['query']['bool']['should'] = [
-                    ['match' => ['title' => $title]],
-                    ['match' => ['title.raw' => $title]],
-                    ['match' => ['title.folded' => $title]],
-                    ['match_phrase_prefix' => ['title' => $title]],
-                    ['match_phrase_prefix' => ['title.raw' => $title]],
-                    ['match_phrase_prefix' => ['title.folded' => $title]],
-                    ['match_phrase_prefix' => ['tags' => $title]],
-                ];
-                $query['query']['bool']['minimum_should_match'] = 1;
-            }
-
-            if (isset($criteria['has_draft_only']) ? (bool)$criteria['has_draft_only'] : false) {
-                $query['query']['bool']['must'][] = ['match' => ['has_draft_contents' => true]];
-            }
-
-            $sortValidAttrNames = [
-                'modified_at',
-                'created_at',
-                'published_at',
-                'type',
-                'is_online',
-                'category',
-            ];
-            $sortValidOrder = ['asc', 'desc'];
-
-            $formattedSort = [];
-            $sort = 0 === count($criteria) && false !== $sort ? $sort : ['modified_at' => 'desc'];
-            foreach ($sort as $attr => $order) {
-                if (!\in_array($attr, $sortValidAttrNames, true)) {
-                    throw new InvalidArgumentException(sprintf('Pages are not sortable by %s .', $attr));
-                }
-                if (!\in_array($order, $sortValidOrder, true)) {
-                    throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
-                }
-                $formattedSort[] = $attr . ':' . $order;
-            }
-
-            return $this->elsMgr->customSearchPage($query, $start, $limit, $formattedSort);
-        }
-
-        unset($criteria['page_uid']);
-        if (1 === count($criteria) && isset($criteria['title'])) {
-            return $this->elsMgr->searchPage(str_replace('%', '', $criteria['title']), $start, $limit);
-        }
-
-        $qb = $this
-            ->repository
-            ->createQueryBuilder('p')
-            ->where('p._state != :deleted_state')
-            ->setParameter('deleted_state', Page::STATE_DELETED)
-            ->orderBy('p._modified', 'desc')
-            ->setFirstResult($start)
-            ->setMaxResults($limit);
-
-        if ($this->multiLangMgr->isActive()) {
-            $qb
-                ->andWhere($qb->expr()->neq('p._url', ':url'))
-                ->setParameter('url', '/');
-        }
-
-        if (null === ($criteria['type'] ?? null)) {
-            $types = array_filter(
-                array_map(
-                    static function ($type) {
-                        return false === $type->isProtected() || $type->uniqueName() === (new HomeType)->uniqueName() ?
-                            $type->uniqueName() : null;
-                    },
-                    array_values(
-                        $this->typeMgr->all()
-                    )
-                )
-            );
-
-            $criteria['type'] = implode(',', $types);
-        }
-
-        try {
-            foreach ($criteria as $attr => $data) {
-                $method = 'filterBy' . implode('', array_map('ucfirst', explode('_', $attr)));
-                if (method_exists($this, $method)) {
-                    $this->{$method}($qb, $data);
-                } else {
-                    throw new InvalidArgumentException("`$attr` attribute is not filterable");
-                }
-            }
-        } catch (EmptyPageSelectionException $e) {
-            return [];
-        }
-
-        return new Paginator($qb->getQuery(), false);
     }
 
     /**
@@ -633,8 +455,9 @@ class PageManager
      *
      * @return Page
      * @throws ClassNotFoundException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws OptimisticLockException
-     * @throws QueryException
      * @throws UnknownPropertyException
      * @throws \BackBee\Exception\InvalidArgumentException
      */
@@ -686,241 +509,6 @@ class PageManager
     }
 
     /**
-     * Returns all pages with draft contents.
-     *
-     * @return ElasticsearchManager
-     */
-    public function getPagesWithDraftContents(): ElasticsearchManager
-    {
-        return $this->elsMgr->customSearchPage(
-            [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            ['match' => ['has_draft_contents' => true]],
-                        ],
-                    ],
-                ],
-            ]
-        );
-    }
-
-    /**
-     * @param QueryBuilder $qb
-     * @param string       $value
-     */
-    protected function filterByTitle(QueryBuilder $qb, string $value): void
-    {
-        $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $rootAlias = current($qb->getRootAliases());
-        $qb
-            ->{$method}(
-                $qb->expr()->like("{$rootAlias}._title", ':title')
-            )
-            ->setParameter('title', '%' . $value . '%');
-    }
-
-    /**
-     * Adds where clause to query builder to filter page collection by state attribute.
-     *
-     * @param QueryBuilder $qb
-     * @param bool         $value
-     */
-    protected function filterByIsOnline(QueryBuilder $qb, bool $value): void
-    {
-        $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $rootAlias = current($qb->getRootAliases());
-        $qb
-            ->{$method}(
-                "{$rootAlias}._state = :state"
-            )
-            ->setParameter('state', $value ? Page::STATE_ONLINE : Page::STATE_OFFLINE);
-    }
-
-    /**
-     * Adds where clause to query builder to filter page collection by tags.
-     *
-     * Note that it's an 'AND' condition between each tag.
-     *
-     * @param QueryBuilder $qb
-     * @param string       $tags
-     *
-     * @throws EmptyPageSelectionException if there is at least one tag that does not exist
-     *                                     or if there is no page that match the set of requested tags
-     */
-    protected function filterByTags(QueryBuilder $qb, $tags): void
-    {
-        $keywords = [];
-        foreach (explode(',', $tags) as $tagId) {
-            if (null === $keyword = $this->entityMgr->getRepository(KeyWord::class)->find($tagId)) {
-                throw new EmptyPageSelectionException('');
-            }
-
-            $keywords[] = $keyword;
-        }
-
-        $pageTags = [];
-        foreach ($keywords as $keyword) {
-            $tagQb = $this->entityMgr
-                ->getRepository(PageTag::class)
-                ->createQueryBuilder('pt')
-                ->join('pt.page', Page::class)
-                ->join('pt.tags', 't')
-                ->where('t._uid = :keyword')
-                ->setParameter('keyword', $keyword);
-
-            if (0 < count($pageTags)) {
-                $tagQb
-                    ->orWhere($tagQb->expr()->in('pt.id', ':pagetags'))
-                    ->setParameter('pagetags', array_filter($pageTags));
-            }
-
-            $pageTags = $tagQb->getQuery()->getResult();
-            if (0 === count($pageTags)) {
-                throw new EmptyPageSelectionException('');
-            }
-        }
-
-        $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $rootAlias = current($qb->getRootAliases());
-        $qb->{$method}(
-            $qb->expr()->in(
-                "{$rootAlias}._uid",
-                array_map(
-                    static function (PageTag $pageTag) {
-                        return $pageTag->getPage()->getUid();
-                    },
-                    $pageTags
-                )
-            )
-        );
-    }
-
-    /**
-     * Adds where clause to query builder to filter page collection by page type.
-     *
-     * @param QueryBuilder $qb
-     * @param              $types
-     */
-    protected function filterByType(QueryBuilder $qb, $types): void
-    {
-        $uniqueNames = [];
-        foreach (explode(',', $types) as $type) {
-            if (null === $this->typeMgr->find($type)) {
-                throw new InvalidArgumentException("`{$type}` is an invalid page type unique name");
-            }
-
-            $uniqueNames[] = $type;
-        }
-
-        $pageTypes = $this->entityMgr
-            ->getRepository(PageType::class)
-            ->createQueryBuilder('pt')
-            ->join('pt.page', Page::class)
-            ->where($qb->expr()->in('pt.typeName', $uniqueNames))
-            ->getQuery()
-            ->getResult();
-
-        if (0 === count($pageTypes)) {
-            throw new EmptyPageSelectionException('');
-        }
-
-        $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $rootAlias = current($qb->getRootAliases());
-        $qb->{$method}(
-            $qb->expr()->in(
-                "{$rootAlias}._uid",
-                array_map(
-                    static function (PageType $pageType) {
-                        return $pageType->getPage()->getUid();
-                    },
-                    $pageTypes
-                )
-            )
-        );
-    }
-
-    /**
-     * Adds where clause to query builder to filter page collection by page lang.
-     *
-     * @param QueryBuilder $qb
-     * @param string       $lang
-     */
-    protected function filterByLang(QueryBuilder $qb, string $lang): void
-    {
-        $langEntity = $this->entityMgr->getRepository(Lang::class)->findOneBy(['lang' => $lang]);
-
-        if ($langEntity instanceof Lang) {
-            $pageLang = $this->entityMgr
-                ->getRepository(PageLang::class)
-                ->createQueryBuilder('pl')
-                ->join('pl.page', Page::class)
-                ->where('pl.lang = :langId')
-                ->setParameter('langId', $langEntity)
-                ->getQuery()
-                ->getResult();
-
-            if (0 === count($pageLang)) {
-                throw new EmptyPageSelectionException('');
-            }
-
-            $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-            $rootAlias = current($qb->getRootAliases());
-            $qb->{$method}(
-                $qb->expr()->in(
-                    "{$rootAlias}._uid",
-                    array_map(
-                        static function (PageLang $pageLang) {
-                            return $pageLang->getPage()->getUid();
-                        },
-                        $pageLang
-                    )
-                )
-            );
-        }
-    }
-
-    /**
-     * Adds where clause to query builder to filter page collection by page category.
-     *
-     * @param QueryBuilder $qb
-     * @param string       $category
-     */
-    protected function filterByCategory(QueryBuilder $qb, string $category): void
-    {
-        $qbPageCategory = $this
-            ->entityMgr
-            ->getRepository(PageCategory::class)
-            ->createQueryBuilder('pc')
-            ->join('pc.page', Page::class);
-
-        if ('none' !== $category) {
-            $qbPageCategory->where('pc.category = :category')->setParameter('category', $category);
-        }
-
-        $pageCategory = $qbPageCategory->getQuery()->getResult();
-
-        if (0 === count($pageCategory)) {
-            throw new EmptyPageSelectionException('');
-        }
-
-        $method = null === $qb->getDQLPart('where') ? 'where' : 'andWhere';
-        $exprMethod = 'none' !== $category ? 'in' : 'notIn';
-        $rootAlias = current($qb->getRootAliases());
-        $qb->{$method}(
-            $qb->expr()->{$exprMethod}(
-                "{$rootAlias}._uid",
-                array_map(
-                    static function (PageCategory $pageCategory) {
-                        return $pageCategory->getPage()->getUid();
-                    },
-                    $pageCategory
-                )
-            )
-        );
-    }
-
-    /**
      * @param Page   $page  The page to update
      * @param string $value The value to set
      *
@@ -929,7 +517,7 @@ class PageManager
      */
     protected function runSetTitle(Page $page, $value): void
     {
-        if (!\is_string($value) || 2 > \strlen($value)) {
+        if (!is_string($value) || 2 > strlen($value)) {
             throw new InvalidArgumentException(
                 '`title` must be type of string and contain at least 2 characters'
             );

@@ -218,6 +218,7 @@ class ElasticsearchClient
                     'is_online' => $page->isOnline(),
                     'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
                     'has_draft_contents' => false,
+                    'source' => Page::SOURCE_TYPE
                 ],
                 $this->getPageCustomDataToIndex($page)
             ),
@@ -286,6 +287,7 @@ class ElasticsearchClient
                 'body' => array_merge(
                     [
                         'name' => strtolower($tag->getKeyWord()),
+                        'source' => Tag::SOURCE_TYPE
                     ],
                     $this->getTagCustomDataToIndex($tag)
                 ),
@@ -298,14 +300,19 @@ class ElasticsearchClient
     /**
      * Indexes all tags into Elasticsearch except the root keyword.
      *
+     * @param SymfonyStyle|null $output
+     *
      * @return self
      */
-    public function indexAllTags(): self
+    public function indexAllTags(?SymfonyStyle $output = null): self
     {
         $rootUid = md5('root');
         foreach ($this->entityMgr->getRepository(Tag::class)->findAll() as $tag) {
             if ($rootUid !== $tag->getUid()) {
                 $this->indexTag($tag);
+                if ($output) {
+                    $output->progressAdvance();
+                }
             }
         }
 
@@ -442,6 +449,9 @@ class ElasticsearchClient
                         'category' => [
                             'type' => 'keyword',
                         ],
+                        'source' => [
+                            'type' => 'keyword',
+                        ],
                     ],
                 ],
             ]
@@ -458,6 +468,9 @@ class ElasticsearchClient
                         $this->getCustomTagTypeProperties(),
                         [
                             'name' => [
+                                'type' => 'keyword',
+                            ],
+                            'source' => [
                                 'type' => 'keyword',
                             ],
                         ]
@@ -571,6 +584,37 @@ class ElasticsearchClient
                 ->select('count(p._uid)')
                 ->where('p._state != :state')
                 ->setParameter('state', Page::STATE_DELETED)
+                ->getQuery()
+                ->getSingleScalarResult();
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
+        return $total;
+    }
+
+    /**
+     * Get total of tags.
+     *
+     * @return int
+     */
+    public function getTotalOfTags(): int
+    {
+        $total = 0;
+
+        try {
+            $total = $this
+                ->entityMgr
+                ->getRepository(Tag::class)
+                ->createQueryBuilder('k')
+                ->select('count(k._uid)')
                 ->getQuery()
                 ->getSingleScalarResult();
         } catch (Exception $exception) {

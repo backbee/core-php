@@ -39,7 +39,7 @@ class ElasticsearchInstaller extends AbstractInstaller
      */
     public function index(SymfonyStyle $io): void
     {
-        $io->section('Index elasticsearch');
+        $io->title('Index elasticsearch');
 
         $elasticsearchManager = $this->getApplication()->getContainer()->get('elasticsearch.manager');
 
@@ -49,15 +49,15 @@ class ElasticsearchInstaller extends AbstractInstaller
         $io->text('Create types');
         $elasticsearchManager->createTypes();
 
-        $io->text('Reindexing all pages');
-        $io->newLine();
+        $io->section('Reindexing all pages');
         $io->progressStart($elasticsearchManager->getTotalOfUndeletedPages());
         $elasticsearchManager->indexAllPages(true, $io);
         $io->progressFinish();
 
-        $io->text('Reindexing all tags');
-        $elasticsearchManager->indexAllTags();
-        $io->newLine();
+        $io->section('Reindexing all tags');
+        $io->progressStart($elasticsearchManager->getTotalOfTags());
+        $elasticsearchManager->indexAllTags($io);
+        $io->progressFinish();
 
         $io->success('Contents are now indexed into Elasticsearch.');
     }

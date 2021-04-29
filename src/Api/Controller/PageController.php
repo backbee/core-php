@@ -26,6 +26,7 @@ use BackBeeCloud\Entity\PageManager;
 use BackBeeCloud\Listener\RequestListener;
 use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\PageType\TypeManager;
+use BackBeeCloud\Search\SearchManager;
 use BackBeeCloud\Security\Authorization\Voter\UserRightPageAttribute;
 use BackBeeCloud\Security\UserRightConstants;
 use BackBee\BBApplication;
@@ -62,24 +63,32 @@ class PageController extends AbstractController
     protected $pageCategoryManager;
 
     /**
+     * @var SearchManager
+     */
+    protected $searchManager;
+
+    /**
      * PageController constructor.
      *
      * @param PageManager         $pageManager
      * @param TypeManager         $pageTypeManager
      * @param PageCategoryManager $pageCategoryManager
      * @param BBApplication       $app
+     * @param SearchManager       $searchManager
      */
     public function __construct(
         PageManager $pageManager,
         TypeManager $pageTypeManager,
         PageCategoryManager $pageCategoryManager,
-        BBApplication $app
+        BBApplication $app,
+        SearchManager $searchManager
     ) {
         parent::__construct($app);
 
         $this->pageManager = $pageManager;
         $this->pageTypeManager = $pageTypeManager;
         $this->pageCategoryManager = $pageCategoryManager;
+        $this->searchManager = $searchManager;
     }
 
     /**
@@ -134,19 +143,10 @@ class PageController extends AbstractController
 
         $criteria['lang'] = $criteria['lang'] ?? 'all';
 
-        $pages = $this->pageManager->getBy($criteria, $start, $limit, $sort);
+        $pages = $this->searchManager->getBy($criteria, $start, $limit, $sort);
 
-        $end = null;
-        $max = null;
-        $count = null;
-        if ($pages instanceof Paginator) {
-            $max = $pages->count();
-            $count = count($pages->getIterator());
-        } elseif ($pages instanceof ElasticsearchCollection) {
-            $max = $pages->countMax();
-            $count = $pages->count();
-        }
-
+        $max = $pages->countMax();
+        $count = $pages->count();
         $end = $start + $count - 1;
         $end = $end >= 0 ? $end : 0;
 
@@ -159,6 +159,7 @@ class PageController extends AbstractController
                 [
                     'Accept-Range' => 'pages ' . RequestListener::COLLECTION_MAX_ITEM,
                     'Content-Range' => $max ? "$start-$end/$max" : '-/-',
+                    'X-Page' => $criteria['page'] ?? 1
                 ]
             );
         } catch (Exception $exception) {
