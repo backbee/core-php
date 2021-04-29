@@ -218,7 +218,7 @@ class KnowledgeGraphManager
         try {
             foreach ($this->config['mapping_schema_types'] as $key => $mapping) {
                 if (true === in_array($pageType, $mapping, true)) {
-                    $schema = new ReflectionClass('BackBeePlanet\KnowledgeGraph\Schema\Schema' . $key);
+                    $schema = new ReflectionClass('BackBee\KnowledgeGraph\Schema\Schema' . $key);
                     $instance = $schema->newInstance($this->context);
                     $pieces[] = $instance->generate();
                 }

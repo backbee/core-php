@@ -2,17 +2,18 @@
 
 namespace BackBeeCloud\Migration;
 
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Basic\Image as BasicImage;
+use BackBee\ClassContent\Media\Image as MediaImage;
+use BackBee\ClassContent\Revision;
+use BackBee\Security\Token\BBUserToken;
 use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\Job\MediaImageMigrationJob;
 use BackBeeCloud\SiteStatusManager;
 use BackBeePlanet\Job\JobInterface;
-use BackBee\ClassContent\AbstractClassContent;
-use BackBee\ClassContent\Basic\Image as BasicImage;
-use BackBee\ClassContent\Media\Image as MediaImage;
-use BackBee\ClassContent\Revision;
-use BackBee\Security\Token\BBUserToken;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 
 /**
@@ -26,7 +27,7 @@ class MediaImageMigration implements JobHandlerInterface
     private $entityManager;
 
     /**
-     * @var \Doctrine\DBAL\Connection
+     * @var Connection
      */
     private $connection;
 
@@ -40,8 +41,11 @@ class MediaImageMigration implements JobHandlerInterface
      */
     private $elasticsearchMgr;
 
-    public function __construct(EntityManager $entityManager, SiteStatusManager $siteStatusMgr, ElasticsearchManager $elasticsearchMgr)
-    {
+    public function __construct(
+        EntityManager $entityManager,
+        SiteStatusManager $siteStatusMgr,
+        ElasticsearchManager $elasticsearchMgr
+    ) {
         $this->entityManager = $entityManager;
         $this->connection = $entityManager->getConnection();
         $this->siteStatusMgr = $siteStatusMgr;
@@ -50,7 +54,7 @@ class MediaImageMigration implements JobHandlerInterface
 
     public function isMigrationNeeded()
     {
-        $count = (int) $this->entityManager->getRepository(MediaImage::class)->createQueryBuilder('i')
+        $count = (int)$this->entityManager->getRepository(MediaImage::class)->createQueryBuilder('i')
             ->select('COUNT(i)')
             ->getQuery()
             ->getSingleScalarResult();
@@ -146,9 +150,12 @@ class MediaImageMigration implements JobHandlerInterface
 
     private function getGlobalContentUids()
     {
-        return array_column($this->connection->executeQuery(
-            'SELECT content_uid FROM global_content'
-        )->fetchAll(), 'content_uid');
+        return array_column(
+            $this->connection->executeQuery(
+                'SELECT content_uid FROM global_content'
+            )->fetchAll(),
+            'content_uid'
+        );
     }
 
     private function getMediaImages()
@@ -261,13 +268,16 @@ class MediaImageMigration implements JobHandlerInterface
 
     private function updateParentContentTables(MediaImage $mediaImage, BasicImage $basicImage)
     {
-        $parentUids = array_column($this->connection->executeQuery(
-            'SELECT c.uid as uid
+        $parentUids = array_column(
+            $this->connection->executeQuery(
+                'SELECT c.uid as uid
             FROM content_has_subcontent chs
             LEFT JOIN content c ON c.uid = chs.parent_uid
             WHERE chs.content_uid = :content_uid',
-            ['content_uid' => $mediaImage->getUid()]
-        )->fetchAll(), 'uid');
+                ['content_uid' => $mediaImage->getUid()]
+            )->fetchAll(),
+            'uid'
+        );
 
         foreach ($parentUids as $parentUid) {
             $parentData = $this->connection->executeQuery(
@@ -283,7 +293,13 @@ class MediaImageMigration implements JobHandlerInterface
             )->fetchAll();
 
             foreach ($revisionData as $revision) {
-                $this->executeUpdateDataField('revision', $revision['uid'], $revision['data'], $mediaImage, $basicImage);
+                $this->executeUpdateDataField(
+                    'revision',
+                    $revision['uid'],
+                    $revision['data'],
+                    $mediaImage,
+                    $basicImage
+                );
             }
         }
 
@@ -296,8 +312,13 @@ class MediaImageMigration implements JobHandlerInterface
         );
     }
 
-    private function executeUpdateDataField($tableName, $targetUid, $originalData, MediaImage $mediaImage, BasicImage $basicImage)
-    {
+    private function executeUpdateDataField(
+        $tableName,
+        $targetUid,
+        $originalData,
+        MediaImage $mediaImage,
+        BasicImage $basicImage
+    ) {
         $this->connection->executeUpdate(
             sprintf("UPDATE %s SET data = :data WHERE uid = :target_uid", $tableName),
             [
@@ -341,11 +362,14 @@ class MediaImageMigration implements JobHandlerInterface
         $data = unserialize($data);
         foreach ($imageAttrNames as $elementAttrName) {
             if (is_array($data[$elementAttrName])) {
-                $data[$elementAttrName] = array_map(function ($element) {
-                    $element['Basic\Image'] = md5($element['Basic\Image']);
+                $data[$elementAttrName] = array_map(
+                    function ($element) {
+                        $element['Basic\Image'] = md5($element['Basic\Image']);
 
-                    return $element;
-                }, $data[$elementAttrName]);
+                        return $element;
+                    },
+                    $data[$elementAttrName]
+                );
             }
         }
 

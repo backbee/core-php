@@ -156,13 +156,13 @@ class ContentManager
      * @return self
      * @throws OptimisticLockException
      */
-    public function addGlobalContent(AbstractClassContent $content)
+    public function addGlobalContent(AbstractClassContent $content): ContentManager
     {
-        $globalcontent = $this->entyMgr->getRepository(GlobalContent::class)->findOneBy(['content' => $content]);
-        if (null === $globalcontent) {
-            $globalcontent = new GlobalContent($content);
-            $this->entyMgr->persist($globalcontent);
-            $this->entyMgr->flush($globalcontent);
+        $globalContent = $this->entyMgr->getRepository(GlobalContent::class)->findOneBy(['content' => $content]);
+        if (null === $globalContent) {
+            $globalContent = new GlobalContent($content);
+            $this->entyMgr->persist($globalContent);
+            $this->entyMgr->flush($globalContent);
         }
 
         return $this;
@@ -175,8 +175,6 @@ class ContentManager
      * @param BBUserToken $token
      *
      * @return bool
-     * @throws ClassNotFoundException
-     * @throws UnknownPropertyException
      */
     public function isDraftedPage(Page $page, BBUserToken $token): bool
     {
@@ -193,7 +191,7 @@ class ContentManager
      *
      * @return AbstractClassContent
      */
-    public function hydrateDraft(AbstractClassContent $content, BBUserToken $token = null)
+    public function hydrateDraft(AbstractClassContent $content, BBUserToken $token = null): AbstractClassContent
     {
         if (null !== $token) {
             $draft = $this->entyMgr->getRepository(Revision::class)->checkout($content, $token);
@@ -244,19 +242,17 @@ class ContentManager
      * @param BBUserToken $token
      *
      * @return int
-     * @throws ClassNotFoundException
      * @throws OptimisticLockException
      * @throws RevisionConflictedException
      * @throws RevisionMissingException
      * @throws RevisionUptodateException
-     * @throws UnknownPropertyException
      */
-    public function publishByPage(Page $page, BBUserToken $token)
+    public function publishByPage(Page $page, BBUserToken $token): int
     {
         $this->entyMgr->beginTransaction();
         foreach ($this->getDraftStageToDelete($page, $token) as $draft) {
             $content = $draft->getContent();
-            $content->setDraft(null);
+            $content->setDraft();
             if ($content instanceof ContentSet) {
                 $content->clear();
             }
@@ -293,14 +289,14 @@ class ContentManager
             }
 
             $commitedCount++;
-            if (false == $result['elements'] && false == $result['parameters']) {
+            if (false === $result['elements'] && false === $result['parameters']) {
                 $content->setDraft($draft);
                 $content->prepareCommitDraft();
 
                 continue;
             }
 
-            $content->setDraft(null);
+            $content->setDraft();
 
             try {
                 $this->bbContentMgr->commit($content, $result);
@@ -332,11 +328,9 @@ class ContentManager
      * @param BBUserToken $token
      *
      * @return int
-     * @throws ClassNotFoundException
      * @throws OptimisticLockException
-     * @throws UnknownPropertyException
      */
-    public function resetByPage(Page $page, BBUserToken $token)
+    public function resetByPage(Page $page, BBUserToken $token): int
     {
         $this->entyMgr->beginTransaction();
 
@@ -347,9 +341,9 @@ class ContentManager
             $this->getPageContentDrafts($page, $token)
         );
         foreach ($drafts as $draft) {
-            $cancelCount = $cancelCount + 1;
+            ++$cancelCount;
             $content = $draft->getContent();
-            $content->setDraft(null);
+            $content->setDraft();
             if (
                 !$page->isOnline()
                 && ($page->getCreated()->getTimestamp() + 3) > $content->getCreated()->getTimestamp()
@@ -444,7 +438,7 @@ class ContentManager
      * @throws ClassNotFoundException
      * @throws UnknownPropertyException
      */
-    protected function gatherContentsUids(AbstractClassContent $content, BBUserToken $token = null)
+    protected function gatherContentsUids(AbstractClassContent $content, BBUserToken $token = null): array
     {
         $uids = [];
         $resetDraft = null !== $content->getDraft();
@@ -468,7 +462,7 @@ class ContentManager
 
         $uids[] = $content->getUid();
         if (!$resetDraft) {
-            $content->setDraft(null);
+            $content->setDraft();
         }
 
         return array_unique($uids);
@@ -481,12 +475,12 @@ class ContentManager
      * @throws ClassNotFoundException
      * @throws UnknownPropertyException
      */
-    protected function getGlobalContentsUids()
+    protected function getGlobalContentsUids(): array
     {
         return array_merge(
             ...array_filter(
                 array_map(
-                    function (GlobalContent $globalcontent) {
+                    static function (GlobalContent $globalcontent) {
                         $uids = [];
                         if (null === $content = $globalcontent->getContent()) {
                             return $uids;
@@ -512,10 +506,8 @@ class ContentManager
      * @param BBUserToken $token
      *
      * @return array|Revision[]
-     * @throws ClassNotFoundException
-     * @throws UnknownPropertyException
      */
-    protected function getDraftStageToDelete(Page $page, BBUserToken $token)
+    protected function getDraftStageToDelete(Page $page, BBUserToken $token): array
     {
         return $this->entyMgr->getRepository(Revision::class)->findBy(
             [
