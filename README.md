@@ -1,6 +1,6 @@
 # Core PHP
 
-BackBee Cloud CorePHP.
+BackBee CorePHP.
 
 ## 1) Image optimizer:
 
