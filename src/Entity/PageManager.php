@@ -70,82 +70,82 @@ class PageManager
     /**
      * @var BBUserToken|null
      */
-    private $bbToken;
+    protected $bbToken;
 
     /**
      * @var EntityManager
      */
-    private $entityMgr;
+    protected $entityMgr;
 
     /**
      * @var TypeManager
      */
-    private $typeMgr;
+    protected $typeMgr;
 
     /**
      * @var ContentManager
      */
-    private $contentMgr;
+    protected $contentMgr;
 
     /**
      * @var PageRepository
      */
-    private $repository;
+    protected $repository;
 
     /**
      * @var ElasticsearchManager
      */
-    private $elsMgr;
+    protected $elsMgr;
 
     /**
      * @var TagManager
      */
-    private $tagMgr;
+    protected $tagMgr;
 
     /**
      * @var bool
      */
-    private $hydratePage = true;
+    protected $hydratePage = true;
 
     /**
      * @var null|Page
      */
-    private $currentPage;
+    protected $currentPage;
 
     /**
      * @var MultiLangManager
      */
-    private $multiLangMgr;
+    protected $multiLangMgr;
 
     /**
      * @var null|Lang
      */
-    private $currentLang;
+    protected $currentLang;
 
     /**
      * @var PageCategoryManager
      */
-    private $pageCategoryManager;
+    protected $pageCategoryManager;
 
     /**
      * @var PageAssociationManager
      */
-    private $pageAssociationMgr;
+    protected $pageAssociationMgr;
 
     /**
      * @var SearchEngineManager
      */
-    private $searchEngineManager;
+    protected $searchEngineManager;
 
     /**
      * @var SeoMetadataManager
      */
-    private $seoMetadataManager;
+    protected $seoMetadataManager;
 
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    protected $logger;
 
     /**
      * PageManager constructor.
