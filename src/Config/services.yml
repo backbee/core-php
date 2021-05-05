@@ -21,6 +21,7 @@ services:
     backbee.logger:
         class: BackBee\Logging\Logger
 
+    # Page
     cloud.page_manager:
         class: BackBeeCloud\Entity\PageManager
         arguments:
@@ -33,6 +34,16 @@ services:
         arguments:
             [ '@em', '@elasticsearch.manager' ]
 
+    core.page.content.manager:
+        class: BackBee\Page\PageContentManager
+        arguments:
+            - '@em'
+            - '@cloud.content_manager'
+            - '@security.context'
+            - '@cloud.page_type.manager'
+            - '@cloud.page_category.manager'
+
+    # Content
     cloud.content_manager:
         class: BackBeeCloud\Entity\ContentManager
         arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp', '@backbee.logger' ]
@@ -596,12 +607,12 @@ services:
     core.menu.listener:
         class: BackBeeCloud\Listener\MenuListener
         arguments:
-            [ '@bbapp' ]
+            [ '@bbapp', '@core.page.content.manager' ]
 
     # Elasticsearch
     elasticsearch.manager:
         class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp" ]
+        arguments: [ "@bbapp", '@core.page.content.manager' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 

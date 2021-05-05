@@ -1,61 +1,73 @@
 Menu:
-  properties:
-    name: Menu
-    description: ~
-    category: ['!Common']
-    forbidden_plugins: ['remove', 'dnd', 'parameter', 'click']
-    form_height: 500
-  parameters:
-    burger:
-      type: switch
-      label: yaml_block_menu_burger
-      value: false
-      tab: yaml_block_menu_page
-    items:
-      type: menu
-      value: []
-      tab: yaml_block_menu_page
-    add_button:
-      type: switch
-      label: yaml_block_menu_add_button
-      value: false
-      tab: yaml_block_menu_button
-    button_title:
-      type: text
-      label: yaml_block_button_title
-      value: ''
-      tab: yaml_block_menu_button
-      group:
-        id: text
-    button_url:
-      type: text
-      label: yaml_block_button_url
-      value: '/'
-      format: URL
-      tab: yaml_block_menu_button
-      group:
-        id: text
-    button_target_blank:
-      type: switch
-      label: yaml_block_button_open_in_tab
-      value: false
-      tab: yaml_block_menu_button
-    button_hide_on_mobile:
-      type: switch
-      label: yaml_block_menu_button_hide_on_mobile
-      value: false
-      tab: yaml_block_menu_button
-    button_color:
-      type: color
-      label: yaml_block_button_color
-      value: 'color-primary'
-      disable_transparent: true
-      tab: yaml_block_menu_button
-      group:
-        id: color
-    button_form:
-      type: switch
-      label: yaml_block_button_line_color
-      label_selected: yaml_block_button_full_color
-      value: true
-      tab: yaml_block_menu_button
+    properties:
+        name: Menu
+        description: ~
+        category: [ '!Common' ]
+        forbidden_plugins: [ 'remove', 'dnd', 'parameter', 'click' ]
+        form_height: 500
+    parameters:
+        items:
+            type: menu
+            value: [ ]
+            tab: yaml_block_menu_page
+            group:
+                id: items
+        add_button:
+            type: switch
+            label: yaml_block_menu_add_button
+            value: false
+            tab: yaml_block_menu_button
+        button_title:
+            type: text
+            label: yaml_block_button_title
+            value: ''
+            tab: yaml_block_menu_button
+            group:
+                id: text
+        button_url:
+            type: text
+            label: yaml_block_button_url
+            value: '/'
+            format: URL
+            tab: yaml_block_menu_button
+            group:
+                id: text
+        button_target_blank:
+            type: switch
+            label: yaml_block_button_open_in_tab
+            value: false
+            tab: yaml_block_menu_button
+        button_hide_on_mobile:
+            type: switch
+            label: yaml_block_menu_button_hide_on_mobile
+            value: false
+            tab: yaml_block_menu_button
+        button_color:
+            type: color
+            label: yaml_block_button_color
+            value: 'color-primary'
+            disable_transparent: true
+            tab: yaml_block_menu_button
+            group:
+                id: color
+        button_form:
+            type: switch
+            label: yaml_block_button_line_color
+            label_selected: yaml_block_button_full_color
+            value: true
+            tab: yaml_block_menu_button
+        burger:
+            type: switch
+            label: yaml_block_menu_burger
+            value: false
+            tab: yaml_block_menu_style
+        title_to_be_displayed:
+            type: select
+            label: yaml_block_menu_choose_title_to_be_displayed
+            options:
+                title_of_page: yaml_block_menu_choose_title_of_page_url
+                first_heading: yaml_block_menu_choose_first_heading
+            value: title_of_page
+            tab: yaml_block_menu_style
+            group:
+                id: title_to_be_displayed

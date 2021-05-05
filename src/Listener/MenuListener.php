@@ -24,6 +24,7 @@ namespace BackBeeCloud\Listener;
 use BackBee\BBApplication;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
+use BackBee\Page\PageContentManager;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Site\Site;
 use BackBeeCloud\Entity\Lang;
@@ -50,14 +51,21 @@ class MenuListener
     private static $entityManager;
 
     /**
+     * @var PageContentManager
+     */
+    private static $pageContentManager;
+
+    /**
      * MenuListener constructor.
      *
-     * @param BBApplication $bbApp
+     * @param BBApplication      $bbApp
+     * @param PageContentManager $pageContentManager
      */
-    public function __construct(BBApplication $bbApp)
+    public function __construct(BBApplication $bbApp, PageContentManager $pageContentManager)
     {
         self::$bbApp = $bbApp;
         self::$entityManager = $bbApp->getEntityManager();
+        self::$pageContentManager = $pageContentManager;
     }
 
     /**
@@ -74,16 +82,18 @@ class MenuListener
             $homepage = self::$entityManager->getRepository(Page::class)->getRoot(
                 self::$entityManager->getRepository(Site::class)->findOneBy([])
             );
-            $menu->setParam(
-                'items',
-                [
+            if ($homepage) {
+                $menu->setParam(
+                    'items',
                     [
-                        'id' => $homepage->getUid(),
-                        'url' => $homepage->getUrl(),
-                        'label' => $homepage->getTitle(),
-                    ],
-                ]
-            );
+                        [
+                            'id' => $homepage->getUid(),
+                            'url' => $homepage->getUrl(),
+                            'label' => $homepage->getTitle(),
+                        ],
+                    ]
+                );
+            }
         }
     }
 
@@ -102,8 +112,12 @@ class MenuListener
         try {
             foreach ($items as $item) {
                 if (false !== $item['id'] && null !== ($page = self::getPageByUid($item['id']))) {
+                    $firstHeading = self::$pageContentManager->getFirstHeadingFromPage($page) ?: $page->getTitle();
+                    $label = $block->getParamValue('title_to_be_displayed') === 'first_heading' ?
+                        $firstHeading : $page->getTitle();
+
                     $item['url'] = $page->getUrl();
-                    $item['label'] = $page->getTitle();
+                    $item['label'] = $label;
                     $item['is_online'] = $page->isOnline();
                     $item['is_current'] = $renderer->getCurrentPage() === $page;
 
