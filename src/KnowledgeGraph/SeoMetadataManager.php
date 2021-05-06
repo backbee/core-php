@@ -126,7 +126,7 @@ class SeoMetadataManager
      */
     public function getPageSeoMetadata(Page $page): array
     {
-        $this->pageMetadataBag = $page->getMetaData() ?: [];
+        $this->pageMetadataBag = $page->getMetaData() ?: new MetaDataBag();
 
         $this
             ->setMetadata()
