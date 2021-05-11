@@ -14,16 +14,9 @@ use BackBee\Event\Event;
 interface LogListenerInterface
 {
     /**
-     * On flush content.
+     * On flush.
      *
      * @param Event $event
      */
-    public static function onFlushContent(Event $event): void;
-
-    /**
-     * On pre remove content.
-     *
-     * @param Event $event
-     */
-    public static function onPreRemoveContent(Event $event): void;
+    public static function onFlush(Event $event): void;
 }

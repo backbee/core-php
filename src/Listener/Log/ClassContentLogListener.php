@@ -16,27 +16,15 @@ use BackBee\Event\Event;
 class ClassContentLogListener extends AbstractLogListener implements LogListenerInterface
 {
     /**
-     * On flush content.
-     *
-     * @param Event $event
+     * {@inheritDoc}
      */
-    public static function onFlushContent(Event $event): void
+    public static function onFlush(Event $event): void
     {
         $content = $event->getTarget();
 
         if ($content instanceof AbstractClassContent) {
             self::writeLog($content, self::getBeforeContent($content), self::getAfterContent($content));
         }
-    }
-
-    /**
-     * On pre remove content.
-     *
-     * @param Event $event
-     */
-    public static function onPreRemoveContent(Event $event): void
-    {
-
     }
 
     /**

@@ -16,16 +16,16 @@ class TagLogListener implements LogListenerInterface
     /**
      * {@inheritDoc}
      */
-    public static function onFlushContent(Event $event): void
+    public static function onFlush(Event $event): void
     {
-        // TODO: Implement onFlushContent() method.
+        // TODO: Implement onFlush() method.
     }
 
     /**
      * {@inheritDoc}
      */
-    public static function onPreRemoveContent(Event $event): void
+    public static function onRemove(Event $event): void
     {
-        // TODO: Implement onPreRemoveContent() method.
+        // TODO: Implement onRemove() method.
     }
 }

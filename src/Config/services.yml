@@ -20,14 +20,23 @@ services:
     # BackBee
     backbee.logger:
         class: BackBee\Logging\Logger
+        arguments: [ '@bbapp' ]
 
     # Page
     cloud.page_manager:
         class: BackBeeCloud\Entity\PageManager
         arguments:
-            - "@bbapp"
-            - "@core.knowledge_graph.seo_metadata.manager"
-            - "@backbee.logger"
+            - '@bbapp'
+            - '@core.knowledge_graph.seo_metadata.manager'
+            - '@cloud.page_type.manager'
+            - '@cloud.content_manager'
+            - '@elasticsearch.manager'
+            - '@cloud.tag_manager'
+            - '@multilang_manager'
+            - '@cloud.page_category.manager'
+            - '@cloud.multilang.page_association.manager'
+            - '@core.search_engine.manager'
+            - '@backbee.logger'
 
     core.page.page_from_raw_data:
         class: BackBeeCloud\Page\PageFromRawData
@@ -694,6 +703,9 @@ services:
         arguments:
             [ '@core.class_content.media.video.manager', '@backbee.logger' ]
 
+    core.page.listener:
+        class: BackBeeCloud\Listener\PageListener
+
     core.log.class_content.listener:
         class: BackBee\Listener\Log\ClassContentLogListener
         arguments:
@@ -702,7 +714,7 @@ services:
     core.log.page.listener:
         class: BackBee\Listener\Log\PageLogListener
         arguments:
-            [ '@security.context', '@em', '@monolog.logger.admin_log' ]
+            [ '@security.context', '@em', '@monolog.logger.admin_log', '@cloud.page_manager', '@elasticsearch.manager' ]
 
     core.log.tag.listener:
         class: BackBee\Listener\Log\TagLogListener

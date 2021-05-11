@@ -86,9 +86,9 @@ abstract class AbstractLogListener
                     'object' => $entity->getUid(),
                     'type' => ClassUtils::getRealClass($entity),
                     'before_content' => $beforeData['content'],
-                    'before_parameter' => $beforeData['parameter'],
+                    'before_parameters' => $beforeData['parameters'],
                     'after_content' => $afterData['content'],
-                    'after_parameter' => $afterData['parameter'],
+                    'after_parameters' => $afterData['parameters'],
                 ]
             );
         }

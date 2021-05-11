@@ -150,23 +150,42 @@ class PageManager
     /**
      * PageManager constructor.
      *
-     * @param BBApplication      $app
-     * @param SeoMetadataManager $seoMetadataManager
-     * @param LoggerInterface    $logger
+     * @param BBApplication          $app
+     * @param SeoMetadataManager     $seoMetadataManager
+     * @param TypeManager            $typeManager
+     * @param ContentManager         $contentManager
+     * @param ElasticsearchManager   $elasticsearchManager
+     * @param TagManager             $tagManager
+     * @param MultiLangManager       $multiLangManager
+     * @param PageCategoryManager    $pageCategoryManager
+     * @param PageAssociationManager $pageAssociationManager
+     * @param SearchEngineManager    $searchEngineManager
+     * @param LoggerInterface        $logger
      */
-    public function __construct(BBApplication $app, SeoMetadataManager $seoMetadataManager, LoggerInterface $logger)
-    {
+    public function __construct(
+        BBApplication $app,
+        SeoMetadataManager $seoMetadataManager,
+        TypeManager $typeManager,
+        ContentManager $contentManager,
+        ElasticsearchManager $elasticsearchManager,
+        TagManager $tagManager,
+        MultiLangManager $multiLangManager,
+        PageCategoryManager $pageCategoryManager,
+        PageAssociationManager $pageAssociationManager,
+        SearchEngineManager $searchEngineManager,
+        LoggerInterface $logger
+    ) {
         $this->bbToken = $app->getBBUserToken();
         $this->entityMgr = $app->getEntityManager();
-        $this->typeMgr = $app->getContainer()->get('cloud.page_type.manager');
-        $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
+        $this->typeMgr = $typeManager;
+        $this->contentMgr = $contentManager;
         $this->repository = $this->entityMgr->getRepository(Page::class);
-        $this->elsMgr = $app->getContainer()->get('elasticsearch.manager');
-        $this->tagMgr = $app->getContainer()->get('cloud.tag_manager');
-        $this->multiLangMgr = $app->getContainer()->get('multilang_manager');
-        $this->pageCategoryManager = $app->getContainer()->get('cloud.page_category.manager');
-        $this->pageAssociationMgr = $app->getContainer()->get('cloud.multilang.page_association.manager');
-        $this->searchEngineManager = $app->getContainer()->get('core.search_engine.manager');
+        $this->elsMgr = $elasticsearchManager;
+        $this->tagMgr = $tagManager;
+        $this->multiLangMgr = $multiLangManager;
+        $this->pageCategoryManager = $pageCategoryManager;
+        $this->pageAssociationMgr = $pageAssociationManager;
+        $this->searchEngineManager = $searchEngineManager;
         $this->seoMetadataManager = $seoMetadataManager;
         $this->logger = $logger;
     }
@@ -240,6 +259,8 @@ class PageManager
             $isDrafted = $this->contentMgr->hasGlobalContentDraft();
         }
 
+        $pageTags = $this->getPageTag($page);
+
         return [
             'id' => $page->getUid(),
             'title' => $page->getTitle(),
@@ -249,15 +270,15 @@ class PageManager
             'is_online' => $page->isOnline(),
             'is_drafted' => $isDrafted,
             'url' => $page->getUrl(),
-            'tags' => array_map(
+            'tags' => $pageTags ? array_map(
                 static function (KeyWord $keyword) {
                     return [
                         'uid' => $keyword->getUid(),
                         'label' => $keyword->getKeyWord(),
                     ];
                 },
-                $this->getPageTag($page)->getTags()->toArray()
-            ),
+                $pageTags->getTags()->toArray()
+            ) : [],
             'seo' => $pageSeo,
             'lang' => $this->multiLangMgr->getLangByPage($page),
             'created_at' => $page->getCreated()->format('Y-m-d H:i:s'),
@@ -1005,6 +1026,11 @@ class PageManager
     {
         $pageTag = $this->getPageTag($page);
 
+        if (null === $pageTag) {
+            $pageTag = new PageTag($page);
+            $this->entityMgr->persist($pageTag);
+        }
+
         $pageTag->resetTags();
         foreach ((array)$values as $tagData) {
             $tag = null;
@@ -1165,23 +1191,15 @@ class PageManager
      *
      * @param Page $page
      *
-     * @return PageTag
+     * @return null|PageTag
      */
-    public function getPageTag(Page $page): PageTag
+    public function getPageTag(Page $page): ?PageTag
     {
-        $pageTag = $this->entityMgr->getRepository(PageTag::class)->findOneBy(
+        return $this->entityMgr->getRepository(PageTag::class)->findOneBy(
             [
                 'page' => $page,
             ]
         );
-
-        if (null === $pageTag) {
-            $pageTag = new PageTag($page);
-
-            $this->entityMgr->persist($pageTag);
-        }
-
-        return $pageTag;
     }
 
     /**
