@@ -674,13 +674,17 @@ services:
         arguments:
             [ '@config', '@backbee.logger' ]
 
+    # Class content
+    core.class_content.media.video.manager:
+        class: BackBee\ClassContent\Media\VideoManager
+
     # Listener
     core.cache.listener:
         class: BackBeeCloud\Listener\CacheListener
         arguments:
             [ '@core.redis.manager' ]
 
-    core.listener:
+    core.core.listener:
         class: BackBeeCloud\Listener\CoreListener
         arguments:
             [ '@bbapp' ]
