@@ -1,33 +1,35 @@
 {% set image = this.getObject().getParamValue('image') %}
 
 <div {{ this.bbcontent(null, {class: 'content dowload-pdf-block py-2'})|raw }}>
-  <div class="mb-3">
-    {{ this.getObject().getParamValue('download_label')|default("Téléchargement")|raw|striptags }}
-  </div>
-  {% if file.value %}
-    {% set fileStat = this.getFileStat(file) %}
-
-    <div class="download-pdf-wrapper">
-      {% if display_img.value == true %}
-        {{ this.render(logo, null, {'forbiddenPlugins': 'remove,dnd,parameter,resize', 'in_fluid': in_fluid, 'colsize': colsize})|raw }}
-      {% endif %}
-      {% if display_date.value %}
-        <div>{% if date %}{{ this.dateHelper(date.value, '%e %B %Y') }}{% endif %}</div>
-      {% endif %}
-      <h3 data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true">
-        {{ title.value|default('Titre du fichier à télécharger') }}
-      </h3>
-      {% if true == display_description.value %}
-      <div data-cloud-rte="true" data-parameter-rte="true" data-parameter-name="description">
-        {{ this.getObject().getParamValue('description')|default("Description à remplir")|raw }}
-      </div>
-      {% endif %}
-      <a href="{{ this.getUri(file.value) }}" target="_blank" class="text-secondary mt-3 d-flex align-items-center">
-        {{ this.getObject().getParamValue('download_text_label')|default("Télécharger")|raw|striptags }}
-        {% if display_size.value == true %}(<span>&nbsp;{{ fileStat['sizeHumanReadable'] }}&nbsp;</span>){% endif %}
-      </a>
+    <div class="mb-3">
+        {{ this.getObject().getParamValue('download_label')|default("Téléchargement")|raw|striptags }}
     </div>
-  {% else %}
-    {% include 'common/missing_config_block.html.twig' %}
-  {% endif %}
+    {% if file.value %}
+        {% set fileStat = this.getFileStat(file) %}
+
+        <div class="download-pdf-wrapper">
+            {% if display_img.value == true %}
+                {{ this.render(logo, null, {'forbiddenPlugins': 'remove,dnd,parameter,resize', 'in_fluid': in_fluid, 'colsize': colsize})|raw }}
+            {% endif %}
+            {% if display_date.value %}
+                <div>{% if date %}{{ this.dateHelper(date.value, '%e %B %Y') }}{% endif %}</div>
+            {% endif %}
+            <h3 data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true">
+                {{ title.value|default('Titre du fichier à télécharger')|raw }}
+            </h3>
+            {% if true == display_description.value %}
+                <div data-cloud-rte="true" data-parameter-rte="true" data-parameter-name="description">
+                    {{ this.getObject().getParamValue('description')|default("Description à remplir")|raw }}
+                </div>
+            {% endif %}
+            <a href="{{ this.getUri(file.value) }}" target="_blank"
+               class="text-secondary mt-3 d-flex align-items-center">
+                {{ this.getObject().getParamValue('download_text_label')|default("Télécharger")|raw|striptags }}
+                {% if display_size.value == true %}(
+                    <span>&nbsp;{{ fileStat['sizeHumanReadable'] }}&nbsp;</span>){% endif %}
+            </a>
+        </div>
+    {% else %}
+        {% include 'common/missing_config_block.html.twig' %}
+    {% endif %}
 </div>
