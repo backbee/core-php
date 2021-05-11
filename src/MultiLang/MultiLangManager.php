@@ -31,7 +31,7 @@ use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
-use BackBeeCloud\SiteStatusManager;
+use BackBee\Site\SiteStatusManager;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
 use Doctrine\ORM\EntityManager;

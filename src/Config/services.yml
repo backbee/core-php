@@ -78,8 +78,8 @@ services:
             - "%cloud.strictly.default.categories%"
 
     site_status.manager:
-        class: BackBeeCloud\SiteStatusManager
-        arguments: [ "@em" ]
+        class: BackBee\Site\SiteStatusManager
+        arguments: [ "@em", "@backbee.logger" ]
 
     cloud.favicon.listener:
         class: BackBeeCloud\Listener\FaviconListener
