@@ -21,34 +21,39 @@
 
 namespace BackBeeCloud\Importer;
 
+use BackBee\NestedNode\Page;
+use BackBee\Util\StringUtils;
 use BackBeeCloud\Entity\ImportStatus;
-use BackBeeCloud\ExecutionHelper;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\Structure\StructureBuilder;
 use BackBeePlanet\Importer\ImportJob;
 use BackBeePlanet\Importer\ReaderInterface;
 use BackBeePlanet\Importer\WordpressReader;
 use BackBeePlanet\Job\JobInterface;
-use BackBee\NestedNode\Page;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
 use InvalidArgumentException;
+use function array_key_exists;
 
 /**
+ * Class ImportManager
+ *
+ * @package BackBeeCloud\Importer
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class ImportManager implements JobHandlerInterface
 {
-    const SUPPORTED_TYPE = [
+    public const SUPPORTED_TYPE = [
         'wordpress' => WordpressReader::class,
     ];
 
     /**
      * @var EntityManager
      */
-    protected $entyMgr;
+    protected $entityMgr;
 
     /**
      * @var StructureBuilder
@@ -58,12 +63,12 @@ class ImportManager implements JobHandlerInterface
     /**
      * ImportManager constructor.
      *
-     * @param EntityManager    $entyMgr
+     * @param EntityManager    $entityMgr
      * @param StructureBuilder $structBuilder
      */
-    public function __construct(EntityManager $entyMgr, StructureBuilder $structBuilder)
+    public function __construct(EntityManager $entityMgr, StructureBuilder $structBuilder)
     {
-        $this->entyMgr = $entyMgr;
+        $this->entityMgr = $entityMgr;
         $this->structBuilder = $structBuilder;
     }
 
@@ -78,24 +83,28 @@ class ImportManager implements JobHandlerInterface
      * @throws OptimisticLockException
      * @throws TransactionRequiredException
      */
-    public function import(ReaderInterface $reader, $source, SimpleWriterInterface $writer)
+    public function import(ReaderInterface $reader, $source, SimpleWriterInterface $writer): void
     {
         if (!$reader->verify($source)) {
-            throw new InvalidArgumentException(sprintf(
-                '[%s] the provided source is not supported by "%s" importer (%s).',
-                __METHOD__,
-                $reader->name(),
-                get_class($reader)
-            ));
+            throw new InvalidArgumentException(
+                sprintf(
+                    '[%s] the provided source is not supported by "%s" importer (%s).',
+                    __METHOD__,
+                    $reader->name(),
+                    get_class($reader)
+                )
+            );
         }
 
         $label = sprintf('[%s] %s', strtoupper($reader->name()), $source);
-        $importStatus = $this->entyMgr->getRepository(ImportStatus::class)->findOneBy([
-            'label' => $label,
-        ]);
+        $importStatus = $this->entityMgr->getRepository(ImportStatus::class)->findOneBy(
+            [
+                'label' => $label,
+            ]
+        );
         if (null === $importStatus) {
             $importStatus = new ImportStatus($label, $reader->sourceMetadata($source)['max_items']);
-            $this->entyMgr->persist($importStatus);
+            $this->entityMgr->persist($importStatus);
         }
 
         $writer->write(sprintf('Starts to import articles from "%s %s"...', $reader->name(), $source));
@@ -108,13 +117,15 @@ class ImportManager implements JobHandlerInterface
             }
 
             $starttime = microtime(true);
-            if (null !== $this->entyMgr->find(Page::class, $row['page']['uid'])) {
-                $writer->write(sprintf(
-                    '- already imported article "%s", skipped.',
-                    html_entity_decode($row['page']['title'])
-                ));
+            if (null !== $this->entityMgr->find(Page::class, $row['page']['uid'])) {
+                $writer->write(
+                    sprintf(
+                        '- already imported article "%s", skipped.',
+                        html_entity_decode($row['page']['title'])
+                    )
+                );
 
-                $this->entyMgr->clear();
+                $this->entityMgr->clear();
                 gc_collect_cycles();
 
                 continue;
@@ -122,23 +133,27 @@ class ImportManager implements JobHandlerInterface
 
             $this->structBuilder->buildPage($row['page'], $row['contents'], true);
 
-            $writer->write(sprintf(
-                '- [%d/%d %d%% %s - %ss] imported article "%s"',
-                ++$count,
-                $importStatus->maxCount(),
-                $importStatus->statusPercent(),
-                ExecutionHelper::formatByte(memory_get_usage()),
-                number_format(microtime(true) - $starttime, 3),
-                $row['page']['title']
-            ));
+            $writer->write(
+                sprintf(
+                    '- [%d/%d %d%% %s - %ss] imported article "%s"',
+                    ++$count,
+                    $importStatus->maxCount(),
+                    $importStatus->statusPercent(),
+                    StringUtils::formatBytes(memory_get_usage()),
+                    number_format(microtime(true) - $starttime, 3),
+                    $row['page']['title']
+                )
+            );
 
-            $importStatus = $this->entyMgr->getRepository(ImportStatus::class)->findOneBy([
-                'label' => $label,
-            ]);
+            $importStatus = $this->entityMgr->getRepository(ImportStatus::class)->findOneBy(
+                [
+                    'label' => $label,
+                ]
+            );
             $importStatus->incrImportedCount();
-            $this->entyMgr->flush($importStatus);
+            $this->entityMgr->flush($importStatus);
 
-            $this->entyMgr->clear();
+            $this->entityMgr->clear();
             gc_collect_cycles();
         }
     }
@@ -146,28 +161,32 @@ class ImportManager implements JobHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function handle(JobInterface $job, SimpleWriterInterface $writer)
+    public function handle(JobInterface $job, SimpleWriterInterface $writer): int
     {
         $writer->write('Starts of import job.');
         $writer->write('');
 
         $reader = $this->getReaderOf($job->type());
         if (null === $reader) {
-            $writer->write(sprintf(
-                '<error>Cannot find reader for type "%s". Import aborted for site "%s".</error>',
-                $job->type(),
-                $job->siteId()
-            ));
+            $writer->write(
+                sprintf(
+                    '<error>Cannot find reader for type "%s". Import aborted for site "%s".</error>',
+                    $job->type(),
+                    $job->siteId()
+                )
+            );
 
             return 1;
         }
 
         if (!$reader->verify($job->source())) {
-            $writer->write(sprintf(
-                '<error>Cannot find reader for type "%s". Import aborted for site "%s".</error>',
-                $job->type(),
-                $job->siteId()
-            ));
+            $writer->write(
+                sprintf(
+                    '<error>Cannot find reader for type "%s". Import aborted for site "%s".</error>',
+                    $job->type(),
+                    $job->siteId()
+                )
+            );
 
             return 1;
         }
@@ -181,7 +200,7 @@ class ImportManager implements JobHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function supports(JobInterface $job)
+    public function supports(JobInterface $job): bool
     {
         return $job instanceof ImportJob;
     }
@@ -190,10 +209,11 @@ class ImportManager implements JobHandlerInterface
      * Returns an instance of reader depending of the requested type. It can return
      * null if the type does not match any reader.
      *
-     * @param  string $type
+     * @param string $type
+     *
      * @return ReaderInterface|null
      */
-    public function getReaderOf($type)
+    public function getReaderOf(string $type): ?ReaderInterface
     {
         $reader = null;
         if ($this->isSupportedType($type)) {
@@ -207,10 +227,11 @@ class ImportManager implements JobHandlerInterface
     /**
      * Returns true if the given type is supported, else false.
      *
-     * @param  string $type
+     * @param string $type
+     *
      * @return bool
      */
-    public function isSupportedType($type): bool
+    public function isSupportedType(string $type): bool
     {
         return array_key_exists($type, self::SUPPORTED_TYPE);
     }
