@@ -19,6 +19,8 @@
 // Share
 
 .btn-social-share {
+    display: flex;
+    
     &:not(:last-child) {
         margin-right: $spacer / 2;
     }
