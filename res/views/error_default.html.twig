@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ this.getCurrentLang.getCode() ?: 'fr' }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +8,6 @@
     <title>{% block title %}Error - {{ this.getApplication().getSite().getLabel() }}{% endblock %}</title>
 
     <!--##FAVICON_SPOT##-->
-
     <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">
     <link rel="stylesheet" href="{{ this.getCdnUri('/static/css/cover.css') }}">
 
@@ -17,34 +16,24 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body>
+<body class="text-left">
 {{ this.bbtoolbar()|raw }}
 <div id="cloud-ui" class="cloud-ui-wrapper"></div>
-{# <div id="bb-site-wrapper" class="bb-site-wrapper{% if has_header_margin %} offset-main{% endif %} {{bb.token ? 'cloud-edit' : ''}}"> #}
-<div class="bb-site-wrapper site-wrapper">
+<div class="bb-site-wrapper site-wrapper text-center">
     <div class="site-wrapper-inner">
-        {# <div class="cover-container"> #}
-        {# <div class="masthead"> #}
-        {{ this.render(this.globalContentFactory().getHeader())|raw }}
-        {# </div> #}
-
         <h1>{% block error_title %}Error{% endblock %}</h1>
         <p class="reason">
             <em>{% block error_message %}Oops, it seems that something went wrong… try to refresh page or click on the button below.{% endblock %}</em>
         </p>
         {% set button_settings = this.getDesignSettings('button') %}
-        <a
-                href="/"
-                class="btn color-primary btn-md btn-{{ settings.shape }}"
-                {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
-        >
+        <a href="/" class="btn color-primary btn-md btn-{{ settings.shape }}" {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}>
             {% block button_title %}BACK TO HOMEPAGE{% endblock %}
         </a>
     </div>
 </div>
-
-{{ this.render(this.globalContentFactory().getFooter())|raw }}
-
 <script src="{{ this.getCdnUri('/js/theme-bottom.min.js') }}"></script>
+{% include 'common/hook_form.js.twig' %}
+{% include 'common/hook_session.js.twig' %}
+{% include 'Optimizeimage/hook.js.twig' %}
 </body>
 </html>

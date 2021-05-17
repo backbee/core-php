@@ -21,24 +21,30 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\Renderer\AbstractRenderer;
-use BackBee\Renderer\Helper\AbstractHelper;
-
-use BackBee\Bundle\Registry;
-
 /**
+ * Class getPageErrors
+ *
+ * @package BackBee\Renderer\Helper
+ *
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  */
 class getPageErrors extends AbstractHelper
 {
-    const DESCRIPTION = [
-        '404' => 'Page not found. The page you are looking for was moved, removed, renamed or might never existed.',
+    public const DESCRIPTION = [
+        '404' => 'page.errors.404.message',
         '500' => '',
     ];
 
-    const BUTTON_TITLE = 'BACK TO HOMEPAGE';
+    public const BUTTON_TITLE = 'page.errors.button';
 
-    public function __invoke($code = '')
+    /**
+     * Invoke.
+     *
+     * @param string $code
+     *
+     * @return array
+     */
+    public function __invoke(string $code = ''): array
     {
         $app = $this->_renderer->getApplication();
         $container = $app->getContainer();
@@ -47,8 +53,8 @@ class getPageErrors extends AbstractHelper
         $result = $userPrefMgr->dataOf('error_page_' . $code);
 
         $data = [
-            'title'        => 'Error ' . $code,
-            'description'  => self::DESCRIPTION[$code],
+            'title' => $code,
+            'description' => self::DESCRIPTION[$code],
             'button_title' => self::BUTTON_TITLE,
         ];
 
