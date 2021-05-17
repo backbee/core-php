@@ -21,6 +21,7 @@
 <div id="cloud-ui" class="cloud-ui-wrapper"></div>
 <div class="bb-site-wrapper site-wrapper text-center">
     <div class="site-wrapper-inner">
+        {{ this.render(this.globalContentFactory().getHeader())|raw }}
         <h1>{% block error_title %}Error{% endblock %}</h1>
         <p class="reason">
             <em>{% block error_message %}Oops, it seems that something went wrong… try to refresh page or click on the button below.{% endblock %}</em>
@@ -31,6 +32,7 @@
         </a>
     </div>
 </div>
+{{ this.render(this.globalContentFactory().getFooter())|raw }}
 <script src="{{ this.getCdnUri('/js/theme-bottom.min.js') }}"></script>
 {% include 'common/hook_form.js.twig' %}
 {% include 'common/hook_session.js.twig' %}
