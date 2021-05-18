@@ -22,6 +22,7 @@
 namespace BackBee\Installer;
 
 use BackBee\Command\AbstractCommand;
+use BackBee\Command\InstallCommand;
 use BackBeePlanet\Standalone\StandaloneHelper;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -40,10 +41,9 @@ class RepositoryInstaller extends AbstractInstaller
     /**
      * Build repository.
      *
-     * @param string         $appName
      * @param StyleInterface $io
      */
-    public static function buildRepository(string $appName, StyleInterface $io): void
+    public static function buildRepository(StyleInterface $io): void
     {
         $io->section('Build repository');
 
@@ -58,6 +58,8 @@ class RepositoryInstaller extends AbstractInstaller
         StandaloneHelper::mkdirOnce($dataDir . DIRECTORY_SEPARATOR . 'Tmp');
 
         $io->text('Data\'s folders are ready.');
+
+        $appName = self::getAppName();
 
         // build bootstrap.yml
         $filepath = $configDir . DIRECTORY_SEPARATOR . 'bootstrap.yml';
@@ -87,8 +89,8 @@ class RepositoryInstaller extends AbstractInstaller
         } else {
             $config = AbstractCommand::parseYaml('config.yml.dist');
 
-            if (null === $config['app']['name']) {
-                $config['app']['name'] = $appName;
+            if (null === $config['parameters']['app_name']) {
+                $config['parameters']['app_name'] = $appName;
             }
 
             file_put_contents($filepath, Yaml::dump($config));
@@ -217,6 +219,23 @@ class RepositoryInstaller extends AbstractInstaller
         }
 
         $io->newLine();
+    }
+
+    /**
+     * Get app name.
+     *
+     * @return string
+     */
+    private static function getAppName(): string
+    {
+        if (file_exists(StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'config.yml')) {
+            $config = AbstractCommand::parseYaml('config.yml', InstallCommand::CONFIG_REGULAR_YAML);
+            $appName = $config['parameters']['app_name'];
+        } elseif (null === ($appName = AbstractCommand::getInput()->getOption('app_name'))) {
+            $appName = AbstractCommand::askFor('Application name: ');
+        }
+
+        return $appName;
     }
 
     /**

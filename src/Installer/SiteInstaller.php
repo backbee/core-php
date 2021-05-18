@@ -38,10 +38,9 @@ class SiteInstaller extends AbstractInstaller
     /**
      * Creates a site if it does not exist.
      *
-     * @param string         $appName
      * @param StyleInterface $io
      */
-    public function createSite(string $appName, StyleInterface $io): void
+    public function createSite(StyleInterface $io): void
     {
         $io->section('Create site');
 
@@ -53,6 +52,7 @@ class SiteInstaller extends AbstractInstaller
         $io->text('Site creation');
         $io->newLine();
 
+        $appName = $this->getApplication()->getContainer()->getParameter('app_name');
         $domain = $this->getSiteDomain();
 
         $site = new Site(md5($appName));
