@@ -61,27 +61,6 @@ class RepositoryInstaller extends AbstractInstaller
 
         $appName = self::getAppName();
 
-        // build bootstrap.yml
-        $filepath = $configDir . DIRECTORY_SEPARATOR . 'bootstrap.yml';
-        if (file_exists($filepath)) {
-            $io->note(sprintf('%s already exists.', $filepath));
-        } else {
-            file_put_contents($filepath, Yaml::dump(
-                [
-                    'debug'     => false,
-                    'container' => [
-                        'dump_directory' => StandaloneHelper::cacheDir(),
-                        'autogenerate'   => true,
-                    ],
-                ],
-                20
-            ));
-
-            $io->text(sprintf('%s has been generated.', $filepath));
-        }
-
-        $io->newLine();
-
         // build config.yml
         $filepath = $configDir . DIRECTORY_SEPARATOR . 'config.yml';
         if (file_exists($filepath)) {
@@ -93,7 +72,13 @@ class RepositoryInstaller extends AbstractInstaller
                 $config['parameters']['app_name'] = $appName;
             }
 
-            file_put_contents($filepath, Yaml::dump($config));
+            $config['parameters']['debug'] = false;
+            $config['parameters']['container'] = [
+                'dump_directory' => StandaloneHelper::cacheDir(),
+                'autogenerate' => true,
+            ];
+
+            file_put_contents($filepath, Yaml::dump($config, 3));
             $io->text(sprintf('%s has been generated.', $filepath));
         }
 
@@ -176,17 +161,23 @@ class RepositoryInstaller extends AbstractInstaller
         if (file_exists($filepath)) {
             $io->note(sprintf('%s already exists.', $filepath));
         } else {
-            file_put_contents($filepath, Yaml::dump(array_merge(
-                AbstractCommand::parseYaml('services.yml.dist'),
-                [
-                    'parameters' => [
-                        'bbapp.cache.dir' => StandaloneHelper::cacheDir(),
-                        'bbapp.data.dir'  => $dataDir,
-                        'bbapp.log.dir'   => StandaloneHelper::logDir(),
-                        'secret_key'      => md5($appName),
-                    ],
-                ]
-            ), 20));
+            file_put_contents(
+                $filepath,
+                Yaml::dump(
+                    array_merge(
+                        AbstractCommand::parseYaml('services.yml.dist'),
+                        [
+                            'parameters' => [
+                                'bbapp.cache.dir' => StandaloneHelper::cacheDir(),
+                                'bbapp.data.dir' => $dataDir,
+                                'bbapp.log.dir' => StandaloneHelper::logDir(),
+                                'secret_key' => md5($appName),
+                            ],
+                        ]
+                    ),
+                    20
+                )
+            );
 
             $io->text(sprintf('%s has been generated.', $filepath));
         }

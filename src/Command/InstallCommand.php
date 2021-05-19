@@ -75,8 +75,7 @@ class InstallCommand extends AbstractCommand
             ->addOption('mailer_password', null, InputOption::VALUE_OPTIONAL, 'The mailer password from to set.')
             ->addOption('mailer_encryption', null, InputOption::VALUE_OPTIONAL, 'The mailer encryption from to set.')
             ->addOption('admin_username', null, InputOption::VALUE_OPTIONAL, 'The admin username to set.')
-            ->addOption('admin_password', null, InputOption::VALUE_OPTIONAL, 'The admin password to set.')
-        ;
+            ->addOption('admin_password', null, InputOption::VALUE_OPTIONAL, 'The admin password to set.');
     }
 
     /**
