@@ -427,7 +427,6 @@ class PageListener
      *
      * @param Event $event
      *
-     * @throws BBException
      * @throws OptimisticLockException
      */
     public static function onPageDeletePostcall(Event $event): void

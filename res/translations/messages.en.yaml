@@ -4,3 +4,9 @@ button:
         close: 'Show more'
 disqus:
     loading_comments: 'Loading comments...'
+page:
+    errors:
+        title: "Error"
+        button: "BACK TO HOMEPAGE"
+        404:
+            message: "Page not found. The page you are looking for was moved, removed, renamed or might never existed."

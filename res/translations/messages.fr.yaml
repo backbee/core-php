@@ -4,3 +4,9 @@ button:
         close: 'Voir plus'
 disqus:
     loading_comments: 'Chargement des commentaires ...'
+page:
+    errors:
+        title: "Erreur"
+        button: "RETOUR À LA PAGE D'ACCUEIL"
+        404:
+            message: "Page non trouvée. La page que vous recherchez a été déplacée, supprimée, renommée ou n'a peut-être jamais existé."
