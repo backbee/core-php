@@ -26,8 +26,6 @@
         "guzzlehttp/guzzle": "^6.0",
         "jenssegers/agent": "^2.5.0",
         "predis/predis": "~1.1.0",
-        "symfony/security-csrf": "v2.7.*",
-        "symfony/var-dumper": "~3.2.0",
         "zircote/swagger-php": "2.0.16"
     },
     "autoload": {
