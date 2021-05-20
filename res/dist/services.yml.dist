@@ -17,9 +17,9 @@ services:
         arguments: ['%bbapp.cache.dir%/metadata']
 
     content.category_listener:
-        class: BackBeePlanet\Standalone\ContentCategoryListener
+        class: BackBee\Listener\ContentCategoryListener
         arguments:
+            - "@routing"
             - "%cloud.default.ordered.categories%"
             - "%cloud.override.default.categories%"
             - "%cloud.strictly.default.categories%"
-            - "@routing"
