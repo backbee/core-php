@@ -51,7 +51,7 @@ class RedisManager
     private $logger;
 
     /**
-     * AbstractStandaloneHelper constructor.
+     * RedisManager constructor.
      *
      * @param Config          $config
      * @param LoggerInterface $logger

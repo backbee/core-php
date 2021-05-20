@@ -23,7 +23,7 @@ namespace BackBee\Installer;
 
 use BackBee\Command\AbstractCommand;
 use BackBee\Command\InstallCommand;
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\StandaloneHelper;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;

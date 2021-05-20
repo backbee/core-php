@@ -29,7 +29,7 @@ use BackBee\Routing\RouteCollection;
  */
 class ContentCategoryListener extends BaseContentCategoryListener
 {
-    const STANDALONE_HELPER_CLASSNAME = 'BackBeePlanet\Standalone\StandaloneHelper';
+    const STANDALONE_HELPER_CLASSNAME = 'App\StandaloneHelper';
 
     /**
      * @var RouteCollection

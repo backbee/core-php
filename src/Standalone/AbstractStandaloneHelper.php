@@ -21,7 +21,7 @@
 
 namespace BackBeePlanet\Standalone;
 
-use BackBee\Config\Config;
+use App\Application;
 use BackBee\DependencyInjection\Container;
 use BackBeeCloud\Listener\CacheListener;
 use BackBee\HttpClient\UserAgent;
@@ -211,7 +211,9 @@ abstract class AbstractStandaloneHelper
                 }
 
                 $response = new Response(
-                    $result, Response::HTTP_OK, [
+                    $result,
+                    Response::HTTP_OK,
+                    [
                         'Content-Type' => $contentType,
                     ]
                 );

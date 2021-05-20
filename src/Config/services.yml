@@ -665,8 +665,6 @@ services:
     # Standalone
     core.standalone.abstract_standalone.helper:
         class: BackBeePlanet\Standalone\AbstractStandaloneHelper
-        arguments:
-            [ '@config', '@backbee.logger' ]
 
     # Redis
     core.redis.manager:

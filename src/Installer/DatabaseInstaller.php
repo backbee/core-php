@@ -24,7 +24,7 @@ namespace BackBee\Installer;
 use BackBee\Command\AbstractCommand;
 use BackBee\Command\InstallCommand;
 use BackBee\Event\Event;
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\StandaloneHelper;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Exception;
