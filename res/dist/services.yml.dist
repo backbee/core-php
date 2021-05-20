@@ -7,15 +7,6 @@ parameters:
     cloud.strictly.default.categories: false
 
 services:
-    twig.extension.text:
-        class: Twig_Extensions_Extension_Text
-        tags:
-            - { name: twig.extension }
-
-    doctrine.metadata.cache.driver:
-        class: Doctrine\Common\Cache\FilesystemCache
-        arguments: ['%bbapp.cache.dir%/metadata']
-
     content.category_listener:
         class: BackBee\Listener\ContentCategoryListener
         arguments:

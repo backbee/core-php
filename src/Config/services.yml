@@ -17,6 +17,18 @@ services:
         class: Twig_Extensions_Extension_Intl
         tags:
             -   name: twig.extension
+
+    twig.extension.text:
+        class: Twig_Extensions_Extension_Text
+        tags:
+            -   name: twig.extension
+
+    # Doctrine
+    doctrine.metadata.cache.driver:
+        class: Doctrine\Common\Cache\FilesystemCache
+        arguments:
+            - '%bbapp.cache.dir%/metadata'
+
     # BackBee
     backbee.logger:
         class: BackBee\Logging\Logger

@@ -9,7 +9,6 @@ parameters:
     knowledge_graph: true
     bundles:
         core: BackBee\EntryPoint
-        standalone: BackBeePlanet\Standalone\EntryPoint
     date:
         format: d/m/Y à H:i
         timezone: Europe/Paris
