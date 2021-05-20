@@ -195,6 +195,17 @@ class RepositoryInstaller extends AbstractInstaller
 
         $io->newLine();
 
+        // build events.yml
+        $filepath = $configDir . DIRECTORY_SEPARATOR . 'events.yml';
+        if (file_exists($filepath)) {
+            $io->note(sprintf('%s already exists.', $filepath));
+        } else {
+            file_put_contents($filepath, Yaml::dump(AbstractCommand::parseYaml('events.yml.dist'), 20));
+            $io->text(sprintf('%s has been generated.', $filepath));
+        }
+
+        $io->newLine();
+
         // build bundles folder
         $filesystem = new Filesystem();
         $originDir = StandaloneHelper::distDir() . DIRECTORY_SEPARATOR . 'bundle';
