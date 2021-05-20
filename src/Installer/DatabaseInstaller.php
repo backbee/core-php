@@ -55,7 +55,6 @@ class DatabaseInstaller extends AbstractInstaller
         $config = AbstractCommand::parseYaml('doctrine.yml', InstallCommand::CONFIG_REGULAR_YAML)['dbal'];
         $dbname = $config['dbname'];
         unset($config['dbname']);
-        $tmpConn = null;
 
         try {
             $tmpConn = DriverManager::getConnection($config);

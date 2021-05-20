@@ -1,13 +1,12 @@
 # Application listeners
-
 bbapplication.init:
     listeners:
         - [ BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit, -8000 ]
         - [ BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit ]
         - [ BackBee\Renderer\Listener\TwigListener, onApplicationReady ]
         # BackBee Cloud listeners
-        - [ '@core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
-        - [ '@core.listener', onApplicationInit, 200 ]
+        - [ '@core.core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
+        - [ '@core.core.listener', onApplicationInit, 200 ]
         - [ BackBeeCloud\Listener\PageListener, onApplicationInit ]
         - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
         - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
@@ -16,21 +15,19 @@ bbapplication.init:
 bbapplication.start:
     listeners:
         # BackBee Cloud listeners
-        - [ '@core.listener', onApplicationStart, -50 ]
+        - [ '@core.core.listener', onApplicationStart, -50 ]
 
 bbapplication.stop:
     listeners:
         - [ BackBee\Bundle\Listener\BundleListener, onApplicationStop ]
 
 # Config listeners
-
 service.tagged.config_per_site:
     listeners:
         - [ @config.configurator, onGetServiceConfig ]
 
 
 # Kernel listeners
-
 kernel.request:
     listeners:
         - [ @profiler.listener, onKernelRequest ]
@@ -46,9 +43,9 @@ kernel.exception:
         - [ "@cloud.api.user_controller.listener", onKernelException, 100 ]
         - [ BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100 ]
         - [ @cloud.disqus_listener, onDisqusControlledException, 100 ]
-        - [ '@core.listener', onAuthenticationException, 100 ]
+        - [ '@core.core.listener', onAuthenticationException, 100 ]
         - [ "@api.multilang.listener", onMultiLangException, 100 ]
-        - [ '@core.listener', onKernelException, 50 ]
+        - [ '@core.core.listener', onKernelException, 50 ]
         - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100 ]
 
 kernel.controller:
@@ -58,7 +55,7 @@ kernel.controller:
         - [ @rest.listener.validation, onKernelController ]
         - [ @rest.listener.pagination, onKernelController ]
         # BackBee Cloud listeners
-        - [ '@core.listener', onKernelController ]
+        - [ '@core.core.listener', onKernelController ]
         - [ "@cloud.api.user_right.listener", onKernelController ]
 
 kernel.response:
@@ -71,7 +68,6 @@ kernel.response:
         - [ '@core.cache.listener', onKernelResponse, -8000 ]
 
 # ClassContent listeners
-
 classcontent.include:
     listeners:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onInclude ]
@@ -103,7 +99,7 @@ revision.postload:
 revision.onflush:
     listeners:
         - [ BackBee\ClassContent\Listener\RevisionListener, onFlushElementFile ]
-        - [ BackBeeCloud\Listener\ClassContent\VideoListener, onVideoRevisionFlush ]
+        - [ '@core.class_content.video.listener', onVideoRevisionFlush ]
 
 basic.searchresult.render:
     listeners:
@@ -113,7 +109,7 @@ basic.searchresult.render:
 media.video.render:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\VideoListener, onRender ]
+        - [ '@core.class_content.video.listener', onRender ]
 
 media.soundcloud.render:
     listeners:
@@ -208,7 +204,6 @@ comment.disqus.render:
         - [ '@cloud.disqus_listener', onRender ]
 
 # Controller listeners
-
 rest.controller.classcontentcontroller.getaction.postcall:
     listeners:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onPostCall ]

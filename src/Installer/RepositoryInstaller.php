@@ -22,6 +22,7 @@
 namespace BackBee\Installer;
 
 use BackBee\Command\AbstractCommand;
+use BackBee\Command\InstallCommand;
 use BackBeePlanet\Standalone\StandaloneHelper;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -40,10 +41,9 @@ class RepositoryInstaller extends AbstractInstaller
     /**
      * Build repository.
      *
-     * @param string         $appName
      * @param StyleInterface $io
      */
-    public static function buildRepository(string $appName, StyleInterface $io): void
+    public static function buildRepository(StyleInterface $io): void
     {
         $io->section('Build repository');
 
@@ -59,26 +59,7 @@ class RepositoryInstaller extends AbstractInstaller
 
         $io->text('Data\'s folders are ready.');
 
-        // build bootstrap.yml
-        $filepath = $configDir . DIRECTORY_SEPARATOR . 'bootstrap.yml';
-        if (file_exists($filepath)) {
-            $io->note(sprintf('%s already exists.', $filepath));
-        } else {
-            file_put_contents($filepath, Yaml::dump(
-                [
-                    'debug'     => false,
-                    'container' => [
-                        'dump_directory' => StandaloneHelper::cacheDir(),
-                        'autogenerate'   => true,
-                    ],
-                ],
-                20
-            ));
-
-            $io->text(sprintf('%s has been generated.', $filepath));
-        }
-
-        $io->newLine();
+        $appName = self::getAppName();
 
         // build config.yml
         $filepath = $configDir . DIRECTORY_SEPARATOR . 'config.yml';
@@ -87,11 +68,17 @@ class RepositoryInstaller extends AbstractInstaller
         } else {
             $config = AbstractCommand::parseYaml('config.yml.dist');
 
-            if (null === $config['app']['name']) {
-                $config['app']['name'] = $appName;
+            if (null === $config['parameters']['app_name']) {
+                $config['parameters']['app_name'] = $appName;
             }
 
-            file_put_contents($filepath, Yaml::dump($config));
+            $config['parameters']['debug'] = false;
+            $config['parameters']['container'] = [
+                'dump_directory' => StandaloneHelper::cacheDir(),
+                'autogenerate' => true,
+            ];
+
+            file_put_contents($filepath, Yaml::dump($config, 3));
             $io->text(sprintf('%s has been generated.', $filepath));
         }
 
@@ -174,17 +161,23 @@ class RepositoryInstaller extends AbstractInstaller
         if (file_exists($filepath)) {
             $io->note(sprintf('%s already exists.', $filepath));
         } else {
-            file_put_contents($filepath, Yaml::dump(array_merge(
-                AbstractCommand::parseYaml('services.yml.dist'),
-                [
-                    'parameters' => [
-                        'bbapp.cache.dir' => StandaloneHelper::cacheDir(),
-                        'bbapp.data.dir'  => $dataDir,
-                        'bbapp.log.dir'   => StandaloneHelper::logDir(),
-                        'secret_key'      => md5($appName),
-                    ],
-                ]
-            ), 20));
+            file_put_contents(
+                $filepath,
+                Yaml::dump(
+                    array_merge(
+                        AbstractCommand::parseYaml('services.yml.dist'),
+                        [
+                            'parameters' => [
+                                'bbapp.cache.dir' => StandaloneHelper::cacheDir(),
+                                'bbapp.data.dir' => $dataDir,
+                                'bbapp.log.dir' => StandaloneHelper::logDir(),
+                                'secret_key' => md5($appName),
+                            ],
+                        ]
+                    ),
+                    20
+                )
+            );
 
             $io->text(sprintf('%s has been generated.', $filepath));
         }
@@ -204,8 +197,8 @@ class RepositoryInstaller extends AbstractInstaller
 
         // build bundles folder
         $filesystem = new Filesystem();
-        $originDir = StandaloneHelper::distDir() . DIRECTORY_SEPARATOR . 'bundles';
-        $targetDir = $configDir . DIRECTORY_SEPARATOR . 'bundles';
+        $originDir = StandaloneHelper::distDir() . DIRECTORY_SEPARATOR . 'bundle';
+        $targetDir = $configDir . DIRECTORY_SEPARATOR . 'bundle';
 
         if ($filesystem->exists($originDir) && false === $filesystem->exists($targetDir)) {
             $filesystem->mirror($originDir, $targetDir);
@@ -217,6 +210,23 @@ class RepositoryInstaller extends AbstractInstaller
         }
 
         $io->newLine();
+    }
+
+    /**
+     * Get app name.
+     *
+     * @return string
+     */
+    private static function getAppName(): string
+    {
+        if (file_exists(StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'config.yml')) {
+            $config = AbstractCommand::parseYaml('config.yml', InstallCommand::CONFIG_REGULAR_YAML);
+            $appName = $config['parameters']['app_name'];
+        } elseif (null === ($appName = AbstractCommand::getInput()->getOption('app_name'))) {
+            $appName = AbstractCommand::askFor('Application name: ');
+        }
+
+        return $appName;
     }
 
     /**

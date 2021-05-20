@@ -23,7 +23,7 @@ namespace BackBeeCloud\Structure\ContentHandler;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Image;
-use BackBee\Config\Config;
+use BackBee\DependencyInjection\Container;
 use BackBee\FileSystem\ImageHandlerInterface;
 use BackBeeCloud\Structure\ContentHandlerInterface;
 
@@ -47,25 +47,25 @@ class ImageHandler implements ContentHandlerInterface
     protected $paramHandler;
 
     /**
-     * @var Config
+     * @var Container
      */
-    protected $config;
+    protected $container;
 
     /**
      * ImageHandler constructor.
      *
      * @param ImageHandlerInterface $imgUploadHandler
      * @param ParameterHandler      $paramHandler
-     * @param Config                $config
+     * @param Container             $container
      */
     public function __construct(
         ImageHandlerInterface $imgUploadHandler,
         ParameterHandler $paramHandler,
-        Config $config
+        Container $container
     ) {
         $this->imgUploadHandler = $imgUploadHandler;
         $this->paramHandler = $paramHandler;
-        $this->config = $config;
+        $this->container = $container;
     }
 
     /**
@@ -99,7 +99,7 @@ class ImageHandler implements ContentHandlerInterface
     {
         $result = $config['current_data'] ?? [];
 
-        $settings = $this->config->getSection('cdn');
+        $settings = $this->container->getParameter('cdn');
 
         $filename = '';
         if ($path = ltrim($content->image->path, '/')) {

@@ -21,7 +21,7 @@
 
 namespace BackBeeCloud\Api\Controller;
 
-use BackBeeCloud\SiteStatusManager;
+use BackBee\Site\SiteStatusManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**

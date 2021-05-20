@@ -39,7 +39,7 @@ class checkUserIP extends AbstractHelper
      */
     public function __invoke(): string
     {
-        $settings = $this->getRenderer()->getApplication()->getConfig()->getSection('whitelist');
+        $settings = $this->getRenderer()->getApplication()->getContainer()->getParameter('whitelist');
 
         return (null === $settings || empty($settings)) || in_array($this->getIP(), $settings, true);
     }

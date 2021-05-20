@@ -57,8 +57,8 @@ class BackBeeConsole extends ConsoleApplication
      */
     public function initApplication(): void
     {
-        $bootstrapFilepath = StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'bootstrap.yml';
-        if (StandaloneHelper::configDir() && is_readable($bootstrapFilepath)) {
+        $configFilepath = StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'config.yml';
+        if (StandaloneHelper::configDir() && is_readable($configFilepath)) {
             Application::setRepositoryDir(StandaloneHelper::repositoryDir());
             $this->bbApplication = new Application();
         }
@@ -91,6 +91,14 @@ class BackBeeConsole extends ConsoleApplication
                             (new ReflectionClass($bundle))->getNamespaceName()
                         );
                     } catch (Exception $exception) {
+                        $this->bbApplication->getLogging()->error(
+                            sprintf(
+                                '%s : %s :%s',
+                                __CLASS__,
+                                __FUNCTION__,
+                                $exception->getMessage()
+                            )
+                        );
                     }
                 }
             } elseif (is_dir($dir = dirname(__DIR__) . '/Command')) {
@@ -116,6 +124,7 @@ class BackBeeConsole extends ConsoleApplication
         $finder = new Finder();
         $finder->files()->name($this->bbApplication === null ? 'InstallCommand.php' : '*Command.php')->in($dir);
         $ns = $namespaceName . '\\Command';
+
         foreach ($finder as $file) {
             if ($relativePath = $file->getRelativePath()) {
                 $ns .= '\\' . str_replace('/', '\\', $relativePath);
@@ -128,6 +137,14 @@ class BackBeeConsole extends ConsoleApplication
                     $this->add($instance);
                 }
             } catch (Exception $exception) {
+                $this->bbApplication->getLogging()->error(
+                    sprintf(
+                        '%s : %s :%s',
+                        __CLASS__,
+                        __FUNCTION__,
+                        $exception->getMessage()
+                    )
+                );
             }
         }
     }

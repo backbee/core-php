@@ -30,7 +30,7 @@ use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\Job\MediaImageMigrationJob;
-use BackBeeCloud\SiteStatusManager;
+use BackBee\Site\SiteStatusManager;
 use BackBeePlanet\Job\JobInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;

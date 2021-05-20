@@ -75,8 +75,7 @@ class InstallCommand extends AbstractCommand
             ->addOption('mailer_password', null, InputOption::VALUE_OPTIONAL, 'The mailer password from to set.')
             ->addOption('mailer_encryption', null, InputOption::VALUE_OPTIONAL, 'The mailer encryption from to set.')
             ->addOption('admin_username', null, InputOption::VALUE_OPTIONAL, 'The admin username to set.')
-            ->addOption('admin_password', null, InputOption::VALUE_OPTIONAL, 'The admin password to set.')
-        ;
+            ->addOption('admin_password', null, InputOption::VALUE_OPTIONAL, 'The admin password to set.');
     }
 
     /**
@@ -91,9 +90,7 @@ class InstallCommand extends AbstractCommand
         $io = new SymfonyStyle($input, $output);
         $io->section('BackBee Standalone installer is now processing');
 
-        $appName = $this->getAppName();
-
-        RepositoryInstaller::buildRepository($appName, $io);
+        RepositoryInstaller::buildRepository($io);
         DatabaseInstaller::createDatabase($io);
 
         Application::setRepositoryDir(StandaloneHelper::repositoryDir());
@@ -101,7 +98,7 @@ class InstallCommand extends AbstractCommand
 
         $app->getContainer()->get('core.installer.database')->updateDatabaseSchema($io);
         $app->getContainer()->get('core.installer.sudoer')->createSudoer($io);
-        $app->getContainer()->get('core.installer.site')->createSite($appName, $io);
+        $app->getContainer()->get('core.installer.site')->createSite($io);
         $app->getContainer()->get('core.installer.layout')->createCleanLayout($io);
         $app->getContainer()->get('core.installer.page')->createRootPage($io);
         $app->getContainer()->get('core.installer.keyword')->createRootKeyword($io);
@@ -114,22 +111,5 @@ class InstallCommand extends AbstractCommand
         $io->success('Installation of BackBee Standalone is now done.');
 
         return 0;
-    }
-
-    /**
-     * Get app name.
-     *
-     * @return string
-     */
-    private function getAppName(): string
-    {
-        if (file_exists(StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'config.yml')) {
-            $config = self::parseYaml('config.yml', $this::CONFIG_REGULAR_YAML);
-            $appName = $config['app']['name'];
-        } elseif (null === ($appName = self::getInput()->getOption('app_name'))) {
-            $appName = self::askFor('Application name: ');
-        }
-
-        return $appName;
     }
 }

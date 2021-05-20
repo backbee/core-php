@@ -35,6 +35,6 @@ class isPrivacyPolicyEnabled extends AbstractHelper
      */
     public function __invoke(): bool
     {
-        return $this->getRenderer()->getApplication()->getAppParameter('privacy_policy');
+        return $this->getRenderer()->getApplication()->getContainer()->getParameter('privacy_policy');
     }
 }

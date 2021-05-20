@@ -28,6 +28,7 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Util\Collection\Collection;
 use DateTime;
 use DateTimeZone;
+use Exception;
 
 /**
  * Class SitemapManager
@@ -120,7 +121,7 @@ class SitemapManager
      * @param string $pathInfo A path info to sitemap.
      *
      * @return mixed|false      The stored content if valid, false elsewhere.
-     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function loadCache(string $id, string $pathInfo)
     {
@@ -147,7 +148,7 @@ class SitemapManager
      * @param mixed  $data     The sitemap content.
      *
      * @return boolean
-     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function saveCache(string $id, string $pathInfo, $data): bool
     {
@@ -169,7 +170,7 @@ class SitemapManager
      * @param string $id A sitemap id.
      *
      * @return boolean
-     * @throws InvalidArgumentException
+     * @throws Exception
      */
     private function isCacheAvailable(string $id): bool
     {

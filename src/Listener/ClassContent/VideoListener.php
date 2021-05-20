@@ -21,29 +21,36 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
-use BackBeeCloud\VideoHelper;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Media\Video;
+use BackBee\ClassContent\Media\VideoManager;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
 use BackBee\Renderer\Event\RendererEvent;
+use Exception;
+use Psr\Log\LoggerInterface;
+use const FILTER_VALIDATE_URL;
 
 /**
+ * Class VideoListener
+ *
+ * @package BackBeeCloud\Listener\ClassContent
+ *
  * @author Marian Hodis <marian.hodis@lp-digital.fr>
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class VideoListener
 {
-    const YOUTUBE_HOST = 'www.youtube.com';
-    const YOUTUBE_HOST_SHORT = 'youtu.be';
-    const DAILYMOTION_HOST = 'www.dailymotion.com';
-    const VIMEO_HOST = 'vimeo.com';
-    const BFMTV_HOST = 'www.bfmtv.com';
+    public const YOUTUBE_HOST = 'www.youtube.com';
+    public const YOUTUBE_HOST_SHORT = 'youtu.be';
+    public const DAILYMOTION_HOST = 'www.dailymotion.com';
+    public const VIMEO_HOST = 'vimeo.com';
+    public const BFMTV_HOST = 'www.bfmtv.com';
 
-    const YOUTUBE_BASEURL = '//www.youtube.com/embed/';
-    const VIMEO_BASEURL = '//player.vimeo.com/video/';
-    const DAILYMOTION_BASEURL = '//www.dailymotion.com/embed/video/';
-    const BFMTV_BASEURL = '/static/nxt-video/player.html';
+    public const YOUTUBE_BASEURL = '//www.youtube.com/embed/';
+    public const VIMEO_BASEURL = '//player.vimeo.com/video/';
+    public const DAILYMOTION_BASEURL = '//www.dailymotion.com/embed/video/';
+    public const BFMTV_BASEURL = '/static/nxt-video/player.html';
 
     /**
      * Default video sizes
@@ -53,9 +60,36 @@ class VideoListener
     private static $defaultVideoSizes = [
         'auto' => 100,
         'md' => 75,
-        'xs' => 50
+        'xs' => 50,
     ];
 
+    /**
+     * @var VideoManager
+     */
+    private static $videoManager;
+
+    /**
+     * @var LoggerInterface
+     */
+    private static $logger;
+
+    /**
+     * VideoListener constructor.
+     *
+     * @param VideoManager    $videoManager
+     * @param LoggerInterface $logger
+     */
+    public function __construct(VideoManager $videoManager, LoggerInterface $logger)
+    {
+        self::$videoManager = $videoManager;
+        self::$logger = $logger;
+    }
+
+    /**
+     * On flush video revision.
+     *
+     * @param Event $event
+     */
     public static function onVideoRevisionFlush(Event $event)
     {
         $app = $event->getApplication();
@@ -76,19 +110,47 @@ class VideoListener
 
         $videoUrl = $revision->getParamValue('video_url');
         if (
-            false == $videoUrl
-            || false == filter_var($videoUrl, \FILTER_VALIDATE_URL)
-            || !VideoHelper::isSupportedUrl($videoUrl)
+            false === $videoUrl
+            || false === filter_var($videoUrl, FILTER_VALIDATE_URL)
+            || !self::$videoManager->isSupportedUrl($videoUrl)
         ) {
             return;
         }
 
+        $thumbnail = null;
         $content = $revision->getContent();
-        $thumbnail = $entityManager->find(Image::class, $content->thumbnail->getUid());
+
+        try {
+            $thumbnail = $entityManager->find(Image::class, $content->thumbnail->getUid());
+        } catch (Exception $exception) {
+            self::$logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
         $image = $thumbnail->image;
 
+        $imageDraft = null;
         $isNewDraft = false;
-        $imageDraft = $entityManager->getRepository(Revision::class)->getDraft($image, $bbtoken);
+
+        try {
+            $imageDraft = $entityManager->getRepository(Revision::class)->getDraft($image, $bbtoken);
+        } catch (Exception $exception) {
+            self::$logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
         if (null === $imageDraft) {
             $imageDraft = $entityManager->getRepository(Revision::class)->checkout($image, $bbtoken);
             $entityManager->persist($imageDraft);
@@ -105,7 +167,7 @@ class VideoListener
             return;
         }
 
-        if (null === $thumbnailUrl = VideoHelper::getVideoThumbnailUrl($videoUrl)) {
+        if (null === $thumbnailUrl = self::$videoManager->getVideoThumbnailUrl($videoUrl)) {
             return;
         }
 
@@ -116,7 +178,7 @@ class VideoListener
 
         $tmpfilepath = tempnam(sys_get_temp_dir(), '');
         file_put_contents($tmpfilepath, $rawContent);
-        $filename .= '.'.pathinfo($thumbnailUrl, PATHINFO_EXTENSION);
+        $filename .= '.' . pathinfo($thumbnailUrl, PATHINFO_EXTENSION);
 
         $imageDraft->path = $app->getContainer()->get('cloud.file_handler')->upload(
             $filename,
@@ -126,8 +188,7 @@ class VideoListener
 
         $method = $unitOfWork->isScheduledForInsert($imageDraft) && !$isNewDraft
             ? 'computeChangeSet'
-            : 'recomputeSingleEntityChangeSet'
-        ;
+            : 'recomputeSingleEntityChangeSet';
         $unitOfWork->$method(
             $entityManager->getClassMetadata(Revision::class),
             $imageDraft
@@ -138,9 +199,10 @@ class VideoListener
      * Video onRender event
      *
      * @param RendererEvent $event
+     *
      * @return void
      */
-    public static function onRender(RendererEvent $event)
+    public static function onRender(RendererEvent $event): void
     {
         $renderer = $event->getRenderer();
         $content = $event->getTarget();
@@ -163,12 +225,13 @@ class VideoListener
      * Get video data based on the url
      *
      * @param string url
+     *
      * @return array
      */
-    private static function getData($url)
+    private static function getData($url): array
     {
         $data = [
-            'src'        => '',
+            'src' => '',
             'attributes' => '',
         ];
 

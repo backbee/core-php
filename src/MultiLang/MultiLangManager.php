@@ -23,7 +23,6 @@ namespace BackBeeCloud\MultiLang;
 
 use BackBee\BBApplication;
 use BackBee\Cache\RedisManager;
-use BackBee\Config\Config;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
 use BackBeeCloud\Entity\Lang;
@@ -31,7 +30,7 @@ use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
-use BackBeeCloud\SiteStatusManager;
+use BackBee\Site\SiteStatusManager;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
 use Doctrine\ORM\EntityManager;
@@ -41,6 +40,7 @@ use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use function in_array;
 
 /**
  * Class MultiLangManager
@@ -79,16 +79,15 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * MultiLangManager constructor.
      *
-     * @param BBApplication         $app
-     * @param Config                $config
-     * @param RedisManager $redisManager
+     * @param BBApplication $app
+     * @param RedisManager  $redisManager
      */
-    public function __construct(BBApplication $app, Config $config, RedisManager $redisManager)
+    public function __construct(BBApplication $app, RedisManager $redisManager)
     {
         $this->app = $app;
         $this->entityMgr = $app->getEntityManager();
         $this->siteStatusMgr = $app->getContainer()->get('site_status.manager');
-        $this->available = $config->getSection('languages');
+        $this->available = $app->getContainer()->getParameter('languages');
         $this->redisManager = $redisManager;
     }
 
