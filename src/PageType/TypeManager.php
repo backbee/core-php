@@ -72,7 +72,7 @@ class TypeManager
     protected $types = [];
 
     /**
-     * @var string
+     * @var AbstractType
      */
     protected $defaultType;
 
@@ -201,9 +201,9 @@ class TypeManager
     /**
      * Get default type.
      *
-     * @return string
+     * @return AbstractType
      */
-    public function getDefaultType(): string
+    public function getDefaultType(): AbstractType
     {
         return $this->defaultType;
     }
