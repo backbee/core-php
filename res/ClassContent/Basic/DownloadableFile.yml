@@ -2,7 +2,7 @@ DownloadableFile:
     properties:
         name: yaml_block_downloadable_file
         description: ~
-        category: [block_category_more]
+        category: [ block_category_more ]
         rte:
             placeholder: yaml_block_text_rte_placeholder
     elements:
@@ -14,7 +14,6 @@ DownloadableFile:
             value: ~
         description:
             value: ~
-
         download_label:
             label: yaml_block_downloadable_file_label
             type: text
