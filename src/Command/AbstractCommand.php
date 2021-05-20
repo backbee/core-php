@@ -25,7 +25,7 @@ use BackBee\BBApplication;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBeePlanet\Job\JobInterface;
-use App\StandaloneHelper;
+use App\Helper\StandaloneHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;

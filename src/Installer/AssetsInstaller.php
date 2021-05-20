@@ -21,7 +21,7 @@
 
 namespace BackBee\Installer;
 
-use App\StandaloneHelper;
+use App\Helper\StandaloneHelper;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 

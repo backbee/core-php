@@ -24,7 +24,7 @@ namespace BackBee\Command;
 use BackBee\Installer\DatabaseInstaller;
 use BackBee\Installer\RepositoryInstaller;
 use App\Application;
-use App\StandaloneHelper;
+use App\Helper\StandaloneHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
