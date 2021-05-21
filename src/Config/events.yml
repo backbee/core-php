@@ -352,11 +352,18 @@ rest.controller.usercontroller.postaction.postcall:
     listeners:
         # BackBee Cloud listeners
         - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
+        - [ '@core.log.user.listener', onRestUserPostActionPostCall ]
 
 rest.controller.usercontroller.putaction.postcall:
     listeners:
         # BackBee Cloud listeners
         - [ "@cloud.api.user_controller.listener", onRestUserPutActionPostCall ]
+        - [ '@core.log.user.listener', onRestUserPutActionPostCall ]
+
+rest.controller.usercontroller.deleteaction.postcall:
+    listeners:
+        # BackBee Cloud listeners
+        - [ '@core.log.user.listener', onRestUserDeleteActionPostCall ]
 
 # Page and Section listeners
 

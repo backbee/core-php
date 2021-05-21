@@ -5,7 +5,6 @@ namespace BackBee\Listener\Log;
 use BackBee\Security\SecurityContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * Class AbstractLogListener
@@ -53,42 +52,25 @@ abstract class AbstractLogListener
     }
 
     /**
-     * Get action.
-     *
-     * @param $entity
-     *
-     * @return string
-     */
-    protected static function getAction($entity): string
-    {
-        if (self::$entityManager->getUnitOfWork()->isScheduledForInsert($entity)) {
-            $action = self::CREATE_ACTION;
-        } elseif (self::$entityManager->getUnitOfWork()->isScheduledForUpdate($entity)) {
-            $action = self::UPDATE_ACTION;
-        } else {
-            $action = self::DELETE_ACTION;
-        }
-
-        return $action;
-    }
-
-    /**
      * Write log.
+     *
+     * @param string $action  Type of action taken
+     * @param string $object  The identifier of the object
+     * @param string $type    The type of the object
+     * @param array  $content The content of the object
      */
-    protected static function writeLog($entity, array $beforeData, array $afterData): void
+    protected static function writeLog(string $action, string $object, string $type, array $content = []): void
     {
         if ($token = self::$context->getToken()) {
             self::$logger->info(
                 'AdminLog',
                 [
                     'user' => $token->getUser()->getId() . '@' . $token->getUser()->getUsername(),
-                    'action' => self::getAction($entity),
-                    'object' => $entity->getUid(),
-                    'type' => ClassUtils::getRealClass($entity),
-                    'before_content' => $beforeData['content'],
-                    'before_parameters' => $beforeData['parameters'],
-                    'after_content' => $afterData['content'],
-                    'after_parameters' => $afterData['parameters'],
+                    'action' => $action,
+                    'object' => $object,
+                    'type' => $type,
+                    'content' => $content['content'] ?? null,
+                    'parameters' => $content['parameters'] ?? null,
                 ]
             );
         }
