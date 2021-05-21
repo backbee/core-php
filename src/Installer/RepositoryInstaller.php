@@ -172,6 +172,7 @@ class RepositoryInstaller extends AbstractInstaller
                                 'bbapp.data.dir' => $dataDir,
                                 'bbapp.log.dir' => StandaloneHelper::logDir(),
                                 'secret_key' => md5($appName),
+                                'cloud.strictly.default.categories' => false
                             ],
                         ]
                     ),
