@@ -1,5 +1,24 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2021 Lp Digital
+ *
+ * This file is part of BackBee Standalone.
+ *
+ * BackBee is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBee Standalone. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 namespace BackBee\Listener\Log;
 
 use BackBee\Controller\Event\PostResponseEvent;
@@ -18,7 +37,7 @@ use Psr\Log\LoggerInterface;
  *
  * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class UserLogListener extends AbstractLogListener
+class UserLogListener extends AbstractLogListener implements LogListenerInterface
 {
     private const ENTITY_CLASS = User::class;
 
@@ -46,9 +65,9 @@ class UserLogListener extends AbstractLogListener
     }
 
     /**
-     * On rest post action post call.
+     * {@inheritDoc}
      */
-    public static function onRestPostActionPostCall(PostResponseEvent $event): void
+    public static function onPostActionPostCall(PostResponseEvent $event): void
     {
         $rawData = json_decode($event->getResponse()->getContent(), true);
 
@@ -61,9 +80,9 @@ class UserLogListener extends AbstractLogListener
     }
 
     /**
-     * On rest put action post call.
+     * {@inheritDoc}
      */
-    public static function onRestPutActionPostCall(PostResponseEvent $event): void
+    public static function onPutActionPostCall(PostResponseEvent $event): void
     {
         $request = $event->getRequest();
         $id = $request->attributes->get('id');
@@ -78,9 +97,9 @@ class UserLogListener extends AbstractLogListener
     }
 
     /**
-     * On rest delete action pre call.
+     * {@inheritDoc}
      */
-    public static function onRestDeleteActionPreCall(PreRequestEvent $event): void
+    public static function onDeleteActionPreCall(PreRequestEvent $event): void
     {
         $userId = $event->getRequest()->attributes->get('id');
         $user = self::$userManager->getById($userId);
@@ -116,7 +135,7 @@ class UserLogListener extends AbstractLogListener
      *
      * @return array
      */
-    public static function getContent(array $rawData): array
+    private static function getContent(array $rawData): array
     {
         return [
             'content' => [

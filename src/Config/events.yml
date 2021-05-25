@@ -302,12 +302,12 @@ backbeecloud.api.controller.pagecontroller.put.postcall:
 
 backbeecloud.api.controller.tagcontroller.post.postcall:
     listeners:
-        - [ '@core.log.tag.listener', onRestPostActionPostCall ]
+        - [ '@core.log.tag.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.put.postcall:
     listeners:
         - [ '@core.cache.listener', onChangePostCall ]
-        - [ '@core.log.tag.listener', onRestPutActionPostCall ]
+        - [ '@core.log.tag.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.delete.postcall:
     listeners:
@@ -315,7 +315,7 @@ backbeecloud.api.controller.tagcontroller.delete.postcall:
 
 backbeecloud.api.controller.tagcontroller.delete.precall:
     listeners:
-        - [ '@core.log.tag.listener', onRestDeleteActionPreCall ]
+        - [ '@core.log.tag.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.publish.postcall:
     listeners:
@@ -365,12 +365,12 @@ rest.controller.usercontroller.getcurrentaction.postcall:
 rest.controller.usercontroller.postaction.postcall:
     listeners:
         - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
-        - [ '@core.log.user.listener', onRestPostActionPostCall ]
+        - [ '@core.log.user.listener', onPostActionPostCall ]
 
 rest.controller.usercontroller.putaction.postcall:
     listeners:
         - [ "@cloud.api.user_controller.listener", onRestUserPutActionPostCall ]
-        - [ '@core.log.user.listener', onRestPutActionPostCall ]
+        - [ '@core.log.user.listener', onPutActionPostCall ]
 
 rest.controller.usercontroller.deleteaction.precall:
     listeners:
@@ -378,15 +378,15 @@ rest.controller.usercontroller.deleteaction.precall:
 
 backbeecloud.api.controller.grouptypecontroller.create.postcall:
     listeners:
-        - [ '@core.log.group_type.listener', onCreatePostCall ]
+        - [ '@core.log.group_type.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.grouptypecontroller.update.postcall:
     listeners:
-        - [ '@core.log.group_type.listener', onUpdatePostCall ]
+        - [ '@core.log.group_type.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.grouptypecontroller.delete.precall:
     listeners:
-        - [ '@core.log.group_type.listener', onDeletePreCall ]
+        - [ '@core.log.group_type.listener', onDeleteActionPreCall ]
 
 # Page and Section listeners
 
