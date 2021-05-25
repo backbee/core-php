@@ -369,6 +369,18 @@ rest.controller.usercontroller.deleteaction.precall:
     listeners:
         - [ '@core.log.user.listener', onRestDeleteActionPreCall ]
 
+backbeecloud.api.controller.grouptypecontroller.create.postcall:
+    listeners:
+        - [ '@core.log.group_type.listener', onRestCreatePostCall ]
+
+backbeecloud.api.controller.grouptypecontroller.update.postcall:
+    listeners:
+        - [ '@core.log.group_type.listener', onRestUpdatePostCall ]
+
+backbeecloud.api.controller.grouptypecontroller.delete.precall:
+    listeners:
+        - [ '@core.log.group_type.listener', onRestDeletePreCall ]
+
 # Page and Section listeners
 
 nestednode.page.postload:

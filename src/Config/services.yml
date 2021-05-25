@@ -726,7 +726,7 @@ services:
         arguments:
             [ '@security.context', '@em', '@cloud.user_manager', '@monolog.logger.admin_log']
 
-    core.log.group.listener:
-        class: BackBee\Listener\Log\GroupLogListener
+    core.log.group_type.listener:
+        class: BackBee\Listener\Log\GroupTypeLogListener
         arguments:
-            [ '@security.context', '@em', '@monolog.logger.admin_log' ]
+            [ '@security.context', '@em', '@cloud.group_type.manager', '@monolog.logger.admin_log' ]
