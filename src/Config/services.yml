@@ -714,7 +714,7 @@ services:
     core.log.page.listener:
         class: BackBee\Listener\Log\PageLogListener
         arguments:
-            [ '@security.context', '@em', '@monolog.logger.admin_log', '@cloud.page_manager', '@elasticsearch.manager' ]
+            [ '@security.context', '@em', '@cloud.page_manager', '@monolog.logger.admin_log']
 
     core.log.tag.listener:
         class: BackBee\Listener\Log\TagLogListener

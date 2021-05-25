@@ -2,10 +2,10 @@
 
 namespace BackBee\Listener\Log;
 
-use BackBee\Event\Event;
+use BackBee\Controller\Event\PostResponseEvent;
+use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\NestedNode\Page;
 use BackBee\Security\SecurityContext;
-use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBeeCloud\Entity\PageManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -17,123 +17,78 @@ use Psr\Log\LoggerInterface;
  *
  * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class PageLogListener extends AbstractLogListener implements LogListenerInterface
+class PageLogListener extends AbstractLogListener
 {
+    private const ENTITY_CLASS = Page::class;
+
     /**
      * @var PageManager
      */
     private static $pageManager;
 
     /**
-     * @var ElasticsearchManager
-     */
-    private static $elasticsearchManager;
-
-    /**
      * PageLogListener constructor.
      *
      * @param SecurityContext        $context
      * @param EntityManagerInterface $entityManager
-     * @param LoggerInterface|null   $logger
      * @param PageManager            $pageManager
-     * @param ElasticsearchManager   $elasticsearchManager
+     * @param LoggerInterface|null   $logger
      */
     public function __construct(
         SecurityContext $context,
         EntityManagerInterface $entityManager,
-        ?LoggerInterface $logger,
         PageManager $pageManager,
-        ElasticsearchManager $elasticsearchManager
+        ?LoggerInterface $logger
     ) {
         self::$pageManager = $pageManager;
-        self::$elasticsearchManager = $elasticsearchManager;
         parent::__construct($context, $entityManager, $logger);
     }
 
     /**
-     * {@inheritDoc}
+     * On post action post call.
      */
-    public static function onFlush(Event $event): void
+    public static function onPostActionPostCall(PostResponseEvent $event): void
     {
-        $page = $event->getTarget();
+        $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        if ($page instanceof Page) {
+        self::writeLog(
+            self::CREATE_ACTION,
+            $rawData['id'] ?? null,
+            self::ENTITY_CLASS,
+            ['content' => $rawData]
+        );
+    }
+
+    /**
+     * On put action post call.
+     */
+    public static function onPutActionPostCall(PostResponseEvent $event): void
+    {
+        $rawData = json_decode($event->getResponse()->getContent(), true);
+
+        self::writeLog(
+            self::UPDATE_ACTION,
+            $rawData['id'] ?? null,
+            self::ENTITY_CLASS,
+            ['content' => $rawData]
+        );
+    }
+
+    /**
+     * On delete action pre call.
+     */
+    public static function onDeleteActionPreCall(PreRequestEvent $event): void
+    {
+        $pageId = $event->getRequest()->attributes->get('uid');
+        $page = self::$pageManager->get($pageId);
+
+        if ($page) {
             self::writeLog(
-                $page,
-                self::getBeforeContent($page),
-                self::getAfterContent($page)
+                self::DELETE_ACTION,
+                $pageId,
+                self::ENTITY_CLASS,
+                ['content' => self::$pageManager->format($page)]
             );
         }
-    }
-
-    /**
-     * Get before content.
-     *
-     * @param Page $page
-     *
-     * @return null|array
-     */
-    private static function getBeforeContent(Page $page): ?array
-    {
-        $content = null;
-        $isScheduledForUpdate = self::$entityManager->getUnitOfWork()->isScheduledForUpdate($page);
-
-        if ($isScheduledForUpdate) {
-            $data = self::$elasticsearchManager->getPageByUid($page->getUid());
-            $content = [
-                'id' => $page->getUid(),
-                'title' => $data['title'],
-//                'type' => $data['type'],
-//                'category' => $data['category'],
-//                'is_online' => $data['is_online'],
-//                'is_drafted' => $data['is_drafted'],
-//                'url' => $data['url'],
-//                'tags' => $data['tags'],
-            ];
-        }
-
-        return [
-            'content' => $isScheduledForUpdate ? $content : null,
-            'parameters' => $isScheduledForUpdate ? '' : null,
-        ];
-    }
-
-    /**
-     * Get after content.
-     *
-     * @param Page $page
-     *
-     * @return array|null
-     */
-    private static function getAfterContent(Page $page): ?array
-    {
-        $isScheduledForUpdate = self::$entityManager->getUnitOfWork()->isScheduledForUpdate($page);
-        $isScheduledForInsert = self::$entityManager->getUnitOfWork()->isScheduledForInsert($page);
-
-        if ($isScheduledForInsert) {
-            self::$elasticsearchManager->indexPage($page);
-        }
-
-        $data = self::$pageManager->format($page);
-
-        $content = [
-            'id' => $data['id'],
-            'title' => $data['title'],
-            'type' => $data['type'],
-            'category' => $data['category'],
-            'is_online' => $data['is_online'],
-            'is_drafted' => $data['is_drafted'],
-            'url' => $data['url'],
-            'tags' => $data['tags'],
-        ];
-
-        $parameters = [
-            'seo' => $data['seo'],
-        ];
-
-        return [
-            'content' => $isScheduledForInsert || $isScheduledForUpdate ? $content : null,
-            'parameters' => $isScheduledForInsert || $isScheduledForUpdate ? $parameters : null,
-        ];
     }
 }

@@ -255,6 +255,10 @@ rest.controller.pagecontroller.deleteaction.postcall:
         - [ BackBeeCloud\Listener\ElasticsearchListener, onPageDeletePostcall ]
         - [ '@core.page.listener', onPageDeletePostcall ]
 
+rest.controller.pagecontroller.deleteaction.precall:
+    listeners:
+        - [ '@core.log.page.listener', onDeleteActionPreCall ]
+
 rest.controller.resourcecontroller.uploadaction.postcall:
     listeners:
         # BackBee Cloud listeners
@@ -288,10 +292,14 @@ backbeecloud.api.controller.contentcontroller.delete.postcall:
         # BackBee Cloud listeners
         - [ '@core.page.listener', onRestContentUpdatePostcall ]
 
+backbeecloud.api.controller.pagecontroller.post.postcall:
+    listeners:
+        - [ '@core.log.page.listener', onPostActionPostCall ]
+
 backbeecloud.api.controller.pagecontroller.put.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
+        - [ '@core.log.page.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.post.postcall:
     listeners:
@@ -367,19 +375,19 @@ rest.controller.usercontroller.putaction.postcall:
 
 rest.controller.usercontroller.deleteaction.precall:
     listeners:
-        - [ '@core.log.user.listener', onRestDeleteActionPreCall ]
+        - [ '@core.log.user.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.grouptypecontroller.create.postcall:
     listeners:
-        - [ '@core.log.group_type.listener', onRestCreatePostCall ]
+        - [ '@core.log.group_type.listener', onCreatePostCall ]
 
 backbeecloud.api.controller.grouptypecontroller.update.postcall:
     listeners:
-        - [ '@core.log.group_type.listener', onRestUpdatePostCall ]
+        - [ '@core.log.group_type.listener', onUpdatePostCall ]
 
 backbeecloud.api.controller.grouptypecontroller.delete.precall:
     listeners:
-        - [ '@core.log.group_type.listener', onRestDeletePreCall ]
+        - [ '@core.log.group_type.listener', onDeletePreCall ]
 
 # Page and Section listeners
 
@@ -404,7 +412,6 @@ nestednode.page.onflush:
         # BackBee Cloud listeners
         - [ '@core.page.listener', onFlush ]
         - [ '@core.page.listener', handleUriCollisionOnFlushPage ]
-        - [ '@core.log.page.listener', onFlush ]
 
 nestednode.page.postremove:
     listeners:

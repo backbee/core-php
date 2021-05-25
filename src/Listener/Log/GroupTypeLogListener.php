@@ -45,9 +45,9 @@ class GroupTypeLogListener extends AbstractLogListener
     }
 
     /**
-     * On rest create action post call.
+     * On create action post call.
      */
-    public static function onRestCreatePostCall(PostResponseEvent $event): void
+    public static function onCreatePostCall(PostResponseEvent $event): void
     {
         $rawData = json_decode($event->getResponse()->getContent(), true);
 
@@ -60,9 +60,9 @@ class GroupTypeLogListener extends AbstractLogListener
     }
 
     /**
-     * On rest update action post call.
+     * On update action post call.
      */
-    public static function onRestUpdatePostCall(PostResponseEvent $event): void
+    public static function onUpdatePostCall(PostResponseEvent $event): void
     {
         $request = $event->getRequest();
         $groupTypeId = $request->attributes->get('id');
@@ -77,9 +77,9 @@ class GroupTypeLogListener extends AbstractLogListener
     }
 
     /**
-     * On rest delete action pre call.
+     * On delete action pre call.
      */
-    public static function onRestDeletePreCall(PreRequestEvent $event): void
+    public static function onDeletePreCall(PreRequestEvent $event): void
     {
         $groupTypeId = $event->getRequest()->attributes->get('id');
         $groupType = self::$groupTypeManager->getById($groupTypeId);

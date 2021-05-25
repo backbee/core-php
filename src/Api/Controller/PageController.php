@@ -198,10 +198,14 @@ class PageController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        return new Response(null, Response::HTTP_CREATED, [
-            'Location'   => "/api/pages/{$page->getUid()}",
-            'X-Page-URL' => $page->getUrl(),
-        ]);
+        return new JsonResponse(
+            $this->pageManager->format($page),
+            Response::HTTP_CREATED,
+            [
+                'Location'   => "/api/pages/{$page->getUid()}",
+                'X-Page-URL' => $page->getUrl(),
+            ]
+        );
     }
 
     /**
@@ -230,9 +234,13 @@ class PageController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        return new Response(null, Response::HTTP_NO_CONTENT, [
-            'X-Page-URL' => $page->getUrl(),
-        ]);
+        return new JsonResponse(
+            $this->pageManager->format($page),
+            Response::HTTP_NO_CONTENT,
+            [
+                'X-Page-URL' => $page->getUrl(),
+            ]
+        );
     }
 
     /**
