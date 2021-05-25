@@ -293,15 +293,22 @@ backbeecloud.api.controller.pagecontroller.put.postcall:
         # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
 
+backbeecloud.api.controller.tagcontroller.post.postcall:
+    listeners:
+        - [ '@core.log.tag.listener', onRestPostActionPostCall ]
+
 backbeecloud.api.controller.tagcontroller.put.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
+        - [ '@core.log.tag.listener', onRestPutActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.delete.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
+
+backbeecloud.api.controller.tagcontroller.delete.precall:
+    listeners:
+        - [ '@core.log.tag.listener', onRestDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.publish.postcall:
     listeners:
@@ -350,20 +357,17 @@ rest.controller.usercontroller.getcurrentaction.postcall:
 
 rest.controller.usercontroller.postaction.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
-        - [ '@core.log.user.listener', onRestUserPostActionPostCall ]
+        - [ '@core.log.user.listener', onRestPostActionPostCall ]
 
 rest.controller.usercontroller.putaction.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ "@cloud.api.user_controller.listener", onRestUserPutActionPostCall ]
-        - [ '@core.log.user.listener', onRestUserPutActionPostCall ]
+        - [ '@core.log.user.listener', onRestPutActionPostCall ]
 
-rest.controller.usercontroller.deleteaction.postcall:
+rest.controller.usercontroller.deleteaction.precall:
     listeners:
-        # BackBee Cloud listeners
-        - [ '@core.log.user.listener', onRestUserDeleteActionPostCall ]
+        - [ '@core.log.user.listener', onRestDeleteActionPreCall ]
 
 # Page and Section listeners
 

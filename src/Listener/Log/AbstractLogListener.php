@@ -54,12 +54,12 @@ abstract class AbstractLogListener
     /**
      * Write log.
      *
-     * @param string $action  Type of action taken
-     * @param string $object  The identifier of the object
-     * @param string $type    The type of the object
-     * @param array  $content The content of the object
+     * @param string      $action  Type of action taken
+     * @param string|null $object  The identifier of the object
+     * @param string      $type    The type of the object
+     * @param array       $content The content of the object
      */
-    protected static function writeLog(string $action, string $object, string $type, array $content = []): void
+    protected static function writeLog(string $action, ?string $object, string $type, array $content = []): void
     {
         if ($token = self::$context->getToken()) {
             self::$logger->info(

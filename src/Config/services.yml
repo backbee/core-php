@@ -719,12 +719,12 @@ services:
     core.log.tag.listener:
         class: BackBee\Listener\Log\TagLogListener
         arguments:
-            [ '@security.context', '@em', '@monolog.logger.admin_log' ]
+            [ '@security.context', '@em', '@cloud.tag_manager', '@monolog.logger.admin_log' ]
 
     core.log.user.listener:
         class: BackBee\Listener\Log\UserLogListener
         arguments:
-            [ '@security.context', '@em', '@monolog.logger.admin_log']
+            [ '@security.context', '@em', '@cloud.user_manager', '@monolog.logger.admin_log']
 
     core.log.group.listener:
         class: BackBee\Listener\Log\GroupLogListener
