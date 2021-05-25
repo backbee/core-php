@@ -1,16 +1,16 @@
 Liner:
-  properties:
-    name: yaml_block_liner
-    description: ~
-    category: [block_category_more]
-    resizable: true
-  parameters:
-    height:
-      value: 40
-    style:
-      type: select
-      label: yaml_block_liner_style
-      options:
-        solid: yaml_block_liner_solid
-        dotted: yaml_block_liner_dotted
-      value: solid
+    properties:
+        name: yaml_block_liner
+        description: ~
+        category: [ block_category_basics ]
+        resizable: true
+    parameters:
+        height:
+            value: 40
+        style:
+            type: select
+            label: yaml_block_liner_style
+            options:
+                solid: yaml_block_liner_solid
+                dotted: yaml_block_liner_dotted
+            value: solid

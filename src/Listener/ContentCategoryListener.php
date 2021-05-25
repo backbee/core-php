@@ -35,8 +35,9 @@ use function in_array;
  *
  * @package BackBeeCloud\Listener
  *
- * @author  Eric Chau <eric.chau@lp-digital.fr>
- * @author  Charles Rouillon <charles.rouillon@lp-digital.fr>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class ContentCategoryListener
 {
@@ -52,12 +53,14 @@ class ContentCategoryListener
                 'Basic/Title' => 0,
                 'Text/Paragraph' => 1,
                 'Basic/Image' => 2,
-                'Text/Button' => 3,
-                'Media/Video' => 4,
-                'Basic/Slider' => 5,
-                'Basic/ResponsiveSlider' => 6,
-                'Basic/Searchbar' => 7,
-                'Basic/Cards' => 8,
+                'Basic/Cards' => 3,
+                'Basic/Slider' => 4,
+                'Basic/ResponsiveSlider' => 5,
+                'Text/Button' => 6,
+                'Media/Video' => 7,
+                'Basic/DownloadableFile' => 8,
+                'Basic/Spacer' => 9,
+                'Basic/Liner' => 10,
             ],
         ],
         'block_category_pages' => [

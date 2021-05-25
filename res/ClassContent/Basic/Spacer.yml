@@ -1,13 +1,13 @@
 Spacer:
-  properties:
-    name: yaml_block_spacer
-    description: ~
-    category: [block_category_more]
-    resizable: true
-  parameters:
-    height:
-      value: 40
-    show_on_mobile:
-      type: switch
-      label: yaml_block_spacer_show_on_mobile
-      value: true
+    properties:
+        name: yaml_block_spacer
+        description: ~
+        category: [ block_category_basics ]
+        resizable: true
+    parameters:
+        height:
+            value: 40
+        show_on_mobile:
+            type: switch
+            label: yaml_block_spacer_show_on_mobile
+            value: true
