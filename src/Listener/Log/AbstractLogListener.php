@@ -61,7 +61,7 @@ abstract class AbstractLogListener
      */
     protected static function writeLog(string $action, ?string $object, string $type, array $content = []): void
     {
-        if ($token = self::$context->getToken()) {
+        if (self::$logger && ($token = self::$context->getToken())) {
             self::$logger->info(
                 'AdminLog',
                 [

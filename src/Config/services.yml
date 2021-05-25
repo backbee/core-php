@@ -709,24 +709,24 @@ services:
     core.log.class_content.listener:
         class: BackBee\Listener\Log\ClassContentLogListener
         arguments:
-            [ '@security.context', '@em', '@monolog.logger.admin_log']
+            [ '@security.context', '@em', '@?monolog.logger.admin_log']
 
     core.log.page.listener:
         class: BackBee\Listener\Log\PageLogListener
         arguments:
-            [ '@security.context', '@em', '@cloud.page_manager', '@monolog.logger.admin_log']
+            [ '@security.context', '@em', '@cloud.page_manager', '@?monolog.logger.admin_log']
 
     core.log.tag.listener:
         class: BackBee\Listener\Log\TagLogListener
         arguments:
-            [ '@security.context', '@em', '@cloud.tag_manager', '@monolog.logger.admin_log' ]
+            [ '@security.context', '@em', '@cloud.tag_manager', '@?monolog.logger.admin_log' ]
 
     core.log.user.listener:
         class: BackBee\Listener\Log\UserLogListener
         arguments:
-            [ '@security.context', '@em', '@cloud.user_manager', '@monolog.logger.admin_log']
+            [ '@security.context', '@em', '@cloud.user_manager', '@?monolog.logger.admin_log']
 
     core.log.group_type.listener:
         class: BackBee\Listener\Log\GroupTypeLogListener
         arguments:
-            [ '@security.context', '@em', '@cloud.group_type.manager', '@monolog.logger.admin_log' ]
+            [ '@security.context', '@em', '@cloud.group_type.manager', '@?monolog.logger.admin_log' ]
