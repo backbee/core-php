@@ -69,8 +69,7 @@ abstract class AbstractLogListener
                     'action' => $action,
                     'object' => $object,
                     'type' => $type,
-                    'content' => $content['content'] ?? null,
-                    'parameters' => $content['parameters'] ?? null,
+                    'content' => $content['content'] ?? null
                 ]
             );
         }

@@ -3,8 +3,12 @@
 namespace BackBee\Listener\Log;
 
 use BackBee\ClassContent\AbstractClassContent;
-use BackBee\ClassContent\Revision;
-use BackBee\Event\Event;
+use BackBee\Controller\Event\PostResponseEvent;
+use BackBee\Controller\Event\PreRequestEvent;
+use BackBee\Security\SecurityContext;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class ClassContentLogListener
@@ -13,52 +17,95 @@ use BackBee\Event\Event;
  *
  * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class ClassContentLogListener extends AbstractLogListener implements LogListenerInterface
+class ClassContentLogListener extends AbstractLogListener
 {
     /**
-     * {@inheritDoc}
+     * @var EntityRepository
      */
-    public static function onFlush(Event $event): void
-    {
-        $content = $event->getTarget();
+    private static $repository;
 
-        if ($content instanceof AbstractClassContent) {
-            self::writeLog($content, self::getBeforeContent($content), self::getAfterContent($content));
+    /**
+     * ClassContentLogListener constructor.
+     *
+     * @param SecurityContext        $context
+     * @param EntityManagerInterface $entityManager
+     * @param LoggerInterface|null   $logger
+     */
+    public function __construct(
+        SecurityContext $context,
+        EntityManagerInterface $entityManager,
+        ?LoggerInterface $logger
+    ) {
+        self::$repository = $entityManager->getRepository(AbstractClassContent::class);
+        parent::__construct($context, $entityManager, $logger);
+    }
+
+    /**
+     * On rest post action post call.
+     */
+    public static function onPostActionPostCall(PostResponseEvent $event): void
+    {
+        $rawData = json_decode($event->getResponse()->getContent(), true);
+
+        self::writeLog(
+            self::CREATE_ACTION,
+            $rawData['uid'] ?? null,
+            $rawData['className'] ?? null,
+            self::getContent($rawData)
+        );
+    }
+
+    /**
+     * On rest put action post call.
+     */
+    public static function onPutActionPostCall(PostResponseEvent $event): void
+    {
+        $rawData = json_decode($event->getResponse()->getContent(), true);
+
+        self::writeLog(
+            self::UPDATE_ACTION,
+            $rawData['uid'] ?? null,
+            $rawData['className'] ?? null,
+            self::getContent($rawData)
+        );
+    }
+
+    /**
+     * On rest delete action pre call.
+     */
+    public static function onDeleteActionPreCall(PreRequestEvent $event): void
+    {
+        $contentId = $event->getRequest()->attributes->get('uid');
+        $content = self::$repository->find($contentId);
+
+        if ($content) {
+            $rawData = $content->jsonSerialize();
+            self::writeLog(
+                self::DELETE_ACTION,
+                $contentId,
+                $rawData['className'] ?? null,
+                self::getContent($rawData)
+            );
         }
     }
 
     /**
-     * Get before content.
+     * Get content.
      *
-     * @param AbstractClassContent $content
+     * @param array $rawData
      *
-     * @return null|array
+     * @return array
      */
-    private static function getBeforeContent(AbstractClassContent $content): ?array
+    public static function getContent(array $rawData): array
     {
-        $id = $content->getRevision();
-        $revision = self::$entityManager->getRepository(Revision::class)->findOneBy(['_revision' => $id - 1]);
-
         return [
-            'content' => $revision ? $revision->getData() : null,
-            'parameter' => $revision ? $revision->getAllParams() : null,
-        ];
-    }
-
-    /**
-     * Get after content.
-     *
-     * @param AbstractClassContent $content
-     *
-     * @return array|null
-     */
-    private static function getAfterContent(AbstractClassContent $content): ?array
-    {
-        $isScheduledForDelete = self::$entityManager->getUnitOfWork()->isScheduledForDelete($content);
-
-        return [
-            'content' => $isScheduledForDelete ? null : $content->getDataToObject(),
-            'parameter' => $isScheduledForDelete ? null : $content->getAllParams(),
+            'content' => [
+                'uid' => $rawData['uid'] ?? null,
+                'type' => $rawData['type'] ?? null,
+                'data' => $rawData['data'] ?? [],
+                'properties' => $rawData['properties'] ?? [],
+                'parameters' => $rawData['parameters'] ?? [],
+            ],
         ];
     }
 }

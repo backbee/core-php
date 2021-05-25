@@ -87,7 +87,6 @@ element.file.postremove:
 classcontent.onflush:
     listeners:
         - [ BackBee\ClassContent\Listener\ClassContentListener, onFlushContent ]
-        #- [ '@core.log.class_content.listener', onFlush ]
 
 classcontent.prerender:
     listeners:
@@ -223,13 +222,13 @@ rest.controller.classcontentcontroller.postaction.precall:
 
 rest.controller.classcontentcontroller.postaction.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.page.listener', onRestContentUpdatePostcall ]
+        - [ '@core.log.class_content.listener', onPostActionPostCall ]
 
 rest.controller.classcontentcontroller.putaction.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.page.listener', onRestContentUpdatePostcall ]
+        - [ '@core.log.class_content.listener', onPutActionPostCall ]
 
 rest.controller.securitycontroller.deletesessionaction.postcall:
     listeners:
@@ -284,8 +283,8 @@ controller.frontcontroller.defaultaction.precall:
 
 backbeecloud.api.controller.contentcontroller.delete.precall:
     listeners:
-        # BackBee Cloud listeners
-        - [ @cloud.disqus_listener, onDeleteContent ]
+        - [ '@cloud.disqus_listener', onDeleteContent ]
+        - [ '@core.log.class_content.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.delete.postcall:
     listeners:
