@@ -35,8 +35,7 @@ use RuntimeException;
  */
 class ImageFilesystemHandler implements ImageHandlerInterface
 {
-    public const MEDIA_BASE_URI = '/img/';
-    #const MEDIA_URI_REGEX = '~^' . self::MEDIA_BASE_URI . '[a-f0-9]{32}\.~';
+    public const MEDIA_BASE_URI = '/media/';
 
     /**
      * @var string
