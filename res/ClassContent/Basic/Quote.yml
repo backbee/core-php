@@ -42,7 +42,7 @@ Quote:
             value: yaml_block_quote_link_label_value
             group:
                 id: link
-                title: yaml_block_quote_link_label_group_title
+                title: yaml_block_quote_link_settings
         link_url:
             type: text
             label: yaml_block_quote_link_url_label

@@ -1,0 +1,44 @@
+Information:
+    properties:
+        name: yaml_block_information
+        description: ~
+        category: [ block_category_basics ]
+        rte:
+            placeholder: rte_text_placeholder
+    parameters:
+        bg_color:
+            label: yaml_block_information_bg_color_label
+            type: color
+            value: ''
+            tab: yaml_block_information_general_tab
+        add_title:
+            type: switch
+            value: true
+            label: yaml_block_information_add_title_label
+            tab: yaml_block_information_general_tab
+        title:
+            value: ''
+        description:
+            value: ''
+        button_title:
+            type: text
+            label: yaml_block_information_button_title_label
+            value: ''
+            group:
+                id: button_settings
+                title: yaml_block_information_button_settings
+            tab: yaml_block_information_general_tab
+        button_url:
+            type: text
+            label: yaml_block_information_button_url_label
+            value: '/'
+            format: URL
+            group:
+                id: button_settings
+            tab: yaml_block_information_general_tab
+        image:
+            type: upload
+            value: ''
+            tab: yaml_block_information_image_tab
+            group:
+                id: picto
