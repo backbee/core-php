@@ -1,0 +1,14 @@
+Accordion:
+    properties:
+        name: yaml_block_accordion
+        description: ~
+        category: [ block_category_basics ]
+        rte:
+            placeholder: yaml_block_accordion_rte_placeholder
+    parameters:
+        title:
+            type: text
+            label: yaml_block_accordion_title
+            value: ''
+        description:
+            value: ~
