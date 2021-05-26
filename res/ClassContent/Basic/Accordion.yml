@@ -8,7 +8,7 @@ Accordion:
     parameters:
         title:
             type: text
-            label: yaml_block_accordion_title
+            label: yaml_block_accordion_title_label
             value: ''
         description:
             value: ~

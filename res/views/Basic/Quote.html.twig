@@ -1,0 +1,33 @@
+<div {{ this.bbcontent(null, {'class': 'content quote'})|raw }}>
+    {% if intro.value %}
+        <div class="quote__intro text-uppercase text-primary mb-1">{{ intro.value }}</div>
+    {% endif %}
+    {% if image_url.value and not bb.token %}<a href="{{ image_url.value }}"
+                                                {% if target_blank.value == true %}target="_blank"{% endif %}>{% endif %}
+        <div class="quote__wrapper bg-white row {% if position.value %}right{% else %}left{% endif %}">
+            <div class="quote__imagewrapper {% if position.value %}pl-0{% else %}pr-0{% endif %} col-lg-4 has-sub-elements pl-0">
+                {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd', class: 'mb-0', 'in_fluid': in_fluid, 'colsize': colsize})|raw }}
+            </div>
+            <div class="quote__textwrapper col-lg-8 py-4 px-5 push-box-shadow {% if position.value %}right{% else %}left{% endif %}">
+                <h3 class="quote__title" data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true">
+                    {{ title.value|raw }}
+                </h3>
+                <div class="mt-3 ml-6 text-primary quote__description" data-parameter-rte="true"
+                     data-parameter-name="description" data-cloud-rte="true">
+                    {{ description.value|raw }}
+                </div>
+                <div class="mt-3 btn__moreInfo btn__moreInfo--color-primary d-flex justify-content-end">
+                    <span>{{ this.trans(button_title.value) }}</span><i class="icon-fma-plus"></i>
+                </div>
+            </div>
+        </div>
+        {% if image_url.value and not bb.token %}</a>{% endif %}
+
+    {% if link_label.value %}
+        <div class="extra-link mt-4 btn__moreInfo{% if link_color.value %} btn__moreInfo--{{ link_color.value }}{% endif %} {% if position.value %}right{% else %}left{% endif %}">
+            <a href="{{ link_url.value }}"
+               {% if link_target_blank.value == true %}target="_blank"{% endif %}>{{ link_label.value }}<i
+                        class="icon-fma-plus"></i></a>
+        </div>
+    {% endif %}
+</div>

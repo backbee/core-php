@@ -1,0 +1,65 @@
+Quote:
+    properties:
+        name: yaml_block_quote
+        description: ~
+        category: [ block_category_basics ]
+        rte:
+            placeholder: yaml_block_quote_rte_placeholder
+    elements:
+        image:
+            type: \BackBee\ClassContent\Basic\Image
+            maxentry: 1
+    parameters:
+        title:
+            value: ~
+        description:
+            value: ~
+        intro:
+            type: text
+            label: yaml_block_quote_intro
+            value: ''
+        position:
+            type: switch
+            value: false
+            label: yaml_block_quote_position_label
+            label_selected: yaml_block_quote_position_label_selected
+        button_title:
+            type: text
+            label: yaml_block_quote_button_title_label
+            value: yaml_block_quote_button_title_value
+        image_url:
+            type: text
+            label: yaml_block_quote_image_url_label
+            value: ''
+            format: URL
+        target_blank:
+            type: switch
+            label: yaml_block_quote_target_blank_label
+            value: false
+        link_label:
+            type: text
+            label: yaml_block_quote_link_label_label
+            value: yaml_block_quote_link_label_value
+            group:
+                id: link
+                title: yaml_block_quote_link_label_group_title
+        link_url:
+            type: text
+            label: yaml_block_quote_link_url_label
+            value: ''
+            format: URL
+            group:
+                id: link
+        link_target_blank:
+            type: switch
+            label: yaml_block_quote_link_target_blank_label
+            value: false
+            group:
+                id: link
+        link_color:
+            type: color
+            label: yaml_block_quote_link_color_label
+            value: ''
+            disable_transparent: true
+            group:
+                id: link
