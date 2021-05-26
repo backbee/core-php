@@ -59,8 +59,9 @@ class ContentCategoryListener
                 'Text/Button' => 6,
                 'Media/Video' => 7,
                 'Basic/DownloadableFile' => 8,
-                'Basic/Spacer' => 9,
-                'Basic/Liner' => 10,
+                'Basic/Author' => 9,
+                'Basic/Spacer' => 10,
+                'Basic/Liner' => 11,
             ],
         ],
         'block_category_pages' => [
