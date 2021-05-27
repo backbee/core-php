@@ -496,9 +496,13 @@ class PageManager
         $page->setSite($this->getSite());
         $page->setLayout($this->getLayout());
 
+        if ($data['url']) {
+            $page->setUrl($data['url']);
+        }
+
         try {
             $page->setParent($this->getRootPage());
-            $page->setState(Page::STATE_OFFLINE);
+            $page->setState($data['state'] ?? Page::STATE_OFFLINE);
             $page->setPosition($this->count() + 1);
         } catch (Exception $exception) {
             $this->logger->error(
@@ -511,7 +515,7 @@ class PageManager
             );
         }
 
-        unset($data['is_online'], $data['uid']);
+        unset($data['is_online'], $data['uid'], $data['state'], $data['url']);
 
         $this->entityMgr->persist($page);
         $data['seo'] = $data['seo'] ?? [];
