@@ -190,6 +190,10 @@ services:
         class: BackBeeCloud\Api\Controller\KnowledgeGraphController
         arguments: [ '@bbapp', '@config' ]
 
+    cloud.api.about.controller:
+        class: BackBee\Api\Controller\AboutController
+        arguments: [ '@bbapp' ]
+
     cloud.api.user_controller.listener:
         class: BackBeeCloud\Listener\Api\UserListener
         arguments:

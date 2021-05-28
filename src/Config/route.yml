@@ -9,7 +9,6 @@ bb.rss:
         uri: .*
 
 # Send contact email
-
 cloud.send_contact:
     pattern: /send-contact
     defaults:
@@ -19,7 +18,6 @@ cloud.send_contact:
         _method: POST
 
 # Newsletter
-
 cloud.newsletter_send:
     pattern: /newsletter/send
     defaults:
@@ -29,7 +27,6 @@ cloud.newsletter_send:
         _method: POST
 
 # robots.txt
-
 cloud.robots_txt:
     pattern: /robots.txt
     defaults:
@@ -39,7 +36,6 @@ cloud.robots_txt:
         _method: GET
 
 # ACL API
-
 #cloud.api.acl.get:
 #    pattern: /api/acl-permissions/{id}
 #    defaults:
@@ -50,7 +46,6 @@ cloud.robots_txt:
 #        id: \d+
 
 # MailChimp API
-
 cloud.api.mailchimp.get_information:
     pattern: /api/mailchimp/get-information
     defaults:
@@ -93,7 +88,6 @@ cloud.api.user_right.get_user_authorized_categories_collection:
             _method: GET
 
 # GroupType API
-
 cloud.api.group_type.get_collection:
     pattern: /api/group-types
     defaults:
@@ -151,7 +145,6 @@ cloud.api.group_type.delete_user:
         _method: DELETE
 
 # User preference API
-
 cloud.api.user_preferences.get_collection:
     pattern: /api/user-preferences
     defaults:
@@ -185,7 +178,6 @@ cloud.api.user_preferences.delete:
         _method: DELETE
 
 # Import Status API
-
 cloud.import_status:
     pattern: /api/import-status
     defaults:
@@ -193,7 +185,6 @@ cloud.import_status:
         _controller: cloud.api.import_status_controller
 
 # Search route
-
 cloud.search:
     pattern: /search
     defaults:
@@ -203,7 +194,6 @@ cloud.search:
         _method: GET
 
 # User API
-
 cloud.api.user.update_password:
     pattern: /api/users/{id}/update-password
     defaults:
@@ -214,7 +204,6 @@ cloud.api.user.update_password:
         _method: PUT
 
 # Content API
-
 cloud.api.contents.delete:
     pattern: /api/contents/{type}/{uid}
     defaults:
@@ -252,7 +241,6 @@ cloud.api.contents.reset:
         _method: PUT
 
 # Page type API
-
 cloud.api.pages_types.get_collection:
     pattern: /api/pages-types
     defaults:
@@ -262,7 +250,6 @@ cloud.api.pages_types.get_collection:
         _method: GET
 
 # Page category API
-
 cloud.api.page_category.get_collection:
     pattern: /api/page-categories
     defaults:
@@ -272,7 +259,6 @@ cloud.api.page_category.get_collection:
         _method: GET
 
 # Page API
-
 cloud.api.pages.get:
     pattern: /api/pages/{uid}
     defaults:
@@ -326,7 +312,6 @@ cloud.api.pages.duplicate:
         _method: POST
 
 # Tag API
-
 cloud.api.tags.get_collection:
     pattern: /api/tags
     defaults:
@@ -396,7 +381,6 @@ cloud.api.tags.delete:
         _method: DELETE
 
 # Knowledge Graph API
-
 cloud.api.knowledge_graph.parameters:
     pattern: /api/knowledge-graph/parameters
     defaults:
@@ -406,7 +390,6 @@ cloud.api.knowledge_graph.parameters:
         _method: GET
 
 # Site API
-
 api.site.work_progress:
     pattern: /api/sites/work-progress
     defaults:
@@ -416,7 +399,6 @@ api.site.work_progress:
         _method: GET
 
 # MultiLang API
-
 api.multilang.get_collection:
     pattern: /api/langs
     defaults:
@@ -628,3 +610,12 @@ api.multilang.delete_page_association:
     requirements:
         _method: DELETE
         pageuid: "[a-f0-9]{32}"
+
+# About API
+cloud.api.about:
+    pattern: /api/about/information
+    defaults:
+        _action: getInformation
+        _controller: cloud.api.about.controller
+    requirements:
+        _method: GET
