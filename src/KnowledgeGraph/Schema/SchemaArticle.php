@@ -66,19 +66,20 @@ class SchemaArticle implements SchemaInterface
     public function generate(): array
     {
         $cxData = $this->context->getData();
+        $url = $this->renderer->getUri($cxData['url'], null, null, null, false);
 
         $data = [
             '@type' => 'Article',
-            '@id' => $this->renderer->getUri($cxData['url']) . SchemaIds::ARTICLE_HASH,
+            '@id' => $url . SchemaIds::ARTICLE_HASH,
             'name' => $cxData['title'],
             'description' => $cxData['abstract'],
             'articleBody' => $cxData['contents'],
             'headline' => substr($cxData['title'], 0, 110),
-            'url' => $this->renderer->getUri($cxData['url']),
+            'url' => $url,
             'isPartOf' => [
-                '@id' => $this->renderer->getUri($cxData['url']) . SchemaIds::WEBPAGE_HASH,
+                '@id' => $url . SchemaIds::WEBPAGE_HASH,
             ],
-            'mainEntityOfPage' => $this->renderer->getUri($cxData['url']) . SchemaIds::WEBPAGE_HASH,
+            'mainEntityOfPage' => $url . SchemaIds::WEBPAGE_HASH,
             'publisher' => [
                 '@id' => $this->renderer->getUri('/') . SchemaIds::ORGANIZATION_HASH,
             ],
@@ -90,9 +91,7 @@ class SchemaArticle implements SchemaInterface
             'datePublished' => (new Datetime($cxData['published_at']))->format('c'),
         ];
 
-        $data = $this->addImage($data);
-
-        return $data;
+        return $this->addImage($data);
     }
 
     /**
