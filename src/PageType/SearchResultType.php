@@ -26,6 +26,10 @@ use BackBee\ClassContent\Basic\Title;
 use BackBee\NestedNode\Page;
 
 /**
+ * Class SearchResultType
+ *
+ * @package BackBeeCloud\PageType
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class SearchResultType extends AbstractType
@@ -43,7 +47,7 @@ class SearchResultType extends AbstractType
      */
     public function isProtected()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -92,7 +96,7 @@ class SearchResultType extends AbstractType
     public function defaultContents()
     {
         return [
-            Title::class => function(Title $title, Page $page) {
+            Title::class => function (Title $title, Page $page) {
                 $title->value = $page->getTitle();
             },
             SearchResult::class => null,
