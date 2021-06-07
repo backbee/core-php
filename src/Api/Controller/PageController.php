@@ -159,7 +159,6 @@ class PageController extends AbstractController
                 [
                     'Accept-Range' => 'pages ' . RequestListener::COLLECTION_MAX_ITEM,
                     'Content-Range' => $max ? "$start-$end/$max" : '-/-',
-                    'X-Page' => $criteria['page'] ?? 1
                 ]
             );
         } catch (Exception $exception) {
