@@ -22,8 +22,8 @@
 namespace BackBee\Console;
 
 use BackBee\BBApplication;
-use BackBeePlanet\Standalone\Application;
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\Application;
+use App\Helper\StandaloneHelper;
 use Exception;
 use ReflectionClass;
 use Symfony\Component\Console\Application as ConsoleApplication;

@@ -19,13 +19,24 @@
  * along with BackBee Standalone. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace BackBeeCloud\Listener;
+namespace BackBee\Listener;
 
+use App\Helper\StandaloneHelper;
 use BackBee\Controller\Event\PostResponseEvent;
+use BackBee\Routing\RouteCollection;
+use BackBeePlanet\Standalone\AbstractStandaloneHelper;
+use RuntimeException;
+use function array_key_exists;
+use function count;
+use function in_array;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
- * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ * Class ContentCategoryListener
+ *
+ * @package BackBeeCloud\Listener
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 class ContentCategoryListener
 {
@@ -34,7 +45,7 @@ class ContentCategoryListener
      *
      * @var array
      */
-    private $defaultData = [
+    private static $defaultData = [
         'block_category_basics' => [
             'pos' => 0,
             'contents_order' => [
@@ -68,25 +79,52 @@ class ContentCategoryListener
      *
      * @var boolean
      */
-    private $strict;
+    protected static $strict;
 
     /**
-     * Listener constructor
-     *
-     * @param array   $data     An ordered categories spec.
-     * @param boolean $override Should the default data overrided? If false (default)
-     *                          $data will be merged with default one.
-     * @param boolean $strict   If true, only categories in $defaultData will be returned.
+     * @var RouteCollection
      */
-    public function __construct(array $data = [], $override = false, $strict = true)
+    protected static $routing;
+
+    /**
+     * ContentCategoryListener constructor.
+     *
+     * @param RouteCollection $routing
+     * @param array           $data     An ordered categories spec.
+     * @param bool            $override Should the default data overrided? If false (default)
+     *                                  $data will be merged with default one.
+     * @param bool            $strict   If true, only categories in $defaultData will be returned.
+     */
+    public function __construct(RouteCollection $routing, array $data = [], bool $override = false, bool $strict = true)
     {
-        if (true === boolval($override)) {
-            $this->defaultData = $data;
-        } else {
-            $this->defaultData = array_merge($this->defaultData, $data);
+        if (!class_exists(StandaloneHelper::class)) {
+            throw new RuntimeException(
+                sprintf(
+                    'Class %s is needed for %s to work.',
+                    StandaloneHelper::class,
+                    static::class
+                )
+            );
         }
 
-        $this->strict = boolval($strict);
+        if (!is_subclass_of(StandaloneHelper::class, AbstractStandaloneHelper::class)) {
+            throw new RuntimeException(
+                sprintf(
+                    'Class %s must extend %s abstract class to work.',
+                    StandaloneHelper::class,
+                    AbstractStandaloneHelper::class
+                )
+            );
+        }
+
+        if (true === $override) {
+            self::$defaultData = $data;
+        } else {
+            self::$defaultData = array_merge(self::$defaultData, $data);
+        }
+
+        self::$strict = $strict;
+        self::$routing = $routing;
     }
 
     /**
@@ -94,7 +132,7 @@ class ContentCategoryListener
      *
      * @param PostResponseEvent $event
      */
-    public function onGetCategoryPostCall(PostResponseEvent $event)
+    public function onGetCategoryPostCall(PostResponseEvent $event): void
     {
         $result = [];
         $response = $event->getResponse();
@@ -120,9 +158,9 @@ class ContentCategoryListener
                 }
 
                 if (isset($config['pos'])) {
-                    $pos = intval($config['pos']);
+                    $pos = (int)$config['pos'];
                 }
-            } elseif ($this->strict) {
+            } elseif (self::$strict) {
                 continue;
             }
 
@@ -141,9 +179,9 @@ class ContentCategoryListener
      *
      * @return array
      */
-    protected function getCategoriesData()
+    protected function getCategoriesData(): array
     {
-        return $this->defaultData;
+        return self::$defaultData;
     }
 
     /**
@@ -156,9 +194,23 @@ class ContentCategoryListener
      *
      * @return array
      */
-    protected function runCustomProcessOnContent(array $content)
+    protected function runCustomProcessOnContent(array $content): array
     {
-        $content['thumbnail'] = null;
+        $thumbnailUrl = null;
+        if (null !== $thumbnailBaseDir = $this->getContentThumbnailBaseDir()) {
+            $thumbnailFilepath = $thumbnailBaseDir . '/' . $content['type'] . '.svg';
+            if (file_exists($thumbnailFilepath)) {
+                $thumbnailUrl = self::$routing->getUri(
+                    str_replace(
+                        ['//', StandaloneHelper::rootDir() . '/web'],
+                        ['/', ''],
+                        $thumbnailFilepath
+                    )
+                );
+            }
+        }
+
+        $content['thumbnail'] = $thumbnailUrl;
 
         return $content;
     }
@@ -170,17 +222,27 @@ class ContentCategoryListener
      *
      * @return array
      */
-    protected function filterContents($contents)
+    protected function filterContents(array $contents): array
     {
         $filteredContents = [];
         $processedTypes = [];
         foreach ($contents as $content) {
-            if (!in_array($content['type'], $processedTypes)) {
+            if (!in_array($content['type'], $processedTypes, true)) {
                 $filteredContents[] = $this->runCustomProcessOnContent($content);
                 $processedTypes[] = $content['type'];
             }
         }
 
         return $filteredContents;
+    }
+
+    /**
+     * Gets content thumbnail base directory.
+     *
+     * @return string
+     */
+    private function getContentThumbnailBaseDir(): string
+    {
+        return realpath(StandaloneHelper::rootDir() . '/web/static/img/contents/');
     }
 }

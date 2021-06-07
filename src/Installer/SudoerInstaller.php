@@ -24,7 +24,7 @@ namespace BackBee\Installer;
 use BackBee\Command\AbstractCommand;
 use BackBee\Command\InstallCommand;
 use BackBee\Security\User;
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\Helper\StandaloneHelper;
 use Exception;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Yaml\Yaml;

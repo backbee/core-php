@@ -23,7 +23,7 @@ namespace BackBee\Installer;
 
 use BackBee\Command\AbstractCommand;
 use BackBee\Command\InstallCommand;
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\Helper\StandaloneHelper;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -172,6 +172,7 @@ class RepositoryInstaller extends AbstractInstaller
                                 'bbapp.data.dir' => $dataDir,
                                 'bbapp.log.dir' => StandaloneHelper::logDir(),
                                 'secret_key' => md5($appName),
+                                'cloud.strictly.default.categories' => false
                             ],
                         ]
                     ),
@@ -190,6 +191,17 @@ class RepositoryInstaller extends AbstractInstaller
             $io->note(sprintf('%s already exists.', $filepath));
         } else {
             file_put_contents($filepath, Yaml::dump(AbstractCommand::parseYaml('recaptcha.yml.dist'), 20));
+            $io->text(sprintf('%s has been generated.', $filepath));
+        }
+
+        $io->newLine();
+
+        // build events.yml
+        $filepath = $configDir . DIRECTORY_SEPARATOR . 'events.yml';
+        if (file_exists($filepath)) {
+            $io->note(sprintf('%s already exists.', $filepath));
+        } else {
+            file_put_contents($filepath, Yaml::dump(AbstractCommand::parseYaml('events.yml.dist'), 20));
             $io->text(sprintf('%s has been generated.', $filepath));
         }
 

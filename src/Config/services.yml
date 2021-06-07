@@ -17,6 +17,18 @@ services:
         class: Twig_Extensions_Extension_Intl
         tags:
             -   name: twig.extension
+
+    twig.extension.text:
+        class: Twig_Extensions_Extension_Text
+        tags:
+            -   name: twig.extension
+
+    # Doctrine
+    doctrine.metadata.cache.driver:
+        class: Doctrine\Common\Cache\FilesystemCache
+        arguments:
+            - '%bbapp.cache.dir%/metadata'
+
     # BackBee
     backbee.logger:
         class: BackBee\Logging\Logger
@@ -71,8 +83,9 @@ services:
         arguments: [ '@em', '@config' ]
 
     content.category_listener:
-        class: BackBeeCloud\Listener\ContentCategoryListener
+        class: BackBee\Listener\ContentCategoryListener
         arguments:
+            - "@routing"
             - "%cloud.default.ordered.categories%"
             - "%cloud.override.default.categories%"
             - "%cloud.strictly.default.categories%"
@@ -665,8 +678,6 @@ services:
     # Standalone
     core.standalone.abstract_standalone.helper:
         class: BackBeePlanet\Standalone\AbstractStandaloneHelper
-        arguments:
-            [ '@config', '@backbee.logger' ]
 
     # Redis
     core.redis.manager:

@@ -23,8 +23,8 @@ namespace BackBee\Command;
 
 use BackBee\Installer\DatabaseInstaller;
 use BackBee\Installer\RepositoryInstaller;
-use BackBeePlanet\Standalone\Application;
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\Application;
+use App\Helper\StandaloneHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;

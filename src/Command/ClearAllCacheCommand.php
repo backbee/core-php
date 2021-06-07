@@ -21,7 +21,7 @@
 
 namespace BackBee\Command;
 
-use BackBeePlanet\Standalone\StandaloneHelper;
+use App\Helper\StandaloneHelper;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
