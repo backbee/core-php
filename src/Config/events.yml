@@ -7,7 +7,7 @@ bbapplication.init:
         # BackBee Cloud listeners
         - [ '@core.core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
         - [ '@core.core.listener', onApplicationInit, 200 ]
-        - [ BackBeeCloud\Listener\PageListener, onApplicationInit ]
+        - [ '@core.page.listener', onApplicationInit ]
         - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
         - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
         - [ '@core.sitemap.listener', onApplicationInit ]
@@ -41,7 +41,7 @@ kernel.exception:
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\Api\UserRightListener, onKernelException, 100 ]
         - [ "@cloud.api.user_controller.listener", onKernelException, 100 ]
-        - [ BackBeeCloud\Listener\PageListener, onPageNotFoundException, 100 ]
+        - [ '@core.page.listener', onPageNotFoundException, 100 ]
         - [ @cloud.disqus_listener, onDisqusControlledException, 100 ]
         - [ '@core.core.listener', onAuthenticationException, 100 ]
         - [ "@api.multilang.listener", onMultiLangException, 100 ]
@@ -222,13 +222,13 @@ rest.controller.classcontentcontroller.postaction.precall:
 
 rest.controller.classcontentcontroller.postaction.postcall:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall ]
+        - [ '@core.page.listener', onRestContentUpdatePostcall ]
+        - [ '@core.log.class_content.listener', onPostActionPostCall ]
 
 rest.controller.classcontentcontroller.putaction.postcall:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall ]
+        - [ '@core.page.listener', onRestContentUpdatePostcall ]
+        - [ '@core.log.class_content.listener', onPutActionPostCall ]
 
 rest.controller.securitycontroller.deletesessionaction.postcall:
     listeners:
@@ -252,7 +252,11 @@ rest.controller.pagecontroller.deleteaction.postcall:
         # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
         - [ BackBeeCloud\Listener\ElasticsearchListener, onPageDeletePostcall ]
-        - [ BackBeeCloud\Listener\PageListener, onPageDeletePostcall ]
+        - [ '@core.page.listener', onPageDeletePostcall ]
+
+rest.controller.pagecontroller.deleteaction.precall:
+    listeners:
+        - [ '@core.log.page.listener', onDeleteActionPreCall ]
 
 rest.controller.resourcecontroller.uploadaction.postcall:
     listeners:
@@ -270,7 +274,7 @@ rest.controller.bundlecontroller.getcollectionaction.postcall:
 controller.frontcontroller.rssaction.precall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onRssActionPreCall ]
+        - [ '@core.page.listener', onRssActionPreCall ]
 
 controller.frontcontroller.defaultaction.precall:
     listeners:
@@ -279,28 +283,39 @@ controller.frontcontroller.defaultaction.precall:
 
 backbeecloud.api.controller.contentcontroller.delete.precall:
     listeners:
-        # BackBee Cloud listeners
-        - [ @cloud.disqus_listener, onDeleteContent ]
+        - [ '@cloud.disqus_listener', onDeleteContent ]
+        - [ '@core.log.class_content.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.delete.postcall:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onRestContentUpdatePostcall ]
+        - [ '@core.page.listener', onRestContentUpdatePostcall ]
+
+backbeecloud.api.controller.pagecontroller.post.postcall:
+    listeners:
+        - [ '@core.log.page.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.pagecontroller.put.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
+        - [ '@core.log.page.listener', onPutActionPostCall ]
+
+backbeecloud.api.controller.tagcontroller.post.postcall:
+    listeners:
+        - [ '@core.log.tag.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.put.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
+        - [ '@core.log.tag.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.delete.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
+
+backbeecloud.api.controller.tagcontroller.delete.precall:
+    listeners:
+        - [ '@core.log.tag.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.publish.postcall:
     listeners:
@@ -349,13 +364,29 @@ rest.controller.usercontroller.getcurrentaction.postcall:
 
 rest.controller.usercontroller.postaction.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
+        - [ '@core.log.user.listener', onPostActionPostCall ]
 
 rest.controller.usercontroller.putaction.postcall:
     listeners:
-        # BackBee Cloud listeners
         - [ "@cloud.api.user_controller.listener", onRestUserPutActionPostCall ]
+        - [ '@core.log.user.listener', onPutActionPostCall ]
+
+rest.controller.usercontroller.deleteaction.precall:
+    listeners:
+        - [ '@core.log.user.listener', onDeleteActionPreCall ]
+
+backbeecloud.api.controller.grouptypecontroller.create.postcall:
+    listeners:
+        - [ '@core.log.group_type.listener', onPostActionPostCall ]
+
+backbeecloud.api.controller.grouptypecontroller.update.postcall:
+    listeners:
+        - [ '@core.log.group_type.listener', onPutActionPostCall ]
+
+backbeecloud.api.controller.grouptypecontroller.delete.precall:
+    listeners:
+        - [ '@core.log.group_type.listener', onDeleteActionPreCall ]
 
 # Page and Section listeners
 
@@ -378,14 +409,14 @@ nestednode.page.onflush:
         - [ BackBee\Event\Listener\RewritingListener, onFlushPage ]
         - [ BackBee\MetaData\Listener\MetaDataListener, onFlushPage, -100 ]
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onFlush ]
-        - [ BackBeeCloud\Listener\PageListener, handleUriCollisionOnFlushPage ]
+        - [ '@core.page.listener', onFlush ]
+        - [ '@core.page.listener', handleUriCollisionOnFlushPage ]
 
 nestednode.page.postremove:
     listeners:
         # BackBee Cloud Listener
-        - [ BackBeeCloud\Listener\PageListener, onPostRemove ]
-        - [ BackBeeCloud\Listener\PageListener, onPagePostChange ]
+        - [ '@core.page.listener', onPostRemove ]
+        - [ '@core.page.listener', onPagePostChange ]
 
 # PageType listeners
 backbeecloud.entity.pagetype.postload:
@@ -396,23 +427,23 @@ backbeecloud.entity.pagetype.postload:
 nestednode.page.postpersist:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onPagePostChange ]
+        - [ '@core.page.listener', onPagePostChange ]
 
 nestednode.page.postupdate:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onPagePostChange ]
+        - [ '@core.page.listener', onPagePostChange ]
 
 nestednode.page.render:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onPageRender ]
+        - [ '@core.page.listener', onPageRender ]
         - [ "@api.multilang.listener", onPageRender ]
 
 nestednode.page.postrender:
     listeners:
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageListener, onPostRender ]
+        - [ '@core.page.listener', onPostRender ]
 
 # User listeners
 rest.user.creation:

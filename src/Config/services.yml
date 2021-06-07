@@ -32,14 +32,23 @@ services:
     # BackBee
     backbee.logger:
         class: BackBee\Logging\Logger
+        arguments: [ '@bbapp' ]
 
     # Page
     cloud.page_manager:
         class: BackBeeCloud\Entity\PageManager
         arguments:
-            - "@bbapp"
-            - "@core.knowledge_graph.seo_metadata.manager"
-            - "@backbee.logger"
+            - '@bbapp'
+            - '@core.knowledge_graph.seo_metadata.manager'
+            - '@cloud.page_type.manager'
+            - '@cloud.content_manager'
+            - '@elasticsearch.manager'
+            - '@cloud.tag_manager'
+            - '@multilang_manager'
+            - '@cloud.page_category.manager'
+            - '@cloud.multilang.page_association.manager'
+            - '@core.search_engine.manager'
+            - '@backbee.logger'
 
     core.page.page_from_raw_data:
         class: BackBeeCloud\Page\PageFromRawData
@@ -704,3 +713,31 @@ services:
         class: BackBeeCloud\Listener\ClassContent\VideoListener
         arguments:
             [ '@core.class_content.media.video.manager', '@backbee.logger' ]
+
+    core.page.listener:
+        class: BackBeeCloud\Listener\PageListener
+
+    core.log.class_content.listener:
+        class: BackBee\Listener\Log\ClassContentLogListener
+        arguments:
+            [ '@security.context', '@em', '@?monolog.logger.admin_log']
+
+    core.log.page.listener:
+        class: BackBee\Listener\Log\PageLogListener
+        arguments:
+            [ '@security.context', '@em', '@cloud.page_manager', '@?monolog.logger.admin_log']
+
+    core.log.tag.listener:
+        class: BackBee\Listener\Log\TagLogListener
+        arguments:
+            [ '@security.context', '@em', '@cloud.tag_manager', '@?monolog.logger.admin_log' ]
+
+    core.log.user.listener:
+        class: BackBee\Listener\Log\UserLogListener
+        arguments:
+            [ '@security.context', '@em', '@cloud.user_manager', '@?monolog.logger.admin_log']
+
+    core.log.group_type.listener:
+        class: BackBee\Listener\Log\GroupTypeLogListener
+        arguments:
+            [ '@security.context', '@em', '@cloud.group_type.manager', '@?monolog.logger.admin_log' ]

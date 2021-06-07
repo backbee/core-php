@@ -66,6 +66,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
 
         $this->elasticSearchQuery = $app->getContainer()->get('elasticsearch.query');
         $this->pageContentManager = $pageContentManager;
+        //dump($this->getPageByUid('79d5eeeae570439b257489607cda31c0'));
     }
 
     /**
@@ -370,5 +371,24 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
         ksort($sorted);
 
         return array_values($sorted);
+    }
+
+    /**
+     * Page page by uid.
+     *
+     * @param string $uid
+     *
+     * @return array|null
+     */
+    public function getPageByUid(string $uid): ?array
+    {
+        $page = $this->getClient()->get(
+            [
+                'id' => $uid,
+                'index' => $this->getIndexName(),
+            ]
+        );
+
+        return $page['found'] ? $page['_source'] : null;
     }
 }

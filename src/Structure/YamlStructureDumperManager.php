@@ -320,17 +320,19 @@ class YamlStructureDumperManager implements JobHandlerInterface
      *
      * @return array
      */
-    protected function computePage(Page $page, PageType $pageType)
+    protected function computePage(Page $page, PageType $pageType): array
     {
+        $pageTags = $this->pageMgr->getPageTag($page);
+
         return [
             'menu' => $this->getMenuState($page),
             'title' => $page->getTitle(),
-            'tags' => array_map(
-                function (KeyWord $keyword) {
+            'tags' => $pageTags ? array_map(
+                static function (KeyWord $keyword) {
                     return $keyword->getKeyWord();
                 },
-                $this->pageMgr->getPageTag($page)->getTags()->toArray()
-            ),
+                $pageTags->getTags()->toArray()
+            ) : [],
             'type' => $pageType->getTypeName(),
             'contents' => [],
         ];

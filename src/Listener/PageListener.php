@@ -49,7 +49,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * Class PageListener
+ *
+ * @package BackBeeCloud\Listener
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class PageListener
 {
@@ -369,7 +373,9 @@ class PageListener
             }
         }
 
-        if ($app->getContainer()->getParameter('privacy_policy') && $data = $userPreferenceManager->dataOf('privacy-policy')) {
+        if ($app->getContainer()->getParameter('privacy_policy') && $data = $userPreferenceManager->dataOf(
+                'privacy-policy'
+            )) {
             $multilangManager = $app->getContainer()->get('multilang_manager');
             if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
                 foreach ($data as $key => $value) {
