@@ -10,12 +10,12 @@
         {% if add_title.value %}
             <h2 class="h2 information-title blue mt-5 text-primary" data-parameter-rte="true"
                 data-parameter-name="title" data-cloud-rte="true">
-                {{ this.getObject().getParamValue('title')|default('Title')|raw }}
+                {{ this.getObject().getParamValue('title')|raw }}
             </h2>
         {% endif %}
         <div class="information-description paragraph" data-parameter-rte="true" data-parameter-name="description"
              data-cloud-rte="true">
-            {{ this.getObject().getParamValue('description')|default('Description')|raw }}
+            {{ this.getObject().getParamValue('description')|raw }}
         </div>
         {% if button_title.value != '' %}
             <span class="arrowLink">{{ button_title.value }}</span>

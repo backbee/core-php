@@ -26,7 +26,7 @@ Quote:
         button_title:
             type: text
             label: yaml_block_quote_button_title_label
-            value: yaml_block_quote_button_title_value
+            value: ''
         image_url:
             type: text
             label: yaml_block_quote_image_url_label
@@ -39,7 +39,7 @@ Quote:
         link_label:
             type: text
             label: yaml_block_quote_link_label_label
-            value: yaml_block_quote_link_label_value
+            value: ''
             group:
                 id: link
                 title: yaml_block_quote_link_settings

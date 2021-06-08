@@ -12,7 +12,7 @@ Author:
         name:
             type: text
             label: yaml_block_author_name_label
-            value: yaml_block_author_name_value
+            value: ''
         description:
             type: text
             label: yaml_block_author_description_label

@@ -1,24 +1,28 @@
 <div {{ this.bbcontent(null, {class: 'content author-block'})|raw }}>
-    {% if url.value %}
-    <a href="{{ url.value|raw }}" title="{{ name.value|raw }}">
-        {% endif %}
-        <div class="card">
-            <div class="d-flex">
-                {% if photo.value %}
-                    <img src="{{ this.getCdnImageUrl(this.getOptimizeImagePathHelper(photo.value, false, 1))|raw }}"
-                         alt="{{ name.value|raw }}"
-                         loading="lazy">
-                {% endif %}
-
-                <div class="card-body py-0">
-                    <h3>{{ name.value|raw }}</h3>
-                    {% if description.value %}
-                        <p class="mt-1">{{ description.value|raw }}</p>
+    {% if name.value is empty %}
+        {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+        {% if url.value %}
+        <a href="{{ url.value|raw }}" title="{{ name.value|raw }}">
+            {% endif %}
+            <div class="card">
+                <div class="d-flex">
+                    {% if photo.value %}
+                        <img src="{{ this.getCdnImageUrl(this.getOptimizeImagePathHelper(photo.value, false, 1))|raw }}"
+                             alt="{{ name.value|raw }}"
+                             loading="lazy">
                     {% endif %}
+
+                    <div class="card-body py-0">
+                        <h3>{{ name.value|raw }}</h3>
+                        {% if description.value %}
+                            <p class="mt-1">{{ description.value|raw }}</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        {% if url.value %}
-    </a>
+            {% if url.value %}
+        </a>
+        {% endif %}
     {% endif %}
 </div>

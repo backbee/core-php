@@ -4,7 +4,7 @@ Information:
         description: ~
         category: [ block_category_basics ]
         rte:
-            placeholder: rte_text_placeholder
+            placeholder: yaml_block_text_rte_placeholder
     parameters:
         bg_color:
             label: yaml_block_information_bg_color_label
