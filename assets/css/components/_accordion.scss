@@ -1,0 +1,18 @@
+.bloc-accordion {
+  .btn-link {
+    color: $primary-color;
+    text-align: left;
+
+    svg {
+      height: 14px;
+      margin-right: 10px;
+      transition: all ease-in-out 300ms;
+    }
+
+    &:not(.collapsed) {
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+  }
+}

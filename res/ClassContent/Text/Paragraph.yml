@@ -1,60 +1,59 @@
 Paragraph:
-  extends: \BackBee\ClassContent\Element\Text
-  properties:
-    name: yaml_block_text
-    description: ~
-    category: [block_category_basics]
-    rte:
-      placeholder: yaml_block_text_rte_placeholder
-  parameters:
-    bg_color:
-      label: yaml_block_text_bg_color
-      type: color
-      label: yaml_block_button_color
-      value: ''
-      disable_transparent: false
-      group:
-        id: color
-    transparency:
-      type: switch
-      value: false
-      label: yaml_block_text_transparency
-      group:
-        id: style
-    style:
-      type: radio
-      inline: true
-      options:
-        full-color: yaml_block_text_full_color
-        bordered: yaml_block_text_line_color
-      value: full-color
-      group:
-        id: style
-    picto:
-      type: upload
-      label: yaml_block_text_picto_label
-      value: ''
-      tab: yaml_block_text_picto_tab
-      group:
-        id: picto
-    picto_direction:
-      type: selectButton
-      label: yaml_block_text_picto_direction_label
-      buttons:
-        left: {'icon': 'icon-align-left'}
-        center: {'icon': 'icon-align-center'}
-        right: {'icon': 'icon-align-right'}
-      value: 'left'
-      tab: yaml_block_text_picto_tab
-      group:
-        id: align
-    picto_size:
-      type: select
-      label: yaml_block_text_picto_size_label
-      options:
-        24 : 24px
-        32 : 32px
-        64 : 64px
-        96 : 96px
-      value: '32'
-      tab: yaml_block_text_picto_tab
+    extends: \BackBee\ClassContent\Element\Text
+    properties:
+        name: yaml_block_text
+        description: ~
+        category: [ block_category_basics ]
+        rte:
+            placeholder: yaml_block_text_rte_placeholder
+    parameters:
+        bg_color:
+            label: yaml_block_text_bg_color
+            type: color
+            value: ''
+            disable_transparent: false
+            group:
+                id: color
+        transparency:
+            type: switch
+            value: false
+            label: yaml_block_text_transparency
+            group:
+                id: style
+        style:
+            type: radio
+            inline: true
+            options:
+                full-color: yaml_block_text_full_color
+                bordered: yaml_block_text_line_color
+            value: full-color
+            group:
+                id: style
+        picto:
+            type: upload
+            label: yaml_block_text_picto_label
+            value: ''
+            tab: yaml_block_text_picto_tab
+            group:
+                id: picto
+        picto_direction:
+            type: selectButton
+            label: yaml_block_text_picto_direction_label
+            buttons:
+                left: { 'icon': 'icon-align-left' }
+                center: { 'icon': 'icon-align-center' }
+                right: { 'icon': 'icon-align-right' }
+            value: 'left'
+            tab: yaml_block_text_picto_tab
+            group:
+                id: align
+        picto_size:
+            type: select
+            label: yaml_block_text_picto_size_label
+            options:
+                24: 24px
+                32: 32px
+                64: 64px
+                96: 96px
+            value: '32'
+            tab: yaml_block_text_picto_tab

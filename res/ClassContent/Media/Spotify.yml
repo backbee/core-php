@@ -1,25 +1,25 @@
 Spotify:
-  properties:
-    name: yaml_block_spotify
-    description: ~
-    category: [block_category_more]
-  parameters:
-    url:
-      type: text
-      label: yaml_block_spotify_url
-      value: ''
-      placeholder: spotify:track:5JunxkcjfCYcY7xJ29tLai
-    theme:
-      type: select
-      label: yaml_block_spotify_theme
-      options:
-        black: yaml_block_spotify_theme_black
-        white: yaml_block_spotify_theme_white
-      value: black
-    view:
-      type: select
-      label: yaml_block_spotify_view
-      options:
-        simple: yaml_block_spotify_view_simple
-        list: yaml_block_spotify_view_list
-      value: coverart
+    properties:
+        name: yaml_block_spotify
+        description: ~
+        category: ~
+    parameters:
+        url:
+            type: text
+            label: yaml_block_spotify_url
+            value: ''
+            placeholder: spotify:track:5JunxkcjfCYcY7xJ29tLai
+        theme:
+            type: select
+            label: yaml_block_spotify_theme
+            options:
+                black: yaml_block_spotify_theme_black
+                white: yaml_block_spotify_theme_white
+            value: black
+        view:
+            type: select
+            label: yaml_block_spotify_view
+            options:
+                simple: yaml_block_spotify_view_simple
+                list: yaml_block_spotify_view_list
+            value: coverart

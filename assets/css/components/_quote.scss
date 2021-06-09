@@ -1,0 +1,79 @@
+// Quote
+
+.quote {
+  .extra-link.right {
+    a {
+      justify-content: flex-end;
+    }
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  &__description {
+    position: relative;
+    min-height: 24px;
+
+    &:after {
+      content: '';
+      display: block;
+      height: 1px;
+      width: 90px;
+      position: absolute;
+      left: -100px;
+      top: 0;
+      background-color: $primary-color;
+    }
+  }
+
+  &__intro {
+    display: flex;
+    align-items: center;
+
+    &:before {
+      content: '';
+      height: 1px;
+      width: 100px;
+      background-color: $primary-color;
+      display: block;
+      margin-right: 5px;
+    }
+  }
+
+  &__wrapper {
+    border: 1px solid $secondary-color;
+
+    &.right {
+      flex-direction: row-reverse;
+
+    }
+  }
+
+  &__imagewrapper {
+    @include media-breakpoint-up(sm) {
+      height: 100%;
+    }
+  }
+
+  .extra-link.right {
+    a {
+      justify-content: flex-end;
+      @include media-breakpoint-down(md) {
+        justify-content: flex-start;
+      }
+    }
+  }
+}
+
+.push-box-shadow {
+  box-shadow: 18px 18px 0 $secondary-color;
+
+  &.right {
+    box-shadow: -18px 18px 0 $secondary-color;
+  }
+}

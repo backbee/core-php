@@ -1,0 +1,24 @@
+Author:
+    properties:
+        name: yaml_block_author
+        description: ~
+        category: [ block_category_basics ]
+    parameters:
+        photo:
+            type: upload
+            label: yaml_block_author_photo_label
+            acceptedFiles: "image/*"
+            value: ''
+        name:
+            type: text
+            label: yaml_block_author_name_label
+            value: ''
+        description:
+            type: text
+            label: yaml_block_author_description_label
+            value: ''
+        url:
+            type: text
+            label: yaml_block_author_url_label
+            value: ''
+            format: URL

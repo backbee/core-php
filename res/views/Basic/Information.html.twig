@@ -1,0 +1,26 @@
+{% set image = this.getObject().getParamValue('image') %}
+
+<div data-mobile-edit="true" {{ this.bbcontent(null, {class: 'content information-block p-5' ~ ' ' ~ (bg_color.value == false ? '' : ' has-bg-color ' ~ bg_color.value)})|raw }}>
+    {% if bb.token == null %}
+    <a href="{{ button_url.value }}">
+        {% endif %}
+        {% if image != '' %}
+            <img src="{{ this.getCdnImageUrl(image)|raw }}" alt="" class="information-image">
+        {% endif %}
+        {% if add_title.value %}
+            <h2 class="h2 information-title blue mt-5 text-primary" data-parameter-rte="true"
+                data-parameter-name="title" data-cloud-rte="true">
+                {{ this.getObject().getParamValue('title')|raw }}
+            </h2>
+        {% endif %}
+        <div class="information-description paragraph" data-parameter-rte="true" data-parameter-name="description"
+             data-cloud-rte="true">
+            {{ this.getObject().getParamValue('description')|raw }}
+        </div>
+        {% if button_title.value != '' %}
+            <span class="arrowLink">{{ button_title.value }}</span>
+        {% endif %}
+        {% if bb.token == null %}
+    </a>
+    {% endif %}
+</div>
