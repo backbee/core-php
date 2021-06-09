@@ -30,6 +30,7 @@ use BackBee\Event\Event;
 use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
+use BackBee\Rewriting\Exception\RewritingException;
 use BackBee\Site\Site;
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageLang;
@@ -39,11 +40,13 @@ use BackBeeCloud\Entity\PageType;
 use BackBeeCloud\PageType\ArticleType;
 use BackBeeCloud\PageType\HomeType;
 use BackBeeCloud\PageType\SearchResultType;
+use DateTime;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
+use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -122,6 +125,11 @@ class PageListener
         }
     }
 
+    /**
+     * Handle URI collision on flush page.
+     *
+     * @param Event $event
+     */
     public static function handleUriCollisionOnFlushPage(Event $event): void
     {
         $page = $event->getTarget();
@@ -165,6 +173,13 @@ class PageListener
         }
     }
 
+    /**
+     * On flush.
+     *
+     * @param Event $event
+     *
+     * @throws RewritingException
+     */
     public static function onFlush(Event $event): void
     {
         $page = $event->getTarget();
@@ -194,10 +209,26 @@ class PageListener
             return;
         }
 
+        $changes = $uow->getEntityChangeSet($page);
+
+        try {
+            if ($changes['_publishing'] && $changes['_publishing'][1]<= new DateTime('now')) {
+                $page->setState(Page::STATE_ONLINE);
+            }
+        } catch (Exception $exception) {
+            $app->getLogging()->error(
+                sprintf(
+                    '%s : %s : %s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
         $container = $app->getContainer();
         $container->get('elasticsearch.manager')->indexPage($page);
         if ($container->get('cloud.page_type.manager')->findByPage($page) instanceof HomeType) {
-            $changes = $uow->getEntityChangeSet($page);
             if (isset($changes['_url'])) {
                 $page->setUrl($changes['_url'][0]);
                 $uow->recomputeSingleEntityChangeSet($entyMgr->getClassMetadata(Page::class), $page);
@@ -207,7 +238,6 @@ class PageListener
             return;
         }
 
-        $changes = $uow->getEntityChangeSet($page);
         if (!isset($changes['_title'])) {
             return;
         }
@@ -335,8 +365,6 @@ class PageListener
      * Occurs on `nestednode.page.render` to set the right layout name to use.
      *
      * @param RendererEvent $event
-     *
-     * @throws BBException
      */
     public static function onPageRender(RendererEvent $event): void
     {
@@ -373,9 +401,10 @@ class PageListener
             }
         }
 
-        if ($app->getContainer()->getParameter('privacy_policy') && $data = $userPreferenceManager->dataOf(
-                'privacy-policy'
-            )) {
+        if (
+            $app->getContainer()->getParameter('privacy_policy') &&
+            $data = $userPreferenceManager->dataOf('privacy-policy')
+        ) {
             $multilangManager = $app->getContainer()->get('multilang_manager');
             if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
                 foreach ($data as $key => $value) {
