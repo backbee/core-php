@@ -146,11 +146,17 @@ class TagController extends AbstractController
             return $this->getTagNotFoundJsonResponse($uid);
         }
 
+        $children = array_map(
+            [$this->dataFormatter, 'format'],
+            $tag->getChildren()->toArray()
+        );
+
+        usort($children, static function ($first, $second) {
+            return strtolower($first['keyword']) <=> strtolower($second['keyword']);
+        });
+
         return new JsonResponse(
-            array_map(
-                [$this->dataFormatter, 'format'],
-                $tag->getChildren()->toArray()
-            ),
+            $children,
             Response::HTTP_OK
         );
     }
