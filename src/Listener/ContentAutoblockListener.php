@@ -117,8 +117,8 @@ class ContentAutoblockListener
         $sortCriteria = ['modified_at:desc'];
         if ('published_at' === $block->getParamValue('order_by')) {
             $sortCriteria = [
-                'is_online:asc',
                 'published_at:desc',
+                'is_online:asc',
             ];
         }
 
