@@ -76,12 +76,10 @@ class ImageHandler implements ContentHandlerInterface
         if (!$this->supports($content)) {
             return;
         }
-
+        
         if (isset($data['path']) && false !== $data['path']) {
             if (1 === preg_match('~^https?://~', $data['path'])) {
                 $content->image->path = $this->imgUploadHandler->uploadFromUrl($data['path']);
-            } else {
-                $content->image->path = '/static/theme-default-resources/' . $data['path'];
             }
 
             $content->image->originalname = basename($data['path']);
