@@ -4,60 +4,69 @@
 {% set linkValue = link.value %}
 
 {% if in_fluid == true %}
-  {% set imageClass = 'image-fullwidth' %}
+    {% set imageClass = 'image-fullwidth' %}
 {% endif %}
 
 <div data-editable="false"
- {{ this.bbcontent(null, {'class': 'slider-item'})|raw }}
- data-forbidden-plugins="upload,resize"
- {% if bb.token == null and linkValue.link == 'image_link' %}data-link="{{ linkValue.options.url }}"{% endif %}
+        {{ this.bbcontent(null, {'class': 'slider-item'})|raw }}
+     data-forbidden-plugins="upload,resize"
 >
-
-  <figure class="figure {{imageClass}}">
-    <img src="{{path}}" loading="lazy">
-    {% set picto = this.getObject().getParamValue('picto') %}
-    {% if picto != '' %}
-      <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto" loading="lazy">
-    {% endif %}
-  </figure>
-
-  {% if display_overlay.value == true %}
-    <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
-  {% endif %}
-
-  {% set imageTitle = this.getObject().getParamValue('title') %}
-  {% set imageDescription = this.getObject().getParamValue('description') %}
-  {% set imageBtnLink = linkValue.options.url %}
-  {% set imageBtnTitle = linkValue.options.title %}
-
-  <div class="slider-content text-center text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} hidden{% endif %}">
-
-    {% if display_title.value == true %}
-      <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="content paragraph is-h3 lead{% if display_text_hover.value %} hover-display{% endif %}">
-        {{ imageTitle|raw }}
-      </div>
-    {% endif %}
-
-    {% if display_description.value == true %}
-      <div data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="content paragraph is-h3 lead hidden-xs{% if display_text_hover.value %} hover-display{% endif %}">
-        {{ imageDescription|raw }}
-      </div>
-    {% endif %}
-
-    {% if linkValue.link == 'with_button' %}
-      {% set button_settings = this.getDesignSettings('button') %}
-
-      <div class="content button{% if display_text_hover.value %} hover-display{% endif %}">
-        <a href="{{ imageBtnLink }}"
-          class="btn color-primary {{ linkValue.options.color }} btn-{{ linkValue.options.size }} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} btn-{{ button_settings.shape }}"
-          {% if bb.token != null %} onclick="return false;"{% endif %}
-          {% if linkValue.options.btn_link_target_blank %} target="_blank"{% endif %}
-          {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
-        >
-          {{imageBtnTitle|default('Button title')|raw}}
+    {% if linkValue.link == 'image_link' and bb.token == null %}
+    <a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>
+        {% elseif linkValue.link == 'lightbox' and bb.token == null %}
+        <a href="{{ this.getCdnImageUrl(image_full_width_path ?: image.path)|raw }}" data-lightbox="lightbox_{{slider_id}}" data-title="{{ alt.value }}">
+            {% endif %}
+            <figure class="figure {{ imageClass }}">
+                <img src="{{path}}" alt="{{ alt.value }}" loading="lazy">
+                {% set picto = this.getObject().getParamValue('picto') %}
+                {% if picto != '' %}
+                    <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto" loading="lazy">
+                {% endif %}
+            </figure>
+            {% if image.path != null and (linkValue.link == 'lightbox' or linkValue.link == 'image_link') %}
         </a>
-      </div>
-    {% endif %}
+        {% endif %}
 
-  </div>
+        {% if display_overlay.value == true %}
+            <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
+        {% endif %}
+
+        {% set imageTitle = this.getObject().getParamValue('title') %}
+        {% set imageDescription = this.getObject().getParamValue('description') %}
+        {% set imageBtnLink = linkValue.options.url %}
+        {% set imageBtnTitle = linkValue.options.title %}
+
+        <div class="slider-content text-center text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} hidden{% endif %}">
+
+            {% if display_title.value == true %}
+                <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="content paragraph is-h3 lead{% if display_text_hover.value %} hover-display{% endif %}" {% if bb.token == null %}style="pointer-events: none;"{% endif %}>
+                    {{ imageTitle|raw }}
+                </div>
+            {% endif %}
+
+            {% if display_description.value == true %}
+                <div data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true" class="content paragraph is-h3 lead hidden-xs{% if display_text_hover.value %} hover-display{% endif %}" {% if bb.token == null %}style="pointer-events: none;"{% endif %}>
+                    {{ imageDescription ? imageDescription|raw : alt.value }}
+                </div>
+            {% endif %}
+
+            {% if linkValue.link == 'with_button' %}
+                {% set button_settings = this.getDesignSettings('button') %}
+
+                <div class="content button{% if display_text_hover.value %} hover-display{% endif %}">
+                    <a href="{{ imageBtnLink }}"
+                       class="btn color-primary {{ linkValue.options.color }} btn-{{ linkValue.options.size }} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} btn-{{ button_settings.shape }}"
+                            {% if bb.token != null %} onclick="return false;"{% endif %}
+                            {% if linkValue.options.btn_link_target_blank %} target="_blank"{% endif %}
+                            {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
+                    >
+                        {{imageBtnTitle|default('Button title')|raw}}
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+        {% if show_caption == true %}
+            <figcaption class="mt-2">{{ alt.value|raw }}</figcaption>
+        {% endif %}
 </div>
