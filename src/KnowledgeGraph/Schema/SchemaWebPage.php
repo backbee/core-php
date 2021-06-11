@@ -63,14 +63,14 @@ class SchemaWebPage implements SchemaInterface
      */
     public function generate(): array
     {
-        $app = $this->context->getApplication();
         $cxData = $this->context->getData();
+        $url = $this->renderer->getUri($cxData['url'], null, null, null, false);
 
         return [
             '@type' => 'WebPage',
-            '@id' => $this->renderer->getUri($cxData['url']) . SchemaIds::WEBPAGE_HASH,
+            '@id' => $url . SchemaIds::WEBPAGE_HASH,
             'name' => $cxData['title'],
-            'url' => $this->renderer->getUri($cxData['url']),
+            'url' => $url,
             'isPartOf' => [
                 '@id' => $this->renderer->getUri('/') . SchemaIds::WEBSITE_HASH,
             ],
