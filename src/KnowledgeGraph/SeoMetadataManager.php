@@ -234,11 +234,11 @@ class SeoMetadataManager
     private function setDescription(): self
     {
         try {
-            if ($this->seoData['description'] &&
-                $this->esResult['source']['abstract_uid'] &&
+            if (null === $this->seoData['description'] &&
+                $this->esResult['_source']['abstract_uid'] &&
                 $abstract = $this->entityManager->find(
                     ArticleAbstract::class,
-                    $this->esResult['source']['abstract_uid']
+                    $this->esResult['_source']['abstract_uid']
                 )
             ) {
                 $this->seoData['description'] = strip_tags(
