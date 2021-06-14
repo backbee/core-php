@@ -35,7 +35,7 @@ use RuntimeException;
  */
 class ImageFilesystemHandler implements ImageHandlerInterface
 {
-    public const MEDIA_BASE_URI = '/media/';
+    public const MEDIA_BASE_URI = '/img/';
 
     /**
      * @var string
