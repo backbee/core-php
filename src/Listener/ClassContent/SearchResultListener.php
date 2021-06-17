@@ -27,6 +27,10 @@ use BackBeeCloud\Elasticsearch\SearchEvent;
 use BackBeeCloud\Search\ResultItemHtmlFormatter;
 
 /**
+ * Class SearchResultListener
+ *
+ * @package BackBeeCloud\Listener\ClassContent
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
@@ -51,6 +55,7 @@ class SearchResultListener
 
         if ('' !== $query) {
             $page = $request->query->getInt('page', 1);
+            $elasticsearchQuery = $app->getContainer()->get('elasticsearch.query');
 
             $contents = [];
             $esQuery = [];
@@ -74,16 +79,15 @@ class SearchResultListener
             $esQuery['query']['bool']['must'][] = ['match' => ['is_pullable' => true]];
 
             if (null === $app->getBBUserToken()) {
-                $esQuery['query']['bool']['must'][] = ['match' => ['is_online' => true]];
+                $esQuery = $elasticsearchQuery->getQueryToFilterByPageIsOnline($esQuery, true);
             }
 
             if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
-                $esQuery['query']['bool']['must'][]['prefix'] = [
-                    'url' => sprintf('/%s/', $currentLang),
-                ];
+                $esQuery = $elasticsearchQuery->getQueryToFilterByLang($esQuery, [$currentLang]);
             }
 
             $size = $searchEvent->getSize() ?: self::RESULT_PER_PAGE;
+
             $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
                 $esQuery,
                 ($page > 0 ? $page - 1 : 0) * $size,
@@ -91,9 +95,11 @@ class SearchResultListener
                 $searchEvent->getOrderBy() ?? ['_score', 'published_at:desc'],
                 false
             );
+
             $formatter = new ResultItemHtmlFormatter(
                 $app->getEntityManager(),
                 $app->getRenderer(),
+                $app->getLogging(),
                 $app->getBBUserToken()
             );
 

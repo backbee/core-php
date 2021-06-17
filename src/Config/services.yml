@@ -126,7 +126,14 @@ services:
     # Search service
     cloud.search_manager:
         class: BackBeeCloud\Search\SearchManager
-        arguments: [ "@cloud.page_manager", "@cloud.content_manager", "@em" ]
+        arguments:
+            - '@cloud.page_manager'
+            - '@cloud.content_manager'
+            - '@em'
+            - '@backbee.logger'
+            - '@multilang_manager'
+            - '@elasticsearch.manager'
+            - '@elasticsearch.query'
 
     cloud.search_controller:
         class: BackBeeCloud\Controller\SearchController
@@ -156,6 +163,7 @@ services:
             - "@cloud.page_type.manager"
             - "@cloud.page_category.manager"
             - "@bbapp"
+            - '@cloud.search_manager'
 
     cloud.api.content_controller:
         class: BackBeeCloud\Api\Controller\ContentController
@@ -326,6 +334,7 @@ services:
             - "@em"
             - "@multilang_manager"
             - "@elasticsearch.manager"
+            - '@elasticsearch.query'
 
     # Structure's services
     cloud.structure.schema_parser:
@@ -435,7 +444,7 @@ services:
     # Search pages by tag services
     cloud.page_by_tag.manager:
         class: BackBeeCloud\Search\PageByTagManager
-        arguments: [ "@cloud.page_manager", "@cloud.content_manager", "@em" ]
+        arguments: [ '@cloud.page_manager', '@cloud.content_manager', '@em', '@backbee.logger' ]
 
     cloud.page_by_tag.controller:
         class: BackBeeCloud\Controller\PageByTagController
@@ -641,7 +650,7 @@ services:
     elasticsearch.query:
         class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
         arguments:
-            [ '@bbapp' ]
+            [ '@bbapp', '@cloud.page_type.manager' ]
 
     # Installer
     core.installer.page:

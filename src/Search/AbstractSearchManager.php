@@ -21,15 +21,21 @@
 
 namespace BackBeeCloud\Search;
 
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\NestedNode\Page;
 use BackBeeCloud\Entity\ContentManager;
 use BackBeeCloud\Entity\PageManager;
 use BackBeeCloud\PageType\TypeInterface;
-use BackBee\ClassContent\AbstractClassContent;
-use BackBee\NestedNode\Page;
 use Doctrine\ORM\EntityManager;
+use Exception;
+use Psr\Log\LoggerInterface;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * Class AbstractSearchManager
+ *
+ * @package BackBeeCloud\Search
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 abstract class AbstractSearchManager
 {
@@ -46,30 +52,41 @@ abstract class AbstractSearchManager
     /**
      * @var EntityManager
      */
-    protected $entyMgr;
+    protected $entityMgr;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     /**
      * Constructor.
      *
-     * @param PageManager    $pageMgr
-     * @param ContentManager $contentMgr
-     * @param EntityManager  $entyMgr
+     * @param PageManager     $pageMgr
+     * @param ContentManager  $contentMgr
+     * @param EntityManager   $entityMgr
+     * @param LoggerInterface $logger
      */
-    public function __construct(PageManager $pageMgr, ContentManager $contentMgr, EntityManager $entyMgr)
-    {
+    public function __construct(
+        PageManager $pageMgr,
+        ContentManager $contentMgr,
+        EntityManager $entityMgr,
+        LoggerInterface $logger
+    ) {
         $this->pageMgr = $pageMgr;
         $this->contentMgr = $contentMgr;
-        $this->entyMgr = $entyMgr;
+        $this->entityMgr = $entityMgr;
+        $this->logger = $logger;
     }
 
     /**
      * Returns the result page entity.
      *
-     * @param  string|null $lang
+     * @param string|null $lang
      *
-     * @return Page
+     * @return null|Page
      */
-    abstract public function getResultPage($lang = null);
+    abstract public function getResultPage($lang = null): ?Page;
 
     /**
      * Builds and returns a result page according to provided uid, title and page type.
@@ -77,23 +94,23 @@ abstract class AbstractSearchManager
      * Note that the created page's state will be online and its contents with normal
      * state (= online).
      *
-     * @param  string        $uid
-     * @param  string        $title
-     * @param  TypeInterface $type
-     * @param  string        $url
-     * @param  null|string   $lang
+     * @param string        $uid
+     * @param string        $title
+     * @param TypeInterface $type
+     * @param string        $url
+     * @param null|string   $lang
      *
      * @return Page
      */
-    protected function buildResultPage($uid, $title, TypeInterface $type, $url, $lang = null)
+    protected function buildResultPage(string $uid, string $title, TypeInterface $type, string $url, $lang = null): Page
     {
         if (null === $page = $this->pageMgr->get($uid)) {
-            $this->entyMgr->beginTransaction();
+            $this->entityMgr->beginTransaction();
 
             $data = [
-                'uid'   => $uid,
+                'uid' => $uid,
                 'title' => $title,
-                'type'  => $type->uniqueName(),
+                'type' => $type->uniqueName(),
             ];
 
             if ($lang) {
@@ -104,14 +121,27 @@ abstract class AbstractSearchManager
             $page->setState(Page::STATE_ONLINE);
             $page->setUrl($url);
 
-            foreach ($this->contentMgr->getUidsFromPage($page) as $contentUid) {
-                $content = $this->entyMgr->find(AbstractClassContent::class, $contentUid);
-                $content->setRevision(1);
-                $content->setState(AbstractClassContent::STATE_NORMAL);
-            }
+            try {
+                foreach ($this->contentMgr->getUidsFromPage($page) as $contentUid) {
+                    $content = $this->entityMgr->find(AbstractClassContent::class, $contentUid);
+                    if ($content) {
+                        $content->setRevision(1);
+                        $content->setState(AbstractClassContent::STATE_NORMAL);
+                    }
+                }
 
-            $this->entyMgr->flush();
-            $this->entyMgr->commit();
+                $this->entityMgr->flush();
+                $this->entityMgr->commit();
+            } catch (Exception $exception) {
+                $this->logger->error(
+                    sprintf(
+                        '%s : %s :%s',
+                        __CLASS__,
+                        __FUNCTION__,
+                        $exception->getMessage()
+                    )
+                );
+            }
         }
 
         return $page;

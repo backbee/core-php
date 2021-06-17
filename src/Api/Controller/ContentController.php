@@ -27,7 +27,7 @@ use BackBee\ClassContent\ClassContentManager;
 use BackBee\ClassContent\Revision;
 use BackBee\NestedNode\Page;
 use BackBeeCloud\Elasticsearch\ElasticsearchManager;
-use BackBeeCloud\Entity\PageManager;
+use BackBeeCloud\Search\SearchManager;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -54,9 +54,9 @@ class ContentController extends AbstractController
     protected $entyMgr;
 
     /**
-     * @var PageManager
+     * @var SearchManager
      */
-    protected $pageMgr;
+    protected $searchManager;
 
     /**
      * @var array
@@ -70,7 +70,7 @@ class ContentController extends AbstractController
         $this->contentMgr = $app->getContainer()->get('cloud.content_manager');
         $this->elasticsearchMgr = $app->getContainer()->get('elasticsearch.manager');
         $this->entyMgr = $app->getEntityManager();
-        $this->pageMgr = $app->getContainer()->get('cloud.page_manager');
+        $this->searchManager = $app->getContainer()->get('cloud.search_manager');
     }
 
     public function delete($type, $uid)
@@ -122,7 +122,7 @@ class ContentController extends AbstractController
         $this->assertIsAuthenticated();
 
         $result = [];
-        foreach ($this->pageMgr->getPagesWithDraftContents() as $page) {
+        foreach ($this->searchManager->getPagesWithDraftContents() as $page) {
             $result[] = [
                 'uid' => $page->getUid(),
                 'title' => $page->getTitle(),

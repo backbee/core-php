@@ -21,9 +21,14 @@
 
 namespace BackBeeCloud\Search;
 
+use BackBee\NestedNode\Page;
 use BackBeeCloud\PageType\PageByTagResultType;
 
 /**
+ * Class PageByTagManager
+ *
+ * @package BackBeeCloud\Search
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class PageByTagManager extends AbstractSearchManager
@@ -31,7 +36,7 @@ class PageByTagManager extends AbstractSearchManager
     /**
      * {@inheritdoc}
      */
-    public function getResultPage($lang = null)
+    public function getResultPage($lang = null): ?Page
     {
         $uid = $this->getResultPageUid($lang);
         if (null === $page = $this->pageMgr->get($uid)) {
@@ -54,7 +59,7 @@ class PageByTagManager extends AbstractSearchManager
      *
      * @return string
      */
-    protected function getResultPageUid($lang = null)
+    protected function getResultPageUid($lang = null): string
     {
         return md5('page_by_tag_result_page' . ($lang ? '_' . $lang : ''));
     }

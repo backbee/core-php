@@ -23,7 +23,10 @@ namespace BackBeeCloud\Elasticsearch;
 
 use ArrayObject;
 use BackBee\BBApplication;
+use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
+use BackBeeCloud\PageType\HomeType;
+use BackBeeCloud\PageType\TypeManager;
 
 /**
  * Class ElasticsearchQuery
@@ -40,13 +43,20 @@ class ElasticsearchQuery
     private $bbApp;
 
     /**
+     * @var TypeManager
+     */
+    private $typeManager;
+
+    /**
      * ElasticsearchQuery constructor.
      *
      * @param BBApplication $bbApp
+     * @param TypeManager   $typeManager
      */
-    public function __construct(BBApplication $bbApp)
+    public function __construct(BBApplication $bbApp, TypeManager $typeManager)
     {
         $this->bbApp = $bbApp;
+        $this->typeManager = $typeManager;
     }
 
     /**
@@ -152,11 +162,14 @@ class ElasticsearchQuery
             return $baseQuery;
         }
 
-        $baseQuery['query']['bool']['should'] = array_map(static function($tag) {
-            return [
-                'match' => ['tags.raw' => strtolower($tag)],
-            ];
-        },$validTags);
+        $baseQuery['query']['bool']['should'] = array_map(
+            static function ($tag) {
+                return [
+                    'match' => ['tags.raw' => strtolower($tag)],
+                ];
+            },
+            $validTags
+        );
 
         $baseQuery['query']['bool']['minimum_should_match'] = 1;
 
@@ -184,21 +197,21 @@ class ElasticsearchQuery
         // Building must clause
         $mustClauses = [];
 
-        if ($page && $pageType = ($this->bbApp->getContainer()->get('cloud.page_type.manager')->findByPage($page))) {
+        if ($page && $pageType = ($this->typeManager->findByPage($page))) {
             $mustClauses = [
                 [
                     'match' => [
-                        'type' => $pageType->uniqueName()
-                    ]
-                ]
+                        'type' => $pageType->uniqueName(),
+                    ],
+                ],
             ];
         }
 
         if (null === $this->bbApp->getBBUserToken()) {
             $mustClauses[] = [
                 'match' => [
-                    'is_online' => true
-                ]
+                    'is_online' => true,
+                ],
             ];
         }
 
@@ -211,5 +224,210 @@ class ElasticsearchQuery
         }
 
         return $isArrayObject ? $esQuery : $esQuery->getArrayCopy();
+    }
+
+    /**
+     * Get query to filter by title.
+     *
+     * @param array  $baseQuery
+     * @param string $title
+     *
+     * @return array
+     */
+    public function getQueryToFilterByTitle(array $baseQuery, string $title): array
+    {
+        $matchPart = [
+            'query' => str_replace('%', '', $title),
+            'boost' => 2,
+        ];
+
+        $baseQuery['query']['bool']['minimum_should_match'] = 1;
+
+        $baseQuery['query']['bool']['should'] = array_merge(
+            $baseQuery['query']['bool']['should'] ?? [],
+            [
+                [
+                    'match' => [
+                        'title' => $matchPart,
+                    ],
+                ],
+                [
+                    'match' => [
+                        'title.raw' => $matchPart,
+                    ],
+                ],
+                [
+                    'match' => [
+                        'title.folded' => $matchPart,
+                    ],
+                ],
+                [
+                    'match_phrase_prefix' => [
+                        'title' => $matchPart,
+                    ],
+                ],
+                [
+                    'match_phrase_prefix' => [
+                        'title.folded' => $matchPart,
+                    ],
+                ],
+                [
+                    'match_phrase_prefix' => [
+                        'tags' => $matchPart,
+                    ],
+                ],
+            ]
+        );
+
+        return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by tags.
+     *
+     * @param array  $baseQuery
+     * @param string $tags
+     *
+     * @return array
+     */
+    public function getQueryToFilterByTags(array $baseQuery, string $tags): array
+    {
+        $validTags = null;
+
+        foreach (explode(',', $tags) as $tagId) {
+            if (null !== $tag = $this->bbApp->getEntityManager()->getRepository(KeyWord::class)->find($tagId)) {
+                $validTags[] = $tag;
+            }
+        }
+
+        if ($validTags) {
+            $baseQuery['query']['bool']['must'] = array_merge(
+                $baseQuery['query']['bool']['must'] ?? [],
+                array_map(
+                    static function (KeyWord $tag) {
+                        return [
+                            'term' => [
+                                'tags.raw' => strtolower($tag->getKeyWord()),
+                            ],
+                        ];
+                    },
+                    $validTags
+                )
+            );
+        }
+
+        return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by page type.
+     *
+     * @param array       $baseQuery
+     * @param string|null $type
+     *
+     * @return array
+     */
+    public function getQueryToFilterByPageType(array $baseQuery, ?string $type): array
+    {
+        if (null === $type) {
+            $baseQuery['query']['bool']['must_not'] = array_merge(
+                $baseQuery['query']['bool']['must_not'] ?? [],
+                array_filter(
+                    array_map(
+                        static function ($type) {
+                            return false === $type->isProtected() ||
+                            $type->uniqueName() === (new HomeType)->uniqueName() ?
+                                null : ['match' => ['type' => $type->uniqueName()]];
+                        },
+                        array_values(
+                            $this->typeManager->all()
+                        )
+                    )
+                )
+            );
+        } else {
+            $baseQuery['query']['bool']['must'][] = [
+                'match' => [
+                    'type' => $type,
+                ],
+            ];
+        }
+
+        return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by lang.
+     *
+     * @param array  $baseQuery
+     * @param array  $languages
+     * @param string $booleanQuery
+     *
+     * @return array
+     */
+    public function getQueryToFilterByLang(array $baseQuery, array $languages, string $booleanQuery = 'must'): array
+    {
+        $baseQuery['query']['bool'][$booleanQuery] = array_merge(
+            $baseQuery['query']['bool'][$booleanQuery] ?? [],
+            array_map(
+                static function (string $lang) {
+                    return [
+                        'prefix' => [
+                            'url' => sprintf('/%s/', $lang),
+                        ],
+                    ];
+                },
+                $languages
+            )
+        );
+
+        return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by page is online.
+     *
+     * @param array $baseQuery
+     * @param bool  $isOnline
+     *
+     * @return array
+     */
+    public function getQueryToFilterByPageIsOnline(array $baseQuery, bool $isOnline): array
+    {
+        $baseQuery['query']['bool']['must'] = array_merge(
+            $baseQuery['query']['bool']['must'] ?? [],
+            [
+                [
+                    'match' => [
+                        'is_online' => $isOnline
+                    ]
+                ]
+            ]
+        );
+
+        return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by page with draft contents.
+     *
+     * @param array $baseQuery
+     *
+     * @return array
+     */
+    public function getQueryToFilterByPageWithDraftContents(array $baseQuery): array
+    {
+        $baseQuery['query']['bool']['must'] = array_merge(
+            $baseQuery['query']['bool']['must'] ?? [],
+            [
+                [
+                    'match' => [
+                        'has_draft_contents' => true
+                    ]
+                ]
+            ]
+        );
+
+        return $baseQuery;
     }
 }

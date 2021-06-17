@@ -21,65 +21,68 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
-use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
-use BackBeeCloud\Search\ResultItemHtmlFormatter;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\Renderer\Event\RendererEvent;
+use BackBee\Renderer\Exception\RendererException;
+use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
+use BackBeeCloud\Search\ResultItemHtmlFormatter;
 
 /**
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * Class PageByTagResultListener
+ *
+ * @package BackBeeCloud\Listener\ClassContent
+ *
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class PageByTagResultListener
 {
     /**
-     * @param  RendererEvent $event
+     * @param RendererEvent $event
+     *
+     * @throws RendererException
      */
-    public static function onRender(RendererEvent $event)
+    public static function onRender(RendererEvent $event): void
     {
         $app = $event->getApplication();
         $entyMgr = $app->getEntityManager();
         $request = $app->getRequest();
         $content = $event->getTarget();
+        $elasticsearchQuery = $app->getContainer()->get('elasticsearch.query');
 
         $pages = new ElasticsearchCollection([], 0);
         $contents = [];
         $tagName = $request->attributes->get('tagName', '');
+
         if (
-            false != $tagName
+            false !== $tagName
             && null !== $tag = $entyMgr->getRepository(Tag::class)->findOneBy(['_keyWord' => $tagName])
         ) {
             $pageNum = $request->query->getInt('page', 1);
-            $limit = (int) $content->getParamValue('limit') ?: SearchResultListener::RESULT_PER_PAGE;
+            $limit = (int)$content->getParamValue('limit') ?: SearchResultListener::RESULT_PER_PAGE;
             $start = ($pageNum > 0 ? $pageNum - 1 : 0) * $limit;
 
             $esQuery = [
                 'query' => [
                     'bool' => [
                         'must' => [
-                            [ 'match' => ['is_pullable' => true] ],
+                            ['match' => ['is_pullable' => true]],
                         ],
                         'should' => [
-                            [ 'match' => ['tags' => $tagName] ],
-                            [ 'match' => ['tags.raw' => $tagName] ],
-                            [ 'match' => ['tags.folded' => $tagName] ],
+                            ['match' => ['tags' => $tagName]],
+                            ['match' => ['tags.raw' => $tagName]],
+                            ['match' => ['tags.folded' => $tagName]],
                         ],
                         'minimum_should_match' => 1,
                     ],
                 ],
             ];
 
-            if (null === $bbotken = $app->getBBUserToken()) {
-                $esQuery['query']['bool']['must'][] = [ 'match' => ['is_online' => true] ];
+            if (null === $app->getBBUserToken()) {
+                $esQuery = $elasticsearchQuery->getQueryToFilterByPageIsOnline($esQuery, true);
             }
 
-            $currentPage = $event->getRenderer()->getCurrentPage();
-            if (
-                null !== $currentPage
-                && null !== $currentLang = $app->getContainer()->get('multilang_manager')->getLangByPage($currentPage)
-            ) {
-                $esQuery['query']['bool']['must'][]['prefix'] = [
-                    'url' => sprintf('/%s/', $currentLang),
-                ];
+            if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
+                $esQuery = $elasticsearchQuery->getQueryToFilterByLang($esQuery, [$currentLang]);
             }
 
             $pages = $app->getContainer()->get('elasticsearch.manager')->customSearchPage(
@@ -93,6 +96,7 @@ class PageByTagResultListener
             $formatter = new ResultItemHtmlFormatter(
                 $app->getEntityManager(),
                 $app->getRenderer(),
+                $app->getLogging(),
                 $app->getBBUserToken()
             );
 

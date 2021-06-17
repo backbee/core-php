@@ -101,10 +101,8 @@ abstract class AbstractController
     protected function createErrorJsonResponse($error, $reason, $statusCode): JsonResponse
     {
         return new JsonResponse(
-            [
-                'error' => $error,
-                'reason' => $reason,
-            ], $statusCode
+            compact('error', 'reason'),
+            $statusCode
         );
     }
 
