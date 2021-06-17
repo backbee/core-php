@@ -407,4 +407,31 @@ class ElasticsearchQuery
 
         return $baseQuery;
     }
+
+    /**
+     * Get query to filter by date.
+     *
+     * @param array $baseQuery
+     * @param array $dates
+     *
+     * @return array
+     */
+    public function getQueryToFilterByDate(array $baseQuery, array $dates): array
+    {
+        foreach ($dates as $field => $date) {
+            if ($date) {
+                $date = (array)explode(',', $date);
+                $baseQuery['query']['bool']['must'][] = [
+                    'range' => [
+                        $field => [
+                            'gte' => $date[0] ?? null,
+                            'lte' => $date[1] ?? null,
+                        ],
+                    ],
+                ];
+            }
+        }
+
+        return $baseQuery;
+    }
 }

@@ -45,11 +45,6 @@ class TitleFilter
             [
                 [
                     'match_phrase' => [
-                        'title' => $title,
-                    ],
-                ],
-                [
-                    'match_phrase' => [
                         'title.folded' => $title,
                     ],
                 ],
@@ -107,7 +102,7 @@ class TitleFilter
             ],
         ];
     }
-    
+
     /**
      * Search term in title field.
      *

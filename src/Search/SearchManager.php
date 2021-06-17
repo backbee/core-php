@@ -185,6 +185,17 @@ class SearchManager extends AbstractSearchManager
             $query = $this->elasticsearchQuery->getQueryToFilterByPageWithDraftContents($query);
         }
 
+        if ($criteria['created_at'] || $criteria['modified_at'] || $criteria['published_at']) {
+            $query = $this->elasticsearchQuery->getQueryToFilterByDate(
+                $query,
+                [
+                    'created_at' => $criteria['created_at'] ?: null,
+                    'modified_at' => $criteria['modified_at'] ?: null,
+                    'published_at' => $criteria['published_at'] ?: null,
+                ]
+            );
+        }
+
         $sortValidAttrNames = [
             'modified_at',
             'created_at',

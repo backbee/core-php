@@ -158,7 +158,10 @@ class ElasticsearchClient
                                 'std_folded' => [
                                     'type' => 'custom',
                                     'tokenizer' => 'standard',
-                                    'filter' => ['lowercase', 'asciifolding'],
+                                    'filter' => [
+                                        'lowercase',
+                                        'asciifolding'
+                                    ],
                                 ],
                             ],
                         ],
