@@ -23,6 +23,7 @@ namespace BackBeeCloud\Elasticsearch;
 
 use ArrayObject;
 use BackBee\BBApplication;
+use BackBee\Elasticsearch\Filter\TitleFilter;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
 use BackBeeCloud\PageType\HomeType;
@@ -48,15 +49,22 @@ class ElasticsearchQuery
     private $typeManager;
 
     /**
+     * @var TitleFilter
+     */
+    private $titleFilter;
+
+    /**
      * ElasticsearchQuery constructor.
      *
      * @param BBApplication $bbApp
      * @param TypeManager   $typeManager
+     * @param TitleFilter   $titleFilter
      */
-    public function __construct(BBApplication $bbApp, TypeManager $typeManager)
+    public function __construct(BBApplication $bbApp, TypeManager $typeManager, TitleFilter $titleFilter)
     {
         $this->bbApp = $bbApp;
         $this->typeManager = $typeManager;
+        $this->titleFilter = $titleFilter;
     }
 
     /**
@@ -232,26 +240,21 @@ class ElasticsearchQuery
      * @param array       $baseQuery
      * @param string      $title
      * @param string|null $searchIn
+     * @param string|null $searchByTerm
      *
      * @return array
      */
     public function getQueryToFilterByTitle(
         array $baseQuery,
         string $title,
-        ?string $searchIn
+        ?string $searchIn,
+        ?string $searchByTerm
     ): array {
-        $matchPart = [
-            'query' => str_replace('%', '', $title),
-            'boost' => 3,
-        ];
-
-        $baseQuery['query']['bool']['minimum_should_match'] = 1;
-
-        $baseQuery['query']['bool']['should'] = array_merge(
-            $baseQuery['query']['bool']['should'] ?? [],
-            $searchIn === 'content' ?
-                $this->getQueryToFilterByTitleInContent($matchPart) : $this->getQueryToFilterByTitleInTitle($matchPart)
-        );
+        if ($searchByTerm === 'exact_term') {
+            $baseQuery = $this->titleFilter->byExactTerm($baseQuery, $title);
+        } else {
+            $baseQuery = $this->titleFilter->byOperator($baseQuery, $title, $searchIn, $searchByTerm);
+        }
 
         return $baseQuery;
     }
@@ -403,56 +406,5 @@ class ElasticsearchQuery
         );
 
         return $baseQuery;
-    }
-
-    /**
-     * Get query to filter by title in title.
-     *
-     * @param array $matchPart
-     *
-     * @return array
-     */
-    private function getQueryToFilterByTitleInTitle(array $matchPart): array
-    {
-        return [
-            [
-                'match' => [
-                    'title' => $matchPart,
-                ],
-            ],
-            [
-                'match' => [
-                    'title.raw' => $matchPart,
-                ],
-            ],
-            [
-                'match' => [
-                    'title.folded' => $matchPart,
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * Get query to filter by title in content.
-     *
-     * @param array $matchPart
-     *
-     * @return array
-     */
-    private function getQueryToFilterByTitleInContent(array $matchPart): array
-    {
-        return [
-            [
-                'match' => [
-                    'contents' => $matchPart,
-                ],
-            ],
-            [
-                'match' => [
-                    'contents.folded' => $matchPart,
-                ],
-            ],
-        ];
     }
 }

@@ -654,7 +654,7 @@ services:
     elasticsearch.query:
         class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
         arguments:
-            [ '@bbapp', '@cloud.page_type.manager' ]
+            [ '@bbapp', '@cloud.page_type.manager', '@core.elasticsearch.title.filter' ]
 
     # Installer
     core.installer.page:
@@ -754,3 +754,7 @@ services:
         class: BackBee\Listener\Log\GroupTypeLogListener
         arguments:
             [ '@security.context', '@em', '@cloud.group_type.manager', '@?monolog.logger.admin_log' ]
+
+    # Elasticsearch filter
+    core.elasticsearch.title.filter:
+        class: BackBee\Elasticsearch\Filter\TitleFilter
