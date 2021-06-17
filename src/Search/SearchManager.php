@@ -39,7 +39,7 @@ use function in_array;
  *
  * @package BackBeeCloud\Search
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class SearchManager extends AbstractSearchManager
 {
@@ -106,11 +106,11 @@ class SearchManager extends AbstractSearchManager
     /**
      * Returns uid for page by tag result page.
      *
-     * @param  null|string $lang
+     * @param null|string $lang
      *
      * @return string
      */
-    protected function getResultPageUid($lang = null): string
+    protected function getResultPageUid(?string $lang = null): string
     {
         return md5('search_result' . ($lang ? '_' . $lang : ''));
     }
@@ -138,23 +138,23 @@ class SearchManager extends AbstractSearchManager
 
         $query['query']['bool']['must'][] = [
             'match' => [
-                'source' => Page::SOURCE_TYPE
-            ]
+                'source' => Page::SOURCE_TYPE,
+            ],
         ];
 
         if ($this->multiLangManager->isActive()) {
             $query['query']['bool']['must_not'][] = [
                 'match' => [
-                    'url' => '/'
-                ]
+                    'url' => '/',
+                ],
             ];
         }
 
         if ((null !== ($criteria['category'] ?? null)) && 'none' !== $criteria['category']) {
             $query['query']['bool']['must'][] = [
                 'match' => [
-                    'category' => $criteria['category']
-                ]
+                    'category' => $criteria['category'],
+                ],
             ];
         }
 
@@ -173,10 +173,14 @@ class SearchManager extends AbstractSearchManager
         }
 
         if ($criteria['title']) {
-            $query = $this->elasticsearchQuery->getQueryToFilterByTitle($query, $criteria['title']);
+            $query = $this->elasticsearchQuery->getQueryToFilterByTitle(
+                $query,
+                $criteria['title'],
+                $criteria['search_in']
+            );
         }
 
-        if ($criteria['has_draft_only'] && true === (bool) $criteria['has_draft_only']) {
+        if ($criteria['has_draft_only'] && true === (bool)$criteria['has_draft_only']) {
             $query = $this->elasticsearchQuery->getQueryToFilterByPageWithDraftContents($query);
         }
 
@@ -190,7 +194,7 @@ class SearchManager extends AbstractSearchManager
         ];
         $sortValidOrder = [
             'asc',
-            'desc'
+            'desc',
         ];
 
         $formattedSort = [];
@@ -205,11 +209,7 @@ class SearchManager extends AbstractSearchManager
             $formattedSort[] = $attr . ':' . $order;
         }
 
-        try {
-            return $this->elasticsearchManager->customSearchPage($query, $start, $limit, $formattedSort);
-        } catch (\Exception $exception) {
-            dump($exception->getMessage());
-        }
+        return $this->elasticsearchManager->customSearchPage($query, $start, $limit, $formattedSort);
     }
 
     /**

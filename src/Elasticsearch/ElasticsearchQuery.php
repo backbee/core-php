@@ -229,54 +229,28 @@ class ElasticsearchQuery
     /**
      * Get query to filter by title.
      *
-     * @param array  $baseQuery
-     * @param string $title
+     * @param array       $baseQuery
+     * @param string      $title
+     * @param string|null $searchIn
      *
      * @return array
      */
-    public function getQueryToFilterByTitle(array $baseQuery, string $title): array
-    {
+    public function getQueryToFilterByTitle(
+        array $baseQuery,
+        string $title,
+        ?string $searchIn
+    ): array {
         $matchPart = [
             'query' => str_replace('%', '', $title),
-            'boost' => 2,
+            'boost' => 3,
         ];
 
         $baseQuery['query']['bool']['minimum_should_match'] = 1;
 
         $baseQuery['query']['bool']['should'] = array_merge(
             $baseQuery['query']['bool']['should'] ?? [],
-            [
-                [
-                    'match' => [
-                        'title' => $matchPart,
-                    ],
-                ],
-                [
-                    'match' => [
-                        'title.raw' => $matchPart,
-                    ],
-                ],
-                [
-                    'match' => [
-                        'title.folded' => $matchPart,
-                    ],
-                ],
-                [
-                    'match_phrase_prefix' => [
-                        'title' => $matchPart,
-                    ],
-                ],
-                [
-                    'match_phrase_prefix' => [
-                        'title.folded' => $matchPart,
-                    ],
-                ],
-                [
-                    'match_phrase_prefix' => [
-                        'tags' => $matchPart,
-                    ],
-                ],
-            ]
+            $searchIn === 'content' ?
+                $this->getQueryToFilterByTitleInContent($matchPart) : $this->getQueryToFilterByTitleInTitle($matchPart)
         );
 
         return $baseQuery;
@@ -399,9 +373,9 @@ class ElasticsearchQuery
             [
                 [
                     'match' => [
-                        'is_online' => $isOnline
-                    ]
-                ]
+                        'is_online' => $isOnline,
+                    ],
+                ],
             ]
         );
 
@@ -422,12 +396,63 @@ class ElasticsearchQuery
             [
                 [
                     'match' => [
-                        'has_draft_contents' => true
-                    ]
-                ]
+                        'has_draft_contents' => true,
+                    ],
+                ],
             ]
         );
 
         return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by title in title.
+     *
+     * @param array $matchPart
+     *
+     * @return array
+     */
+    private function getQueryToFilterByTitleInTitle(array $matchPart): array
+    {
+        return [
+            [
+                'match' => [
+                    'title' => $matchPart,
+                ],
+            ],
+            [
+                'match' => [
+                    'title.raw' => $matchPart,
+                ],
+            ],
+            [
+                'match' => [
+                    'title.folded' => $matchPart,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get query to filter by title in content.
+     *
+     * @param array $matchPart
+     *
+     * @return array
+     */
+    private function getQueryToFilterByTitleInContent(array $matchPart): array
+    {
+        return [
+            [
+                'match' => [
+                    'contents' => $matchPart,
+                ],
+            ],
+            [
+                'match' => [
+                    'contents.folded' => $matchPart,
+                ],
+            ],
+        ];
     }
 }
