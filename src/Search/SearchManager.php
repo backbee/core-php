@@ -203,6 +203,8 @@ class SearchManager extends AbstractSearchManager
             'type',
             'is_online',
             'category',
+            'lang',
+            'title'
         ];
         $sortValidOrder = [
             'asc',
@@ -218,10 +220,14 @@ class SearchManager extends AbstractSearchManager
             if (!in_array($order, $sortValidOrder, true)) {
                 throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
             }
-            $formattedSort[] = $attr . ':' . $order;
+            $formattedSort[] = $attr . ($attr === 'title' ? '.raw' : '') . ':' . $order;
         }
 
-        return $this->elasticsearchManager->customSearchPage($query, $start, $limit, $formattedSort);
+        try {
+            return $this->elasticsearchManager->customSearchPage($query, $start, $limit, $formattedSort);
+        } catch (\Exception $exception) {
+            dump($exception->getMessage());
+        }
     }
 
     /**

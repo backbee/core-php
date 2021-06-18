@@ -455,6 +455,9 @@ class ElasticsearchClient
                         'source' => [
                             'type' => 'keyword',
                         ],
+                        'lang' => [
+                            'type' => 'keyword',
+                        ],
                     ],
                 ],
             ]
