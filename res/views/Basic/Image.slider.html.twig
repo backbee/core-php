@@ -36,7 +36,7 @@
         {% set imageBtnLink = linkValue.options.url %}
         {% set imageBtnTitle = linkValue.options.title %}
 
-        <div class="slider-content text-center text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} hidden{% endif %}">
+        <div class="slider-content text-center text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} d-none{% endif %}">
 
             {% if display_title.value == true %}
                 <div data-parameter-rte="true" data-parameter-name="title" data-cloud-rte="true" class="content paragraph is-h3 lead{% if display_text_hover.value %} hover-display{% endif %}" {% if bb.token == null %}style="pointer-events: none;"{% endif %}>
