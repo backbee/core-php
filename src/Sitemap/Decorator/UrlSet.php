@@ -53,7 +53,12 @@ class UrlSet extends AbstractDecorator
                 'lastmod' => new DateTime(),
                 'urlset' => $this->getRenderer()->partial(
                     'Sitemap/UrlSet.html.twig',
-                    array_merge($params, ['locations' => $locations])
+                    array_merge(
+                        $params,
+                        [
+                            'locations' => $locations,
+                        ]
+                    )
                 ),
             ];
         }

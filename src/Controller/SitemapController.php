@@ -24,12 +24,12 @@ namespace BackBeePlanet\Controller;
 use BackBee\BBApplication;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\ContainerInterface;
-use BackBee\Exception\InvalidArgumentException;
 use BackBee\Site\Site;
 use BackBee\Util\Collection\Collection;
 use BackBeePlanet\Listener\SitemapListener;
 use BackBeePlanet\Sitemap\Decorator\DecoratorInterface;
 use BackBeePlanet\Sitemap\SitemapManager;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -73,6 +73,7 @@ class SitemapController
      *
      * @param BBApplication  $bbApp
      * @param SitemapManager $sitemapManager
+     * @param Config         $config
      */
     public function __construct(BBApplication $bbApp, SitemapManager $sitemapManager, Config $config)
     {
@@ -88,7 +89,6 @@ class SitemapController
      * @param Request $request The current request.
      *
      * @return Response
-     * @throws InvalidArgumentException
      */
     public function indexAction(Request $request): Response
     {
@@ -108,7 +108,6 @@ class SitemapController
      * @param Request $request
      *
      * @return Response
-     * @throws InvalidArgumentException
      */
     public function getArchiveAction(Request $request): Response
     {
@@ -142,23 +141,34 @@ class SitemapController
      * @param Request            $request
      *
      * @return false|mixed|Response
-     * @throws InvalidArgumentException
      */
     private function getSitemap(string $id, DecoratorInterface $decorator, Request $request)
     {
+        $sitemap = false;
         $pathInfo = (string)str_replace('.gz', '', $request->getPathInfo());
 
-        if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
-            $preset = $this->getPreset($decorator, $request->attributes->all());
-            $params = $this->getParams($id);
-            $sitemaps = $decorator->render($preset, $params);
-            if (!isset($sitemaps[$pathInfo])) {
-                return new Response('Not found', Response::HTTP_NOT_FOUND);
+        try {
+            if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
+                $preset = $this->getPreset($decorator, $request->attributes->all());
+                $params = $this->getParams($id);
+                $sitemaps = $decorator->render($preset, $params);
+                if (!isset($sitemaps[$pathInfo])) {
+                    return new Response('Not found', Response::HTTP_NOT_FOUND);
+                }
+
+                $sitemap = $sitemaps[$pathInfo];
+
+                $this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
             }
-
-            $sitemap = $sitemaps[$pathInfo];
-
-            $this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
+        } catch (Exception $exception) {
+            $this->container->get('logger')->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
         return $sitemap;
@@ -193,10 +203,9 @@ class SitemapController
      *
      * @param string $id A sitemap id.
      *
-     * @return DecoratorInterface|object|null
-     *                                     if found, null otherwise.
+     * @return DecoratorInterface|null if found, null otherwise.
      */
-    private function getDecorator(string $id)
+    private function getDecorator(string $id): ?DecoratorInterface
     {
         return $this->container->has(SitemapListener::$DECORATOR_PREFIX . $id) ?
             $this->container->get(SitemapListener::$DECORATOR_PREFIX . $id) : null;
@@ -221,13 +230,16 @@ class SitemapController
      * @param string $id A sitemap id.
      *
      * @return array
-     * @throws InvalidArgumentException
+     * @throws Exception
      */
     private function getParams(string $id): array
     {
+        $config = $this->config->getSection('sitemaps');
+
         return [
             'site' => $this->site,
-            'step' => Collection::get($this->config->getSection('sitemaps'), $id . ':iterator-step', 1500),
+            'step' => Collection::get($config, $id . ':iterator-step', 1500),
+            'changeFreq' => $config['urlset']['change_freq'] ?? 'always',
         ];
     }
 }
