@@ -21,10 +21,8 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBee\BBApplication;
 use BackBee\ClassContent\ContentAutoblock;
 use BackBee\ClassContent\Revision;
-use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Renderer\Renderer;
@@ -49,8 +47,6 @@ class ArticleTitleListener
      * Called on `article.articletitle.render` event.
      *
      * @param RendererEvent $event
-     *
-     * @throws BBException
      */
     public static function onRender(RendererEvent $event): void
     {
@@ -58,7 +54,7 @@ class ArticleTitleListener
         $entityMgr = $app->getEntityManager();
         $renderer = $event->getRenderer();
         $autoBlock = null;
-        $context = $app->getRequest()->query->get('context', '');
+        $context = $app->getRequest()->query->get('ref', '');
 
         if (ContentAutoblockListener::AUTOBLOCK_ID_LENGTH === strlen($context)) {
             try {
@@ -86,9 +82,20 @@ class ArticleTitleListener
             return;
         }
 
-        if (null !== $app->getBBUserToken()) {
-            $draft = $entityMgr->getRepository(Revision::class)->getDraft($autoBlock, $app->getBBUserToken());
-            $autoBlock->setDraft($draft);
+        try {
+            if (null !== $app->getBBUserToken()) {
+                $draft = $entityMgr->getRepository(Revision::class)->getDraft($autoBlock, $app->getBBUserToken());
+                $autoBlock->setDraft($draft);
+            }
+        } catch (Exception $exception) {
+            $app->getLogging()->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
         self::computeContextualSiblings($autoBlock, $renderer, $currentPage, $app->getLogging());
@@ -190,7 +197,7 @@ class ArticleTitleListener
         if (0 < $result->count()) {
             $collection = $result->collection();
             $prev = array_pop($collection)['_source'];
-            $prev['url'] = sprintf('%s?context=%s', $prev['url'], ContentAutoblockListener::getAutoblockId($autoblock));
+            $prev['url'] = sprintf('%s?ref=%s', $prev['url'], ContentAutoblockListener::getAutoblockId($autoblock));
         }
 
         // get next article
@@ -206,7 +213,7 @@ class ArticleTitleListener
         if (0 < $result->count()) {
             $collection = $result->collection();
             $next = array_pop($collection)['_source'];
-            $next['url'] = sprintf('%s?context=%s', $next['url'], ContentAutoblockListener::getAutoblockId($autoblock));
+            $next['url'] = sprintf('%s?ref=%s', $next['url'], ContentAutoblockListener::getAutoblockId($autoblock));
         }
 
         $renderer->assign('prev', $prev);
