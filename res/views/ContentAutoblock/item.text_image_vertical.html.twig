@@ -4,7 +4,7 @@
             <h4 class="autoblock-title{% if reduce_title_size %} reduce-title{% endif %}">
                 <a
                     {% block data_item_title_attributes %}{% endblock %}
-                    href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}"
+                    href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}"
                     {% if is_online == false %} title="This page is offline"{% endif %}
                 >
                     <span class="{{is_online == false ? 'offline autoblock-item' : ''}}">
@@ -33,7 +33,7 @@
         </div>
         <div class="col-md-4">
             {% if image.url != false %}
-            <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?context=' ~ autoblock_id : '')}}">
+            <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}">
                 <figure class="figure push-image" style="background-image: url({{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}})">
                     <div class="contentwrapper">
                         {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
