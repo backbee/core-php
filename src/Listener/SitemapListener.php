@@ -27,7 +27,6 @@ use BackBee\Routing\RouteCollection;
 use BackBee\Util\Collection\Collection;
 use BackBeePlanet\Sitemap\Decorator\DecoratorInterface;
 use BackBeePlanet\Sitemap\Query\BaseCollector;
-use BackBeePlanet\Sitemap\SitemapManager;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -44,11 +43,6 @@ class SitemapListener
      * @var BBApplication
      */
     private static $bbApp;
-
-    /**
-     * @var SitemapManager
-     */
-    private static $sitemapManager;
 
     /**
      * @var Config
@@ -78,14 +72,12 @@ class SitemapListener
     /**
      * SitemapListener constructor.
      *
-     * @param BBApplication  $bbApp
-     * @param SitemapManager $sitemapManager
-     * @param Config         $config
+     * @param BBApplication $bbApp
+     * @param Config        $config
      */
-    public function __construct(BBApplication $bbApp, SitemapManager $sitemapManager, Config $config)
+    public function __construct(BBApplication $bbApp, Config $config)
     {
         self::$bbApp = $bbApp;
-        self::$sitemapManager = $sitemapManager;
         self::$config = $config;
     }
 
@@ -201,7 +193,7 @@ class SitemapListener
         string $id,
         Reference $collectorRef
     ): ?Reference {
-        if (is_object($decoratorId) && $decoratorId instanceof DecoratorInterface) {
+        if ($decoratorId instanceof DecoratorInterface) {
             $decoratorId->setRenderer($container->get('renderer'));
             $decoratorId->setCollector($container->get($collectorRef));
 

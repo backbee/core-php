@@ -606,7 +606,7 @@ services:
 
     core.sitemap.listener:
         class: BackBeePlanet\Listener\SitemapListener
-        arguments: [ '@bbapp', '@core.sitemap.manager', '@config' ]
+        arguments: [ '@bbapp', '@config' ]
 
     # Search engine
     core.search_engine.controller:
