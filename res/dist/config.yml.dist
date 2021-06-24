@@ -33,3 +33,8 @@ parameters:
         ru: русский
         ar: العربية
     whitelist: []
+    about:
+        author: 'Lp digital system'
+        author_link: 'https://www.lp-digital.fr'
+        licence: 'GPL-3.0+'
+        licence_link: 'https://www.gnu.org/licenses/gpl-3.0.txt'
