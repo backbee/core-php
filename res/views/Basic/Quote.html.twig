@@ -3,7 +3,7 @@
         <div class="quote__intro text-uppercase text-primary mb-1">{{ intro.value }}</div>
     {% endif %}
     {% if image_url.value and not bb.token %}<a href="{{ image_url.value }}"
-                                                {% if target_blank.value == true %}target="_blank"{% endif %}>{% endif %}
+                                                {% if target_blank.value == true %}target="_blank" rel="noopener"{% endif %}>{% endif %}
         <div class="quote__wrapper bg-white row {% if position.value %}right{% else %}left{% endif %}">
             <div class="quote__imagewrapper {% if position.value %}pl-0{% else %}pr-0{% endif %} col-lg-4 has-sub-elements pl-0">
                 {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd', class: 'mb-0', 'in_fluid': in_fluid, 'colsize': colsize})|raw }}
@@ -26,7 +26,7 @@
     {% if link_label.value %}
         <div class="extra-link mt-4 btn__moreInfo{% if link_color.value %} btn__moreInfo--{{ link_color.value }}{% endif %} {% if position.value %}right{% else %}left{% endif %}">
             <a href="{{ link_url.value }}"
-               {% if link_target_blank.value == true %}target="_blank"{% endif %}>{{ link_label.value }}<i
+               {% if link_target_blank.value == true %}target="_blank" rel="noopener"{% endif %}>{{ link_label.value }}<i
                         class="icon-fma-plus"></i></a>
         </div>
     {% endif %}
