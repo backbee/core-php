@@ -2,23 +2,15 @@
     <link id="cloud-css" href="{{ appCssUrl }}" rel="stylesheet">
 {% endif %}
 
-<div id="cloud-ui"
-     class="cloud-ui-wrapper"
-     data-api="{{ this.getUri('/rest/2/') }}"
-     data-base-url="{{ this.getUri('/') }}"
-     data-toolbar-selector="true"
-     data-image-domain="{{ imageDomain }}"
-        {% if bb.token != null %}
-data-autostart
-    data-site-uid="{{ this.getCurrentPage().getSite().getUid() }}"
-    data-page-uid="{{ this.getCurrentPage().getUid() }}"
-    data-layout-uid="{{ this.getCurrentPage().getLayout().getUid() }}"
-    data-page-online="{{ this.getCurrentPage().isOnline() }}"
-    data-root-uid="{{ this.getCurrentPage().getRoot().getUid() }}"
-    data-parent-uid="{{ this.getCurrentPage().getParent().getUid() }}"
-    data-max-size="{{ this.getMaxFileSize() }}"
-        {% endif %}>
-</div>
+<div id="cloud-ui" class="cloud-ui-wrapper" data-api="{{ this.getUri('/rest/2/') }}"
+     data-base-url="{{ this.getUri('/') }}" data-toolbar-selector="true" data-image-domain="{{ imageDomain }}"
+     {% if bb.token != null %}data-autostart data-site-uid="{{ this.getCurrentPage().getSite().getUid() }}"
+     data-page-uid="{{ this.getCurrentPage().getUid() }}"
+     data-layout-uid="{{ this.getCurrentPage().getLayout().getUid() }}"
+     data-page-online="{{ this.getCurrentPage().isOnline() }}"
+     data-root-uid="{{ this.getCurrentPage().getRoot().getUid() }}"
+     data-parent-uid="{{ this.getCurrentPage().getParent().getUid() }}"
+     data-max-size="{{ this.getMaxFileSize() }}"{% endif %}></div>
 
 {% if bb.token != null %}
     <script src="{{ appJsUrl }}"></script>

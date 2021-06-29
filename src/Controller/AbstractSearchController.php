@@ -26,6 +26,7 @@ use BackBeeCloud\Search\AbstractSearchManager;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Renderer\Renderer;
 use BackBee\Routing\RouteCollection;
+use BackBeeCloud\Search\SearchManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
