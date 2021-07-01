@@ -35,17 +35,18 @@ class TitleFilter
      *
      * @param array  $baseQuery
      * @param string $title
+     * @param string $searchIn
      *
      * @return array
      */
-    public function byExactTerm(array $baseQuery, string $title): array
+    public function byExactTerm(array $baseQuery, string $title, string $searchIn): array
     {
         $baseQuery['query']['bool']['must'] = array_merge(
             $baseQuery['query']['bool']['must'] ?? [],
             [
                 [
                     'match_phrase' => [
-                        'title.folded' => $title,
+                        ($searchIn === 'content' ? 'contents' : 'title') . '.folded' => $title,
                     ],
                 ],
             ]

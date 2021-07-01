@@ -251,7 +251,7 @@ class ElasticsearchQuery
         ?string $searchByTerm
     ): array {
         if ($searchByTerm === 'exact_term') {
-            $baseQuery = $this->titleFilter->byExactTerm($baseQuery, $title);
+            $baseQuery = $this->titleFilter->byExactTerm($baseQuery, $title, $searchIn);
         } else {
             $baseQuery = $this->titleFilter->byOperator($baseQuery, $title, $searchIn, $searchByTerm);
         }

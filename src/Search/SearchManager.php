@@ -40,6 +40,7 @@ use function in_array;
  * @package BackBeeCloud\Search
  *
  * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SearchManager extends AbstractSearchManager
 {
@@ -204,14 +205,13 @@ class SearchManager extends AbstractSearchManager
             'is_online',
             'category',
             'lang',
-            'title'
+            'title',
         ];
         $sortValidOrder = [
             'asc',
             'desc',
         ];
 
-        $formattedSort = [];
         $orderBy = (empty($sort)) ? ['modified_at' => 'desc'] : $sort;
         foreach ($orderBy as $attr => $order) {
             if (!in_array($attr, $sortValidAttrNames, true)) {
@@ -220,14 +220,15 @@ class SearchManager extends AbstractSearchManager
             if (!in_array($order, $sortValidOrder, true)) {
                 throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
             }
-            $formattedSort[] = $attr . ($attr === 'title' ? '.raw' : '') . ':' . $order;
+            $query['sort'] = [
+                $attr . ($attr === 'title' ? '.raw' : '') => [
+                    'order' => $order,
+                    'missing' => $order === 'desc' ? '_last' : '_first',
+                ],
+            ];
         }
 
-        try {
-            return $this->elasticsearchManager->customSearchPage($query, $start, $limit, $formattedSort);
-        } catch (\Exception $exception) {
-            dump($exception->getMessage());
-        }
+        return $this->elasticsearchManager->customSearchPage($query, $start, $limit);
     }
 
     /**
