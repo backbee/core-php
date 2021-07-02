@@ -36,6 +36,7 @@ use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use function count;
 
 /**
  * Class PageController
@@ -116,15 +117,12 @@ class PageController extends AbstractController
      * @param Request $request
      *
      * @param int     $start
-     * @param int     $limit
      *
      * @return JsonResponse
-     * @throws Exception
      */
     public function getCollection(
         Request $request,
-        int $start = 0,
-        int $limit = RequestListener::COLLECTION_MAX_ITEM
+        int $start = 0
     ): ?JsonResponse {
         $this->assertIsAuthenticated();
 
@@ -132,7 +130,7 @@ class PageController extends AbstractController
         $sort = [];
         if (isset($criteria['sort'])) {
             foreach (explode(',', $criteria['sort']) as $attrName) {
-                $attrName = explode(':', $attrName);
+                $attrName = (array) explode(':', $attrName);
                 if (count($attrName) === 2) {
                     $sort[$attrName[0]] = $attrName[1];
                 }
@@ -142,6 +140,8 @@ class PageController extends AbstractController
         unset($criteria['sort'], $criteria['desc']);
 
         $criteria['lang'] = $criteria['lang'] ?? 'all';
+
+        $limit = $criteria['by_page'] ?? RequestListener::COLLECTION_MAX_ITEM;
 
         $pages = $this->searchManager->getBy($criteria, $start, $limit, $sort);
 
@@ -153,17 +153,18 @@ class PageController extends AbstractController
         try {
             return new JsonResponse(
                 $this->pageManager->formatCollection($pages, true),
-                null !== $max
-                    ? ($max > $count ? Response::HTTP_PARTIAL_CONTENT : Response::HTTP_OK)
-                    : Response::HTTP_OK,
+                null !== $max && $max > $count ? Response::HTTP_PARTIAL_CONTENT : Response::HTTP_OK,
                 [
-                    'Accept-Range' => 'pages ' . RequestListener::COLLECTION_MAX_ITEM,
+                    'Accept-Range' => 'pages ' . $limit,
                     'Content-Range' => $max ? "$start-$end/$max" : '-/-',
                 ]
             );
         } catch (Exception $exception) {
             return new JsonResponse(
-                ['error'  => 'bad_request', 'reason' => $exception->getMessage()],
+                [
+                    'error'  => 'bad_request',
+                    'reason' => $exception->getMessage()
+                ],
                 Response::HTTP_BAD_REQUEST
             );
         }

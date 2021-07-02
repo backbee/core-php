@@ -647,14 +647,19 @@ services:
     # Elasticsearch
     elasticsearch.manager:
         class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp", '@core.page.content.manager' ]
+        arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 
     elasticsearch.query:
         class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
         arguments:
-            [ '@bbapp', '@cloud.page_type.manager' ]
+            - '@bbapp'
+            - '@cloud.page_type.manager'
+            - '@core.elasticsearch.title.filter'
+
+    core.elasticsearch.title.filter:
+        class: BackBee\Elasticsearch\Filter\TitleFilter
 
     # Installer
     core.installer.page:
@@ -733,12 +738,12 @@ services:
     core.log.class_content.listener:
         class: BackBee\Listener\Log\ClassContentLogListener
         arguments:
-            [ '@security.context', '@em', '@?monolog.logger.admin_log']
+            [ '@security.context', '@em', '@?monolog.logger.admin_log' ]
 
     core.log.page.listener:
         class: BackBee\Listener\Log\PageLogListener
         arguments:
-            [ '@security.context', '@em', '@cloud.page_manager', '@?monolog.logger.admin_log']
+            [ '@security.context', '@em', '@cloud.page_manager', '@?monolog.logger.admin_log' ]
 
     core.log.tag.listener:
         class: BackBee\Listener\Log\TagLogListener
@@ -748,7 +753,7 @@ services:
     core.log.user.listener:
         class: BackBee\Listener\Log\UserLogListener
         arguments:
-            [ '@security.context', '@em', '@cloud.user_manager', '@?monolog.logger.admin_log']
+            [ '@security.context', '@em', '@cloud.user_manager', '@?monolog.logger.admin_log' ]
 
     core.log.group_type.listener:
         class: BackBee\Listener\Log\GroupTypeLogListener

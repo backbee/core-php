@@ -39,7 +39,8 @@ use function in_array;
  *
  * @package BackBeeCloud\Search
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SearchManager extends AbstractSearchManager
 {
@@ -106,11 +107,11 @@ class SearchManager extends AbstractSearchManager
     /**
      * Returns uid for page by tag result page.
      *
-     * @param  null|string $lang
+     * @param null|string $lang
      *
      * @return string
      */
-    protected function getResultPageUid($lang = null): string
+    protected function getResultPageUid(?string $lang = null): string
     {
         return md5('search_result' . ($lang ? '_' . $lang : ''));
     }
@@ -138,23 +139,23 @@ class SearchManager extends AbstractSearchManager
 
         $query['query']['bool']['must'][] = [
             'match' => [
-                'source' => Page::SOURCE_TYPE
-            ]
+                'source' => Page::SOURCE_TYPE,
+            ],
         ];
 
         if ($this->multiLangManager->isActive()) {
             $query['query']['bool']['must_not'][] = [
                 'match' => [
-                    'url' => '/'
-                ]
+                    'url' => '/',
+                ],
             ];
         }
 
         if ((null !== ($criteria['category'] ?? null)) && 'none' !== $criteria['category']) {
             $query['query']['bool']['must'][] = [
                 'match' => [
-                    'category' => $criteria['category']
-                ]
+                    'category' => $criteria['category'],
+                ],
             ];
         }
 
@@ -173,11 +174,27 @@ class SearchManager extends AbstractSearchManager
         }
 
         if ($criteria['title']) {
-            $query = $this->elasticsearchQuery->getQueryToFilterByTitle($query, $criteria['title']);
+            $query = $this->elasticsearchQuery->getQueryToFilterByTitle(
+                $query,
+                str_replace('%', '', $criteria['title']),
+                $criteria['search_in'],
+                $criteria['search_by_term']
+            );
         }
 
-        if ($criteria['has_draft_only'] && true === (bool) $criteria['has_draft_only']) {
+        if ($criteria['has_draft_only'] && true === (bool)$criteria['has_draft_only']) {
             $query = $this->elasticsearchQuery->getQueryToFilterByPageWithDraftContents($query);
+        }
+
+        if ($criteria['created_at'] || $criteria['modified_at'] || $criteria['published_at']) {
+            $query = $this->elasticsearchQuery->getQueryToFilterByDate(
+                $query,
+                [
+                    'created_at' => $criteria['created_at'] ?: null,
+                    'modified_at' => $criteria['modified_at'] ?: null,
+                    'published_at' => $criteria['published_at'] ?: null,
+                ]
+            );
         }
 
         $sortValidAttrNames = [
@@ -187,13 +204,14 @@ class SearchManager extends AbstractSearchManager
             'type',
             'is_online',
             'category',
+            'lang',
+            'title',
         ];
         $sortValidOrder = [
             'asc',
-            'desc'
+            'desc',
         ];
 
-        $formattedSort = [];
         $orderBy = (empty($sort)) ? ['modified_at' => 'desc'] : $sort;
         foreach ($orderBy as $attr => $order) {
             if (!in_array($attr, $sortValidAttrNames, true)) {
@@ -202,14 +220,15 @@ class SearchManager extends AbstractSearchManager
             if (!in_array($order, $sortValidOrder, true)) {
                 throw new InvalidArgumentException(sprintf("'%s' is not a valid order direction.", $order));
             }
-            $formattedSort[] = $attr . ':' . $order;
+            $query['sort'] = [
+                $attr . ($attr === 'title' ? '.raw' : '') => [
+                    'order' => $order,
+                    'missing' => $order === 'desc' ? '_last' : '_first',
+                ],
+            ];
         }
 
-        try {
-            return $this->elasticsearchManager->customSearchPage($query, $start, $limit, $formattedSort);
-        } catch (\Exception $exception) {
-            dump($exception->getMessage());
-        }
+        return $this->elasticsearchManager->customSearchPage($query, $start, $limit);
     }
 
     /**

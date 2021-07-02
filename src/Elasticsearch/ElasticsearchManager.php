@@ -27,6 +27,7 @@ use BackBee\NestedNode\Page;
 use BackBee\Page\PageContentManager;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
+use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
 use Exception;
@@ -37,8 +38,8 @@ use stdClass;
  *
  * @package BackBeeCloud\Elasticsearch
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInterface
 {
@@ -55,18 +56,29 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     protected $pageContentManager;
 
     /**
+     * @var MultiLangManager
+     */
+    protected $multiLangManager;
+
+    /**
      * ElasticsearchManager constructor.
      *
-     * @param BBApplication   $app
+     * @param BBApplication      $app
      * @param PageContentManager $pageContentManager
+     * @param MultiLangManager   $multiLangManager
+     * @param ElasticsearchQuery $elasticsearchQuery
      */
-    public function __construct(BBApplication $app, PageContentManager $pageContentManager)
-    {
+    public function __construct(
+        BBApplication $app,
+        PageContentManager $pageContentManager,
+        MultiLangManager $multiLangManager,
+        ElasticsearchQuery $elasticsearchQuery
+    ) {
         parent::__construct($app, $app->getContainer()->get('config'));
 
-        $this->elasticSearchQuery = $app->getContainer()->get('elasticsearch.query');
+        $this->elasticSearchQuery = $elasticsearchQuery;
         $this->pageContentManager = $pageContentManager;
-        //dump($this->getPageByUid('79d5eeeae570439b257489607cda31c0'));
+        $this->multiLangManager = $multiLangManager;
     }
 
     /**
@@ -113,7 +125,8 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'published_at' => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,
             'has_draft_contents' => $this->pageContentManager->hasDraftContents($page),
             'category' => $this->pageContentManager->getCategoryByPage($page),
-            'images' => $this->pageContentManager->getImagesByPage($page)
+            'images' => $this->pageContentManager->getImagesByPage($page),
+            'lang' => $this->multiLangManager->getLangByPage($page) ?? 'fr',
         ];
     }
 
@@ -124,7 +137,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      *
      * @return ElasticsearchManager
      */
-    public function deletePage(Page $page)
+    public function deletePage(Page $page): ElasticsearchManager
     {
         $this->getClient()->delete(['index' => $this->getIndexName(), 'id' => $page->getUid()]);
 
@@ -157,7 +170,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      *
      * @param array    $body
      * @param int|null $start
-     * @param int  $limit
+     * @param int      $limit
      * @param array    $sort
      * @param bool     $formatResult
      *
@@ -177,7 +190,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'body' => $body,
         ];
 
-        if (false !== $sort) {
+        if (!empty($sort)) {
             $criteria['sort'] = $sort;
         }
 
@@ -187,7 +200,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
 
         if ($formatResult) {
             $uids = array_column($pages, '_id');
-            if (false !== $uids) {
+            if (!empty($uids)) {
                 $pages = $this->sortEntitiesByUids(
                     $uids,
                     $this->entityMgr->getRepository(Page::class)->findBy(['_uid' => $uids])
@@ -300,11 +313,11 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
                         'query' => [
                             'bool' => [
                                 'must' => [
-                                    [ 'match' => ['_id' => $uid] ],
-                                ]
+                                    ['match' => ['_id' => $uid]],
+                                ],
                             ],
                         ],
-                        '_source' => ['images']
+                        '_source' => ['images'],
                     ],
                 ]
             );

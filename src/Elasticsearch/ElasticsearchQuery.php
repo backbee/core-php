@@ -23,6 +23,7 @@ namespace BackBeeCloud\Elasticsearch;
 
 use ArrayObject;
 use BackBee\BBApplication;
+use BackBee\Elasticsearch\Filter\TitleFilter;
 use BackBee\NestedNode\KeyWord;
 use BackBee\NestedNode\Page;
 use BackBeeCloud\PageType\HomeType;
@@ -48,15 +49,22 @@ class ElasticsearchQuery
     private $typeManager;
 
     /**
+     * @var TitleFilter
+     */
+    private $titleFilter;
+
+    /**
      * ElasticsearchQuery constructor.
      *
      * @param BBApplication $bbApp
      * @param TypeManager   $typeManager
+     * @param TitleFilter   $titleFilter
      */
-    public function __construct(BBApplication $bbApp, TypeManager $typeManager)
+    public function __construct(BBApplication $bbApp, TypeManager $typeManager, TitleFilter $titleFilter)
     {
         $this->bbApp = $bbApp;
         $this->typeManager = $typeManager;
+        $this->titleFilter = $titleFilter;
     }
 
     /**
@@ -229,55 +237,24 @@ class ElasticsearchQuery
     /**
      * Get query to filter by title.
      *
-     * @param array  $baseQuery
-     * @param string $title
+     * @param array       $baseQuery
+     * @param string      $title
+     * @param string|null $searchIn
+     * @param string|null $searchByTerm
      *
      * @return array
      */
-    public function getQueryToFilterByTitle(array $baseQuery, string $title): array
-    {
-        $matchPart = [
-            'query' => str_replace('%', '', $title),
-            'boost' => 2,
-        ];
-
-        $baseQuery['query']['bool']['minimum_should_match'] = 1;
-
-        $baseQuery['query']['bool']['should'] = array_merge(
-            $baseQuery['query']['bool']['should'] ?? [],
-            [
-                [
-                    'match' => [
-                        'title' => $matchPart,
-                    ],
-                ],
-                [
-                    'match' => [
-                        'title.raw' => $matchPart,
-                    ],
-                ],
-                [
-                    'match' => [
-                        'title.folded' => $matchPart,
-                    ],
-                ],
-                [
-                    'match_phrase_prefix' => [
-                        'title' => $matchPart,
-                    ],
-                ],
-                [
-                    'match_phrase_prefix' => [
-                        'title.folded' => $matchPart,
-                    ],
-                ],
-                [
-                    'match_phrase_prefix' => [
-                        'tags' => $matchPart,
-                    ],
-                ],
-            ]
-        );
+    public function getQueryToFilterByTitle(
+        array $baseQuery,
+        string $title,
+        ?string $searchIn,
+        ?string $searchByTerm
+    ): array {
+        if ($searchByTerm === 'exact_term') {
+            $baseQuery = $this->titleFilter->byExactTerm($baseQuery, $title, $searchIn);
+        } else {
+            $baseQuery = $this->titleFilter->byOperator($baseQuery, $title, $searchIn, $searchByTerm);
+        }
 
         return $baseQuery;
     }
@@ -399,9 +376,9 @@ class ElasticsearchQuery
             [
                 [
                     'match' => [
-                        'is_online' => $isOnline
-                    ]
-                ]
+                        'is_online' => $isOnline,
+                    ],
+                ],
             ]
         );
 
@@ -422,11 +399,38 @@ class ElasticsearchQuery
             [
                 [
                     'match' => [
-                        'has_draft_contents' => true
-                    ]
-                ]
+                        'has_draft_contents' => true,
+                    ],
+                ],
             ]
         );
+
+        return $baseQuery;
+    }
+
+    /**
+     * Get query to filter by date.
+     *
+     * @param array $baseQuery
+     * @param array $dates
+     *
+     * @return array
+     */
+    public function getQueryToFilterByDate(array $baseQuery, array $dates): array
+    {
+        foreach ($dates as $field => $date) {
+            if ($date) {
+                $date = (array)explode(',', $date);
+                $baseQuery['query']['bool']['must'][] = [
+                    'range' => [
+                        $field => [
+                            'gte' => $date[0] ?? null,
+                            'lte' => $date[1] ?? null,
+                        ],
+                    ],
+                ];
+            }
+        }
 
         return $baseQuery;
     }

@@ -43,8 +43,8 @@ use function in_array;
  *
  * @package BackBeeCloud\Elasticsearch
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class ElasticsearchClient
 {
@@ -158,7 +158,10 @@ class ElasticsearchClient
                                 'std_folded' => [
                                     'type' => 'custom',
                                     'tokenizer' => 'standard',
-                                    'filter' => ['lowercase', 'asciifolding'],
+                                    'filter' => [
+                                        'lowercase',
+                                        'asciifolding',
+                                    ],
                                 ],
                             ],
                         ],
@@ -218,7 +221,7 @@ class ElasticsearchClient
                     'is_online' => $page->isOnline(),
                     'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
                     'has_draft_contents' => false,
-                    'source' => Page::SOURCE_TYPE
+                    'source' => Page::SOURCE_TYPE,
                 ],
                 $this->getPageCustomDataToIndex($page)
             ),
@@ -287,7 +290,7 @@ class ElasticsearchClient
                 'body' => array_merge(
                     [
                         'name' => strtolower($tag->getKeyWord()),
-                        'source' => Tag::SOURCE_TYPE
+                        'source' => Tag::SOURCE_TYPE,
                     ],
                     $this->getTagCustomDataToIndex($tag)
                 ),
@@ -450,6 +453,9 @@ class ElasticsearchClient
                             'type' => 'keyword',
                         ],
                         'source' => [
+                            'type' => 'keyword',
+                        ],
+                        'lang' => [
                             'type' => 'keyword',
                         ],
                     ],
