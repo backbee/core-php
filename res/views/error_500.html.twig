@@ -6,3 +6,13 @@
 {% block error_title %}{{ errors.title ? (this.trans('page.errors.title') ~ ' ' ~ errors.title) : parent() }}{% endblock %}
 {% block error_message %}{{ errors.description ? this.trans(errors.description) : parent() }}{% endblock %}
 {% block button_title %}{{ errors.button_title ? this.trans(errors.button_title) : parent() }}{% endblock %}
+
+{% block hook_js %}
+    <script>
+      document.addEventListener('cloudReady', function () {
+        cloud.mediator.subscribe('after:menu:show', function() {
+          cloud.mediator.publish('on:error:500');
+        });
+      });
+    </script>
+{% endblock %}
