@@ -3,6 +3,7 @@
         {% block data_item_attributes %}{% endblock %}
         {% if bb.token == null %}href="{{social.url}}"{% endif %}
         target="_blank"
+        rel="noopener"
         rel="nofollow"
         class="social-icon-{{key}} btn color-primary {{color.value}} btn-{{ form.value == false ? 'outline' }} d-flex align-items-center justify-content-center"
     >

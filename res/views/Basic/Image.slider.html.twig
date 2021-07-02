@@ -12,7 +12,7 @@
      data-forbidden-plugins="upload,resize"
 >
     {% if linkValue.link == 'image_link' and bb.token == null %}
-    <a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% endif %}>
+    <a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank" rel="noopener"{% endif %}>
         {% elseif linkValue.link == 'lightbox' and bb.token == null %}
         <a href="{{ this.getCdnImageUrl(image_full_width_path ?: image.path)|raw }}" data-lightbox="lightbox_{{slider_id}}" data-title="{{ alt.value }}">
             {% endif %}
@@ -57,7 +57,7 @@
                     <a href="{{ imageBtnLink }}"
                        class="btn color-primary {{ linkValue.options.color }} btn-{{ linkValue.options.size }} btn-{{ linkValue.options.form == false ? 'border' : 'full' }} btn-{{ button_settings.shape }}"
                             {% if bb.token != null %} onclick="return false;"{% endif %}
-                            {% if linkValue.options.btn_link_target_blank %} target="_blank"{% endif %}
+                            {% if linkValue.options.btn_link_target_blank %} target="_blank" rel="noopener"{% endif %}
                             {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
                     >
                         {{imageBtnTitle|default('Button title')|raw}}

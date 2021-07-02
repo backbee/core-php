@@ -23,6 +23,7 @@
             {% endif %}
             <a href="{{ this.getUri(file.value) }}"
                target="_blank"
+               rel="noopener"
                class="text-secondary mt-3 d-flex align-items-center">
                 {{ this.getObject().getParamValue('download_text_label')|default("Télécharger")|raw|striptags }}
                 {% if display_size.value == true %}(<span>{{ fileStat['sizeHumanReadable'] }}</span>){% endif %}

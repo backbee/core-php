@@ -3,7 +3,7 @@
 <div data-mobile-edit="false" data-forbidden-plugins="dnd,remove,click" {{this.bbcontent(null, {class: 'content button text-' ~ align.value})|raw}}>
   <a {% if url.value %}href="{{url.value}}"{% endif %}
     {% block data_attributes %}{% endblock %}
-    {% if target_blank.value == true %}target="_blank"{% endif %}
+    {% if target_blank.value == true %}target="_blank" rel="noopener"{% endif %}
     class="btn color-primary {{ color.value }} btn-{{ size.value }} btn-{{ form.value == false ? 'outline' }} btn-{{ settings.shape }}"
     {% if settings.font %}style="font-family: {{ settings.font }}"{% endif %}
   >
