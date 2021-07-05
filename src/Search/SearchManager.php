@@ -177,7 +177,7 @@ class SearchManager extends AbstractSearchManager
             $query = $this->elasticsearchQuery->getQueryToFilterByTitle(
                 $query,
                 str_replace('%', '', $criteria['title']),
-                $criteria['search_in'],
+                $criteria['search_in'] ?? 'title',
                 $criteria['search_by_term']
             );
         }
