@@ -42,7 +42,7 @@ use function count;
  *
  * @package BackBeeCloud\MultiLang
  *
- * @author Alina Pascalau <alina.pascalau@lp-digital.fr>
+ * @author  Alina Pascalau <alina.pascalau@lp-digital.fr>
  */
 class PageAssociationManager
 {
@@ -103,8 +103,8 @@ class PageAssociationManager
                     'must_not' => [
                         [
                             'match' => [
-                                'url' => '/'
-                            ]
+                                'url' => '/',
+                            ],
                         ],
                     ],
                 ],
