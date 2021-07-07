@@ -1,27 +1,41 @@
 // Align card
 @include media-breakpoint-up(sm) {
-    .stretch-card {
-        &.row {
-            align-items: stretch !important;
+  .stretch-card {
+    &.row {
+      align-items: stretch !important;
 
-            .colcontentset {
-                &, & .card-block, & .card {
-                    height: 100%;
-                }
-
-                .card-body {
-                    &.has-btn .card-text {
-                        margin-bottom: 60px;
-                    }
-
-                    .btn {
-                        bottom: 20px;
-                        left: 50%;
-                        position: absolute;
-                        @include transform(translateX(-50%));
-                    }
-                }
-            }
+      .colcontentset {
+        &, & .card-block, & .card {
+          height: 100%;
         }
+
+        .card-body {
+          &.has-btn .card-text {
+            margin-bottom: 60px;
+          }
+
+          .btn {
+            bottom: 20px;
+            left: 50%;
+            position: absolute;
+            @include transform(translateX(-50%));
+          }
+        }
+      }
     }
+  }
+}
+
+.card-block {
+  .image-right {
+    @include media-breakpoint-up(md) {
+      flex-direction: row-reverse;
+    }
+  }
+
+  .small-col & {
+    .card-text p {
+      line-height: 1;
+    }
+  }
 }

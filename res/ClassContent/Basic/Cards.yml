@@ -1,71 +1,101 @@
 Cards:
-  properties:
-    name: yaml_block_cards
-    description: ~
-    category: [block_category_basics]
-    rte:
-      placeholder: "Your text here"
-  elements:
-    image:
-      type: \BackBee\ClassContent\Basic\Image
-      maxentry: 1
-  parameters:
-    image_stretch:
-      type: switch
-      value: false
-      label: yaml_block_cards_image_stretch
-      tab: yaml_block_general_tab
-    url:
-      type: text
-      label: yaml_block_cards_url
-      value: '/'
-      format: URL
-      tab: yaml_block_general_tab
-    target_blank:
-      type: switch
-      label: yaml_block_cards_open_in_tab
-      value: false
-      tab: yaml_block_general_tab
-    align:
-      type: selectButton
-      label: yaml_block_cards_button_position
-      buttons:
-        left: {'icon': 'icon-align-left'}
-        center: {'icon': 'icon-align-center'}
-        right: {'icon': 'icon-align-right'}
-      value: 'center'
-      tab: yaml_block_general_tab
-      group:
-        id: position
-    add_button:
-      type: switch
-      label: yaml_block_cards_add_button
-      value: false
-      tab: yaml_block_cards_button
-    button_description:
-      type: text
-      label: yaml_block_cards_button_link_title
-      value: ''
-      tab: yaml_block_cards_button
-      group:
-        id: button_style
-    color:
-      type: color
-      label: yaml_block_cards_color
-      value: 'color-primary'
-      disable_transparent: true
-      tab: yaml_block_cards_button
-      group:
-        id: button_style
-    description:
-      value: ''
-      tab: yaml_block_cards_button
-      group:
-        id: button_style
-    form:
-      type: switch
-      label: yaml_block_cards_button_full_color
-      value: true
-      tab: yaml_block_cards_button
-      group:
-        id: button_style
+    properties:
+        name: yaml_block_cards
+        description: ~
+        category: [ block_category_basics ]
+        rte:
+            placeholder: "Your text here"
+    elements:
+        image:
+            type: \BackBee\ClassContent\Basic\Image
+            maxentry: 1
+    parameters:
+        bg_color:
+            label: yaml_block_text_bg_color
+            type: color
+            value: ''
+            disable_transparent: false
+            tab: yaml_block_general_tab
+        image_stretch:
+            type: switch
+            value: false
+            label: yaml_block_cards_image_stretch
+            tab: yaml_block_general_tab
+        url:
+            type: text
+            label: yaml_block_cards_url
+            value: '/'
+            format: URL
+            tab: yaml_block_general_tab
+        target_blank:
+            type: switch
+            label: yaml_block_cards_open_in_tab
+            value: false
+            tab: yaml_block_general_tab
+        align:
+            type: selectButton
+            label: yaml_block_cards_button_position
+            buttons:
+                left: { 'icon': 'icon-align-left' }
+                center: { 'icon': 'icon-align-center' }
+                right: { 'icon': 'icon-align-right' }
+            value: 'center'
+            tab: yaml_block_general_tab
+            group:
+                id: position
+        horizontal:
+            type: switch
+            value: false
+            label: yaml_block_cards_horizontal_card
+            tab: yaml_block_cards_horizontal_card
+        image_right:
+            type: switch
+            value: false
+            label: yaml_block_cards_image_right
+            tab: yaml_block_cards_horizontal_card
+        no_gutter:
+            type: switch
+            value: false
+            label: yaml_block_cards_no_gutter
+            tab: yaml_block_cards_horizontal_card
+        image_size:
+            type: select
+            label: yaml_block_cards_image_size
+            options:
+                sm: yaml_block_cards_horizontal_card_sm
+                md: yaml_block_cards_horizontal_card_md
+                lg: yaml_block_cards_horizontal_card_lg
+            value: 'sm'
+            tab: yaml_block_cards_horizontal_card
+        add_button:
+            type: switch
+            label: yaml_block_cards_add_button
+            value: false
+            tab: yaml_block_cards_button
+        button_description:
+            type: text
+            label: yaml_block_cards_button_link_title
+            value: ''
+            tab: yaml_block_cards_button
+            group:
+                id: button_style
+        color:
+            type: color
+            label: yaml_block_cards_color
+            value: 'color-primary'
+            disable_transparent: true
+            tab: yaml_block_cards_button
+            group:
+                id: button_style
+        description:
+            value: ''
+            tab: yaml_block_cards_button
+            group:
+                id: button_style
+        form:
+            type: switch
+            label: yaml_block_cards_button_full_color
+            value: true
+            tab: yaml_block_cards_button
+            group:
+                id: button_style

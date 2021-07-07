@@ -1,26 +1,55 @@
 {% set button_settings = this.getDesignSettings('button') %}
 
-<div data-mobile-edit="false" {{this.bbcontent(null, {class: 'content card-block'})|raw}}>
-  {% if button_description.value == null and url.value != null %}<a {% if bb.token == null %}href="{{ url.value }}" {% endif %}class="card-link"{% if target_blank.value %} target="_blank" rel="noopener" {% endif %}>{% endif %}
-  <div class="card has-sub-elements">
-    {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd,parameter', class: 'mb-0', 'in_fluid': in_fluid, 'colsize': colsize})|raw }}
+{% if image_size.value == 'sm' %}
+    {% set col_image = 3 %}
+{% elseif image_size.value == 'lg' %}
+    {% set col_image = 8 %}
+{% else %}
+    {% set col_image = 6 %}
+{% endif %}
 
-    <div class="card-body text-{{ align.value }}{% if add_button.value %} has-btn{% endif %}">
-      <div class="card-text paragraph" data-parameter-rte="true" data-parameter-name="description" data-cloud-rte="true">
-        {{ this.getObject().getParamValue('description')|raw }}
-      </div>
+{% set col_text = 12 - col_image %}
 
-      {% if add_button.value and (button_description.value or bb.token != null) %}
-        <a
-          href="{{ url.value }}"
-          class="btn color-primary {{ color.value }} btn-{{ form.value == false ? 'outline' }} btn-{{ button_settings.shape }} mt-3"
-          {% if target_blank.value %}target="_blank" rel="noopener"{% endif %}
-          {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
-        >
-          {{ button_description.value }}
-        </a>
-      {% endif %}
-    </div>
-  </div>
-  {% if button_description.value == null and url.value != null %}</a>{% endif %}
+<div data-mobile-edit="false" {{ this.bbcontent(null, {class: 'content card-block'})|raw }}>
+    {% if add_button.value == false and url.value != null %}<a {% if bb.token == null %}href="{{ url.value }}" {% endif %}class="card-link"{% if target_blank.value %} target="_blank" {% endif %}>{% endif %}
+        <div class="card rounded-0 has-sub-elements{% if horizontal.value %} border-0{% endif %}{{ bg_color.value == false ? '' : ' has-bg-color ' ~ bg_color.value }}">
+            {% if horizontal.value %}
+            <div class="row no-gutter{{ image_right.value ? ' image-right' : '' }}">
+                <div class="col-{{ col_image == 6 ? 'lg' : 'md' }}-{{ col_image }}">
+                    {% endif %}
+                    {{ this.render(image, null, {'forbiddenPlugins': 'remove,dnd', class: 'mb-0', 'in_fluid': false, 'colsize': col_image})|raw }}
+
+                    {% if horizontal.value %}
+                </div>
+                <div class="col-{{ col_image == 6 ? 'lg' : 'md' }}-{{ col_text }}">
+                    {% endif %}
+
+                    <div class="card-body text-{{ align.value }}{% if add_button.value %} has-btn{% endif %}{{ no_gutter.value ? ' p-0' : '' }}">
+                        <div class="card-text paragraph" data-parameter-rte="true" data-parameter-name="description"
+                             data-cloud-rte="true">
+                            {{ this.getObject().getParamValue('description')|raw }}
+                        </div>
+
+                        {% if add_button.value and (button_description.value or bb.token != null) %}
+                            <a
+                                    href="{{ url.value }}"
+                                    class="btn color-primary {{ color.value }} btn-{{ form.value == false ? 'outline' }} btn-{{ button_settings.shape }} mt-3"
+                                    {% if target_blank.value %}target="_blank"{% endif %}
+                                    {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
+                                    title="{{ button_description.value|striptags|raw }}"
+                            >
+                                {% if current_lang == 'fr' %}
+                                    {{ button_description.value|default("Lire la suite")|raw|striptags }}
+                                {% else %}
+                                    {{ button_description.value|default("Read more")|raw|striptags }}
+                                {% endif %}
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% if horizontal.value %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% if button_description.value == null and url.value != null %}</a>{% endif %}
 </div>
