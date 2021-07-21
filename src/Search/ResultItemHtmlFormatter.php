@@ -133,6 +133,7 @@ class ResultItemHtmlFormatter
                     'url' => $image->image->path,
                     'title' => $image->getParamValue('title'),
                     'legend' => $image->getParamValue('description'),
+                    'alt' => $this->renderer->getImageAlternativeText($image, $params['title']),
                     'stat' => $image->image->getParamValue('stat'),
                 ];
             }

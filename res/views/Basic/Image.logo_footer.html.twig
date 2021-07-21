@@ -1,5 +1,5 @@
 <div data-mobile-edit="false" data-forbidden-plugins="dnd,parameter,remove,resize,focus" data-img-quality="100" {{this.bbcontent(null, {class: 'media-image logo'})|raw}}>
   <div {% block data_item_attributes %}{% endblock %}>
-    <img draggable="false" {% if image.path != false %}src="{{this.getCdnImageUrl(image.path)|raw}}"{% endif %} alt="{{ title.value }}" loading="lazy"/>
+    <img draggable="false" {% if image.path != false %}src="{{this.getCdnImageUrl(image.path)|raw}}"{% endif %} alt="{{ image.originalname|raw }}" loading="lazy"/>
   </div>
 </div>

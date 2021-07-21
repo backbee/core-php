@@ -2,6 +2,7 @@
     <a
         {% block data_item_attributes %}{% endblock %}
         {% if bb.token == null %}href="{{social.url}}"{% endif %}
+        aria-label="{{key}}"
         target="_blank"
         rel="noopener"
         rel="nofollow"

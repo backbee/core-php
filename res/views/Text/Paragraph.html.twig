@@ -17,7 +17,7 @@
     })|raw }}
 >
     {% if picto != '' %}
-        <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto picto-{{picto_size.value}}" loading="lazy">
+        <img src="{{this.getCdnImageUrl(picto)|raw}}" alt="{{ picto|split('/')|last|raw }}" class="image-picto picto-{{picto_size.value}}" loading="lazy">
     {% endif %}
 
     <div class="rte-text" data-cloud-rte="true">

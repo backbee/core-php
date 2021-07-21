@@ -213,7 +213,8 @@ class HighlightContentListener
         } elseif ($displayImage) {
             $mode = '.' . $wrapper->getParamValue('format');
         }
-
+        $title = $wrapper->getParamValue('title_to_be_displayed') === 'first_heading' ?
+            $pageRawData['_source']['first_heading'] : $pageRawData['_source']['title'];
         $abstract = null;
         if (null !== $abstractUid = $pageRawData['_source']['abstract_uid'] ?: null) {
             $abstract = self::getContentWithDraft(ArticleAbstract::class, $abstractUid, $bbApp);
@@ -243,16 +244,16 @@ class HighlightContentListener
                         'url' => $image->path,
                         'title' => $image->getParamValue('title'),
                         'legend' => $image->getParamValue('description'),
+                        'alt' => $bbApp->getRenderer()->getImageAlternativeText($media, $title),
                         'stat' => $image->getParamValue('stat'),
                     ] + $imageData;
             }
         }
-
+        
         return $bbApp->getRenderer()->partial(
             sprintf('ContentAutoblock/item%s.html.twig', $mode),
             [
-                'title' => $wrapper->getParamValue('title_to_be_displayed') === 'first_heading' ?
-                    $pageRawData['_source']['first_heading'] : $pageRawData['_source']['title'],
+                'title' => $title,
                 'abstract' => (string)$abstract,
                 'tags' => array_map('ucfirst', $pageRawData['_source']['tags']),
                 'url' => $pageRawData['_source']['url'],

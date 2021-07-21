@@ -20,7 +20,7 @@
                 <img src="{{path}}" alt="{{ alt.value }}" loading="lazy">
                 {% set picto = this.getObject().getParamValue('picto') %}
                 {% if picto != '' %}
-                    <img src="{{this.getCdnImageUrl(picto)|raw}}"alt="" class="image-picto" loading="lazy">
+                    <img src="{{this.getCdnImageUrl(picto)|raw}}" alt="" class="image-picto" loading="lazy">
                 {% endif %}
             </figure>
             {% if image.path != null and (linkValue.link == 'lightbox' or linkValue.link == 'image_link') %}

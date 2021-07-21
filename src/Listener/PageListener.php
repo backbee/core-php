@@ -439,11 +439,19 @@ class PageListener
      */
     public static function onPostRender(RendererEvent $event): void
     {
+        $renderer = $event->getRenderer();
+        $renderer->setRender(
+            str_replace(
+                '</body>',
+                $renderer->partial('common/hook_background_lazyload.js.twig') . '</body>',
+                $renderer->getRender()
+            )
+        );
+
         if ($event->getApplication()->getBBUserToken() === null) {
             return;
         }
 
-        $renderer = $event->getRenderer();
         $renderer->setRender(
             str_replace(
                 '</body>',
