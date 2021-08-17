@@ -7,6 +7,7 @@
   {% set autoHeightClass = force_auto_height ? ' set-auto-height' : '' %}
   {% set dataForbidden = forbiddenPlugins ? forbiddenPlugins : 'click' %}
   {% set image_full_width_path = image_full_width_path is defined ? image_full_width_path : '' %}
+  {% set currentPage = this.getCurrentPage() %}
 
   {% if image.path == false %}
     {% set dataForbidden = forbiddenPlugins ~ ',parameter' %}
@@ -58,12 +59,12 @@
     {% endif %}
 
       <div class="contentwrapper{% if this.userAgentHelper().isDesktop() == false %} hover-none{% endif %}">
-        {% set img_alt = description.value != false ? description.value|striptags : '' %}
+        {% set img_alt = this.getImageAlternativeText(this.getObject(), currentPage.getTitle()) %}
         {% set coord = this.getObject().getParamValue('position') %}
         {% set left = coord['left'] ? coord['left'] : 0 %}
         {% set top = coord['top'] ? coord['top'] : 0 %}
         {% set imgWidth = this.getObject().getParamValue('width') ? (' width:' ~ this.getObject().getParamValue('width') ~ '%') : '' %}
-        <img draggable="false" {% if image.path != false %}src="{{this.getCdnImageUrl((this.getObject().getParamValue('stretch') and not class is defined ? this.getOptimizeImagePathHelper(image.path, false, 12) : image.path))|raw}}"{% endif %} alt="{{ img_alt }}" style="top:{{top}}%; left:{{left}}%;{{ imgWidth }}" {% if top == 0 and left ==0 %}loading="lazy"{% endif %} />
+        <img draggable="false" {% if image.path != false %}src="{{this.getCdnImageUrl((this.getObject().getParamValue('stretch') and not class is defined ? this.getOptimizeImagePathHelper(image.path, false, 12) : image.path))|raw}}"{% endif %} alt="{{ img_alt|raw }}" style="top:{{top}}%; left:{{left}}%;{{ imgWidth }}" {% if top == 0 and left ==0 %}loading="lazy"{% endif %} />
 
         {% if display_overlay.value %}
           <span class="image-overlay{% if display_text_hover.value %} hover-display{% endif %}"></span>
@@ -71,7 +72,7 @@
 
         {% set picto = this.getObject().getParamValue('picto') %}
         {% if picto != '' %}
-          <img src="{{this.getCdnImageUrl(picto)|raw}}" alt="" class="image-picto{% if display_text_hover.value %} hover-display{% endif %}" loading="lazy">
+          <img src="{{this.getCdnImageUrl(picto)|raw}}" alt="{{ img_alt|raw }}" class="image-picto{% if display_text_hover.value %} hover-display{% endif %}" loading="lazy">
         {% endif %}
 
         {% set imageBtnLink = linkValue.options.url %}

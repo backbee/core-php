@@ -5,7 +5,7 @@
     <a href="{{ button_url.value }}">
         {% endif %}
         {% if image != '' %}
-            <img src="{{ this.getCdnImageUrl(image)|raw }}" alt="" class="information-image">
+            <img src="{{ this.getCdnImageUrl(image)|raw }}" alt="{{ image|split('/')|last|raw }}" class="information-image">
         {% endif %}
         {% if add_title.value %}
             <h2 class="h2 information-title blue mt-5 text-primary" data-parameter-rte="true"

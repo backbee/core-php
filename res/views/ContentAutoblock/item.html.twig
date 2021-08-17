@@ -1,9 +1,8 @@
 {% if image.url != false and display_image == true %}
 <div class="row">
   <div class="col-md-3">
-    {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-    <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}">
-        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive" alt="{{img_alt}}" loading="lazy" />
+    <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}" aria-label="{{title|striptags|raw}}">
+        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive" alt="{{image.alt|raw}}" loading="lazy" />
     </a>
   </div>
   <div class="col-md-9">
@@ -12,6 +11,7 @@
       <a
         {% block data_item_title_attributes %}{% endblock %}
         href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}"
+        aria-label="{{title|striptags|raw}}" 
         {% if is_online == false %} title="This page is offline"{% endif %}
       >
         <span class="{{is_online == false ? 'offline autoblock-item' : ''}}">

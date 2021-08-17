@@ -1,13 +1,24 @@
 <div class="row">
     {% if show_image %}
     <div class="col-md-4">
-        <figure class="figure{% if image.url %} push-image{% endif %}"{% if image.url %} style="background-image: url({{this.getCdnImageUrl(image.url)}});"{% endif %}>
+        {% if image.url %}
+            {% set backgroundImageUid = 'background-image-' ~ this.getObject().getUid() ~ '-' ~ image.uid %}
+
+            {% include 'common/background_lazyload.html.twig' with {
+                'backgroundImageUid': backgroundImageUid, 
+                'url': this.getCdnImageUrl(image.url) 
+            } %}
+
+            <figure id="{{ backgroundImageUid }}" class="figure push-image lazy-background-image">
+        {% else %}
+            <figure class="figure">
+        {% endif %}
+        
             <div class="contentwrapper">
             {% if image.url != false %}
-                {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-                <a href="{{url}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive d-none" alt="{{img_alt}}" /></a>
+                <a href="{{url}}" aria-label="{{title|striptags|raw}}"><img src="{{this.getCdnImageUrl(image.url)}}" class="img-responsive d-none" alt="{{image.alt|raw}}" /></a>
             {% else %}
-                <a href="{{url}}"><span class="image-placeholder"></span></a>
+                <a href="{{url}}" aria-label="{{title|striptags|raw}}"><span class="image-placeholder"></span></a>
             {% endif %}
             </div>
         </figure>
@@ -15,7 +26,7 @@
     {% endif %}
 
     <div class="col-md-{{show_image ? 8 : 12}}">
-        <h4 class="autoblock-title"><a href="{{url}}">{{title|striptags|raw}}</a></h4>
+        <h4 class="autoblock-title"><a href="{{url}}" aria-label="{{title|striptags|raw}}">{{title|striptags|raw}}</a></h4>
 
         {% if show_published_at %}
         <p class="metadata-wrapper">

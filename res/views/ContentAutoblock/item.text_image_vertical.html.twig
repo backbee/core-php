@@ -5,6 +5,7 @@
                 <a
                     {% block data_item_title_attributes %}{% endblock %}
                     href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}"
+                    aria-label="{{title|striptags|raw}}" 
                     {% if is_online == false %} title="This page is offline"{% endif %}
                 >
                     <span class="{{is_online == false ? 'offline autoblock-item' : ''}}">
@@ -33,11 +34,23 @@
         </div>
         <div class="col-md-4">
             {% if image.url != false %}
-            <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}">
-                <figure class="figure push-image" style="background-image: url({{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}})">
+            {% set cdnImageUrl = this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4)) %}
+                {% if bb.token == null %}
+                {% set backgroundImageUid = 'background-image-' ~ this.getObject().getUid() ~ '-' ~ image.uid %}
+
+                {% include 'common/background_lazyload.html.twig' with {
+                    'backgroundImageUid': backgroundImageUid, 
+                    'url': cdnImageUrl
+                } %}
+                {% endif %}
+
+            <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}" aria-label="{{title|striptags|raw}}" >
+                <figure{% if bb.token == null %} id="{{ backgroundImageUid }}"{% endif %} 
+                    class="figure push-image{% if bb.token == null %} lazy-background-image{% endif %}"
+                    {% if bb.token != null %} style="background-image: url({{cdnImageUrl}});"{% endif %}
+                >
                     <div class="contentwrapper">
-                        {% set img_alt = image.getParamValue('description') != false ? abstract|striptags|raw %}
-                        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive d-none" alt="{{img_alt}}" />
+                        <img src="{{this.getCdnImageUrl(this.getOptimizeImagePathHelper(image.url, false, 4))}}" class="img-responsive d-none" alt="{{image.alt|raw}}" loading="lazy" />
                         {% if image.is_video_thumbnail %}
                             <span class="picto-video"><i></i></span>
                         {% endif %}

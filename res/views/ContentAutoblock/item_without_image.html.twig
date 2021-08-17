@@ -3,6 +3,7 @@
     <a
       {% block data_item_title_attributes %}{% endblock %}
       href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}"
+      aria-label="{{title|striptags|raw}}"
       {% if is_online == false %} title="This page is offline"{% endif %}
     >
       {% spaceless %}
