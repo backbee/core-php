@@ -443,6 +443,7 @@ class PageListener
         $renderer->setRender(
             str_replace(
                 '</body>',
+                $renderer->partial('common/hook_video_lazyload.js.twig') .
                 $renderer->partial('common/hook_background_lazyload.js.twig') . '</body>',
                 $renderer->getRender()
             )

@@ -206,6 +206,9 @@ class VideoListener
     {
         $renderer = $event->getRenderer();
         $content = $event->getTarget();
+        $app = $event->getApplication();
+        $request = $app->getRequest();
+        $userAgent = $request->headers->get('User-Agent');
 
         $url = $content->getParamValue('video_url');
 
@@ -216,9 +219,11 @@ class VideoListener
         $data = self::getData($url);
 
         $renderer->assign('src', $data['src']);
+        $renderer->assign('thumb_url', (true === $renderer->userAgentHelper()->isDesktop()) ? self::$videoManager->getVideoThumbnailUrl($url) : self::$videoManager->getMobileVideoThumbnailUrl($url));
         $renderer->assign('attributes', $data['attributes']);
         $renderer->assign('position', $content->getParamValue('position'));
         $renderer->assign('size', self::$defaultVideoSizes[$content->getParamValue('size')]);
+        $renderer->assign('is_iframe_lazyload_browser', preg_match('/(Chrome|CriOS)\//i', $userAgent));
     }
 
     /**
