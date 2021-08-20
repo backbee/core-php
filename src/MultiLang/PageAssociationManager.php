@@ -138,7 +138,7 @@ class PageAssociationManager
         $pagesToExclude = [];
         $pageLangToExclude = array_values(array_unique(array_column($pageLangToExclude, 'page_lang_id')));
 
-        if (false !== $pageLangToExclude && !empty($pageLangToExclude)) {
+        if (!empty($pageLangToExclude)) {
             $qb = $this->entityMgr->getRepository(PageAssociation::class)->createQueryBuilder('pa');
             $pagesToExclude = $qb
                 ->select('p._uid as page_uid')
