@@ -244,7 +244,9 @@ class HighlightContentListener
                         'url' => $image->path,
                         'title' => $image->getParamValue('title'),
                         'legend' => $image->getParamValue('description'),
-                        'alt' => $bbApp->getRenderer()->getImageAlternativeText($media, $title),
+                        'alt' => ($media instanceof Image)
+                            ? $bbApp->getRenderer()->getImageAlternativeText($media, $title) 
+                            : $title,
                         'stat' => $image->getParamValue('stat'),
                     ] + $imageData;
             }
