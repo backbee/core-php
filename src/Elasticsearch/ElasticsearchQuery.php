@@ -247,8 +247,8 @@ class ElasticsearchQuery
     public function getQueryToFilterByTitle(
         array $baseQuery,
         string $title,
-        ?string $searchIn,
-        ?string $searchByTerm
+        string $searchIn = 'title',
+        ?string $searchByTerm = null
     ): array {
         if ($searchByTerm === 'exact_term') {
             $baseQuery = $this->titleFilter->byExactTerm($baseQuery, $title, $searchIn);
