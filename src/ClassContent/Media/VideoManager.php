@@ -101,7 +101,7 @@ class VideoManager
         try {
             $client->request('head', $thumbnailUrl);
         } catch (Exception $e) {
-            $thumbnailUrl = sprintf('https://img.youtube.com/vi/%s/0.jpg', $matches[5]);
+            $thumbnailUrl = sprintf('https://img.youtube.com/vi/%s/hqdefault.jpg', $matches[5]);
         }
 
         return $thumbnailUrl;
@@ -160,5 +160,113 @@ class VideoManager
         $data = json_decode((string)$response->getBody(), true);
 
         return $data['thumbnail_720_url'];
+    }
+
+    /**
+     * Get mobile video thumbnail url.
+     *
+     * @param $url
+     *
+     * @return string|void
+     */
+    public function getMobileVideoThumbnailUrl($url)
+    {
+        if (!$this->isSupportedUrl($url)) {
+            return;
+        }
+
+        $thumbnail = '';
+
+        $client = new Client();
+
+        if (1 === preg_match(self::YOUTUBE_URL_REGEX, $url, $matches)) {
+            $thumbnail = $this->isMobileYoutubeVideo($client, $matches);
+        }
+
+        if (1 === preg_match(self::VIMEO_URL_REGEX, $url, $matches)) {
+            $thumbnail = $this->isMobileVimeoVideo($client, $matches);
+        }
+
+        if (1 === preg_match(self::DAILYMOTION_URL_REGEX, $url, $matches)) {
+            $thumbnail = $this->isMobileDailymotionVideo($client, $matches);
+        }
+
+        return $thumbnail;
+    }
+
+    /**
+     * Is mobile Youtube video.
+     *
+     * @param $client
+     * @param $matches
+     *
+     * @return string
+     */
+    private function isMobileYoutubeVideo($client, $matches): string
+    {
+        $thumbnailUrl = sprintf('https://img.youtube.com/vi/%s/maxresdefault.jpg', $matches[5]);
+
+        try {
+            $client->request('head', $thumbnailUrl);
+        } catch (Exception $e) {
+            $thumbnailUrl = sprintf('https://img.youtube.com/vi/%s/hqdefault.jpg', $matches[5]);
+        }
+
+        return $thumbnailUrl;
+    }
+
+    /**
+     * Is mobile Vimeo video.
+     *
+     * @param $client
+     * @param $matches
+     *
+     * @return string
+     */
+    private function isMobileVimeoVideo($client, $matches): string
+    {
+        $response = $client->request(
+            'get',
+            sprintf(
+                'https://vimeo.com/api/v2/video/%s.json',
+                $matches[1]
+            )
+        );
+
+        if (Response::HTTP_OK !== $response->getStatusCode()) {
+            return '';
+        }
+
+        $data = json_decode((string)$response->getBody(), true);
+        $data = array_pop($data);
+
+        return $data['thumbnail_medium'];
+    }
+
+    /**
+     * Is mobile Dailymotion video.
+     *
+     * @param $client
+     * @param $matches
+     *
+     * @return string
+     */
+    private function isMobileDailymotionVideo($client, $matches): string
+    {
+        $response = $client->request(
+            'get',
+            sprintf(
+                'https://api.dailymotion.com/video/%s?fields=id,thumbnail_480_url',
+                $matches[1]
+            )
+        );
+
+        if (Response::HTTP_OK !== $response->getStatusCode()) {
+            return '';
+        }
+
+        $data = json_decode((string)$response->getBody(), true);
+
+        return $data['thumbnail_480_url'];
     }
 }

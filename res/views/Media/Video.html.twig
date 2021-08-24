@@ -1,13 +1,37 @@
-<div {{this.bbcontent(null, {class: 'content video'})|raw}} {% block data_attributes %}{% endblock %}>
-{% if src is empty %}
-  {% include 'common/missing_config_block.html.twig' %}
-{% else %}
-  <div class="d-flex justify-content-{{ position }}">
-    <div class="w-{{size}}">
-      <div class="embed-responsive embed-responsive-16by9">
-        <iframe title="Video" class="embed-responsive-item edit-iframe" src="{{src}}" {{attributes}}></iframe>
-      </div>
-    </div>
-  </div>
-{% endif %}
+<div {{ this.bbcontent(null, {class: 'content video'})|raw }} {% block data_attributes %}{% endblock %}>
+    {% if src is empty %}
+        {% include 'common/missing_config_block.html.twig' %}
+    {% else %}
+        <div class="d-flex justify-content-{{ position }}">
+            <div class="w-{{ size }}">
+                <div class="embed-responsive embed-responsive-16by9">
+                    {% if bb.token != null %}
+                        <iframe title="Video" class="embed-responsive-item edit-iframe" src="{{ src }}"
+                                loading="lazy" {{ attributes }}></iframe>
+                    {% else %}
+                        {% if this.userAgentHelper.isDesktop() %}
+                            <iframe title="Video" class="embed-responsive-item edit-iframe" src="{{ src }}"
+                                    loading="lazy" {{ attributes }}></iframe>
+                        {% else %}
+                            <img
+                                    data-toggle="modal"
+                                    data-target="#videoPlayerModal"
+                                    data-video-src='<iframe title="Video" class="embed-responsive-item edit-iframe" src="{{ src }}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" {{ attributes }}></iframe>'
+                                    class="video-thumb"
+                                    src={{ thumb_url }}
+                                    loading="lazy"
+                                    alt="Video"
+                            >
+                            <span
+                                    data-toggle="modal"
+                                    data-target="#videoPlayerModal"
+                                    data-video-src='<iframe title="Video" class="embed-responsive-item edit-iframe" src="{{ src }}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" {{ attributes }}></iframe>'
+                                    class="video-thumb"
+                            >▶</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
