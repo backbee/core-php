@@ -212,7 +212,7 @@ class PageListener
         $changes = $uow->getEntityChangeSet($page);
 
         try {
-            if ($changes['_publishing'] && $changes['_publishing'][1]<= new DateTime('now')) {
+            if ($changes['_publishing'][1] && $changes['_publishing'][1]<= new DateTime('now')) {
                 $page->setState(Page::STATE_ONLINE);
             }
         } catch (Exception $exception) {

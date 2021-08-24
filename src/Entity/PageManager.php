@@ -606,6 +606,14 @@ class PageManager
                 $page->setPublishing();
             }
         } catch (LogicException $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
             throw new LogicException('Home page cannot be offline');
         }
     }
