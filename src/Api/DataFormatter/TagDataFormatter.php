@@ -21,12 +21,14 @@
 
 namespace BackBeeCloud\Api\DataFormatter;
 
+use BackBee\NestedNode\KeyWord as Tag;
 use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeeCloud\Tag\TagLang;
-use BackBee\NestedNode\KeyWord as Tag;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
+ * Tag data formatter.
+ *
  * @author Eric Chau <eriic.chau@gmail.com>
  */
 class TagDataFormatter
@@ -41,15 +43,26 @@ class TagDataFormatter
      */
     protected $tagLangRepository;
 
-    public function __construct(MultiLangManager $multilangManager, EntityManagerInterface $entityManager)
+    /**
+     * @param \BackBeeCloud\MultiLang\MultiLangManager $multiLangManager
+     * @param \Doctrine\ORM\EntityManagerInterface     $entityManager
+     */
+    public function __construct(MultiLangManager $multiLangManager, EntityManagerInterface $entityManager)
     {
-        $this->isMultiLangEnabled = $multilangManager->isActive();
+        $this->isMultiLangEnabled = $multiLangManager->isActive();
         if ($this->isMultiLangEnabled) {
             $this->tagLangRepository = $entityManager->getRepository(TagLang::class);
         }
     }
 
-    public function format(Tag $tag)
+    /**
+     * Formatted tag
+     *
+     * @param \BackBee\NestedNode\KeyWord $tag
+     *
+     * @return array
+     */
+    public function format(Tag $tag): array
     {
         $parents = [];
         $parent = $tag->getParent();

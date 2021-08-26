@@ -235,7 +235,7 @@ class ElasticsearchClient
     /**
      * Gets all pages of current application and index these.
      *
-     * @param bool              $memoryHardCleanup
+     * @param bool $memoryHardCleanup
      * @param SymfonyStyle|null $output
      *
      * @return self
@@ -477,6 +477,9 @@ class ElasticsearchClient
                                 'type' => 'keyword',
                             ],
                             'source' => [
+                                'type' => 'keyword',
+                            ],
+                            'parents' => [
                                 'type' => 'keyword',
                             ],
                         ]

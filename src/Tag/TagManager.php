@@ -137,8 +137,6 @@ class TagManager
      */
     public function createIfNotExists($tagName, ?Tag $parent = null, ?array $translations = null): Tag
     {
-        $tag = null;
-
         try {
             $tag = $this->create($tagName, $parent, $translations);
         } catch (RuntimeException $exception) {
@@ -519,7 +517,7 @@ class TagManager
      *
      * @return array
      */
-    private function getTagWithAllChildren(Tag $tag, array $values): array
+    public function getTagWithAllChildren(Tag $tag, array $values): array
     {
         $children = [];
 
