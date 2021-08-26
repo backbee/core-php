@@ -227,7 +227,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
 
     /**
      * Searches tag with the provided prefix. If `prefix == false`, it will
-     * returns all tags with pagination.
+     * return all tags with pagination.
      *
      * Note that tags are ordered by its name (ascending).
      *
@@ -261,6 +261,13 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
                             'constant_score' => [
                                 'filter' => $filter,
                             ],
+                            'bool' => [
+                                'must' => [
+                                    'match' => [
+                                        'source' => Tag::SOURCE_TYPE,
+                                    ],
+                                ]
+                            ]
                         ],
                         'sort' => [
                             'name' => [
