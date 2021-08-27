@@ -35,6 +35,10 @@ DownloadableFile:
             type: switch
             label: yaml_block_downloadable_file_display_img
             value: true
+        img_at_left:
+            type: switch
+            label: yaml_block_downloadable_file_img_at_left
+            value: true
         display_size:
             type: switch
             label: yaml_block_downloadable_file_display_size
