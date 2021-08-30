@@ -21,12 +21,12 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBee\Security\SecurityContext;
 use BackBeeCloud\Api\DataFormatter\TagDataFormatter;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
-use BackBeeCloud\Tag\TagManager;
 use BackBeeCloud\Listener\RequestListener;
 use BackBeeCloud\Security\UserRightConstants;
-use BackBee\Security\SecurityContext;
+use BackBeeCloud\Tag\TagManager;
 use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -48,8 +48,11 @@ class TagController extends AbstractController
      */
     protected $dataFormatter;
 
-    public function __construct(SecurityContext $securityContext, TagManager $tagManager, TagDataFormatter $dataFormatter)
-    {
+    public function __construct(
+        SecurityContext $securityContext,
+        TagManager $tagManager,
+        TagDataFormatter $dataFormatter
+    ) {
         $this->setSecurityContext($securityContext);
 
         $this->tagManager = $tagManager;
@@ -58,8 +61,20 @@ class TagController extends AbstractController
         parent::__construct($securityContext->getApplication());
     }
 
-    public function getCollection($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM, Request $request)
-    {
+    /**
+     * Get collection.
+     *
+     * @param int $start
+     * @param int $limit
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getCollection(
+        $start = 0,
+        $limit = RequestListener::COLLECTION_MAX_ITEM,
+        Request $request
+    ): JsonResponse {
         $this->assertIsAuthenticated();
 
         $tags = $this->tagManager->getBy(
@@ -68,7 +83,6 @@ class TagController extends AbstractController
             $limit
         );
 
-        $end = null;
         $max = null;
         $count = null;
         if ($tags instanceof ElasticsearchCollection) {
@@ -80,8 +94,7 @@ class TagController extends AbstractController
         $end = $end >= 0 ? $end : 0;
         $statusCode = null !== $max
             ? ($max > $count ? Response::HTTP_PARTIAL_CONTENT : Response::HTTP_OK)
-            : Response::HTTP_OK
-        ;
+            : Response::HTTP_OK;
 
         return new JsonResponse(
             array_map(
@@ -122,8 +135,7 @@ class TagController extends AbstractController
         $end = $end >= 0 ? $end : 0;
         $statusCode = null !== $max
             ? ($max > $count ? Response::HTTP_PARTIAL_CONTENT : Response::HTTP_OK)
-            : Response::HTTP_OK
-        ;
+            : Response::HTTP_OK;
 
         return new JsonResponse(
             array_map(
@@ -165,7 +177,8 @@ class TagController extends AbstractController
      * Returns an instance of JsonResponse that contains list of pages (id and title)
      * that are linked to the provided tag.
      *
-     * @param  string $uid The tag's uid
+     * @param string $uid The tag's uid
+     *
      * @return JsonResponse
      */
     public function getLinkedPages($uid)

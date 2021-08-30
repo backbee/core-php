@@ -377,6 +377,7 @@ class TagManager
                 ->select('t')
                 ->setFirstResult($start)
                 ->setMaxResults($limit)
+                ->orderBy('t._keyWord', 'ASC')
                 ->getQuery()
                 ->getResult();
         } catch (Exception $exception) {
@@ -513,8 +514,8 @@ class TagManager
     /**
      * Get tag with all children.
      *
-     * @param Tag $tag
-     * @param array    $values
+     * @param Tag   $tag
+     * @param array $values
      *
      * @return array
      */
