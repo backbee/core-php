@@ -28,12 +28,18 @@ use BackBeeCloud\Listener\RequestListener;
 use BackBeeCloud\Security\UserRightConstants;
 use BackBeeCloud\Tag\TagManager;
 use Doctrine\DBAL\DBALException;
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use function is_array;
 
 /**
+ * Tag controller.
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class TagController extends AbstractController
@@ -48,6 +54,11 @@ class TagController extends AbstractController
      */
     protected $dataFormatter;
 
+    /**
+     * @param \BackBee\Security\SecurityContext                $securityContext
+     * @param \BackBeeCloud\Tag\TagManager                     $tagManager
+     * @param \BackBeeCloud\Api\DataFormatter\TagDataFormatter $dataFormatter
+     */
     public function __construct(
         SecurityContext $securityContext,
         TagManager $tagManager,
@@ -64,8 +75,8 @@ class TagController extends AbstractController
     /**
      * Get collection.
      *
-     * @param int $start
-     * @param int $limit
+     * @param int                                       $start
+     * @param int                                       $limit
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
@@ -109,7 +120,14 @@ class TagController extends AbstractController
         );
     }
 
-    public function get($uid)
+    /**
+     * Get tag.
+     *
+     * @param $uid
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function get($uid): JsonResponse
     {
         $this->assertIsAuthenticated();
 
@@ -123,8 +141,18 @@ class TagController extends AbstractController
         );
     }
 
-    public function getTreeFirstLevelTags($start = 0, $limit = RequestListener::COLLECTION_MAX_ITEM)
-    {
+    /**
+     * Get tree first level tags.
+     *
+     * @param int $start
+     * @param int $limit
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getTreeFirstLevelTags(
+        int $start = 0,
+        int $limit = RequestListener::COLLECTION_MAX_ITEM
+    ): JsonResponse {
         $this->assertIsAuthenticated();
 
         $result = $this->tagManager->getTreeFirstLevelTags($start, $limit);
@@ -150,7 +178,14 @@ class TagController extends AbstractController
         );
     }
 
-    public function getChildren($uid)
+    /**
+     * Get children.
+     *
+     * @param $uid
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getChildren($uid): JsonResponse
     {
         $this->assertIsAuthenticated();
 
@@ -181,7 +216,7 @@ class TagController extends AbstractController
      *
      * @return JsonResponse
      */
-    public function getLinkedPages($uid)
+    public function getLinkedPages(string $uid): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
@@ -197,15 +232,20 @@ class TagController extends AbstractController
         );
     }
 
-    public function post(Request $request)
+    /**
+     * Post tag.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function post(Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
             UserRightConstants::TAG_FEATURE
         );
 
-        $data = [];
-        $tag = null;
         try {
             $data = $this->assertAndExtractPostAndPutRequestData($request->request);
 
@@ -214,7 +254,7 @@ class TagController extends AbstractController
                 $data['parent'],
                 $data['translations']
             );
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new JsonResponse(
                 [
                     'error' => 'bad_request',
@@ -230,7 +270,15 @@ class TagController extends AbstractController
         );
     }
 
-    public function put($uid, Request $request)
+    /**
+     * Update tag.
+     *
+     * @param string                                    $uid
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function put(string $uid, Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
@@ -241,10 +289,9 @@ class TagController extends AbstractController
             return $this->getTagNotFoundJsonResponse($uid);
         }
 
-        $data = [];
         try {
             $data = $this->assertAndExtractPostAndPutRequestData($request->request);
-        } catch (\InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             return new JsonResponse(
                 [
                     'error' => 'bad_request',
@@ -261,7 +308,7 @@ class TagController extends AbstractController
                 $data['parent'],
                 $data['translations']
             );
-        } catch (\RuntimeException $exception) {
+        } catch (RuntimeException $exception) {
             return new JsonResponse(
                 [
                     'error' => 'bad_request',
@@ -274,7 +321,14 @@ class TagController extends AbstractController
         return new JsonResponse('', Response::HTTP_NO_CONTENT);
     }
 
-    public function delete($uid)
+    /**
+     * Delete tag.
+     *
+     * @param string $uid
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function delete(string $uid): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
@@ -294,14 +348,21 @@ class TagController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        return new Response('', Response::HTTP_NO_CONTENT);
+        return new JsonResponse('', Response::HTTP_NO_CONTENT);
     }
 
-    private function assertAndExtractPostAndPutRequestData(ParameterBag $bag)
+    /**
+     * Assert and extract post and put request data.
+     *
+     * @param \Symfony\Component\HttpFoundation\ParameterBag $bag
+     *
+     * @return array
+     */
+    private function assertAndExtractPostAndPutRequestData(ParameterBag $bag): array
     {
         $verifiedData = [];
-        if (!$bag->has('name') || false == $bag->get('name')) {
-            throw new \InvalidArgumentException(
+        if (!$bag->has('name') || false === $bag->get('name')) {
+            throw new InvalidArgumentException(
                 '\'name\' parameter is expected but cannot be found in request body.'
             );
         }
@@ -311,10 +372,11 @@ class TagController extends AbstractController
         $parent = null;
         if (
             $bag->has('parent_uid')
-            && false != $bag->get('parent_uid')
+            && false !== $bag->get('parent_uid')
+            && !empty($bag->get('parent_uid'))
             && null === $parent = $this->tagManager->get($bag->get('parent_uid'))
         ) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Cannot find parent tag with provided uid (:%s).',
                     $bag->get('parent_uid')
@@ -327,7 +389,7 @@ class TagController extends AbstractController
             $bag->has('translations')
             && !is_array($bag->get('translations'))
         ) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 '\'translations\' parameter must be type of array.'
             );
         }
@@ -337,7 +399,14 @@ class TagController extends AbstractController
         return $verifiedData;
     }
 
-    private function getTagNotFoundJsonResponse($unknownUid)
+    /**
+     * Get tag not found json response.
+     *
+     * @param $unknownUid
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    private function getTagNotFoundJsonResponse($unknownUid): JsonResponse
     {
         return new JsonResponse(
             [

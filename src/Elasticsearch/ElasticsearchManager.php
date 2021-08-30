@@ -90,7 +90,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     }
 
     /**
-     * Deletes the index if it exist and create a new one.
+     * Deletes the index if it exists and create a new one.
      */
     public function resetIndex(): ElasticsearchManager
     {
@@ -127,6 +127,28 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'category' => $this->pageContentManager->getCategoryByPage($page),
             'images' => $this->pageContentManager->getImagesByPage($page),
             'lang' => $this->multiLangManager->getLangByPage($page) ?? 'fr',
+        ];
+    }
+
+    /**
+     * Override this method if you want to index some custom property for tag.
+     *
+     * @param Tag $tag
+     *
+     * @return array
+     */
+    protected function getTagCustomDataToIndex(Tag $tag): array
+    {
+        $parents = [];
+        $parent = $tag->getParent();
+
+        while ($parent) {
+            $parents[] = $parent->getUid();
+            $parent = $parent->getParent();
+        }
+
+        return [
+            'parents' => array_reverse($parents),
         ];
     }
 
@@ -239,13 +261,26 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      */
     public function searchTag(?string $prefix, int $start, int $limit): ElasticsearchCollection
     {
-        $filter = [
+        $must = [
             'match_all' => new stdClass,
         ];
+
         if (null !== $prefix) {
-            $filter = [
-                'prefix' => [
-                    'name' => strtolower($prefix),
+            $must = [
+                [
+                    'match' => [
+                        'source' => Tag::SOURCE_TYPE,
+                    ],
+                ],
+                [
+                    'prefix' => [
+                        'name' => strtolower($prefix),
+                    ],
+                ],
+                [
+                    'script' => [
+                        'script' => "doc['parents'].size() < 2",
+                    ],
                 ],
             ];
         }
@@ -258,16 +293,9 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
                     'size' => $limit,
                     'body' => [
                         'query' => [
-                            'constant_score' => [
-                                'filter' => $filter,
-                            ],
                             'bool' => [
-                                'must' => [
-                                    'match' => [
-                                        'source' => Tag::SOURCE_TYPE,
-                                    ],
-                                ]
-                            ]
+                                'must' => $must
+                            ],
                         ],
                         'sort' => [
                             'name' => [
@@ -302,7 +330,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     }
 
     /**
-     * Get all image for an page by uid.
+     * Get all image for a page by uid.
      *
      * @param string $uid
      *
@@ -394,7 +422,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     }
 
     /**
-     * Page page by uid.
+     * Get page by uid.
      *
      * @param string $uid
      *
