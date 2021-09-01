@@ -21,6 +21,10 @@
 
 namespace BackBeeCloud\Listener\Api;
 
+use BackBee\Controller\Event\PostResponseEvent;
+use BackBee\Rest\Controller\ClassContentController;
+use BackBee\Rest\Controller\UserController;
+use BackBee\Security\SecurityContext;
 use BackBeeCloud\Entity\GlobalContent;
 use BackBeeCloud\Entity\PageManager;
 use BackBeeCloud\PageCategory\PageCategoryManager;
@@ -29,18 +33,21 @@ use BackBeeCloud\Security\Authentication\UserRightUnauthorizedException;
 use BackBeeCloud\Security\Authorization\UserRightAccessDeniedException;
 use BackBeeCloud\Security\Authorization\Voter\UserRightPageAttribute;
 use BackBeeCloud\Security\UserRightConstants;
-use BackBee\Controller\Event\PostResponseEvent;
-use BackBee\Rest\Controller\ClassContentController;
-use BackBee\Rest\Controller\UserController;
-use BackBee\Security\SecurityContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
+use function count;
+use function get_class;
+use function in_array;
+use function is_array;
+use function is_object;
 
 /**
+ * User right listener.
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserRightListener
@@ -70,6 +77,13 @@ class UserRightListener
      */
     private $pageCategoryManager;
 
+    /**
+     * @param \Doctrine\ORM\EntityManagerInterface           $entityManager
+     * @param \BackBee\Security\SecurityContext              $securityContext
+     * @param \BackBeeCloud\Entity\PageManager               $pageManager
+     * @param \BackBeeCloud\PageType\TypeManager             $pageTypeManager
+     * @param \BackBeeCloud\PageCategory\PageCategoryManager $pageCategoryManager
+     */
     public function __construct(
         EntityManagerInterface $entityManager,
         SecurityContext $securityContext,
@@ -84,31 +98,44 @@ class UserRightListener
         $this->pageCategoryManager = $pageCategoryManager;
     }
 
-    public function onKernelException(GetResponseForExceptionEvent $event)
+    /**
+     * On kernel exception.
+     *
+     * @param \Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent $event
+     */
+    public function onKernelException(GetResponseForExceptionEvent $event): void
     {
         if (
-            $event->getException() instanceof UserRightUnauthorizedException
-            || $event->getException() instanceof AuthenticationCredentialsNotFoundException
+            $event->getException() instanceof UserRightUnauthorizedException ||
+            $event->getException() instanceof AuthenticationCredentialsNotFoundException
         ) {
-            $event->setResponse(new JsonResponse([
-                'error' => 'unauthorized',
-                'reason' => 'request_aborted_because_not_authenticated',
-            ], Response::HTTP_UNAUTHORIZED));
+            $event->setResponse(
+                new JsonResponse([
+                    'error' => 'unauthorized',
+                    'reason' => 'request_aborted_because_not_authenticated',
+                ], Response::HTTP_UNAUTHORIZED)
+            );
 
             return;
         }
 
         if ($event->getException() instanceof UserRightAccessDeniedException) {
-            $event->setResponse(new JsonResponse([
-                'error' => 'forbidden',
-                'reason' => 'access_denied_because_not_enough_right',
-            ], Response::HTTP_FORBIDDEN));
+            $event->setResponse(
+                new JsonResponse([
+                    'error' => 'forbidden',
+                    'reason' => 'access_denied_because_not_enough_right',
+                ], Response::HTTP_FORBIDDEN)
+            );
 
-            return;
         }
     }
 
-    public function onKernelController(FilterControllerEvent $event)
+    /**
+     * On kernel controller.
+     *
+     * @param \Symfony\Component\HttpKernel\Event\FilterControllerEvent $event
+     */
+    public function onKernelController(FilterControllerEvent $event): void
     {
         $controller = $event->getController();
         if (!is_array($controller) || !is_object($controller[0])) {
@@ -118,15 +145,14 @@ class UserRightListener
         $classname = get_class($controller[0]);
         switch ($classname) {
             case UserController::class:
-                if ('getCollectionAction' === $controller[1]) {
-                    if (
-                        !$this->securityContext->isGranted(
-                            UserRightConstants::MANAGE_ATTRIBUTE,
-                            UserRightConstants::USER_RIGHT_FEATURE
-                        )
-                    ) {
-                        throw UserRightAccessDeniedException::create();
-                    }
+                if (
+                    ('getCollectionAction' === $controller[1]) &&
+                    !$this->securityContext->isGranted(
+                        UserRightConstants::MANAGE_ATTRIBUTE,
+                        UserRightConstants::USER_RIGHT_FEATURE
+                    )
+                ) {
+                    throw UserRightAccessDeniedException::create();
                 }
 
                 break;
@@ -159,18 +185,14 @@ class UserRightListener
                     return;
                 }
 
+                $isPutAction = 'putAction' === $controller[1] ?
+                    UserRightConstants::EDIT_CONTENT_ATTRIBUTE : UserRightConstants::DELETE_CONTENT_ATTRIBUTE;
+
                 $subject = $contextualPage->isOnline(true)
                     ? UserRightConstants::ONLINE_PAGE
-                    : UserRightConstants::OFFLINE_PAGE
-                ;
+                    : UserRightConstants::OFFLINE_PAGE;
                 $attribute = new UserRightPageAttribute(
-                    'postAction' === $controller[1]
-                        ? UserRightConstants::CREATE_CONTENT_ATTRIBUTE
-                        : ('putAction' === $controller[1]
-                            ? UserRightConstants::EDIT_CONTENT_ATTRIBUTE
-                            : UserRightConstants::DELETE_CONTENT_ATTRIBUTE
-                        )
-                    ,
+                    'postAction' === $controller[1] ? UserRightConstants::CREATE_CONTENT_ATTRIBUTE : $isPutAction,
                     $this->pageTypeManager->findByPage($contextualPage)->uniqueName(),
                     $this->pageCategoryManager->getCategoryByPage($contextualPage)
                 );
@@ -180,7 +202,12 @@ class UserRightListener
         }
     }
 
-    public function onBundleGetCollectionPostCall(PostResponseEvent $event)
+    /**
+     * On bundle get collection post call.
+     *
+     * @param \BackBee\Controller\Event\PostResponseEvent $event
+     */
+    public function onBundleGetCollectionPostCall(PostResponseEvent $event): void
     {
         $response = $event->getResponse();
         if (!$response->isSuccessful()) {
@@ -205,10 +232,15 @@ class UserRightListener
         $response->setContent(json_encode($filteredData));
     }
 
-    public function onPageTypeGetCollectionPostCall(PostResponseEvent $event)
+    /**
+     * On page type get collection post call.
+     *
+     * @param \BackBee\Controller\Event\PostResponseEvent $event
+     */
+    public function onPageTypeGetCollectionPostCall(PostResponseEvent $event): void
     {
         $response = $event->getResponse();
-        if (!$response->isSuccessful()) {
+        if (!$response->isSuccessful() || $event->getRequest()->query->get('context') === 'search') {
             return;
         }
 
@@ -231,15 +263,19 @@ class UserRightListener
         $response->setContent(json_encode($filteredData));
         $response->headers->set(
             'Content-Range',
-            count($filteredData) ? sprintf('0-%d/%d', count($filteredData) - 1, count($filteredData)) : '-/-',
-            true
+            count($filteredData) ? sprintf('0-%d/%d', count($filteredData) - 1, count($filteredData)) : '-/-'
         );
     }
 
-    private function isGlobalContentByUid($uid)
+    /**
+     * Is global content by uid.
+     *
+     * @param $uid
+     *
+     * @return bool
+     */
+    private function isGlobalContentByUid($uid): bool
     {
-        return null !== $this->entityManager->getRepository(GlobalContent::class)->findOneBy([
-            'content' => $uid,
-        ]);
+        return null !== $this->entityManager->getRepository(GlobalContent::class)->findOneBy(['content' => $uid]);
     }
 }

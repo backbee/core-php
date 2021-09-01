@@ -38,7 +38,7 @@ use Doctrine\ORM\EntityManagerInterface;
  *
  * @package BackBeeCloud\PageType
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class TypeManager
 {
@@ -192,6 +192,7 @@ class TypeManager
                     return $entity;
                 }
             }
+
             return null;
         }
 
