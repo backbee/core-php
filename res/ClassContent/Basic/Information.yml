@@ -31,7 +31,7 @@ Information:
         button_url:
             type: text
             label: yaml_block_information_button_url_label
-            value: '/'
+            value: ''
             format: URL
             group:
                 id: button_settings
