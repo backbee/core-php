@@ -127,7 +127,7 @@ abstract class AbstractController
     }
 
     /**
-     * Deny access unless granted.
+     * Deny accesses unless granted.
      *
      * @param      $attribute
      * @param null $subject
