@@ -27,7 +27,7 @@ Menu:
         button_url:
             type: text
             label: yaml_block_button_url
-            value: '/'
+            value: ''
             format: URL
             tab: yaml_block_menu_button
             group:

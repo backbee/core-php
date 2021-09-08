@@ -24,7 +24,7 @@ Cards:
         url:
             type: text
             label: yaml_block_cards_url
-            value: '/'
+            value: ''
             format: URL
             tab: yaml_block_general_tab
         target_blank:
