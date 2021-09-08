@@ -154,6 +154,17 @@ class ElasticsearchClient
                         'number_of_shards' => $this->settings['index']['number_of_shards'],
                         'number_of_replicas' => $this->settings['index']['number_of_replicas'],
                         'analysis' => [
+                            'filter' => [
+                                'autocomplete_filter' => [
+                                    'type' => 'edge_ngram',
+                                    'min_gram' => 1,
+                                    'max_gram' => 20
+                                ],
+                                'my_ascii_folding' => [
+                                    'type' => 'asciifolding',
+                                    'preserve_original' => true
+                                ]
+                            ],
                             'analyzer' => [
                                 'std_folded' => [
                                     'type' => 'custom',
@@ -163,6 +174,15 @@ class ElasticsearchClient
                                         'asciifolding',
                                     ],
                                 ],
+                                'autocomplete' => [
+                                    'type' => 'custom',
+                                    'tokenizer' => 'standard',
+                                    'filter' => [
+                                        'lowercase',
+                                        'my_ascii_folding',
+                                        'autocomplete_filter'
+                                    ],
+                                ]
                             ],
                         ],
                     ],
@@ -289,7 +309,7 @@ class ElasticsearchClient
                 'id' => $tag->getUid(),
                 'body' => array_merge(
                     [
-                        'name' => strtolower($tag->getKeyWord()),
+                        'name' => $tag->getKeyWord(),
                         'source' => Tag::SOURCE_TYPE,
                     ],
                     $this->getTagCustomDataToIndex($tag)
@@ -474,7 +494,10 @@ class ElasticsearchClient
                         $this->getCustomTagTypeProperties(),
                         [
                             'name' => [
-                                'type' => 'keyword',
+                                'type' => 'text',
+                                'analyzer' => 'autocomplete',
+                                'search_analyzer' => 'standard',
+                                'fielddata' => true
                             ],
                             'source' => [
                                 'type' => 'keyword',
@@ -644,7 +667,7 @@ class ElasticsearchClient
      * Returns the registry that contains the custom analyzer to use. It can be
      * null if current application has no settings.
      *
-     * @return Registry|null
+     * @return object|null
      */
     protected function getAnalyzerRegistry(): ?Registry
     {

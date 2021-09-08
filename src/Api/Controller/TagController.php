@@ -75,21 +75,23 @@ class TagController extends AbstractController
     /**
      * Get collection.
      *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
      * @param int                                       $start
      * @param int                                       $limit
-     * @param \Symfony\Component\HttpFoundation\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function getCollection(
-        $start = 0,
-        $limit = RequestListener::COLLECTION_MAX_ITEM,
-        Request $request
+        Request $request,
+        int $start = 0,
+        int $limit = RequestListener::COLLECTION_MAX_ITEM
     ): JsonResponse {
         $this->assertIsAuthenticated();
 
         $tags = $this->tagManager->getBy(
             $request->query->get('term', ''),
+            $request->query->get('context', ''),
             $start,
             $limit
         );

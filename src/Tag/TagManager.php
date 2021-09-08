@@ -327,6 +327,7 @@ class TagManager
      * Get by.
      *
      * @param string $prefix
+     * @param string $context
      * @param int    $start
      * @param int    $limit
      *
@@ -334,11 +335,13 @@ class TagManager
      */
     public function getBy(
         string $prefix = '',
+        string $context = '',
         int $start = 0,
         int $limit = self::DEFAULT_LIMIT
     ): ElasticsearchCollection {
         return $this->elasticsearchManager->searchTag(
             preg_replace('#[/\"]#', '', trim($prefix)),
+            $context,
             $start,
             $limit
         );
