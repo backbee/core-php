@@ -75,7 +75,7 @@ services:
 
     cloud.image_listener:
         class: BackBeeCloud\Listener\ImageListener
-        arguments: [ "@cloud.file_handler" ]
+        arguments: [ '@bbapp', '@cloud.file_handler' ]
 
     cloud.file_handler:
         class: BackBee\FileSystem\ImageFilesystemHandler
