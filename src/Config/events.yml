@@ -218,7 +218,7 @@ frontcontroller.request:
 rest.controller.classcontentcontroller.postaction.precall:
     listeners:
         # BackBee Cloud listeners
-        - [ @cloud.disqus_listener, onCreateContent ]
+        - [ '@cloud.disqus_listener', onCreateContent ]
 
 rest.controller.classcontentcontroller.postaction.postcall:
     listeners:
@@ -227,8 +227,9 @@ rest.controller.classcontentcontroller.postaction.postcall:
 
 rest.controller.classcontentcontroller.putaction.postcall:
     listeners:
-        - [ '@core.page.listener', onRestContentUpdatePostcall ]
+        - [ '@core.page.listener', onRestContentUpdatePostCall ]
         - [ '@core.log.class_content.listener', onPutActionPostCall ]
+        - [ '@cloud.image_listener', onPutActionPostCall ]
 
 rest.controller.securitycontroller.deletesessionaction.postcall:
     listeners:

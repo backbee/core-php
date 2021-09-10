@@ -298,12 +298,11 @@ class PageListener
      *
      * @param Event $event
      *
-     * @throws BBException
      * @throws OptimisticLockException
      * @throws ORMException
      * @throws TransactionRequiredException
      */
-    public static function onRestContentUpdatePostcall(Event $event): void
+    public static function onRestContentUpdatePostCall(Event $event): void
     {
         $app = $event->getApplication();
         $querybag = $app->getRequest()->query;
