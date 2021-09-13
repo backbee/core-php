@@ -59,8 +59,8 @@ use function strlen;
  *
  * @package BackBeeCloud\Entity
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class PageManager
 {
@@ -235,6 +235,7 @@ class PageManager
      * @param Page $page            The page to format
      * @param bool $strictDraftMode If false, it will perform additional check
      *                              on global contents to determine if page is drafted
+     *
      * @return array
      */
     public function format(Page $page, bool $strictDraftMode = false): array
@@ -297,13 +298,21 @@ class PageManager
      * @return array
      * @see ::format()
      */
-    public function formatCollection($collection, $strictDraftMode): array
+    public function formatCollection($collection, bool $strictDraftMode): array
     {
         $result = [];
         foreach ($collection as $page) {
             try {
                 $result[] = $this->format($page, $strictDraftMode);
             } catch (Exception $exception) {
+                $this->logger->error(
+                    sprintf(
+                        '%s : %s :%s',
+                        __CLASS__,
+                        __FUNCTION__,
+                        $exception->getMessage()
+                    )
+                );
                 continue;
             }
         }
@@ -392,7 +401,7 @@ class PageManager
      * @param array $data    The data to use to update the page
      * @param bool  $doFlush If true, PageManager will invoke EntityManager::flush()
      */
-    public function update(Page $page, array $data, $doFlush = true): void
+    public function update(Page $page, array $data, bool $doFlush = true): void
     {
         try {
             $autoUpdateModified = !isset($data['modified_at']);
@@ -486,6 +495,14 @@ class PageManager
         unset($data['title']);
 
         $this->currentPage = $copy;
+
+        $seoPage = $this->seoMetadataManager->getPageSeoMetadata($page);
+
+        $data['seo'] = [
+            'title' => $seoPage['title'] ?? $data['title'],
+            'description' => $seoPage['description'] ?? '',
+        ];
+
         $this->update($copy, $data, false);
 
         $this->entityMgr->flush();
@@ -570,11 +587,17 @@ class PageManager
      */
     protected function genericRunSetDateTime(Page $page, $method, $value): void
     {
-        $datetime = null;
-
         try {
             $datetime = new DateTime($value);
         } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
             throw new InvalidArgumentException(
                 sprintf(
                     '[%s - %s] Failed to create an instance of DateTime, "%s" is not valid.',
@@ -659,18 +682,7 @@ class PageManager
      */
     protected function runSetSeo(Page $page, array $data): void
     {
-        $currentSeo = $this->seoMetadataManager->getPageSeoMetadata($page);
-        $keys = ['title', 'description'];
-
-        if (false !== $currentSeo) {
-            foreach ($keys as $key) {
-                if (isset($data[$key]) && $data[$key] === $currentSeo[$key]) {
-                    unset($data[$key]);
-                }
-            }
-        }
-
-        if (false === $data) {
+        if (empty($data)) {
             return;
         }
 
@@ -711,7 +723,7 @@ class PageManager
     {
         $type = $this->typeMgr->find($typeName);
         if ($type === null) {
-            throw new InvalidArgumentException("You selected `{$typeName}` as page type but it does not exist.");
+            throw new InvalidArgumentException("You selected `$typeName` as page type but it does not exist.");
         }
 
         $this->typeMgr->associate($page, $type);
@@ -721,13 +733,9 @@ class PageManager
     }
 
     /**
-     * @param Page   $page  The page to update
-     * @param string $value The value to set
-     *
-     * @throws InvalidArgumentException if provided value is not string or
-     *                                   does not contain at least 2 characters
+     * @param Page $page The page to update
      */
-    protected function runSetLang(Page $page, $value): void
+    protected function runSetLang(Page $page): void
     {
         if ($this->currentLang instanceof Lang) {
             $this->multiLangMgr->associate($page, $this->currentLang);
@@ -791,9 +799,9 @@ class PageManager
      *
      * @param Page $page
      *
-     * @return null|PageTag
+     * @return null|object
      */
-    public function getPageTag(Page $page): ?PageTag
+    public function getPageTag(Page $page)
     {
         return $this->entityMgr->getRepository(PageTag::class)->findOneBy(
             [
