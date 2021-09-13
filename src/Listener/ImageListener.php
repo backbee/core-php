@@ -21,6 +21,8 @@
 
 namespace BackBeeCloud\Listener;
 
+use BackBee\ApplicationInterface;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PostResponseEvent;
@@ -28,9 +30,13 @@ use BackBee\Event\Event;
 use BackBee\FileSystem\ImageHandlerInterface;
 use BackBee\Renderer\Event\RendererEvent;
 use Cocur\Slugify\Slugify;
+use Exception;
 
 /**
+ * Image listener.
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class ImageListener
 {
@@ -40,18 +46,24 @@ class ImageListener
     protected $imgHandler;
 
     /**
+     * @var \BackBee\ApplicationInterface
+     */
+    protected static $app;
+
+    /**
      * ImageListener constructor.
      *
-     * @param ImageHandlerInterface $imgHandler
+     * @param \BackBee\ApplicationInterface $app
+     * @param ImageHandlerInterface         $imgHandler
      */
-    public function __construct(ImageHandlerInterface $imgHandler)
+    public function __construct(ApplicationInterface $app, ImageHandlerInterface $imgHandler)
     {
+        self::$app = $app;
         $this->imgHandler = $imgHandler;
     }
 
     /**
-     * Occurs on 'rest.controller.resourcecontroller.uploadaction.postcall'. This
-     * listener send the image to AWS S3 bucket.
+     * Occurs on 'rest.controller.resourcecontroller.uploadaction.postcall'.
      *
      * @param PostResponseEvent $event
      */
@@ -129,6 +141,38 @@ class ImageListener
         $block = $event->getTarget();
         if (false !== strpos($block->getParamValue('bg_image'), 'theme-default-resources')) {
             $block->setParam('bg_image', $event->getRenderer()->getCdnImageUrl($block->getParamValue('bg_image')));
+        }
+    }
+
+    /**
+     * Handle on update content.
+     *
+     * @param \BackBee\Controller\Event\PostResponseEvent $event
+     */
+    public static function onPutActionPostCall(PostResponseEvent $event): void
+    {
+        $request = $event->getRequest();
+
+        if (self::$app->getBBUserToken()) {
+            $entityMgr = $event->getApplication()->getEntityManager();
+            $element = $entityMgr->getRepository(AbstractClassContent::class)->find($request->request->get('uid'));
+            if ($element && $element->getType() === Image::class && empty($element->getParamValue('alt'))) {
+                $entityMgr->beginTransaction();
+                try {
+                    $element->setParam('alt', trim(strip_tags($element->getParamValue('description'))));
+                    $entityMgr->flush();
+                    $entityMgr->commit();
+                } catch (Exception $exception) {
+                    self::$app->getLogging()->error(
+                        sprintf(
+                            '%s : %s :%s',
+                            __CLASS__,
+                            __FUNCTION__,
+                            $exception->getMessage()
+                        )
+                    );
+                }
+            }
         }
     }
 }
