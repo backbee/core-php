@@ -254,12 +254,13 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      * Note that tags are ordered by its name (ascending).
      *
      * @param string|null $prefix
+     * @param null|string $context
      * @param int         $start
      * @param int         $limit
      *
      * @return ElasticsearchCollection
      */
-    public function searchTag(?string $prefix, int $start, int $limit): ElasticsearchCollection
+    public function searchTag(?string $prefix, ?string $context, int $start, int $limit): ElasticsearchCollection
     {
         $must = [
             'match_all' => new stdClass,
@@ -273,14 +274,19 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
                     ],
                 ],
                 [
-                    'prefix' => [
-                        'name' => strtolower($prefix),
+                    'match' => [
+                        'name' => [
+                            'query' => $prefix,
+                        ],
                     ],
                 ],
-                [
-                    'script' => [
-                        'script' => "doc['parents'].size() < 2",
-                    ],
+            ];
+        }
+
+        if ($context === 'get_parent') {
+            $must[] = [
+                'script' => [
+                    'script' => "doc['parents'].size() < 2",
                 ],
             ];
         }
@@ -294,7 +300,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
                     'body' => [
                         'query' => [
                             'bool' => [
-                                'must' => $must
+                                'must' => $must,
                             ],
                         ],
                         'sort' => [
