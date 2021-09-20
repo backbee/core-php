@@ -68,6 +68,16 @@ abstract class AbstractStandaloneHelper
     }
 
     /**
+     * Get app directory.
+     *
+     * @return false|string
+     */
+    public static function appDir()
+    {
+        return realpath(static::rootDir() . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'App');
+    }
+
+    /**
      * Get dist directory.
      *
      * @return false|string
@@ -84,7 +94,8 @@ abstract class AbstractStandaloneHelper
      */
     public static function cacheDir(): string
     {
-        $path = static::rootDir() . DIRECTORY_SEPARATOR . 'cache';
+        $path = realpath(static::rootDir() . DIRECTORY_SEPARATOR . 'cache');
+
         static::mkdirOnce($path);
 
         return $path;

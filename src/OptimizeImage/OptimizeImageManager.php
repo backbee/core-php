@@ -227,11 +227,15 @@ class OptimizeImageManager
      */
     public function isValidToOptimize($filePath): bool
     {
-        return !(
-            (1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp)$~', @mime_content_type($filePath)))
-            || ('image/gif' === @mime_content_type($filePath) && (true === $this->isAnimated($filePath)))
-            || ('image/png' === @mime_content_type($filePath)) && (true === $this->isTransparent($filePath))
-        );
+        if (file_exists($filePath)) {
+            return !(
+                (1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp)$~', @mime_content_type($filePath)))
+                || ('image/gif' === @mime_content_type($filePath) && (true === $this->isAnimated($filePath)))
+                || ('image/png' === @mime_content_type($filePath)) && (true === $this->isTransparent($filePath))
+            );
+        }
+
+        return false;
     }
 
     /**

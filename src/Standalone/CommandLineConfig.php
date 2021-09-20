@@ -21,6 +21,9 @@
 
 namespace BackBeePlanet\Standalone;
 
+use App\Application;
+use App\Helper\StandaloneHelper;
+use BackBee\BBApplication;
 use Webmozart\Console\Config\DefaultApplicationConfig;
 
 /**
@@ -33,7 +36,12 @@ class CommandLineConfig extends DefaultApplicationConfig
      */
     protected $rootDir;
 
-    public function __construct($rootDir)
+    /**
+     * Constructor.
+     *
+     * @param string $rootDir
+     */
+    public function __construct(string $rootDir)
     {
         if (!class_exists(Application::class)) {
             echo sprintf(
@@ -49,7 +57,12 @@ class CommandLineConfig extends DefaultApplicationConfig
         $this->rootDir = $rootDir;
     }
 
-    public function getRootDir()
+    /**
+     * Get root dir.
+     *
+     * @return string
+     */
+    public function getRootDir(): string
     {
         return $this->rootDir;
     }
@@ -61,23 +74,27 @@ class CommandLineConfig extends DefaultApplicationConfig
     {
         parent::configure();
 
-        $bootstrapFilepath = StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'bootstrap.yml';
-        if (!is_readable($bootstrapFilepath)) {
-            return;
+        $this
+            ->setName('backbee-standalone')
+            ->setVersion(BBApplication::VERSION);
+
+        if (
+            StandaloneHelper::configDir() &&
+            is_readable(StandaloneHelper::configDir() . DIRECTORY_SEPARATOR . 'config.yml')
+        ) {
+            Application::setRepositoryDir(StandaloneHelper::repositoryDir());
+            $app = new Application();
+
+            // injecting Standalone others commands...
+            $app->getEventDispatcher()->addListener(CommandLineReadyEvent::EVENT_NAME, [
+                CommandLineListener::class,
+                'onCommandLineReady',
+            ]);
+
+            $app->getEventDispatcher()->dispatch(
+                CommandLineReadyEvent::EVENT_NAME,
+                new CommandLineReadyEvent($this, $app)
+            );
         }
-
-        Application::setRepositoryDir(StandaloneHelper::repositoryDir());
-        $app = new Application();
-
-        // injecting Standalone others commands...
-        $app->getEventDispatcher()->addListener(CommandLineReadyEvent::EVENT_NAME, [
-            CommandLineListener::class,
-            'onCommandLineReady',
-        ]);
-
-        $app->getEventDispatcher()->dispatch(
-            CommandLineReadyEvent::EVENT_NAME,
-            new CommandLineReadyEvent($this, $app)
-        );
     }
 }
