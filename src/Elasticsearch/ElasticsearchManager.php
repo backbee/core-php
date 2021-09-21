@@ -266,7 +266,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'match_all' => new stdClass,
         ];
 
-        if (null !== $prefix) {
+        if ($prefix !== null) {
             $must = [
                 [
                     'match' => [

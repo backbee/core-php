@@ -215,7 +215,7 @@ class ElasticsearchQuery
             ];
         }
 
-        if (null === $this->bbApp->getBBUserToken()) {
+        if ($this->bbApp->getBBUserToken() === null) {
             $mustClauses[] = [
                 'match' => [
                     'is_online' => true,
@@ -272,7 +272,7 @@ class ElasticsearchQuery
         $validTags = null;
 
         foreach (explode(',', $tags) as $tagId) {
-            if (null !== $tag = $this->bbApp->getEntityManager()->getRepository(KeyWord::class)->find($tagId)) {
+            if (($tag = $this->bbApp->getEntityManager()->getRepository(KeyWord::class)->find($tagId)) !== null) {
                 $validTags[] = $tag;
             }
         }
@@ -306,13 +306,13 @@ class ElasticsearchQuery
      */
     public function getQueryToFilterByPageType(array $baseQuery, ?string $type): array
     {
-        if (null === $type) {
+        if ($type === null) {
             $baseQuery['query']['bool']['must_not'] = array_merge(
                 $baseQuery['query']['bool']['must_not'] ?? [],
                 array_filter(
                     array_map(
                         static function ($type) {
-                            return false === $type->isProtected() ||
+                            return $type->isProtected() === false ||
                             $type->uniqueName() === (new HomeType)->uniqueName() ?
                                 null : ['match' => ['type' => $type->uniqueName()]];
                         },

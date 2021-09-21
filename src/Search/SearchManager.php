@@ -91,7 +91,7 @@ class SearchManager extends AbstractSearchManager
     public function getResultPage($lang = null): ?Page
     {
         $uid = $this->getResultPageUid($lang);
-        if (null === $page = $this->pageMgr->get($uid)) {
+        if ($page = $this->pageMgr->get($uid) === null) {
             $page = $this->buildResultPage(
                 $uid,
                 'Search result',
@@ -151,7 +151,7 @@ class SearchManager extends AbstractSearchManager
             ];
         }
 
-        if ((null !== ($criteria['category'] ?? null)) && 'none' !== $criteria['category']) {
+        if ((($criteria['category'] ?? null) !== null) && $criteria['category'] !== 'none') {
             $query['query']['bool']['must'][] = [
                 'match' => [
                     'category' => $criteria['category'],
@@ -161,7 +161,7 @@ class SearchManager extends AbstractSearchManager
 
         $query = $this->elasticsearchQuery->getQueryToFilterByPageType($query, $criteria['type'] ?? null);
 
-        if (null !== ($criteria['is_online'] ?? null) && 'all' !== $criteria['is_online']) {
+        if (($criteria['is_online'] ?? null) !== null && $criteria['is_online'] !== 'all') {
             $query = $this->elasticsearchQuery->getQueryToFilterByPageIsOnline($query, (bool)$criteria['is_online']);
         }
 
@@ -182,7 +182,7 @@ class SearchManager extends AbstractSearchManager
             );
         }
 
-        if ($criteria['has_draft_only'] && true === (bool)$criteria['has_draft_only']) {
+        if ($criteria['has_draft_only'] && (bool)$criteria['has_draft_only'] === true) {
             $query = $this->elasticsearchQuery->getQueryToFilterByPageWithDraftContents($query);
         }
 

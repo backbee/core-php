@@ -158,12 +158,20 @@ class ElasticsearchClient
                                 'autocomplete_filter' => [
                                     'type' => 'edge_ngram',
                                     'min_gram' => 1,
-                                    'max_gram' => 20
+                                    'max_gram' => 20,
                                 ],
                                 'my_ascii_folding' => [
                                     'type' => 'asciifolding',
-                                    'preserve_original' => true
-                                ]
+                                    'preserve_original' => true,
+                                ],
+                                'my_stemmer_french' => [
+                                    'type' => 'stemmer',
+                                    'language' => 'french',
+                                ],
+                                'my_stemmer_english' => [
+                                    'type' => 'stemmer',
+                                    'language' => 'english',
+                                ],
                             ],
                             'analyzer' => [
                                 'std_folded' => [
@@ -172,6 +180,8 @@ class ElasticsearchClient
                                     'filter' => [
                                         'lowercase',
                                         'asciifolding',
+                                        'my_stemmer_english',
+                                        'my_stemmer_french',
                                     ],
                                 ],
                                 'autocomplete' => [
@@ -180,9 +190,9 @@ class ElasticsearchClient
                                     'filter' => [
                                         'lowercase',
                                         'my_ascii_folding',
-                                        'autocomplete_filter'
+                                        'autocomplete_filter',
                                     ],
-                                ]
+                                ],
                             ],
                         ],
                     ],
@@ -497,7 +507,7 @@ class ElasticsearchClient
                                 'type' => 'text',
                                 'analyzer' => 'autocomplete',
                                 'search_analyzer' => 'standard',
-                                'fielddata' => true
+                                'fielddata' => true,
                             ],
                             'source' => [
                                 'type' => 'keyword',
@@ -686,7 +696,7 @@ class ElasticsearchClient
      */
     protected function getAnalyzerName(): string
     {
-        return null === $this->getAnalyzerRegistry() ?
+        return $this->getAnalyzerRegistry() === null ?
             self::DEFAULT_ANALYZER : $this->getAnalyzerRegistry()->getValue();
     }
 }
