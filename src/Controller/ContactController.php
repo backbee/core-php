@@ -22,9 +22,7 @@
 namespace BackBeeCloud\Controller;
 
 use BackBee\BBApplication;
-use Swift_Mailer;
 use Swift_Message;
-use Swift_SmtpTransport;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -32,7 +30,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package BackBeeCloud\Controller
  *
- * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
+ * @author  Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  */
 class ContactController
 {
@@ -78,14 +76,7 @@ class ContactController
             ->setTo($destEmail)
             ->setBody($message, 'text/html');
 
-        $transport = Swift_SmtpTransport::newInstance(
-            $mailerConfig['server'],
-            $mailerConfig['port'],
-            $mailerConfig['encryption']
-        );
-        $transport->setUsername($mailerConfig['username'])->setPassword($mailerConfig['password']);
-
-        Swift_Mailer::newInstance($transport)->send($message);
+        $this->app->getContainer()->get('mailer')->send($message);
 
         return Response::create('ok');
     }
