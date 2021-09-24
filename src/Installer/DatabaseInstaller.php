@@ -119,6 +119,7 @@ class DatabaseInstaller extends AbstractInstaller
         $installer = new Database($this->getApplication());
         $installer->updateBackBeeSchema();
         $installer->updateBundlesSchema();
+        $installer->updateAppSchema();
 
         $tablesMapping = [
             'class_table_name'         => 'acl_classes',
