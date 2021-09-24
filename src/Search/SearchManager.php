@@ -91,7 +91,7 @@ class SearchManager extends AbstractSearchManager
     public function getResultPage($lang = null): ?Page
     {
         $uid = $this->getResultPageUid($lang);
-        if ($page = $this->pageMgr->get($uid) === null) {
+        if (($page = $this->pageMgr->get($uid)) === null) {
             $page = $this->buildResultPage(
                 $uid,
                 'Search result',
