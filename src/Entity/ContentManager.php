@@ -494,7 +494,7 @@ class ContentManager
      * @throws ClassNotFoundException
      * @throws UnknownPropertyException
      */
-    protected function getGlobalContentsUids(): array
+    protected function getGlobalContentsUids(): ?array
     {
         return array_merge(
             ...array_filter(

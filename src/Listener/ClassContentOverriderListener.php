@@ -21,8 +21,8 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\ClassContent\ClassContentOverrider;
 use BackBee\Event\Event;
+use BackBeeCloud\ClassContent\ClassContentOverrider;
 
 /**
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -32,19 +32,27 @@ class ClassContentOverriderListener
     /**
      * @var ClassContentOverrider
      */
-    private $classcontentOverrider;
+    private $classContentOverrider;
 
+    /**
+     * @param \BackBeeCloud\ClassContent\ClassContentOverrider $overrider
+     */
     public function __construct(ClassContentOverrider $overrider)
     {
-        $this->classcontentOverrider = $overrider;
+        $this->classContentOverrider = $overrider;
     }
 
-    public function onApplicationInit(Event $event)
+    /**
+     * On application init.
+     *
+     * @param \BackBee\Event\Event $event
+     */
+    public function onApplicationInit(Event $event): void
     {
         if ($event->getTarget()->isRestored()) {
             return;
         }
 
-        $this->classcontentOverrider->generate();
+        $this->classContentOverrider->generate();
     }
 }
