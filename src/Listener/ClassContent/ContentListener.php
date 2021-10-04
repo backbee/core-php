@@ -29,13 +29,14 @@ use BackBee\HttpClient\UserAgent;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBeeCloud\Entity\ContentDuplicatePreSaveEvent;
+use Exception;
 
 /**
  * Class ContentListener
  *
  * @package BackBeeCloud\Listener\ClassContent
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentListener
 {
@@ -57,7 +58,7 @@ class ContentListener
      *
      * @param ContentDuplicatePreSaveEvent $event
      */
-    public static function onContentDuplicatePreSave(ContentDuplicatePreSaveEvent $event)
+    public static function onContentDuplicatePreSave(ContentDuplicatePreSaveEvent $event): void
     {
         $dic = $event->getApplication()->getContainer();
         $content = $event->getContent();
@@ -71,8 +72,8 @@ class ContentListener
                 $content->path = $event->getApplication()->getContainer()->get('cloud.file_handler')->duplicate(
                     $content->path,
                     sprintf('%s.%s', $content->getUid(), explode('.', basename($content->path))[1])
-                );
-            } catch (\Exception $exception) {
+                ) ?? '';
+            } catch (Exception $exception) {
                 $content->path = null;
             }
         } elseif ($content instanceof Title) {
