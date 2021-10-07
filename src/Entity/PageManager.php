@@ -491,17 +491,21 @@ class PageManager
         $this->entityMgr->persist($copy);
         $this->typeMgr->associate($copy, $this->typeMgr->findByPage($page));
 
-        $this->update($copy, ['title' => $data['title']], false);
-        unset($data['title']);
+        $this->update(
+            $copy,
+            [
+                'title' => $data['title'],
+                'seo' => [
+                    'title' => $data['title'],
+                    'description' => $data['description'],
+                ],
+            ],
+            false
+        );
+
+        unset($data['title'], $data['description']);
 
         $this->currentPage = $copy;
-
-        $seoPage = $this->seoMetadataManager->getPageSeoMetadata($page);
-
-        $data['seo'] = [
-            'title' => $seoPage['title'] ?? $data['title'],
-            'description' => $seoPage['description'] ?? '',
-        ];
 
         $this->update($copy, $data, false);
 
