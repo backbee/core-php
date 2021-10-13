@@ -146,7 +146,7 @@ class HighlightContentListener
      *
      * @return array
      */
-    private static function sortPagesByUids(array $param, $pages): array
+    public static function sortPagesByUids(array $param, $pages): array
     {
         $uids = [];
         foreach ($param as $data) {
