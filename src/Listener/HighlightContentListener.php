@@ -41,7 +41,6 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
 use Exception;
 
-
 /**
  * @author Florian Kroockmann <florian.kroockmann@lp-digital.fr>
  * @author Eric Chau <eric.chau@lp-digital.fr>
@@ -165,7 +164,7 @@ class HighlightContentListener
      *
      * @return array
      */
-    private static function sortPagesByUids(array $param, $pages): array
+    public static function sortPagesByUids(array $param, $pages): array
     {
         $uids = [];
         foreach ($param as $data) {
@@ -245,13 +244,13 @@ class HighlightContentListener
                         'title' => $image->getParamValue('title'),
                         'legend' => $image->getParamValue('description'),
                         'alt' => ($media instanceof Image)
-                            ? $bbApp->getRenderer()->getImageAlternativeText($media, $title) 
+                            ? $bbApp->getRenderer()->getImageAlternativeText($media, $title)
                             : $title,
                         'stat' => $image->getParamValue('stat'),
                     ] + $imageData;
             }
         }
-        
+
         return $bbApp->getRenderer()->partial(
             sprintf('ContentAutoblock/item%s.html.twig', $mode),
             [
