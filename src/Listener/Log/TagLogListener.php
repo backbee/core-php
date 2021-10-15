@@ -68,14 +68,16 @@ class TagLogListener extends AbstractLogListener implements LogListenerInterface
      */
     public static function onPostActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::CREATE_ACTION,
-            $rawData['uid'] ?? null,
-            self::ENTITY_CLASS,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::CREATE_ACTION,
+                $rawData['uid'] ?? null,
+                self::ENTITY_CLASS,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -83,16 +85,18 @@ class TagLogListener extends AbstractLogListener implements LogListenerInterface
      */
     public static function onPutActionPostCall(PostResponseEvent $event): void
     {
-        $request = $event->getRequest();
-        $id = $request->attributes->get('uid');
-        $rawData = array_merge(['uid' => $id], $request->request->all());
+        if (self::$logger) {
+            $request = $event->getRequest();
+            $id = $request->attributes->get('uid');
+            $rawData = array_merge(['uid' => $id], $request->request->all());
 
-        self::writeLog(
-            self::UPDATE_ACTION,
-            $id,
-            self::ENTITY_CLASS,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::UPDATE_ACTION,
+                $id,
+                self::ENTITY_CLASS,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -100,16 +104,18 @@ class TagLogListener extends AbstractLogListener implements LogListenerInterface
      */
     public static function onDeleteActionPreCall(PreRequestEvent $event): void
     {
-        $tagId = $event->getRequest()->attributes->get('uid');
-        $tag = self::$tagManager->get($tagId);
+        if (self::$logger) {
+            $tagId = $event->getRequest()->attributes->get('uid');
+            $tag = self::$tagManager->get($tagId);
 
-        if ($tag) {
-            self::writeLog(
-                self::DELETE_ACTION,
-                $tagId,
-                self::ENTITY_CLASS,
-                self::getContent($tag->jsonSerialize())
-            );
+            if ($tag) {
+                self::writeLog(
+                    self::DELETE_ACTION,
+                    $tagId,
+                    self::ENTITY_CLASS,
+                    self::getContent($tag->jsonSerialize())
+                );
+            }
         }
     }
 

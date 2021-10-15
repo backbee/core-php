@@ -64,14 +64,16 @@ class ClassContentLogListener extends AbstractLogListener implements LogListener
      */
     public static function onPostActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::CREATE_ACTION,
-            $rawData['uid'] ?? null,
-            $rawData['className'] ?? null,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::CREATE_ACTION,
+                $rawData['uid'] ?? null,
+                $rawData['className'] ?? null,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -79,14 +81,16 @@ class ClassContentLogListener extends AbstractLogListener implements LogListener
      */
     public static function onPutActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::UPDATE_ACTION,
-            $rawData['uid'] ?? null,
-            $rawData['className'] ?? null,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::UPDATE_ACTION,
+                $rawData['uid'] ?? null,
+                $rawData['className'] ?? null,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -94,17 +98,19 @@ class ClassContentLogListener extends AbstractLogListener implements LogListener
      */
     public static function onDeleteActionPreCall(PreRequestEvent $event): void
     {
-        $contentId = $event->getRequest()->attributes->get('uid');
-        $content = self::$repository->find($contentId);
+        if (self::$logger) {
+            $contentId = $event->getRequest()->attributes->get('uid');
+            $content = self::$repository->find($contentId);
 
-        if ($content) {
-            $rawData = $content->jsonSerialize();
-            self::writeLog(
-                self::DELETE_ACTION,
-                $contentId,
-                $rawData['className'] ?? null,
-                self::getContent($rawData)
-            );
+            if ($content) {
+                $rawData = $content->jsonSerialize();
+                self::writeLog(
+                    self::DELETE_ACTION,
+                    $contentId,
+                    $rawData['className'] ?? null,
+                    self::getContent($rawData)
+                );
+            }
         }
     }
 

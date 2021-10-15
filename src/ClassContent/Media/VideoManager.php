@@ -23,6 +23,7 @@ namespace BackBee\ClassContent\Media;
 
 use Exception;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -30,14 +31,30 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package BackBee\ClassContent\Media
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class VideoManager
 {
     public const YOUTUBE_URL_REGEX = '/(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"\'>]+)/';
     public const YOUTUBE_EMBED_BASE_URL = 'https://www.youtube.com/embed/';
     public const DAILYMOTION_URL_REGEX = '/(?:dailymotion\.com\/|dai\.ly)(?:video|hub)?\/([0-9a-z]+)/';
-    public const VIMEO_URL_REGEX = '/(?:vimeo\.com\/)(?:channels\/[A-z]+\/)?([0-9]+)/';
+    public const VIMEO_URL_REGEX = '/(?:vimeo\.com\/)(?:channels\/[A-z]+\/)?(\d+)(?:\/?[A-Za-z0-9]+)/';
+    public const VIMEO_PRIVATE_URL_REGEX = '/(?:vimeo\.com\/)(?:channels\/[A-z]+\/)?(\d+)(\/[A-Za-z0-9]+)/';
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * Constructor.
+     *
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * Check is supported url.
@@ -49,9 +66,9 @@ class VideoManager
     public function isSupportedUrl($url): bool
     {
         return
-            1 === preg_match(self::YOUTUBE_URL_REGEX, $url)
-            || 1 === preg_match(self::VIMEO_URL_REGEX, $url)
-            || 1 === preg_match(self::DAILYMOTION_URL_REGEX, $url);
+            preg_match(self::YOUTUBE_URL_REGEX, $url) === 1
+            || preg_match(self::VIMEO_URL_REGEX, $url) === 1
+            || preg_match(self::DAILYMOTION_URL_REGEX, $url) === 1;
     }
 
     /**
@@ -71,15 +88,15 @@ class VideoManager
 
         $client = new Client();
 
-        if (1 === preg_match(self::YOUTUBE_URL_REGEX, $url, $matches)) {
+        if (preg_match(self::YOUTUBE_URL_REGEX, $url, $matches) === 1) {
             $thumbnail = $this->isYoutubeVideo($client, $matches);
         }
 
-        if (1 === preg_match(self::VIMEO_URL_REGEX, $url, $matches)) {
+        if (preg_match(self::VIMEO_URL_REGEX, $url, $matches) === 1) {
             $thumbnail = $this->isVimeoVideo($client, $matches);
         }
 
-        if (1 === preg_match(self::DAILYMOTION_URL_REGEX, $url, $matches)) {
+        if (preg_match(self::DAILYMOTION_URL_REGEX, $url, $matches) === 1) {
             $thumbnail = $this->isDailymotionVideo($client, $matches);
         }
 
@@ -100,7 +117,15 @@ class VideoManager
 
         try {
             $client->request('head', $thumbnailUrl);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
+            $this->logger->warning(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
             $thumbnailUrl = sprintf('https://img.youtube.com/vi/%s/hqdefault.jpg', $matches[5]);
         }
 
@@ -117,19 +142,28 @@ class VideoManager
      */
     private function isVimeoVideo($client, $matches): string
     {
-        $response = $client->request(
-            'get',
-            sprintf(
-                'https://vimeo.com/api/v2/video/%s.json',
-                $matches[1]
-            )
-        );
-
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
+        try {
+            $response = $client->request(
+                'get',
+                sprintf(
+                    'https://vimeo.com/api/oembed.json?url=https://%s',
+                    $matches[0]
+                )
+            );
+        } catch (Exception $exception) {
+            $this->logger->warning(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
             return '';
         }
 
         $data = json_decode((string)$response->getBody(), true);
+
         $data = array_pop($data);
 
         return $data['thumbnail_large'];
@@ -179,15 +213,15 @@ class VideoManager
 
         $client = new Client();
 
-        if (1 === preg_match(self::YOUTUBE_URL_REGEX, $url, $matches)) {
+        if (preg_match(self::YOUTUBE_URL_REGEX, $url, $matches) === 1) {
             $thumbnail = $this->isMobileYoutubeVideo($client, $matches);
         }
 
-        if (1 === preg_match(self::VIMEO_URL_REGEX, $url, $matches)) {
+        if (preg_match(self::VIMEO_URL_REGEX, $url, $matches) === 1) {
             $thumbnail = $this->isMobileVimeoVideo($client, $matches);
         }
 
-        if (1 === preg_match(self::DAILYMOTION_URL_REGEX, $url, $matches)) {
+        if (preg_match(self::DAILYMOTION_URL_REGEX, $url, $matches) === 1) {
             $thumbnail = $this->isMobileDailymotionVideo($client, $matches);
         }
 
