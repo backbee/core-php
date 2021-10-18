@@ -36,8 +36,8 @@ use const FILTER_VALIDATE_URL;
  *
  * @package BackBeeCloud\Listener\ClassContent
  *
- * @author Marian Hodis <marian.hodis@lp-digital.fr>
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Marian Hodis <marian.hodis@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class VideoListener
 {
@@ -90,10 +90,10 @@ class VideoListener
      *
      * @param Event $event
      */
-    public static function onVideoRevisionFlush(Event $event)
+    public static function onVideoRevisionFlush(Event $event): void
     {
         $app = $event->getApplication();
-        if (null === $bbtoken = $app->getBBUserToken()) {
+        if (($bbtoken = $app->getBBUserToken()) === null) {
             return;
         }
 
@@ -110,8 +110,8 @@ class VideoListener
 
         $videoUrl = $revision->getParamValue('video_url');
         if (
-            false === $videoUrl
-            || false === filter_var($videoUrl, FILTER_VALIDATE_URL)
+            $videoUrl === false
+            || filter_var($videoUrl, FILTER_VALIDATE_URL) === false
             || !self::$videoManager->isSupportedUrl($videoUrl)
         ) {
             return;
@@ -151,7 +151,7 @@ class VideoListener
             );
         }
 
-        if (null === $imageDraft) {
+        if ($imageDraft === null) {
             $imageDraft = $entityManager->getRepository(Revision::class)->checkout($image, $bbtoken);
             $entityManager->persist($imageDraft);
             $unitOfWork->computeChangeSet(
@@ -163,16 +163,16 @@ class VideoListener
         }
 
         $filename = md5($videoUrl);
-        if (false !== strpos($imageDraft->path, $filename)) {
+        if (strpos($imageDraft->path, $filename) !== false) {
             return;
         }
 
-        if (null === $thumbnailUrl = self::$videoManager->getVideoThumbnailUrl($videoUrl)) {
+        if (($thumbnailUrl = self::$videoManager->getVideoThumbnailUrl($videoUrl)) === null) {
             return;
         }
 
         $rawContent = @file_get_contents($thumbnailUrl);
-        if (false === $rawContent) {
+        if ($rawContent === false) {
             return;
         }
 
@@ -183,7 +183,6 @@ class VideoListener
         $imageDraft->path = $app->getContainer()->get('cloud.file_handler')->upload(
             $filename,
             $tmpfilepath,
-            true
         );
 
         $method = $unitOfWork->isScheduledForInsert($imageDraft) && !$isNewDraft
@@ -219,7 +218,12 @@ class VideoListener
         $data = self::getData($url);
 
         $renderer->assign('src', $data['src']);
-        $renderer->assign('thumb_url', (true === $renderer->userAgentHelper()->isDesktop()) ? self::$videoManager->getVideoThumbnailUrl($url) : self::$videoManager->getMobileVideoThumbnailUrl($url));
+        $renderer->assign(
+            'thumb_url',
+            ($renderer->userAgentHelper()->isDesktop() === true) ? self::$videoManager->getVideoThumbnailUrl(
+                $url
+            ) : self::$videoManager->getMobileVideoThumbnailUrl($url)
+        );
         $renderer->assign('attributes', $data['attributes']);
         $renderer->assign('position', $content->getParamValue('position'));
         $renderer->assign('size', self::$defaultVideoSizes[$content->getParamValue('size')]);
@@ -240,8 +244,9 @@ class VideoListener
             'attributes' => '',
         ];
 
-        $urlData = parse_url($url);
+        $urlData = (array)parse_url($url);
         $queryString = [];
+
         if (isset($urlData['query'])) {
             parse_str($urlData['query'], $queryString);
         }
@@ -255,28 +260,23 @@ class VideoListener
                 if (isset($queryString['v'])) {
                     $data['src'] = self::YOUTUBE_BASEURL . $queryString['v'];
                 }
-
                 break;
-
             case self::YOUTUBE_HOST_SHORT:
                 $data['src'] = self::YOUTUBE_BASEURL . substr($urlData['path'], 1);
-
                 break;
-
             case self::DAILYMOTION_HOST:
                 $data['src'] = self::DAILYMOTION_BASEURL . strtok(basename($url), '_');
                 break;
-
             case self::VIMEO_HOST:
-                $data['src'] = self::VIMEO_BASEURL . substr($urlData['path'], 1);
-
+                $data['src'] = self::VIMEO_BASEURL . (
+                    preg_match(self::$videoManager::VIMEO_PRIVATE_URL_REGEX, $url, $matches) === 1 ?
+                        ltrim(preg_replace("~/(?!.*/)~", '?h=', $urlData['path']), '/') : substr($urlData['path'], 1)
+                );
                 break;
-
             case self::BFMTV_HOST:
                 if ($urlData['path'] === self::BFMTV_BASEURL) {
                     $data['src'] = $url;
                 }
-
                 break;
         }
 

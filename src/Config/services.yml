@@ -715,6 +715,7 @@ services:
     # Class content
     core.class_content.media.video.manager:
         class: BackBee\ClassContent\Media\VideoManager
+        arguments: [ '@backbee.logger' ]
 
     # Listener
     core.cache.listener:

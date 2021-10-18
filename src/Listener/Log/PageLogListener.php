@@ -68,14 +68,16 @@ class PageLogListener extends AbstractLogListener implements LogListenerInterfac
      */
     public static function onPostActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::CREATE_ACTION,
-            $rawData['id'] ?? null,
-            self::ENTITY_CLASS,
-            ['content' => $rawData]
-        );
+            self::writeLog(
+                self::CREATE_ACTION,
+                $rawData['id'] ?? null,
+                self::ENTITY_CLASS,
+                ['content' => $rawData]
+            );
+        }
     }
 
     /**
@@ -83,14 +85,16 @@ class PageLogListener extends AbstractLogListener implements LogListenerInterfac
      */
     public static function onPutActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::UPDATE_ACTION,
-            $rawData['id'] ?? null,
-            self::ENTITY_CLASS,
-            ['content' => $rawData]
-        );
+            self::writeLog(
+                self::UPDATE_ACTION,
+                $rawData['id'] ?? null,
+                self::ENTITY_CLASS,
+                ['content' => $rawData]
+            );
+        }
     }
 
     /**
@@ -98,16 +102,18 @@ class PageLogListener extends AbstractLogListener implements LogListenerInterfac
      */
     public static function onDeleteActionPreCall(PreRequestEvent $event): void
     {
-        $pageId = $event->getRequest()->attributes->get('uid');
-        $page = self::$pageManager->get($pageId);
+        if (self::$logger) {
+            $pageId = $event->getRequest()->attributes->get('uid');
+            $page = self::$pageManager->get($pageId);
 
-        if ($page) {
-            self::writeLog(
-                self::DELETE_ACTION,
-                $pageId,
-                self::ENTITY_CLASS,
-                ['content' => self::$pageManager->format($page)]
-            );
+            if ($page) {
+                self::writeLog(
+                    self::DELETE_ACTION,
+                    $pageId,
+                    self::ENTITY_CLASS,
+                    ['content' => self::$pageManager->format($page)]
+                );
+            }
         }
     }
 }

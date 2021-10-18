@@ -69,14 +69,16 @@ class UserLogListener extends AbstractLogListener implements LogListenerInterfac
      */
     public static function onPostActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::CREATE_ACTION,
-            $rawData['id'] ?? null,
-            self::ENTITY_CLASS,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::CREATE_ACTION,
+                $rawData['id'] ?? null,
+                self::ENTITY_CLASS,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -84,16 +86,18 @@ class UserLogListener extends AbstractLogListener implements LogListenerInterfac
      */
     public static function onPutActionPostCall(PostResponseEvent $event): void
     {
-        $request = $event->getRequest();
-        $id = $request->attributes->get('id');
-        $rawData = array_merge(['id' => $id], $request->request->all());
+        if (self::$logger) {
+            $request = $event->getRequest();
+            $id = $request->attributes->get('id');
+            $rawData = array_merge(['id' => $id], $request->request->all());
 
-        self::writeLog(
-            self::UPDATE_ACTION,
-            $id,
-            self::ENTITY_CLASS,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::UPDATE_ACTION,
+                $id,
+                self::ENTITY_CLASS,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -101,30 +105,32 @@ class UserLogListener extends AbstractLogListener implements LogListenerInterfac
      */
     public static function onDeleteActionPreCall(PreRequestEvent $event): void
     {
-        $userId = $event->getRequest()->attributes->get('id');
-        $user = self::$userManager->getById($userId);
+        if (self::$logger) {
+            $userId = $event->getRequest()->attributes->get('id');
+            $user = self::$userManager->getById($userId);
 
-        if ($user) {
-            self::writeLog(
-                self::DELETE_ACTION,
-                $userId,
-                self::ENTITY_CLASS,
-                self::getContent(
-                    [
-                        'id' => $user->getId(),
-                        'login' => $user->getLogin(),
-                        'email' => $user->getEmail(),
-                        'firstname' => $user->getFirstname(),
-                        'lastname' => $user->getLastname(),
-                        'group_types' => array_map(
-                            static function (Group $group) {
-                                return $group->getName();
-                            },
-                            $user->getGroups()->toArray()
-                        )
-                    ]
-                )
-            );
+            if ($user) {
+                self::writeLog(
+                    self::DELETE_ACTION,
+                    $userId,
+                    self::ENTITY_CLASS,
+                    self::getContent(
+                        [
+                            'id' => $user->getId(),
+                            'login' => $user->getLogin(),
+                            'email' => $user->getEmail(),
+                            'firstname' => $user->getFirstname(),
+                            'lastname' => $user->getLastname(),
+                            'group_types' => array_map(
+                                static function (Group $group) {
+                                    return $group->getName();
+                                },
+                                $user->getGroups()->toArray()
+                            )
+                        ]
+                    )
+                );
+            }
         }
     }
 

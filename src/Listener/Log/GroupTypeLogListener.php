@@ -68,14 +68,16 @@ class GroupTypeLogListener extends AbstractLogListener implements LogListenerInt
      */
     public static function onPostActionPostCall(PostResponseEvent $event): void
     {
-        $rawData = json_decode($event->getResponse()->getContent(), true);
+        if (self::$logger) {
+            $rawData = json_decode($event->getResponse()->getContent(), true);
 
-        self::writeLog(
-            self::CREATE_ACTION,
-            $rawData['id'] ?? null,
-            self::ENTITY_CLASS,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::CREATE_ACTION,
+                $rawData['id'] ?? null,
+                self::ENTITY_CLASS,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -83,16 +85,18 @@ class GroupTypeLogListener extends AbstractLogListener implements LogListenerInt
      */
     public static function onPutActionPostCall(PostResponseEvent $event): void
     {
-        $request = $event->getRequest();
-        $groupTypeId = $request->attributes->get('id');
-        $rawData = array_merge(['id' => $groupTypeId], $request->request->all());
+        if (self::$logger) {
+            $request = $event->getRequest();
+            $groupTypeId = $request->attributes->get('id');
+            $rawData = array_merge(['id' => $groupTypeId], $request->request->all());
 
-        self::writeLog(
-            self::UPDATE_ACTION,
-            $groupTypeId,
-            self::ENTITY_CLASS,
-            self::getContent($rawData)
-        );
+            self::writeLog(
+                self::UPDATE_ACTION,
+                $groupTypeId,
+                self::ENTITY_CLASS,
+                self::getContent($rawData)
+            );
+        }
     }
 
     /**
@@ -100,16 +104,18 @@ class GroupTypeLogListener extends AbstractLogListener implements LogListenerInt
      */
     public static function onDeleteActionPreCall(PreRequestEvent $event): void
     {
-        $groupTypeId = $event->getRequest()->attributes->get('id');
-        $groupType = self::$groupTypeManager->getById($groupTypeId);
+        if (self::$logger) {
+            $groupTypeId = $event->getRequest()->attributes->get('id');
+            $groupType = self::$groupTypeManager->getById($groupTypeId);
 
-        if ($groupType) {
-            self::writeLog(
-                self::DELETE_ACTION,
-                $groupTypeId,
-                self::ENTITY_CLASS,
-                self::getContent($groupType->jsonSerialize())
-            );
+            if ($groupType) {
+                self::writeLog(
+                    self::DELETE_ACTION,
+                    $groupTypeId,
+                    self::ENTITY_CLASS,
+                    self::getContent($groupType->jsonSerialize())
+                );
+            }
         }
     }
 
