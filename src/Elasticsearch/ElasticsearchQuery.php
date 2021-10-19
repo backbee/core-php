@@ -107,7 +107,6 @@ class ElasticsearchQuery
                                 'contents' => [
                                     'query' => $term,
                                     'boost' => 3,
-                                    'fuzziness' => 'AUTO',
                                 ],
                             ],
                         ],
@@ -116,7 +115,6 @@ class ElasticsearchQuery
                                 'contents.folded' => [
                                     'query' => $term,
                                     'boost' => 3,
-                                    'fuzziness' => 'AUTO',
                                 ],
                             ],
                         ],
@@ -125,7 +123,6 @@ class ElasticsearchQuery
                                 'tags' => [
                                     'query' => $term,
                                     'boost' => 2,
-                                    'fuzziness' => 'AUTO',
                                 ],
                             ],
                         ],
@@ -134,7 +131,6 @@ class ElasticsearchQuery
                                 'tags.raw' => [
                                     'query' => $term,
                                     'boost' => 2,
-                                    'fuzziness' => 'AUTO',
                                 ],
                             ],
                         ],
@@ -143,7 +139,6 @@ class ElasticsearchQuery
                                 'tags.folded' => [
                                     'query' => $term,
                                     'boost' => 2,
-                                    'fuzziness' => 'AUTO',
                                 ],
                             ],
                         ],
