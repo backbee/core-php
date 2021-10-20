@@ -1,53 +1,56 @@
 <div {{ this.bbcontent()|raw }} data-forbidden-plugins="remove">
-  <div class="form-group">
-    {% set current_lang = this.getCurrentLang.getCode() %}
-    <form action="{{ current_lang ? '/' ~ current_lang : '' }}/search" method="get" class="searchbar-wrapper">
-      <div class="input-group">
-        <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="{{this.getObject().getParamValue('input_placeholder')}}" />
-        <div class="input-group-append">
-          <button class="btn search-btn" aria-label="search" type="submit"><i class="icon_search"></i></botton>
-        </div>
-      </div>
-    </form>
-  </div>
+    <div class="form-group">
+        {% set current_lang = this.getCurrentLang.getCode() %}
+        <form action="{{ current_lang ? '/' ~ current_lang : '' }}/search" method="get" class="searchbar-wrapper">
+            <div class="input-group">
+                <input type="text" class="form-control" name="q" value="{{ query }}"
+                       placeholder="{{ this.getObject().getParamValue('input_placeholder') }}"/>
+                <div class="input-group-append">
+                    <button class="btn search-btn" aria-label="search" type="submit"><i class="icon_search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-  {% if query %}
-  <h2>{{ this.getObject().getParamValue('result_label') }} <strong>{{ query }}</strong></h2>
-  {% endif %}
+    {% if query %}
+        <h2>{{ pages.countMax() }} {{ this.getObject().getParamValue('result_label') }} <strong>{{ query }}</strong></h2>
+    {% endif %}
 
-  <ul class="list-unstyled list-result image-text-vertical">
-  {% for content in contents %}
-    <li>{{ content|raw }}</li>
-  {% else %}
-    <li><em>{{this.getObject().getParamValue('no_results_message')}}</em></li>
-  {% endfor %}
-  </ul>
-
-  {% if pages.maxPagination() > 1 %}
-  <nav class="text-center">
-    <ul class="pagination">
-      {% if pages.currentPagination() != 1 and pages.currentPagination() > 0 %}
-      <li class="page-item">
-        <a class="page-link" href="?q={{ query|url_encode }}&page={{ pages.currentPagination() - 1 }}" aria-label="Previous">
-          <span class="arrow_carrot-left" aria-hidden="true"></span>
-        </a>
-      </li>
-      {% endif %}
-
-      {% for i in 1..pages.maxPagination() %}
-      <li class="page-item{% if pages.currentPagination() == i %} active{% endif %}">
-        <a class="page-link" href="?q={{ query|url_encode }}&page={{ i }}">{{ i }}</a>
-      </li>
-      {% endfor %}
-
-      {% if pages.maxPagination() > pages.currentPagination() %}
-      <li class="page-item">
-        <a class="page-link" href="?q={{ query|url_encode }}&page={{ pages.currentPagination() + 1 }}" aria-label="Next">
-          <span class="arrow_carrot-right" aria-hidden="true"></span>
-        </a>
-      </li>
-      {% endif %}
+    <ul class="list-unstyled list-result image-text-vertical">
+        {% for content in contents %}
+            <li>{{ content|raw }}</li>
+        {% else %}
+            <li><em>{{ this.getObject().getParamValue('no_results_message') }}</em></li>
+        {% endfor %}
     </ul>
-  </nav>
-  {% endif %}
+
+    {% if pages.maxPagination() > 1 %}
+        <nav class="text-center">
+            <ul class="pagination">
+                {% if pages.currentPagination() != 1 and pages.currentPagination() > 0 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query|url_encode }}&page={{ pages.currentPagination() - 1 }}"
+                           aria-label="Previous">
+                            <span class="arrow_carrot-left" aria-hidden="true"></span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for i in 1..pages.maxPagination() %}
+                    <li class="page-item{% if pages.currentPagination() == i %} active{% endif %}">
+                        <a class="page-link" href="?q={{ query|url_encode }}&page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if pages.maxPagination() > pages.currentPagination() %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query|url_encode }}&page={{ pages.currentPagination() + 1 }}"
+                           aria-label="Next">
+                            <span class="arrow_carrot-right" aria-hidden="true"></span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
 </div>
