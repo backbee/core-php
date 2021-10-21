@@ -22,10 +22,9 @@ Cards:
             label: yaml_block_cards_image_stretch
             tab: yaml_block_general_tab
         url:
-            type: text
+            type: url
             label: yaml_block_cards_url
             value: ''
-            format: URL
             tab: yaml_block_general_tab
         target_blank:
             type: switch

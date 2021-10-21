@@ -18,7 +18,6 @@ Author:
             label: yaml_block_author_description_label
             value: ''
         url:
-            type: text
+            type: url
             label: yaml_block_author_url_label
             value: ''
-            format: URL

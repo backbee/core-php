@@ -25,10 +25,9 @@ Menu:
             group:
                 id: text
         button_url:
-            type: text
+            type: url
             label: yaml_block_button_url
             value: ''
-            format: URL
             tab: yaml_block_menu_button
             group:
                 id: text
