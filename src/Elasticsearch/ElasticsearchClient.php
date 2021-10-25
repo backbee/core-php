@@ -172,6 +172,25 @@ class ElasticsearchClient
                                     'type' => 'stemmer',
                                     'language' => 'english',
                                 ],
+                                'my_french_elision' => [
+                                    'type' => 'elision',
+                                    'articles_case' => true,
+                                    'articles' => [
+                                        0 => 'l',
+                                        1 => 'm',
+                                        2 => 't',
+                                        3 => 'qu',
+                                        4 => 'n',
+                                        5 => 's',
+                                        6 => 'j',
+                                        7 => 'd',
+                                        8 => 'c',
+                                        9 => 'jusqu',
+                                        10 => 'quoiqu',
+                                        11 => 'lorsqu',
+                                        12 => 'puisqu',
+                                    ],
+                                ],
                             ],
                             'analyzer' => [
                                 'std_folded' => [
@@ -181,6 +200,7 @@ class ElasticsearchClient
                                         'lowercase',
                                         'asciifolding',
                                         'my_stemmer_english',
+                                        'my_french_elision',
                                         'my_stemmer_french',
                                     ],
                                 ],
