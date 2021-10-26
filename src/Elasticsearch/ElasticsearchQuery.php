@@ -79,7 +79,7 @@ class ElasticsearchQuery
                 'bool' => [
                     'should' => [
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'title' => [
                                     'query' => $term,
                                     'boost' => 5,
@@ -87,7 +87,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'title.raw' => [
                                     'query' => $term,
                                     'boost' => 5,
@@ -95,7 +95,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'title.folded' => [
                                     'query' => $term,
                                     'boost' => 5,
@@ -103,7 +103,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'contents' => [
                                     'query' => $term,
                                     'boost' => 3,
@@ -111,7 +111,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'contents.folded' => [
                                     'query' => $term,
                                     'boost' => 3,
@@ -119,7 +119,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'tags' => [
                                     'query' => $term,
                                     'boost' => 2,
@@ -127,7 +127,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'tags.raw' => [
                                     'query' => $term,
                                     'boost' => 2,
@@ -135,7 +135,7 @@ class ElasticsearchQuery
                             ],
                         ],
                         [
-                            'match' => [
+                            'match_phrase' => [
                                 'tags.folded' => [
                                     'query' => $term,
                                     'boost' => 2,
