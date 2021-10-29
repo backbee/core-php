@@ -178,7 +178,7 @@ class SearchManager extends AbstractSearchManager
                 $query,
                 str_replace('%', '', $criteria['title']),
                 $criteria['search_in'] ?? 'title',
-                $criteria['search_by_term']
+                $criteria['search_by_term'] ?? 'exact_term'
             );
         }
 
