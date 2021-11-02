@@ -165,13 +165,12 @@ $.fn.masterHead = function (config) {
 };
 
 // Privacy policy banner - OK button
-
-var setCookie = function(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-};
+const setCookie = function (cName, cValue, expDays) {
+  let date = new Date()
+  date.setTime(date.getTime() + (expDays * 24 * 60 * 60 * 1000))
+  const expires = 'expires=' + date.toUTCString()
+  document.cookie = cName + '=' + cValue + '; ' + expires + '; path=/; secure;'
+}
 
 function getCookie(name) {
     var value = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
@@ -198,7 +197,7 @@ $('#privacy-policy-banner button').on('click', function () {
 
 var startPos = jQuery(window).scrollTop();
 
-jQuery(window).on('scroll', function(e) {
+jQuery(window).on('scroll', function() {
    var currentPos = jQuery(window).scrollTop();
 
    if (Math.abs(currentPos - startPos) >= 500) {
