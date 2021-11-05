@@ -29,10 +29,9 @@ Information:
                 title: yaml_block_information_button_settings
             tab: yaml_block_information_general_tab
         button_url:
-            type: text
+            type: url
             label: yaml_block_information_button_url_label
             value: ''
-            format: URL
             group:
                 id: button_settings
             tab: yaml_block_information_general_tab

@@ -28,10 +28,9 @@ Quote:
             label: yaml_block_quote_button_title_label
             value: ''
         image_url:
-            type: text
+            type: url
             label: yaml_block_quote_image_url_label
             value: ''
-            format: URL
         target_blank:
             type: switch
             label: yaml_block_quote_target_blank_label
@@ -44,10 +43,9 @@ Quote:
                 id: link
                 title: yaml_block_quote_link_settings
         link_url:
-            type: text
+            type: url
             label: yaml_block_quote_link_url_label
             value: ''
-            format: URL
             group:
                 id: link
         link_target_blank:
