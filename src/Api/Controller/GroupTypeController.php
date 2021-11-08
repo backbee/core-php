@@ -21,6 +21,7 @@
 
 namespace BackBeeCloud\Api\Controller;
 
+use BackBee\BBApplication;
 use BackBeeCloud\Security\GroupType\CannotAddOrRemoveUserToClosedGroupTypeException;
 use BackBeeCloud\Security\GroupType\CannotDeleteGroupTypeWithUsersException;
 use BackBeeCloud\Security\GroupType\CannotDeleteReadOnlyException;
@@ -28,10 +29,9 @@ use BackBeeCloud\Security\GroupType\CannotUpdateReadOnlyGroupTypeException;
 use BackBeeCloud\Security\GroupType\GroupTypeManager;
 use BackBeeCloud\Security\GroupType\GroupTypeRightManager;
 use BackBeeCloud\Security\GroupType\NameAlreadyUsedException;
-use BackBeeCloud\Security\UserRightConstants;
 use BackBeeCloud\Security\User\UserDataFormatter;
+use BackBeeCloud\Security\UserRightConstants;
 use BackBeeCloud\User\UserManager;
-use BackBee\BBApplication;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,6 +52,14 @@ class GroupTypeController extends AbstractController
      */
     protected $userManager;
 
+    /**
+     * Constructor.
+     *
+     * @param \BackBee\BBApplication                                 $app
+     * @param \BackBeeCloud\Security\GroupType\GroupTypeManager      $groupTypeManager
+     * @param \BackBeeCloud\User\UserManager                         $userManager
+     * @param \BackBeeCloud\Security\GroupType\GroupTypeRightManager $groupTypeRightManager
+     */
     public function __construct(
         BBApplication $app,
         GroupTypeManager $groupTypeManager,
@@ -65,7 +73,14 @@ class GroupTypeController extends AbstractController
         $this->groupTypeRightManager = $groupTypeRightManager;
     }
 
-    public function getCollection(Request $request)
+    /**
+     * Get collection.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getCollection(Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
@@ -75,12 +90,19 @@ class GroupTypeController extends AbstractController
         $term = $request->query->get('term', '');
         $result = $term
             ? $this->groupTypeManager->searchByTerm($term)
-            : $this->groupTypeManager->getAllGroupTypes()
-        ;
+            : $this->groupTypeManager->getAllGroupTypes();
 
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
+    /**
+     * Create.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|void
+     * @throws \Exception
+     */
     public function create(Request $request)
     {
         $this->denyAccessUnlessGranted(
@@ -92,12 +114,11 @@ class GroupTypeController extends AbstractController
             return $response;
         }
 
-        $groupType = null;
         try {
             $groupType = $this->groupTypeManager->create(
                 $request->request->get('name'),
                 $request->request->get('description'),
-                true, // isOpen
+                true,  // isOpen
                 false, // readOnly
                 $request->request->get('features_rights', []),
                 $request->request->get('pages_rights', [])
@@ -109,9 +130,19 @@ class GroupTypeController extends AbstractController
                 Response::HTTP_BAD_REQUEST
             );
         }
+
         return new JsonResponse($groupType, Response::HTTP_CREATED);
     }
 
+    /**
+     * Update.
+     *
+     * @param                                           $id
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response|void
+     * @throws \Exception
+     */
     public function update($id, Request $request)
     {
         $this->denyAccessUnlessGranted(
@@ -152,6 +183,13 @@ class GroupTypeController extends AbstractController
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
+    /**
+     * Delete.
+     *
+     * @param $id
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function delete($id)
     {
         $this->denyAccessUnlessGranted(
@@ -182,8 +220,14 @@ class GroupTypeController extends AbstractController
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
-
-    public function getGroupTypeUsersCollection($groupTypeId)
+    /**
+     * Get group type users collection.
+     *
+     * @param $groupTypeId
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getGroupTypeUsersCollection($groupTypeId): JsonResponse
     {
         $this->denyAccessUnlessGranted(
             UserRightConstants::MANAGE_ATTRIBUTE,
@@ -202,6 +246,14 @@ class GroupTypeController extends AbstractController
         return new JsonResponse($users, Response::HTTP_OK);
     }
 
+    /**
+     * Associate group id with user id.
+     *
+     * @param $groupTypeId
+     * @param $userId
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function linkUser($groupTypeId, $userId)
     {
         $this->denyAccessUnlessGranted(
@@ -230,6 +282,14 @@ class GroupTypeController extends AbstractController
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
+    /**
+     * Delete user.
+     *
+     * @param $groupTypeId
+     * @param $userId
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function deleteUser($groupTypeId, $userId)
     {
         $this->denyAccessUnlessGranted(
@@ -258,7 +318,12 @@ class GroupTypeController extends AbstractController
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
-    private function getBadRequestResponseOnInvalidUserId()
+    /**
+     * Return json response with invalid user id error.
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    private function getBadRequestResponseOnInvalidUserId(): JsonResponse
     {
         return $this->createErrorJsonResponse(
             'bad_request',
@@ -267,9 +332,16 @@ class GroupTypeController extends AbstractController
         );
     }
 
+    /**
+     * Return json response with invalid data error.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|void
+     */
     private function getBadRequestResponseOnInvalidData(Request $request)
     {
-        if (false == $request->request->get('name')) {
+        if (false === $request->request->get('name')) {
             return $this->createErrorJsonResponse(
                 'bad_request',
                 'name_is_required',
@@ -278,7 +350,12 @@ class GroupTypeController extends AbstractController
         }
     }
 
-    private function getNotFoundResponseOnInvalidId()
+    /**
+     * Return json response with group type id not found error.
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    private function getNotFoundResponseOnInvalidId(): JsonResponse
     {
         return $this->createErrorJsonResponse(
             'not_found',

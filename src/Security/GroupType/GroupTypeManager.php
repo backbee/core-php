@@ -21,14 +21,16 @@
 
 namespace BackBeeCloud\Security\GroupType;
 
-use BackBeeCloud\PageCategory\PageCategoryManager;
-use BackBeeCloud\PageType\TypeManager;
-use BackBeeCloud\Security\UserRightConstants;
 use BackBee\Security\Group;
 use BackBee\Security\User;
 use BackBee\Site\Site;
+use BackBeeCloud\PageCategory\PageCategoryManager;
+use BackBeeCloud\PageType\TypeManager;
+use BackBeeCloud\Security\UserRightConstants;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use SplObjectStorage;
 
 /**
  * @author Quentin Guitard <quentin.guitard@lp-digital.fr>
@@ -124,15 +126,15 @@ class GroupTypeManager
 
         try {
             $groupType = $this->createGroupTypeEntity(
-                (bool) $isOpen,
-                (bool) $readOnly,
+                (bool)$isOpen,
+                (bool)$readOnly,
                 $group
             );
 
             if (UserRightConstants::SUPER_ADMIN_ID !== $groupType->getId()) {
                 $this->updateRights($groupType, $featuresSubject, $pageRightsData);
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->entityManager->rollback();
 
             throw $exception;
@@ -146,13 +148,24 @@ class GroupTypeManager
         return $groupType;
     }
 
+    /**
+     * Update.
+     *
+     * @param \BackBeeCloud\Security\GroupType\GroupType $groupType
+     * @param                                            $name
+     * @param                                            $description
+     * @param array                                      $featuresSubject
+     * @param array                                      $pageRightsData
+     *
+     * @throws \Exception
+     */
     public function update(
         GroupType $groupType,
         $name,
         $description,
         array $featuresSubject = [],
         array $pageRightsData = []
-    ) {
+    ): void {
         $this->entityManager->beginTransaction();
 
         try {
@@ -166,7 +179,7 @@ class GroupTypeManager
 
             $groupType->setDescription($description);
             $this->updateRights($groupType, $featuresSubject, $pageRightsData);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->entityManager->rollback();
 
             throw $exception;
@@ -176,9 +189,16 @@ class GroupTypeManager
         $this->entityManager->commit();
     }
 
-    public function updateRights(GroupType $groupType, array $featuresSubject, array $pageRightsData)
+    /**
+     * Update rights.
+     *
+     * @param \BackBeeCloud\Security\GroupType\GroupType $groupType
+     * @param array                                      $featuresSubject
+     * @param array                                      $pageRightsData
+     */
+    public function updateRights(GroupType $groupType, array $featuresSubject, array $pageRightsData): void
     {
-        $rightsToRemove = new \SplObjectStorage();
+        $rightsToRemove = new SplObjectStorage();
         foreach ($this->groupTypeRightManager->findByGroupType($groupType) as $right) {
             $rightsToRemove->attach($right);
         }
@@ -218,8 +238,7 @@ class GroupTypeManager
         }
 
         // handle pages rights
-
-        $pageTypes = isset($pageRightsData['page_types']) ? $pageRightsData['page_types'] : [];
+        $pageTypes = $pageRightsData['page_types'] ?? [];
         // if no page type selected, there is no rights on pages to apply
         $contextMask = UserRightConstants::NO_CONTEXT_MASK;
         $contextData = [];
@@ -233,21 +252,14 @@ class GroupTypeManager
             }
 
             $contextData['page_types'] = $pageTypesData;
-            $contextMask = $contextMask + UserRightConstants::PAGE_TYPE_CONTEXT_MASK;
+            $contextMask += UserRightConstants::PAGE_TYPE_CONTEXT_MASK;
         }
 
         if ($this->pageCategoryManager->getCategories()) {
-            $categories = isset($pageRightsData['categories']) ? $pageRightsData['categories'] : [];
+            $categories = $pageRightsData['categories'] ?? [];
             if (['all'] !== $categories) {
-                $categoriesData = [];
-                foreach ($pageRightsData['categories'] as $category) {
-                    if ($this->pageCategoryManager->hasCategory($category)) {
-                        $categoriesData = $category;
-                    }
-                }
-
                 $contextData['categories'] = $categories;
-                $contextMask = $contextMask + UserRightConstants::CATEGORY_CONTEXT_MASK;
+                $contextMask += UserRightConstants::CATEGORY_CONTEXT_MASK;
             }
         }
 
@@ -312,8 +324,7 @@ class GroupTypeManager
             )
             ->setParameter('name', '%' . $term . '%')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
 
         return $this->groupTypeRepository->findBy(['group' => $groups]);
     }
