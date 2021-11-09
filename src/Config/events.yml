@@ -103,8 +103,7 @@ revision.onflush:
 
 basic.searchresult.render:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\SearchResultListener, onRender ]
+        - [ '@core.search_result.listener', onRender ]
 
 media.video.render:
     listeners:

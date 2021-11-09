@@ -21,23 +21,47 @@
 
 namespace BackBeeCloud\Listener\ClassContent;
 
+use BackBee\Config\Config;
 use BackBee\Exception\BBException;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBeeCloud\Elasticsearch\SearchEvent;
 use BackBeeCloud\Search\ResultItemHtmlFormatter;
+use function strlen;
 
 /**
  * Class SearchResultListener
  *
  * @package BackBeeCloud\Listener\ClassContent
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SearchResultListener
 {
+    /**
+     * Event name.
+     */
     public const SEARCHRESULT_PRE_SEARCH_EVENT = 'content.searchresult.presearch';
+
+    /**
+     * Result per page by default
+     */
     public const RESULT_PER_PAGE = 10;
+
+    /**
+     * @var Config
+     */
+    private static $config;
+
+    /**
+     * Constructor.
+     *
+     * @param \BackBee\Config\Config $config
+     */
+    public function __construct(Config $config)
+    {
+        self::$config = $config;
+    }
 
     /**
      * On render.
@@ -53,7 +77,7 @@ class SearchResultListener
 
         $query = $request->query->get('q', '');
 
-        if ('' !== $query) {
+        if ($query !== '') {
             $page = $request->query->getInt('page', 1);
             $elasticsearchQuery = $app->getContainer()->get('elasticsearch.query');
 
@@ -78,12 +102,19 @@ class SearchResultListener
 
             $esQuery['query']['bool']['must'][] = ['match' => ['is_pullable' => true]];
 
-            if (null === $app->getBBUserToken()) {
+            if ($app->getBBUserToken() === null) {
                 $esQuery = $elasticsearchQuery->getQueryToFilterByPageIsOnline($esQuery, true);
             }
 
-            if (null !== $currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) {
+            if (($currentLang = $app->getContainer()->get('multilang_manager')->getCurrentLang()) !== null) {
                 $esQuery = $elasticsearchQuery->getQueryToFilterByLang($esQuery, [$currentLang]);
+            }
+
+            if (($settings = self::$config->getSection('elasticsearch'))) {
+                $esQuery = $elasticsearchQuery->getQueryToExcludePagesByUidOrUrl(
+                    $esQuery,
+                    $settings['pages_to_exclude'] ?? []
+                );
             }
 
             $size = $searchEvent->getSize() ?: self::RESULT_PER_PAGE;

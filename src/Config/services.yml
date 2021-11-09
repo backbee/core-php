@@ -736,6 +736,10 @@ services:
     core.page.listener:
         class: BackBeeCloud\Listener\PageListener
 
+    core.search_result.listener:
+        class: BackBeeCloud\Listener\ClassContent\SearchResultListener
+        arguments: [ '@config' ]
+
     core.log.class_content.listener:
         class: BackBee\Listener\Log\ClassContentLogListener
         arguments:
