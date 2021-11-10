@@ -2,6 +2,8 @@
 //
 // SASS variables
 
+@use "sass:math";
+
 /* Font */
 $font-sans:                     $font-family-sans-serif;
 
@@ -34,9 +36,9 @@ $btn-color2:                    $theme-color2;
 $btn-color3:                    $theme-color3;
 $btn-color4:                    $theme-color4;
 
-$btn-rounded-radius:            ceil( $btn-line-height * $font-size-base / 2 + $btn-padding-y );
-$btn-rounded-radius-sm:         ceil( $btn-line-height-sm * $font-size-sm / 2 + $btn-padding-y-sm );
-$btn-rounded-radius-lg:         ceil( $btn-line-height-lg * $font-size-lg / 2 + $btn-padding-y-lg );
+$btn-rounded-radius:            ceil( math.div($btn-line-height * $font-size-base, 2 + $btn-padding-y ));
+// $btn-rounded-radius-sm:         ceil( $btn-line-height-sm * $font-size-sm / 2 + $btn-padding-y-sm );
+// $btn-rounded-radius-lg:         ceil( $btn-line-height-lg * $font-size-lg / 2 + $btn-padding-y-lg );
 
 $btn-border-width:              1px;
 $liner-width:                   1px;
@@ -85,7 +87,7 @@ $social-border-width:           1px;
 $bg-padding:                    $spacer;
 $container-small-mw:            800px;
 
-$cloudcontentset-py:            $spacer / 2;
+$cloudcontentset-py:            math.div($spacer, 2);
 
 /* Pager */
 $pager-w:                       4rem;
@@ -95,7 +97,7 @@ $pager-w-md:                    2rem;
 $pager-h-md:                    4rem;
 
 $pagination-size:               3rem;
-$paginatoin-margin-x:           $spacer / 2;
+$paginatoin-margin-x:           math.div($spacer, 2);
 
 /* Spacer & Liner */
 $spacer-min-h:                  40px;
@@ -114,7 +116,7 @@ $map-set-autoheight-min-h:      $spacer-min-h;
 
 /* Image */
 $image-text-padding:            $spacer $spacer * 2;
-$image-text-margin:             $spacer / 2;
+$image-text-margin:             math.div($spacer, 2);
 $image-set-autoheight-min-h:    $spacer-min-h;
 
 // breakpoints

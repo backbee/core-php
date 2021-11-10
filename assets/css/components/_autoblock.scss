@@ -1,4 +1,4 @@
-// Autoblock
+@use "sass:math";
 
 // Image push
 figure {
@@ -52,7 +52,7 @@ figure {
         border-color: $border-color;
     }
     .abstract, .metadata-wrapper {
-        margin-top: $spacer / 2;
+        margin-top: math.div($spacer, 2);
         margin-bottom: 0;
     }
 
@@ -106,7 +106,7 @@ figure {
     .image-text-vertical, .text-image-vertical {
         @include media-breakpoint-down(sm) {
             figure {
-                margin-bottom: $spacer / 2;
+                margin-bottom: math.div($spacer, 2);
             }
         }
 
@@ -122,7 +122,7 @@ figure {
 
 .image-text-horizontal {
     figure {
-        margin-bottom: $spacer / 2;
+        margin-bottom: math.div($spacer, 2);
     }
 }
 

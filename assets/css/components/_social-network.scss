@@ -1,5 +1,7 @@
 // Social network
 
+@use "sass:math";
+
 .social-list {
     margin-bottom: 0;
     li a {
@@ -22,7 +24,7 @@
     display: flex;
     
     &:not(:last-child) {
-        margin-right: $spacer / 2;
+        margin-right: math.div($spacer, 2);
     }
 
     .fb-share-button {

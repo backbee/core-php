@@ -70,14 +70,14 @@
 
     // Older version
     &.btn-primary, &.btn-color2, &.btn-color6 {
-        @extend .btn.color-primary;
+        @extend .btn, .color-primary;
     }
 
     &.btn-secondary, &.btn-color3, &.btn-color7 {
-        @extend .btn.color-secondary;
+        @extend .btn, .color-secondary;
     }
 
     &.btn-color1, &.btn-color5 {
-        @extend .btn.color-background;
+        @extend .btn, .color-background;
     }
 }

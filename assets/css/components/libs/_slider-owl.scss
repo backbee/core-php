@@ -1,5 +1,7 @@
 // Slider (Owl Carousel : https://owlcarousel2.github.io/OwlCarousel2/)
 
+@use "sass:math";
+
 .slider-container {
     max-width: 770px;
     margin: 0 auto 3em auto;
@@ -138,7 +140,7 @@
             //.bg-opacity(@brand-primary,90%);
             background-color: rgba(#000, .25);
             //
-            position: absolute; top: 50%; margin: -$slider-std-btn-h/2 0 0 0;
+            position: absolute; top: 50%; margin: math.div(-$slider-std-btn-h, 2) 0 0 0;
             //
             font-size: 2em;
             height: $slider-std-btn-h;
