@@ -25,6 +25,7 @@ use App\Helper\StandaloneHelper;
 use BackBee\BBApplication;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBeeCloud\Api\Controller\AbstractController;
+use BackBeeCloud\Security\UserRightConstants;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -68,9 +69,11 @@ class AboutController extends AbstractController
         if (is_file($installedFile)) {
             $values = json_decode(file_get_contents($installedFile), true);
             foreach ($values['packages'] as $package) {
-                if (0 === strncmp($package['name'], 'backbee', 7)) {
+                if (strncmp($package['name'], 'backbee', 7) === 0) {
                     $packages[] = [
-                        'description' => $package['description'],
+                        'description' => $package['name'] . (
+                            $package['description'] ? ' ' . '(' . $package['description'] . ')' : ''
+                        ),
                         'version' => $package['version'],
                     ];
                 }
@@ -79,18 +82,28 @@ class AboutController extends AbstractController
 
         $aboutParams = $this->container->getParameter('about');
 
-        return new JsonResponse(
-            [
-                'information' => [
-                    'backbee_version' => BBApplication::VERSION,
-                    'php_version' => PHP_VERSION,
-                    'author' => '<a href="' . $aboutParams['author_link'] . '">' . $aboutParams['author'] . '</a>',
-                    'licence' => '<a href="' . $aboutParams['licence_link'] . '" target="_blank">' .
-                        $aboutParams['licence'] . '</a>',
-                ],
-                'bundles' => array_keys($this->container->getParameter('bundles')),
+        $data = [
+            'information' => [
+                'backbee_version' => BBApplication::VERSION,
+                'php_version' => PHP_VERSION,
+                'author' => '<a href="' . $aboutParams['author_link'] . '">' . $aboutParams['author'] . '</a>',
+                'licence' => '<a href="' . $aboutParams['licence_link'] . '" target="_blank">' .
+                    $aboutParams['licence'] . '</a>',
+            ],
+        ];
+
+        if (
+            $this->securityContext->isGranted(
+                UserRightConstants::CHECK_IDENTITY_ATTRIBUTE,
+                UserRightConstants::SUPER_ADMIN_ID
+            )
+        ) {
+            $data = array_merge($data, [
                 'packages' => $packages,
-            ]
-        );
+                'bundles' => array_keys($this->container->getParameter('bundles')),
+            ]);
+        }
+
+        return new JsonResponse($data);
     }
 }
