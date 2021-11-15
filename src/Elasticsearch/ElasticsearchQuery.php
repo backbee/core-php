@@ -429,4 +429,28 @@ class ElasticsearchQuery
 
         return $baseQuery;
     }
+
+    /**
+     * Get a query to exclude pages by uid or url
+     *
+     * @param array $baseQuery
+     * @param array $toExclude
+     *
+     * @return array
+     */
+    public function getQueryToExcludePagesByUidOrUrl(array $baseQuery, array $toExclude): array
+    {
+        $baseQuery['query']['bool']['must_not'] = array_merge(
+            $baseQuery['query']['bool']['must_not'] ?? [],
+            array_map(static function ($value) {
+                return [
+                    'match' => [
+                        (strncmp($value, '/', 1) === 0 ? 'url' : '_id') => $value
+                    ]
+                ];
+            }, $toExclude)
+        );
+
+        return $baseQuery;
+    }
 }
