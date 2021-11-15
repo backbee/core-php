@@ -1,5 +1,7 @@
 // Footer
 
+@use "sass:math";
+
 .footer {
     font-family: $font-sans;
     border-top: $liner-width solid;
@@ -7,13 +9,13 @@
 
     p {
         margin: 0;
-        @include padding-y($spacer / 2);
+        @include padding-y(math.div($spacer, 2));
     }
 
     .logo {
         margin-bottom: $spacer;
         @include media-breakpoint-down(sm) {
-            margin-bottom: $spacer / 2;
+            margin-bottom:math.div($spacer, 2);
         }
         img {
             max-height: 100px;
@@ -26,7 +28,7 @@
     .social-list {
         margin-bottom: $spacer;
         @include media-breakpoint-down(sm) {
-            margin-bottom: $spacer / 2;
+            margin-bottom: math.div($spacer, 2);
         }
     }
 

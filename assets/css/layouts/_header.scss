@@ -1,5 +1,7 @@
 // Header
 
+@use "sass:math";
+
 .navbar-header {
     border-bottom: 1px solid $border-color;
     height: $navbar-header-height;
@@ -10,7 +12,7 @@
 
     &.navbar-expand-lg {
         #navbar-primary a.btn {
-            margin-left: $spacer / 2;
+            margin-left: math.div($spacer, 2);
         }
 
         .navbar-collapse {

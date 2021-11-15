@@ -86,13 +86,13 @@
 
 // Older version
 .bg-color2, .bg-color6 {
-    @extend .has-bg-color.color-primary;
+    @extend .has-bg-color, .color-primary;
 }
 
 .bg-color3, .bg-color7 {
-    @extend .has-bg-color.color-secondary;
+    @extend .has-bg-color, .color-secondary;
 }
 
 .bg-color1, .bg-color5 {
-    @extend .has-bg-color.color-background;
+    @extend .has-bg-color, .color-background;
 }

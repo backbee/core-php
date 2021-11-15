@@ -1,3 +1,5 @@
+@use "sass:math";
+
 // Text & Header
 h1, h2, h3, h4, h5, h6, .is-h1, .is-h2, .is-h3, .is-h4, .is-h5, .is-h6, p {
   margin: 0;
@@ -34,7 +36,7 @@ h1, h2, h3, h4, h5, h6, .is-h1, .is-h2, .is-h3, .is-h4, .is-h5, .is-h6 {
     }
 
     &:not(:last-child) {
-      margin-bottom: $spacer / 2;
+      margin-bottom: math.div($spacer, 2);
     }
 
     &:last-of-type {
@@ -44,7 +46,7 @@ h1, h2, h3, h4, h5, h6, .is-h1, .is-h2, .is-h3, .is-h4, .is-h5, .is-h6 {
 
   ol, ul {
     li:not(:last-of-type) {
-      margin-bottom: $spacer / 2;
+      margin-bottom: math.div($spacer, 2);
     }
   }
 

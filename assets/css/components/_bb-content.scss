@@ -1,5 +1,7 @@
 // BB Content
 
+@use "sass:math";
+
 .bb-content {
     &.content {
         .colcontentset & ~ & {
@@ -19,7 +21,7 @@
 
     @include media-breakpoint-down(sm) {
         .colcontentset {
-            margin-bottom: $spacer / 2;
+            margin-bottom: math.div($spacer, 2);
         }
 
         .no-gutters .colcontentset {
@@ -27,7 +29,7 @@
         }
 
         .colcontentset a:not(:last-child) & {
-            margin-bottom: $spacer / 2 !important;
+            margin-bottom: math.div($spacer, 2) !important;
         }
     }
 

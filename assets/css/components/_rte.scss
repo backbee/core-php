@@ -1,10 +1,12 @@
 // RTE with picto
 
+@use "sass:math";
+
 .with-picto.paragraph {
     align-items: center;
 
     .image-picto {
-        margin-right: $spacer / 2;
+        margin-right: math.div($spacer, 2);
         flex-shrink: 0;
 
         &.picto-24 {
@@ -29,7 +31,7 @@
         flex-direction: row-reverse;
         .image-picto {
             margin-right: 0;
-            margin-left: $spacer / 2;
+            margin-left: math.div($spacer, 2);
         }
         .rte-text {
             text-align: right;
@@ -42,5 +44,5 @@
 }
 
 .paragraph, .lead {
-    @include padding-y($spacer / 4);
+    @include padding-y(math.div($spacer, 4));
 }
