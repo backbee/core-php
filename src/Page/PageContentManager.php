@@ -364,7 +364,7 @@ class PageContentManager
         $pageTag = $this->entityManager->getRepository(PageTag::class)->findOneBy(['page' => $page]);
 
         foreach ($pageTag !== null ? $pageTag->getTags() : [] as $tag) {
-            $tags[] = strtolower($tag->getKeyWord());
+            $tags[] = $tag->getKeyWord();
         }
 
         return $tags;
