@@ -279,7 +279,7 @@ class ElasticsearchQuery
                     static function (KeyWord $tag) {
                         return [
                             'term' => [
-                                'tags.raw' => strtolower($tag->getKeyWord()),
+                                'tags.raw' => $tag->getKeyWord(),
                             ],
                         ];
                     },
