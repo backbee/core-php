@@ -168,7 +168,7 @@ class ElasticsearchQuery
         $baseQuery['query']['bool']['should'] = array_map(
             static function ($tag) {
                 return [
-                    'match' => ['tags.raw' => strtolower($tag)],
+                    'match' => ['tags.raw' => $tag],
                 ];
             },
             $validTags
