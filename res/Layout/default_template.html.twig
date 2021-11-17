@@ -10,15 +10,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
     <link rel="canonical" href="{{ bb.routing.getUri(this.getCurrentPage().getUrl(), '', this.getCurrentSite()) }}"/>
 
-{% if this.knowledgeGraphHelper.isKnowledgeGraphEnabled() %}
-    {{ this.knowledgeGraphHelper.getSeoMetadata(this.getCurrentPage)|raw }}
-    {{ this.knowledgeGraphHelper.getMetaGoogleSiteVerification()|raw }}
-    {{ this.knowledgeGraphHelper.getGraph(this.getCurrentPage)|raw }}
-{% endif %}
-<!--##FAVICON_SPOT##-->
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">
-{% endblock %}
+    {% if this.knowledgeGraphHelper.isKnowledgeGraphEnabled() %}
+        {{ this.knowledgeGraphHelper.getSeoMetadata(this.getCurrentPage)|raw }}
+        {{ this.knowledgeGraphHelper.getMetaGoogleSiteVerification()|raw }}
+        {{ this.knowledgeGraphHelper.getGraph(this.getCurrentPage)|raw }}
+    {% endif %}
+    <!--##FAVICON_SPOT##-->
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">
+    {% endblock %}
 
     <script>
       window.onDocumentReady = function (fn) {
@@ -39,78 +39,50 @@
 
     {# ANALYTICS TOOLS - Google Analytics, Google Tag Manager and Facebook Analytics - can be disabled #}
     {% if bb.token == null %}
-    {% if
-        google_analytics_code is defined
-        and google_analytics_code
-        and (
-        disable_google_analytics is not defined
-        or disable_google_analytics == false
-        ) %}
-        <script>
-          (function (i, s, o, g, r, a, m) {
-            i['GoogleAnalyticsObject'] = r
-            i[r] = i[r] || function () {
-              (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date()
-            a = s.createElement(o),
-              m = s.getElementsByTagName(o)[0]
-            a.async = 1
-            a.src = g
-            m.parentNode.insertBefore(a, m)
-          })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga')
+        {% if
+            google_analytics_code is defined
+            and google_analytics_code
+            and (
+            disable_google_analytics is not defined
+            or disable_google_analytics == false
+            ) %}
+            <script>
+              (function (i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r
+                i[r] = i[r] || function () {
+                  (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date()
+                a = s.createElement(o),
+                  m = s.getElementsByTagName(o)[0]
+                a.async = 1
+                a.src = g
+                m.parentNode.insertBefore(a, m)
+              })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga')
 
-          ga('create', '{{ google_analytics_code }}', 'auto')
-          ga('send', 'pageview')
-        </script>
-    {% endif %}
+              ga('create', '{{ google_analytics_code }}', 'auto')
+              ga('send', 'pageview')
+            </script>
+        {% endif %}
 
-    {% if gtm_code is defined and gtm_code and (disable_gtm is not defined or disable_gtm == false) %}
-        <!-- Google Tag Manager -->
-        <script>
-          (function (w, d, s, l, i) {
-            w[l] = w[l] || []
-            w[l].push({
-              'gtm.start':
-                new Date().getTime(), event: 'gtm.js'
-            })
-            var f = d.getElementsByTagName(s)[0],
-              j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''
-            j.async = true
-            j.src =
-              'https://www.googletagmanager.com/gtm.js?id=' + i + dl
-            f.parentNode.insertBefore(j, f)
-          })(window, document, 'script', 'dataLayer', '{{ gtm_code }}')
-        </script>
-        <!-- End Google Tag Manager -->
-    {% endif %}
-
-    {% if
-        facebook_analytics_code is defined
-        and facebook_analytics_code
-        and (
-        disable_facebook_analytics is not defined
-        or disable_facebook_analytics == false
-        ) %}
-        <script>
-          window.fbAsyncInit = function () {
-            FB.init({
-              appId: "{{ facebook_analytics_code }}",
-              xfbml: true,
-              version: 'v2.8'
-            })
-            FB.AppEvents.logPageView()
-          };
-
-          (function (d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0]
-            if (d.getElementById(id)) {return}
-            js = d.createElement(s)
-            js.id = id
-            js.src = '//connect.facebook.net/en_US/sdk.js'
-            fjs.parentNode.insertBefore(js, fjs)
-          }(document, 'script', 'facebook-jssdk'))
-        </script>
-    {% endif %}
+        {% if gtm_code is defined and gtm_code and (disable_gtm is not defined or disable_gtm == false) %}
+            <!-- Google Tag Manager -->
+            <script>
+              (function (w, d, s, l, i) {
+                w[l] = w[l] || []
+                w[l].push({
+                  'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+                })
+                var f = d.getElementsByTagName(s)[0],
+                  j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''
+                j.async = true
+                j.src =
+                  'https://www.googletagmanager.com/gtm.js?id=' + i + dl
+                f.parentNode.insertBefore(j, f)
+              })(window, document, 'script', 'dataLayer', '{{ gtm_code }}')
+            </script>
+            <!-- End Google Tag Manager -->
+        {% endif %}
     {% endif %}
 
     {% block header_tag %}{% endblock %}

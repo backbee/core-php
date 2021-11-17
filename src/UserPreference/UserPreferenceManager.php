@@ -293,11 +293,6 @@ class UserPreferenceManager
                     return 1 === preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code);
                 },
             ],
-            'facebook-analytics' => [
-                'code' => function ($code) {
-                    return 1 === preg_match('#^[0-9]{15}$#', $code);
-                },
-            ],
             'privacy-policy' => [
                 'banner_message' => 'is_string',
                 'learn_more_url' => 'is_string',

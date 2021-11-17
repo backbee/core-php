@@ -393,13 +393,6 @@ class PageListener
             }
         }
 
-        if ($faData = $userPreferenceManager->dataOf('facebook-analytics')) {
-            $code = isset($faData['code']) ? (string)$faData['code'] : '';
-            if (1 === preg_match('#^[0-9]{15}$#', $code)) {
-                $renderer->assign('facebook_analytics_code', $code);
-            }
-        }
-
         if (
             $app->getContainer()->getParameter('privacy_policy') &&
             $data = $userPreferenceManager->dataOf('privacy-policy')

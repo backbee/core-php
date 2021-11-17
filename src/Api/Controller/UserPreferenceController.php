@@ -22,9 +22,8 @@
 namespace BackBeeCloud\Api\Controller;
 
 use BackBee\BBApplication;
-use BackBee\Exception\BBException;
 use BackBeeCloud\UserPreference\UserPreferenceManager;
-use InvalidArgumentException;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,7 +33,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package BackBeeCloud\Api\Controller
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserPreferenceController extends AbstractController
 {
@@ -52,8 +51,6 @@ class UserPreferenceController extends AbstractController
      * UserPreferenceController constructor.
      *
      * @param BBApplication $app
-     *
-     * @throws BBException
      */
     public function __construct(BBApplication $app)
     {
@@ -102,11 +99,11 @@ class UserPreferenceController extends AbstractController
 
         try {
             $this->usrPrefMgr->setDataOf($name, $this->request->request->all());
-        } catch (InvalidArgumentException $e) {
+        } catch (Exception $ex) {
             return new JsonResponse(
                 [
                     'error' => 'bad_request',
-                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+\] ~', '', $e->getMessage()),
+                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+\] ~', '', $ex->getMessage()),
                 ],
                 Response::HTTP_BAD_REQUEST
             );
@@ -126,7 +123,17 @@ class UserPreferenceController extends AbstractController
     {
         $this->assertIsAuthenticated();
 
-        $this->usrPrefMgr->removeDataOf($name);
+        try {
+            $this->usrPrefMgr->removeDataOf($name);
+        } catch (Exception $ex) {
+            return new JsonResponse(
+                [
+                    'error' => 'bad_request',
+                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+\] ~', '', $ex->getMessage()),
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
