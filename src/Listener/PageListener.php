@@ -371,7 +371,7 @@ class PageListener
         $app = $event->getApplication();
         $typeMgr = $app->getContainer()->get('cloud.page_type.manager');
 
-        if (null === $type = $typeMgr->findByPage($page)) {
+        if (($type = $typeMgr->findByPage($page)) === null) {
             $type = $typeMgr->getDefaultType();
         }
 
@@ -380,28 +380,25 @@ class PageListener
 
         $userPreferenceManager = $app->getContainer()->get('user_preference.manager');
         if ($gaData = $userPreferenceManager->dataOf('google-analytics')) {
-            $code = isset($gaData['code']) ? (string)$gaData['code'] : '';
-            if (1 === preg_match('#^UA\-[0-9]+\-[0-9]+$#', $code)) {
-                $renderer->assign('google_analytics_code', $code);
-            }
+            $renderer->assign('google_analytics_code', isset($gaData['code']) ? (string)$gaData['code'] : '');
         }
 
         if ($gtmData = $userPreferenceManager->dataOf('gtm-analytics')) {
             $code = isset($gtmData['code']) ? (string)$gtmData['code'] : '';
-            if (1 === preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code)) {
+            if (preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code) === 1) {
                 $renderer->assign('gtm_code', $code);
             }
         }
 
         if (
-            $app->getContainer()->getParameter('privacy_policy') &&
-            $data = $userPreferenceManager->dataOf('privacy-policy')
+            ($data = $userPreferenceManager->dataOf('privacy-policy')) &&
+            $app->getContainer()->getParameter('privacy_policy')
         ) {
-            $multilangManager = $app->getContainer()->get('multilang_manager');
-            if ($multilangManager->isActive() && $currentLang = $multilangManager->getCurrentLang()) {
+            $multiLangManager = $app->getContainer()->get('multilang_manager');
+            if ($multiLangManager->isActive() && $currentLang = $multiLangManager->getCurrentLang()) {
                 foreach ($data as $key => $value) {
                     $prefix = $currentLang . '_';
-                    if (1 === preg_match(sprintf('~^%s~', $prefix), $key)) {
+                    if (preg_match(sprintf('~^%s~', $prefix), $key) === 1) {
                         $renderer->assign(str_replace($prefix, '', $key), $value);
                     }
                 }

@@ -284,13 +284,11 @@ class UserPreferenceManager
                 'url_152x152' => 'is_string',
             ],
             'google-analytics' => [
-                'code' => function ($code) {
-                    return 1 === preg_match('#^UA\-[0-9]+\-[0-9]+$#', $code);
-                },
+                'code' => true
             ],
             'gtm-analytics' => [
                 'code' => function ($code) {
-                    return 1 === preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code);
+                    return preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code) === 1;
                 },
             ],
             'privacy-policy' => [
