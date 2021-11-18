@@ -49,10 +49,11 @@
     {% endif %}
   >
 
+    {% set isExternalLink = linkValue.options.url matches '{^https?:\/\/.*$}' ? true : false %}
 
     {% if image.path != null and bb.token == null %}
       {% if linkValue.link == 'image_link' %}
-        <a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank" rel="noopener"{% endif %}>
+        <a href="{{ linkValue.options.url }}" {% if linkValue.options.link_target_blank %}target="_blank"{% if isExternalLink %} rel="noopener"{% endif %}{% endif %}>
       {% elseif linkValue.link == 'lightbox' %}
         <a href="{{ this.getCdnImageUrl(image_full_width_path ?: image.path)|raw }}" data-lightbox="lightbox">
       {% endif %}
@@ -80,7 +81,7 @@
         {% set imageTitle = this.getObject().getParamValue('title') %}
         {% set imageDescription = this.getObject().getParamValue('description') %}
 
-        {% if display_title.value or display_description.value or linkValue.value %}
+        {% if display_title.value or display_description.value or linkValue.value or linkValue.link %}
         <div class="above-content-wrapper text-{{text_position.value}}{% if display_text_hover.value %} hover-display{% endif %}{% if bb.token == null and imageTitle == null and imageDescription == null and imageBtnLink == null and imageBtnTitle == null %} hidden{% endif %}">
           {% if display_title.value or display_description.value %}
             <div class="textwrapper">
@@ -107,7 +108,7 @@
               <a href="{{ imageBtnLink }}"
                 class="btn color-primary {{ linkValue.options.color }} btn-{{ linkValue.options.size }} btn-{{ linkValue.options.form == false ? 'outline' }} btn-{{ button_settings.shape }}"
                 {% if bb.token != null %} onclick="return false;"{% endif %}
-                {% if linkValue.options.btn_link_target_blank %} target="_blank" rel="noopener"{% endif %}
+                {% if linkValue.options.btn_link_target_blank %} target="_blank"{% if isExternalLink %} rel="noopener"{% endif %}{% endif %}
                 {% if button_settings.font %}style="font-family: {{ button_settings.font }}"{% endif %}
               >
                 {{imageBtnTitle|default('Button title')|raw}}
