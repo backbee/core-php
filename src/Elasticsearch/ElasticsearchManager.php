@@ -269,12 +269,12 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
         if ($prefix !== null) {
             $must = [
                 [
-                    'match' => [
+                    'match_phrase' => [
                         'source' => Tag::SOURCE_TYPE,
                     ],
                 ],
                 [
-                    'match' => [
+                    'match_phrase' => [
                         'name' => [
                             'query' => $prefix,
                         ],
@@ -320,12 +320,14 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
         }
 
         $uids = [];
+
         foreach ($result['hits']['hits'] as $document) {
             $uids[] = $document['_id'];
         }
 
         $tags = [];
-        if (false !== $uids) {
+
+        if (!empty($uids)) {
             $tags = $this->sortEntitiesByUids(
                 $uids,
                 $this->entityMgr->getRepository(Tag::class)->findBy(['_uid' => $uids])
