@@ -51,7 +51,7 @@ class SitemapIndex extends AbstractDecorator
         foreach ($this->getCollector()->collect($preset) as $sitemap) {
             foreach ($sitemap as $location) {
                 $locations[] = [
-                    'loc' => str_replace('.xml', '.xml.gz', $location),
+                    'loc' => $location,
                     'lastmod' => new DateTime(),
                 ];
             }

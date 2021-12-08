@@ -104,7 +104,6 @@ class SitemapListener
                 $decorator = Collection::get($definition, 'decorator');
                 $collector = Collection::get($definition, 'collector', BaseCollector::class);
                 $pattern = Collection::get($definition, 'url_pattern');
-                $archivePattern = Collection::get($definition, 'archive_pattern');
                 $limits = Collection::get($definition, 'limits', []);
 
                 if (!$active || empty($pattern) || empty($decorator)) {
@@ -120,10 +119,6 @@ class SitemapListener
                 );
                 self::getDecoratorReference(self::$bbApp->getContainer(), $decorator, $id, $collectorRef);
                 self::addRoute(self::$bbApp->getContainer()->get('routing'), $id, $pattern);
-
-                if (null !== $archivePattern) {
-                    self::addGenerateArchiveRoute(self::$bbApp->getContainer()->get('routing'), $id, $archivePattern);
-                }
             }
         } catch (Exception $exception) {
             self::$bbApp->getLogging()->error(
@@ -147,28 +142,6 @@ class SitemapListener
                     'pattern' => $pattern,
                     'defaults' => [
                         '_action' => 'indexAction',
-                        '_controller' => 'core.sitemap.controller',
-                    ],
-                ],
-            ]
-        );
-    }
-
-    /**
-     * Adds a new route to generate archive for the sitemap $id to the default action controller.
-     *
-     * @param RouteCollection $routing The current application route collection.
-     * @param string          $id      The sitemap id.
-     * @param string          $archivePattern
-     */
-    private static function addGenerateArchiveRoute(RouteCollection $routing, string $id, string $archivePattern): void
-    {
-        $routing->pushRouteCollection(
-            [
-                self::$ARCHIVE_ROUTE_PREFIX . $id => [
-                    'pattern' => $archivePattern,
-                    'defaults' => [
-                        '_action' => 'getArchiveAction',
                         '_controller' => 'core.sitemap.controller',
                     ],
                 ],
@@ -219,7 +192,7 @@ class SitemapListener
     }
 
     /**
-     * Returns a reference to a sitemap collector, builds it if need.
+     * Returns a reference to a sitemap collector, builds it if you need.
      *
      * @param ContainerBuilder $container   The current application container.
      * @param string           $collectorId The collector id or a classname of collector.
