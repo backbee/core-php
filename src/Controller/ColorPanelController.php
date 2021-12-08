@@ -22,9 +22,9 @@
 namespace BackBeeCloud\Controller;
 
 use BackBee\Cache\RedisManager;
+use BackBee\HttpClient\UserAgent;
 use BackBee\Site\Site;
 use BackBeeCloud\ThemeColor\ColorPanelCssGenerator;
-use BackBee\HttpClient\UserAgent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -59,7 +59,7 @@ class ColorPanelController
      *
      * @param ColorPanelCssGenerator $cssGenerator
      * @param EntityManagerInterface $entityManager
-     * @param RedisManager  $redisManager
+     * @param RedisManager           $redisManager
      */
     public function __construct(
         ColorPanelCssGenerator $cssGenerator,
@@ -82,6 +82,7 @@ class ColorPanelController
     public function getColorPanelCssAction($hash, Request $request)
     {
         $currentHash = $this->cssGenerator->getCurrentHash();
+
         if ($hash !== $currentHash) {
             return new RedirectResponse(
                 str_replace($hash, $currentHash, $request->getPathInfo()),
@@ -89,7 +90,6 @@ class ColorPanelController
             );
         }
 
-        $cssContent = null;
         $redisClient = $this->redisManager->getClient();
         $redisCacheKey = sprintf(
             '%s:%s[%s]',
@@ -105,8 +105,13 @@ class ColorPanelController
         }
 
         return new Response(
-            $cssContent, Response::HTTP_OK, [
+            $cssContent,
+            Response::HTTP_OK,
+            [
                 'Content-Type' => 'text/css',
+                'Expires' => date('Y-m-d', strtotime('+10 days')),
+                'Cache-Control' => 'public',
+                'Pragma' => 'public'
             ]
         );
     }
