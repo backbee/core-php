@@ -35,7 +35,6 @@ use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\TransactionRequiredException;
@@ -47,28 +46,6 @@ use Exception;
  */
 class HighlightContentListener
 {
-    /**
-     * @var BBApplication
-     */
-    private static $bbApp;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private static $entityManager;
-
-    /**
-     * HighlightContentListener constructor.
-     *
-     * @param BBApplication          $bbApp
-     * @param EntityManagerInterface $entityManager
-     */
-    public function __construct(BBApplication $bbApp, EntityManagerInterface $entityManager)
-    {
-        self::$bbApp = $bbApp;
-        self::$entityManager = $entityManager;
-    }
-
     /**
      * Called on `rest.controller.classcontentcontroller.getaction.postcall` event.
      *
@@ -271,10 +248,6 @@ class HighlightContentListener
                 'display_image' => $displayImage,
                 'title_max_length' => $wrapper->getParamValue('title_max_length'),
                 'abstract_max_length' => $wrapper->getParamValue('abstract_max_length'),
-                'autoblock_id' => $wrapper instanceof ContentAutoblock
-                    ? ContentAutoblockListener::getAutoblockId($wrapper)
-                    : null
-                ,
                 'wrapper' => $wrapper,
             ]
         );

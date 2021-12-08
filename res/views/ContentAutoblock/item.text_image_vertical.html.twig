@@ -4,8 +4,8 @@
             <h4 class="autoblock-title{% if reduce_title_size %} reduce-title{% endif %}">
                 <a
                     {% block data_item_title_attributes %}{% endblock %}
-                    href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}"
-                    aria-label="{{title|striptags|raw}}" 
+                    href="{{url}}"
+                    aria-label="{{title|striptags|raw}}"
                     {% if is_online == false %} title="This page is offline"{% endif %}
                 >
                     <span class="{{is_online == false ? 'offline autoblock-item' : ''}}">
@@ -39,13 +39,13 @@
                 {% set backgroundImageUid = 'background-image-' ~ this.getObject().getUid() ~ '-' ~ image.uid %}
 
                 {% include 'common/background_lazyload.html.twig' with {
-                    'backgroundImageUid': backgroundImageUid, 
+                    'backgroundImageUid': backgroundImageUid,
                     'url': cdnImageUrl
                 } %}
                 {% endif %}
 
-            <a {% block data_item_image_attributes %}{% endblock %} href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}" aria-label="{{title|striptags|raw}}" >
-                <figure{% if bb.token == null %} id="{{ backgroundImageUid }}"{% endif %} 
+            <a {% block data_item_image_attributes %}{% endblock %} href="{{url}}" aria-label="{{title|striptags|raw}}" >
+                <figure{% if bb.token == null %} id="{{ backgroundImageUid }}"{% endif %}
                     class="figure push-image{% if bb.token == null %} lazy-background-image{% endif %}"
                     {% if bb.token != null %} style="background-image: url({{cdnImageUrl}});"{% endif %}
                 >

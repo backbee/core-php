@@ -28,19 +28,20 @@ use BackBee\Exception\BBException;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBeeCloud\Listener\ClassContent\ContentAutoblockElasticsearchPreQueryEvent;
-use BackBeeCloud\Revision\RevisionManager;
 use Exception;
+use function count;
+use function is_array;
+use function is_string;
 
 /**
  * Class ContentAutoblockListener
  *
  * @package BackBeeCloud\Listener
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class ContentAutoblockListener
 {
-    public const AUTOBLOCK_ID_LENGTH = 7;
     public const MAX_PAGE = 5;
 
     /**
@@ -141,13 +142,14 @@ class ContentAutoblockListener
         }
 
         $contents = [];
-        $currentpage = $event->getRenderer()->getCurrentPage();
+        $currentPage = $event->getRenderer()->getCurrentPage();
+
         foreach ($pages as $page) {
             if (count($contents) === $limit) {
                 break;
             }
 
-            if ($page['_id'] === $currentpage->getUid()) {
+            if ($page['_id'] === $currentPage->getUid()) {
                 continue;
             }
 
@@ -160,7 +162,7 @@ class ContentAutoblockListener
         }
 
         $paginationData = [];
-        if (false !== $pages && $block->getParamValue('pagination')) {
+        if ($block->getParamValue('pagination')) {
             $count = $pages->countMax();
             $nbPage = ceil(($count ?: 1) / $limit);
             $startPagination = 1;
@@ -195,17 +197,5 @@ class ContentAutoblockListener
 
         $renderer->assign('contents', $contents);
         $renderer->assign('pagination_data', $paginationData);
-    }
-
-    /**
-     * Get autoblock id.
-     *
-     * @param ContentAutoblock $autoblock
-     *
-     * @return false|string
-     */
-    public static function getAutoblockId(ContentAutoblock $autoblock)
-    {
-        return substr($autoblock->getUid(), 0, self::AUTOBLOCK_ID_LENGTH);
     }
 }

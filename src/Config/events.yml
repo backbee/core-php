@@ -120,11 +120,6 @@ social.tweet.render:
         # BackBee Cloud listeners
         - [ BackBeeCloud\Listener\ClassContent\TweetListener, onRender ]
 
-article.articletitle.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ArticleTitleListener, onRender ]
-
 basic.menu.prepersist:
     listeners:
         # BackBee Cloud listeners
