@@ -118,9 +118,9 @@ class AbstractCommand extends Command
     /**
      * Get container.
      *
-     * @return ContainerInterface
+     * @return \Symfony\Component\DependencyInjection\ContainerInterface
      */
-    protected function getContainer(): ContainerInterface
+    protected function getContainer(): \Symfony\Component\DependencyInjection\ContainerInterface
     {
         return $this->bbApp->getContainer();
     }
@@ -160,6 +160,30 @@ class AbstractCommand extends Command
     {
         exec(sprintf('rm -rf %s/*', StandaloneHelper::cacheDir()));
         exec(sprintf('chmod -R 777 %s/*', StandaloneHelper::logDir()));
+    }
+
+    /**
+     * Clean memory usage.
+     */
+    protected function cleanMemoryUsage(): void
+    {
+        $this->getEntityManager()->clear();
+        gc_collect_cycles();
+        gc_disable();
+        gc_enable();
+    }
+
+    /**
+     * Get pretty memory usage.
+     *
+     * @return string
+     */
+    protected function getPrettyMemoryUsage(): string
+    {
+        $size = memory_get_usage();
+        $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
+
+        return @round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[(int) $i];
     }
 
     /**
