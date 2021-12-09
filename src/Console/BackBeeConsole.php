@@ -21,16 +21,16 @@
 
 namespace BackBee\Console;
 
-use BackBee\BBApplication;
 use App\Application;
 use App\Helper\StandaloneHelper;
+use BackBee\BBApplication;
+use BackBee\Command\AbstractCommand;
 use Exception;
 use ReflectionClass;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
-use BackBee\Command\AbstractCommand;
 use function dirname;
 
 /**
@@ -80,37 +80,96 @@ class BackBeeConsole extends ConsoleApplication
     public function doRun(InputInterface $input, OutputInterface $output): int
     {
         if (!$this->commandsRegistered) {
-            if ($this->bbApplication) {
-                foreach ($this->bbApplication->getBundles() as $bundle) {
-                    if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
-                        continue;
-                    }
-                    try {
-                        $this->addCommand(
-                            $dir,
-                            (new ReflectionClass($bundle))->getNamespaceName()
-                        );
-                    } catch (Exception $exception) {
-                        $this->bbApplication->getLogging()->error(
-                            sprintf(
-                                '%s : %s :%s',
-                                __CLASS__,
-                                __FUNCTION__,
-                                $exception->getMessage()
-                            )
-                        );
-                    }
-                }
-            } elseif (is_dir($dir = dirname(__DIR__) . '/Command')) {
+            $this->addBundlesCommand();
+            $this->addCoreCommand();
+            $this->addAppCommand();
+            $this->commandsRegistered = true;
+        }
+
+        return parent::doRun($input, $output);
+    }
+
+    /**
+     * Inject add command.
+     *
+     * @return void
+     */
+    private function addAppCommand(): void
+    {
+        try {
+            if (is_dir($dir = $this->bbApplication->getAppDir() . '/Command')) {
+                $this->addCommand(
+                    $dir,
+                    'App'
+                );
+            }
+        } catch (Exception $exception) {
+            $this->bbApplication->getLogging()->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+    }
+
+    /**
+     * Inject core command.
+     *
+     * @return void
+     */
+    private function addCoreCommand(): void
+    {
+        try {
+            if (is_dir($dir = dirname(__DIR__) . '/Command')) {
                 $this->addCommand(
                     $dir,
                     'BackBee'
                 );
             }
-            $this->commandsRegistered = true;
+        } catch (Exception $exception) {
+            $this->bbApplication->getLogging()->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
+    }
 
-        return parent::doRun($input, $output);
+    /**
+     * Inject bundles command.
+     *
+     * @return void
+     */
+    private function addBundlesCommand(): void
+    {
+        if ($this->bbApplication) {
+            foreach ($this->bbApplication->getBundles() as $bundle) {
+                if (!is_dir($dir = $bundle->getBaseDirectory() . '/Command')) {
+                    continue;
+                }
+                try {
+                    $this->addCommand(
+                        $dir,
+                        (new ReflectionClass($bundle))->getNamespaceName()
+                    );
+                } catch (Exception $exception) {
+                    $this->bbApplication->getLogging()->error(
+                        sprintf(
+                            '%s : %s :%s',
+                            __CLASS__,
+                            __FUNCTION__,
+                            $exception->getMessage()
+                        )
+                    );
+                }
+            }
+        }
     }
 
     /**
