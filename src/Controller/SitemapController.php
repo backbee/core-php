@@ -103,37 +103,6 @@ class SitemapController
     }
 
     /**
-     * Get archive action.
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function getArchiveAction(Request $request): Response
-    {
-        $id = str_replace(SitemapListener::$ARCHIVE_ROUTE_PREFIX, '', $request->attributes->get('_route'));
-        $decorator = $this->getDecorator($id);
-
-        if (null === $decorator) {
-            return new Response('Not found', Response::HTTP_NOT_FOUND);
-        }
-
-        $sitemap = $this->getSitemap($id, $decorator, $request);
-
-        $response = new Response();
-        $response
-            ->setContent(gzencode($sitemap['urlset'], 9))
-            ->setStatusCode(Response::HTTP_OK)
-            ->headers
-            ->set('content-type', 'application/gzip');
-        $response->headers->set('cache-control', 'no-cache');
-        $response->headers->set('pragma', 'no-cache');
-        $response->headers->set('expires', -1);
-
-        return $response;
-    }
-
-    /**
      * Get sitemap.
      *
      * @param string             $id
