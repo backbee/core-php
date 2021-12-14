@@ -215,27 +215,4 @@ class OptimizeImageConvertCommand extends AbstractCommand
         $this->getEntityManager()->flush();
         $this->getEntityManager()->clear();
     }
-
-    /**
-     * Clean memory usage.
-     */
-    protected function cleanMemoryUsage(): void
-    {
-        gc_collect_cycles();
-        gc_disable();
-        gc_enable();
-    }
-
-    /**
-     * Get pretty memory usage.
-     *
-     * @return string
-     */
-    protected function getPrettyMemoryUsage(): string
-    {
-        $size = memory_get_usage();
-        $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
-
-        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
-    }
 }
