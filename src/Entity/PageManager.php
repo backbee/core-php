@@ -592,7 +592,7 @@ class PageManager
     protected function genericRunSetDateTime(Page $page, $method, $value): void
     {
         try {
-            $datetime = new DateTime($value);
+            $datetime = '' === $value ? null : new DateTime($value);
         } catch (Exception $exception) {
             $this->logger->error(
                 sprintf(
