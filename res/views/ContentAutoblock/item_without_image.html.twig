@@ -2,7 +2,7 @@
   <h4 class="autoblock-title{% if reduce_title_size %} reduce-title{% endif %}">
     <a
       {% block data_item_title_attributes %}{% endblock %}
-      href="{{url ~ (autoblock_id ? '?ref=' ~ autoblock_id : '')}}"
+      href="{{url}}"
       aria-label="{{title|striptags|raw}}"
       {% if is_online == false %} title="This page is offline"{% endif %}
     >
