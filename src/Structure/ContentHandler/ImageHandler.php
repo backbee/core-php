@@ -32,7 +32,7 @@ use BackBeeCloud\Structure\ContentHandlerInterface;
  *
  * @package BackBeeCloud\Structure\ContentHandler
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class ImageHandler implements ContentHandlerInterface
 {
@@ -76,12 +76,10 @@ class ImageHandler implements ContentHandlerInterface
         if (!$this->supports($content)) {
             return;
         }
-        
-        if (isset($data['path']) && false !== $data['path']) {
-            if (1 === preg_match('~^https?://~', $data['path'])) {
-                $content->image->path = $this->imgUploadHandler->uploadFromUrl($data['path']);
-            }
 
+        if (isset($data['path']) && false !== $data['path']) {
+            $content->image->path = 1 === preg_match('~^https?://~', $data['path']) ?
+                $this->imgUploadHandler->uploadFromUrl($data['path']) : $data['path'];
             $content->image->originalname = basename($data['path']);
         }
 
