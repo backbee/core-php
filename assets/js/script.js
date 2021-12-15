@@ -62,20 +62,16 @@ $(document).ready(function() {
     });
 
     const onRowCollapse = function($element, state) {
-        var $buttonCollapse = $element.parents('.cloudcontentset').find('.button-collapse');
-        var btnText = state ?  $buttonCollapse[0].dataset.stratOpen : $buttonCollapse[0].dataset.stratClose;
+      const $buttonCollapse = $element.parents('.cloudcontentset').find('.button-collapse')
+      const btnText = state ? $buttonCollapse[0].dataset.stratOpen : $buttonCollapse[0].dataset.stratClose
 
-        $buttonCollapse.text(btnText);
+      $buttonCollapse.text(btnText);
     };
 
-    const afterRowCollapse = function($element) {
+    const afterRowCollapse = function() {
         if (isAuthenticated) {
             window.dndZone.apply();
         }
-
-        $('html, body').animate({
-            'scrollTop': $element.offset().top - 200,
-        }, 300);
     };
 
     $('body')
@@ -86,10 +82,10 @@ $(document).ready(function() {
             onRowCollapse($(this), true);
         })
         .on('hidden.bs.collapse', '.container.collapse.fade', function() {
-            afterRowCollapse($(this));
+            afterRowCollapse();
         })
         .on('shown.bs.collapse', '.container.collapse.fade', function() {
-            afterRowCollapse($(this));
+            afterRowCollapse();
         });
 
     // Tooltip initialization
