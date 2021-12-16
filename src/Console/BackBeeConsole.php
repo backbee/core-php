@@ -97,7 +97,7 @@ class BackBeeConsole extends ConsoleApplication
     private function addAppCommand(): void
     {
         try {
-            if (is_dir($dir = $this->bbApplication->getAppDir() . '/Command')) {
+            if ($this->bbApplication && is_dir($dir = $this->bbApplication->getAppDir() . '/Command')) {
                 $this->addCommand(
                     $dir,
                     'App'
