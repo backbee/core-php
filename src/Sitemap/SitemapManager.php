@@ -19,23 +19,21 @@
  * along with BackBee Standalone. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace BackBeePlanet\Sitemap;
+namespace BackBee\Sitemap;
 
 use BackBee\BBApplication;
-use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Config\Config;
-use BackBee\Exception\InvalidArgumentException;
-use BackBee\Util\Collection\Collection;
+use BackBeeCloud\Search\SearchManager;
 use DateTime;
-use DateTimeZone;
 use Exception;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class SitemapManager
  *
- * @package BackBeePlanet\Sitemap
+ * @package BackBee\Sitemap
  *
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SitemapManager
 {
@@ -50,147 +48,91 @@ class SitemapManager
     private $config;
 
     /**
-     * A cache engine instance.
-     *
-     * @var AbstractExtendedCache
+     * @var SearchManager
      */
-    private $cache;
+    private $searchManager;
 
     /**
-     * Cache control directives for every sitemap.
-     *
-     * @var array
+     * @var \Psr\Log\LoggerInterface
      */
-    private $cacheControl = [];
+    private $logger;
 
     /**
      * SitemapManager constructor.
      *
      * @param BBApplication $bbApp
-     * @param Config        $config
+     * @param Config $config
+     * @param \BackBeeCloud\Search\SearchManager $searchManager
      */
-    public function __construct(BBApplication $bbApp, Config $config)
+    public function __construct(BBApplication $bbApp, Config $config, SearchManager $searchManager)
     {
         $this->bbApp = $bbApp;
-        $this->config = $config;
-        $this->initCache();
+        $this->config = $config->getSection('sitemap');
+        $this->searchManager = $searchManager;
+        $this->logger = $bbApp->getLogging();
     }
 
     /**
-     * Initialize cache.
+     * Generate sitemap.
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function initCache(): void
+    public function generate(): Response
     {
-        if ($this->bbApp->getContainer()->has('cache.control')) {
-            $this->cache = $this->bbApp->getContainer()->get('cache.control');
-        }
+        try {
+            $locations = $this->searchManager->getBy(
+                ['is_online' => true],
+                0,
+                $this->config['limits'] ?? 10000,
+                [],
+                false
+            );
 
-        foreach ($this->config->getSection('sitemaps') ?? [] as $id => $definition) {
-            $cacheControl = Collection::get($definition, 'cache-control', []);
-            $this->setCacheControl($id, $cacheControl);
-        }
-    }
-
-    /**
-     * Sets cache control directive for sitemap $id.
-     *
-     * @param  string  $id           The sitemap identifier.
-     * @param  array   $cacheControl Optional, an array of cache directives.
-     */
-    public function setCacheControl(string $id, array $cacheControl = []): void
-    {
-        $this->cacheControl[$id] = $cacheControl;
-    }
-
-    /**
-     * Gets cache control directive for sitemap $id.
-     *
-     * @param string $id The sitemap identifier.
-     *
-     * @return array      An array of cache directives
-     */
-    public function getCacheControl(string $id): array
-    {
-        return $this->cacheControl[$id] ?? [];
-    }
-
-    /**
-     * Returns the cache stored content for sitemap.
-     *
-     * @param string $id       A sitemap id.
-     * @param string $pathInfo A path info to sitemap.
-     *
-     * @return mixed|false      The stored content if valid, false elsewhere.
-     * @throws Exception
-     */
-    public function loadCache(string $id, string $pathInfo)
-    {
-        if (!$this->isCacheAvailable($id)) {
-            return false;
-        }
-
-        $data = json_decode($this->cache->load($this->getCacheId($id, $pathInfo)), true);
-        if (isset($data['lastmod'])) {
-            $data['lastmod'] = new DateTime(
-                Collection::get($data['lastmod'], 'date'),
-                new DateTimeZone(Collection::get($data['lastmod'], 'timezone', ''))
+            $urlSet = $this->bbApp->getRenderer()->partial(
+                'Sitemap/UrlSet.html.twig',
+                [
+                    'changeFreq' => $this->config['change_freq'],
+                    'locations' => $locations->collection(),
+                ]
+            );
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
             );
         }
 
-        return $data;
+        return $this->buildResponse([
+            'lastModified' => new DateTime(),
+            'urlSet' => $urlSet ?? '',
+        ]);
     }
 
     /**
-     * Saves a sitemap in cache.
+     * Builds a valid response.
      *
-     * @param string $id       A sitemap id.
-     * @param string $pathInfo A path info to sitemap.
-     * @param mixed  $data     The sitemap content.
+     * @param array $sitemap The sitemap content.
      *
-     * @return boolean
-     * @throws Exception
+     * @return Response          The valid response.
      */
-    public function saveCache(string $id, string $pathInfo, $data): bool
+    private function buildResponse(array $sitemap): Response
     {
-        if (!$this->isCacheAvailable($id)) {
-            return false;
-        }
+        $response = new Response();
+        $response
+            ->setLastModified($sitemap['lastModified'])
+            ->setContent($sitemap['urlSet'])
+            ->setStatusCode(Response::HTTP_OK)
+            ->headers
+            ->set('content-type', 'text/xml');
 
-        return $this->cache->save(
-            $this->getCacheId($id, $pathInfo),
-            json_encode($data),
-            Collection::get($this->cacheControl, $id . ':max_age', 60 * 60),
-            'sitemap-' . $id
-        );
-    }
+        $response->headers->set('cache-control', 'no-cache');
+        $response->headers->set('pragma', 'no-cache');
+        $response->headers->set('expires', -1);
 
-    /**
-     * Is cache is available for the sitemap?
-     *
-     * @param string $id A sitemap id.
-     *
-     * @return boolean
-     * @throws Exception
-     */
-    private function isCacheAvailable(string $id): bool
-    {
-        return (
-            !$this->bbApp->isDebugMode()
-            && null !== $this->cache
-            && null === Collection::get($this->cacheControl, $id . ':no-cache')
-        );
-    }
-
-    /**
-     * Return a cache unique identifier.
-     *
-     * @param  string $id       A sitemap id.
-     * @param  string $pathInfo A path info to sitemap.
-     *
-     * @return string
-     */
-    private function getCacheId(string $id, string $pathInfo): string
-    {
-        return md5('sitemap' . $id . $pathInfo);
+        return $response;
     }
 }

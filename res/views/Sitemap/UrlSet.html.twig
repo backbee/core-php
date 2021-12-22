@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-    {% for part in this.sitemapLocationIterator(locations, step) %}
-        {% for location in part if this.sitemapUrlHelper.isExcluded(location.getUrl()) %}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    {% for location in locations %}
+        {% set page = location['_source'] %}
+        {% if this.sitemapHelper.isExcluded(page.url) %}
             <url>
-                <loc>{{ this.sitemapUrlHelper.isUrlExtensionRequired(bb.routing.getUri(location.getUrl(), null, site)) }}</loc>
-                <lastmod>{{ this.dateHelper(location.modified, 'c') }}</lastmod>
+                <loc>{{ bb.routing.getUri(page.url, '', this.getCurrentSite()) }}</loc>
+                <lastmod>{{ page.modified_at|date('c') }}</lastmod>
                 <changefreq>{{ changeFreq }}</changefreq>
-                <priority>{{ this.sitemapLocationPriority(location) }}</priority>
-                {% for path in this.sitemapGetImagesByPage(location) if not this.sitemapGetImagesByPage(location) is empty %}
+                <priority>{{ this.sitemapHelper.getLocationPriority(page) }}</priority>
+                {% for image in page.images if not page.images is empty and image.path %}
                     <image:image>
-                        <image:loc>{{ bb.routing.getUri(path, null, site) }}</image:loc>
+                        <image:loc>{{ bb.routing.getUri(image.path, '', this.getCurrentSite()) }}</image:loc>
                     </image:image>
                 {% endfor %}
             </url>
-        {% endfor %}
+        {% endif %}
     {% endfor %}
 </urlset>

@@ -128,6 +128,8 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'type' => $type ? $type->uniqueName() : '',
             'is_online' => $page->isOnline(),
             'is_pullable' => $type && $type->isPullable(),
+            'level' => $page->getLevel(),
+            'state' => $page->getState(),
             'created_at' => $page->getCreated()->format('Y-m-d H:i:s'),
             'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
             'published_at' => $page->getPublishing() ? $page->getPublishing()->format('Y-m-d H:i:s') : null,

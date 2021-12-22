@@ -10,7 +10,6 @@ bbapplication.init:
         - [ '@core.page.listener', onApplicationInit ]
         - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
         - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
-        - [ '@core.sitemap.listener', onApplicationInit ]
 
 bbapplication.start:
     listeners:

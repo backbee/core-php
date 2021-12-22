@@ -19,16 +19,14 @@
  * along with BackBee Standalone. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace BackBeePlanet\Controller;
+namespace BackBee\Controller;
 
 use BackBee\BBApplication;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\Site\Site;
+use BackBee\Sitemap\SitemapManager;
 use BackBee\Util\Collection\Collection;
-use BackBeePlanet\Listener\SitemapListener;
-use BackBeePlanet\Sitemap\Decorator\DecoratorInterface;
-use BackBeePlanet\Sitemap\SitemapManager;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +36,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Sitemap controller, only one action method handles every request.
  *
- * @package BackBeePlanet\Controller
+ * @package BackBee\Controller
  */
 class SitemapController
 {
@@ -92,44 +90,39 @@ class SitemapController
      */
     public function indexAction(Request $request): Response
     {
-        $id = str_replace(SitemapListener::$ROUTE_PREFIX, '', $request->attributes->get('_route'));
-        $decorator = $this->getDecorator($id);
-
-        if (null === $decorator) {
-            return new Response('Not found', Response::HTTP_NOT_FOUND);
-        }
-
-        return $this->buildResponse($this->getSitemap($id, $decorator, $request));
+        return $this->getSitemap($request);
     }
 
     /**
      * Get sitemap.
      *
-     * @param string             $id
-     * @param DecoratorInterface $decorator
-     * @param Request            $request
+     * @param Request $request
      *
-     * @return false|mixed|Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    private function getSitemap(string $id, DecoratorInterface $decorator, Request $request)
+    private function getSitemap(Request $request): ?Response
     {
-        $sitemap = false;
+        $sitemap = null;
         $pathInfo = (string)str_replace('.gz', '', $request->getPathInfo());
 
         try {
-            if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
-                $preset = $this->getPreset($decorator, $request->attributes->all());
-                $params = $this->getParams($id);
-                $sitemaps = $decorator->render($preset, $params);
-                if (!isset($sitemaps[$pathInfo])) {
-                    return new Response('Not found', Response::HTTP_NOT_FOUND);
-                }
+            //if (!($sitemap = $this->sitemapManager->loadCache($id, $request->getPathInfo()))) {
+            //$preset = $this->getPreset($decorator, $request->attributes->all());
+//            $params = $this->getParams();
+//            $sitemaps = $decorator->render($preset, $params);
+//            if (!isset($sitemaps[$pathInfo])) {
+//                return new Response('Not found', Response::HTTP_NOT_FOUND);
+//            }
+//
+//            $sitemap = $sitemaps[$pathInfo];
 
-                $sitemap = $sitemaps[$pathInfo];
+            //$this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
+            //}
 
-                $this->sitemapManager->saveCache($id, $request->getPathInfo(), $sitemap);
-            }
+            $sitemap = $this->sitemapManager->generate();
+
         } catch (Exception $exception) {
+            dump($exception);
             $this->container->get('logger')->error(
                 sprintf(
                     '%s : %s :%s',
@@ -141,56 +134,6 @@ class SitemapController
         }
 
         return $sitemap;
-    }
-
-    /**
-     * Builds a valid response.
-     *
-     * @param array $sitemap The sitemap content.
-     *
-     * @return Response          The valid response.
-     */
-    private function buildResponse(array $sitemap): Response
-    {
-        $response = new Response();
-        $response
-            ->setLastModified($sitemap['lastmod'])
-            ->setContent($sitemap['urlset'])
-            ->setStatusCode(Response::HTTP_OK)
-            ->headers
-            ->set('content-type', 'text/xml');
-
-        $response->headers->set('cache-control', 'no-cache');
-        $response->headers->set('pragma', 'no-cache');
-        $response->headers->set('expires', -1);
-
-        return $response;
-    }
-
-    /**
-     * Returns the decorator associated to a route name.
-     *
-     * @param string $id A sitemap id.
-     *
-     * @return DecoratorInterface|null if found, null otherwise.
-     */
-    private function getDecorator(string $id): ?DecoratorInterface
-    {
-        return $this->container->has(SitemapListener::$DECORATOR_PREFIX . $id) ?
-            $this->container->get(SitemapListener::$DECORATOR_PREFIX . $id) : null;
-    }
-
-    /**
-     * Returns the preset parameters from the request attributes.
-     *
-     * @param DecoratorInterface $decorator  The decorator.
-     * @param array              $attributes The request attributes.
-     *
-     * @return array                         An array of accepted preset discriminators.
-     */
-    private function getPreset(DecoratorInterface $decorator, array $attributes): array
-    {
-        return array_intersect_key($attributes, array_flip($decorator->getCollector()->getAcceptedDiscriminators()));
     }
 
     /**

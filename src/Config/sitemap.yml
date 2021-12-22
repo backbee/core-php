@@ -1,0 +1,5 @@
+change_freq: weekly
+excluded: [ ]
+limits: 50000
+cache-control:
+    max_age: 86400

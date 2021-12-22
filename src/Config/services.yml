@@ -593,20 +593,12 @@ services:
 
     # Sitemap
     core.sitemap.manager:
-        class: BackBeePlanet\Sitemap\SitemapManager
-        arguments: [ '@bbapp', '@config' ]
+        class: BackBee\Sitemap\SitemapManager
+        arguments: [ '@bbapp', '@config', '@cloud.search_manager' ]
 
     core.sitemap.controller:
-        class: BackBeePlanet\Controller\SitemapController
+        class: BackBee\Controller\SitemapController
         arguments: [ '@bbapp', '@core.sitemap.manager', '@config' ]
-
-    core.sitemap.query_builder:
-        class: BackBeePlanet\Sitemap\Query\QueryBuilder
-        arguments: [ '@em', '@site' ]
-
-    core.sitemap.listener:
-        class: BackBeePlanet\Listener\SitemapListener
-        arguments: [ '@bbapp', '@config' ]
 
     # Search engine
     core.search_engine.controller:

@@ -35,6 +35,15 @@ cloud.robots_txt:
     requirements:
         _method: GET
 
+# Sitemap
+core.sitemap.controller:
+    pattern: /sitemap.xml
+    defaults:
+        _action: indexAction
+        _controller: core.sitemap.controller
+
+############# API #############
+
 # ACL API
 #cloud.api.acl.get:
 #    pattern: /api/acl-permissions/{id}

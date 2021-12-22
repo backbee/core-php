@@ -153,6 +153,7 @@ class ElasticsearchClient
                     'settings' => [
                         'number_of_shards' => $this->settings['index']['number_of_shards'],
                         'number_of_replicas' => $this->settings['index']['number_of_replicas'],
+                        'max_result_window' => 50000,
                         'analysis' => [
                             'filter' => [
                                 'autocomplete_filter' => [
@@ -507,6 +508,12 @@ class ElasticsearchClient
                         ],
                         'lang' => [
                             'type' => 'keyword',
+                        ],
+                        'level' => [
+                            'type' => 'integer',
+                        ],
+                        'state' => [
+                            'type' => 'integer',
                         ],
                     ],
                 ],

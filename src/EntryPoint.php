@@ -66,12 +66,12 @@ class EntryPoint extends AbstractBundle implements HasTranslatableResourceInterf
      */
     public static function onLoadConfigurations(BBApplication $app, Config $config): void
     {
-        // Sitemaps
+        // Sitemap
         $app->getConfig()->setSection(
-            'sitemaps',
+            'sitemap',
             array_replace_recursive(
-                $config->getRawSection('sitemaps') ?? [],
-                $app->getConfig()->getSection('sitemaps') ?? []
+                $config->getRawSection('sitemap') ?? [],
+                $app->getConfig()->getSection('sitemap') ?? []
             )
         );
 
