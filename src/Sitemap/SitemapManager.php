@@ -81,7 +81,10 @@ class SitemapManager
     {
         try {
             $locations = $this->searchManager->getBy(
-                ['is_online' => true],
+                [
+                    'is_online' => true,
+                    'seo_index' => true
+                ],
                 0,
                 $this->config['limits'] ?? 10000,
                 [],

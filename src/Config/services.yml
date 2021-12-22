@@ -639,7 +639,7 @@ services:
     # Elasticsearch
     elasticsearch.manager:
         class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query' ]
+        arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query', '@core.search_engine.manager' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 

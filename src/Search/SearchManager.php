@@ -203,6 +203,13 @@ class SearchManager extends AbstractSearchManager
             );
         }
 
+        if (($criteria['seo_index'] ?? null) !== null) {
+            $query = $this->elasticsearchQuery->getQueryToFilterPageIndexedOrNot(
+                $query,
+                (bool)$criteria['seo_index']
+            );
+        }
+
         $sortValidAttrNames = [
             'modified_at',
             'created_at',

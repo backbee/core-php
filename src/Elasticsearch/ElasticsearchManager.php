@@ -28,6 +28,7 @@ use BackBee\Page\PageContentManager;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\MultiLang\MultiLangManager;
+use BackBeeCloud\SearchEngine\SearchEngineManager;
 use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
 use Cocur\Slugify\Slugify;
@@ -67,18 +68,25 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     protected $config;
 
     /**
+     * @var \BackBeeCloud\SearchEngine\SearchEngineManager
+     */
+    protected $searchEngineManager;
+
+    /**
      * ElasticsearchManager constructor.
      *
-     * @param BBApplication      $app
-     * @param PageContentManager $pageContentManager
-     * @param MultiLangManager   $multiLangManager
-     * @param ElasticsearchQuery $elasticsearchQuery
+     * @param BBApplication                                  $app
+     * @param PageContentManager                             $pageContentManager
+     * @param MultiLangManager                               $multiLangManager
+     * @param ElasticsearchQuery                             $elasticsearchQuery
+     * @param \BackBeeCloud\SearchEngine\SearchEngineManager $searchEngineManager
      */
     public function __construct(
         BBApplication $app,
         PageContentManager $pageContentManager,
         MultiLangManager $multiLangManager,
-        ElasticsearchQuery $elasticsearchQuery
+        ElasticsearchQuery $elasticsearchQuery,
+        SearchEngineManager $searchEngineManager
     ) {
         parent::__construct($app, $app->getContainer()->get('config'));
 
@@ -86,6 +94,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
         $this->pageContentManager = $pageContentManager;
         $this->multiLangManager = $multiLangManager;
         $this->config = $app->getContainer()->get('config')->getSection('elasticsearch');
+        $this->searchEngineManager = $searchEngineManager;
     }
 
     /**
@@ -116,6 +125,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     protected function getPageCustomDataToIndex(Page $page): array
     {
         $type = $this->pageContentManager->getTypeByPage($page);
+        $searchEngine = $this->searchEngineManager->googleSearchEngineIsActivated();
 
         return [
             'title' => $this->pageContentManager->extractTitleFromPage($page),
@@ -137,6 +147,10 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'category' => $this->pageContentManager->getCategoryByPage($page),
             'images' => $this->pageContentManager->getImagesByPage($page),
             'lang' => $this->multiLangManager->getLangByPage($page) ?? 'fr',
+            'seo_index' => null === $page->getMetaData()->get('index') ?
+                $searchEngine : $page->getMetaData()->get('index')->getAttribute('content'),
+            'seo_follow' => null === $page->getMetaData()->get('follow') ?
+                $searchEngine : $page->getMetaData()->get('follow')->getAttribute('content'),
         ];
     }
 

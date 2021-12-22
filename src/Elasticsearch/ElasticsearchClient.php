@@ -515,6 +515,12 @@ class ElasticsearchClient
                         'state' => [
                             'type' => 'integer',
                         ],
+                        'seo_index' => [
+                            'type' => 'boolean',
+                        ],
+                        'seo_follow' => [
+                            'type' => 'boolean',
+                        ]
                     ],
                 ],
             ]
