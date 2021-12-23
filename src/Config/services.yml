@@ -594,11 +594,11 @@ services:
     # Sitemap
     core.sitemap.manager:
         class: BackBee\Sitemap\SitemapManager
-        arguments: [ '@bbapp', '@config', '@cloud.search_manager' ]
+        arguments: [ '@bbapp', '@config', '@cloud.search_manager', '@core.redis.manager' ]
 
     core.sitemap.controller:
         class: BackBee\Controller\SitemapController
-        arguments: [ '@bbapp', '@core.sitemap.manager', '@config' ]
+        arguments: [ '@bbapp', '@core.sitemap.manager' ]
 
     # Search engine
     core.search_engine.controller:
