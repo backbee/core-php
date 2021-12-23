@@ -1,6 +1,8 @@
 host: ~
+index_name: ~
 index:
     number_of_shards: 5
     number_of_replicas: 0
 supported_analyzer:
+    - english
     - french
