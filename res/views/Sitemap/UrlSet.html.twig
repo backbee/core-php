@@ -11,6 +11,9 @@
                 {% for image in page.images if not page.images is empty and image.path %}
                     <image:image>
                         <image:loc>{{ bb.routing.getUri(image.path, '', this.getCurrentSite()) }}</image:loc>
+                        {% if not image.alt is empty %}
+                            <image:title>{{ image.alt }}</image:title>
+                        {% endif %}
                     </image:image>
                 {% endfor %}
             </url>
