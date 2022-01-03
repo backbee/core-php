@@ -22,7 +22,6 @@
 namespace BackBee\Renderer\Helper;
 
 use BackBee\ClassContent\Basic\Image;
-use BackBee\Renderer\Helper\AbstractHelper;
 
 /**
  * @author Michel Baptista <michel.baptista@lp-digital.fr>
@@ -30,15 +29,15 @@ use BackBee\Renderer\Helper\AbstractHelper;
 class getImageAlternativeText extends AbstractHelper
 {
     /**
-     * @param       $uri
-     * @param false $preserveScheme
+     * @param \BackBee\ClassContent\Basic\Image $image
+     * @param string                            $defaultText
      *
      * @return string|null
      */
     public function __invoke(Image $image, string $defaultText = ''): string
     {
-        return (null === $image->getParamValue('alt') || empty($image->getParamValue('alt')))
-        ? ((null === $image->getParamValue('description') || empty($image->getParamValue('description'))) ? $defaultText : trim(str_replace("\n", " ", strip_tags($image->getParamValue('description')))))
-        : $image->getParamValue('alt');
+        return empty($image->getParamValue('alt')) ? (empty($image->getParamValue('description') ?
+            $defaultText : trim(str_replace("\n", " ", strip_tags($image->getParamValue('description')))))) :
+            $image->getParamValue('alt');
     }
 }
