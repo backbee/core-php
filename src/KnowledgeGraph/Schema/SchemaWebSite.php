@@ -28,7 +28,7 @@ use BackBee\Renderer\Renderer;
  *
  * @package BackBee\KnowledgeGraph\Schema
  *
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class SchemaWebSite implements SchemaInterface
 {
@@ -74,9 +74,7 @@ class SchemaWebSite implements SchemaInterface
             $data['description'] = $this->config['website_description'];
         }
 
-        $data = $this->processSearchSection($data);
-
-        return $data;
+        return $this->processSearchSection($data);
     }
 
     /**
@@ -94,7 +92,7 @@ class SchemaWebSite implements SchemaInterface
 
         $data['potentialAction'] = [
             '@type' => 'SearchAction',
-            'target' => $this->renderer->getUri($this->config['website_search']) .
+            'target' => $this->renderer->getUri($this->config['website_search'], null, null, null, false) .
                 $this->config['website_search_term_string'] . '{search_term_string}',
             'query-input' => 'required name=search_term_string',
         ];
