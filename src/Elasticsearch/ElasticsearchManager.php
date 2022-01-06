@@ -147,9 +147,9 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
             'category' => $this->pageContentManager->getCategoryByPage($page),
             'images' => $this->pageContentManager->getImagesByPage($page),
             'lang' => $this->multiLangManager->getLangByPage($page) ?? 'fr',
-            'seo_index' => null === $page->getMetaData()->get('index') ?
+            'seo_index' => $page->getMetaData() === null || null === $page->getMetaData()->get('index') ?
                 $searchEngine : $page->getMetaData()->get('index')->getAttribute('content'),
-            'seo_follow' => null === $page->getMetaData()->get('follow') ?
+            'seo_follow' => $page->getMetaData() === null || null === $page->getMetaData()->get('follow') ?
                 $searchEngine : $page->getMetaData()->get('follow')->getAttribute('content'),
         ];
     }
