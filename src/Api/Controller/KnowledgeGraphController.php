@@ -19,19 +19,21 @@
  * along with BackBee Standalone. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace BackBeeCloud\Api\Controller;
+namespace BackBee\Api\Controller;
 
 use BackBee\BBApplication;
 use BackBee\Config\Config;
+use BackBeeCloud\Api\Controller\AbstractController;
+use BackBeeCloud\UserPreference\UserPreferenceManager;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Class KnowledgeGraphController
  *
- * @package BackBeeCloud\Api\Controller
+ * @package BackBee\Api\Controller
  *
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class KnowledgeGraphController extends AbstractController
 {
@@ -41,14 +43,22 @@ class KnowledgeGraphController extends AbstractController
     private $config;
 
     /**
+     * @var UserPreferenceManager
+     */
+    private $userPreferenceManager;
+
+    /**
      * KnowledgeGraphController constructor.
      *
      * @param BBApplication $app
-     * @param Config        $config
+     * @param Config $config
+     * @param \BackBeeCloud\UserPreference\UserPreferenceManager $userPreferenceManager
      */
-    public function __construct(BBApplication $app, Config $config)
+    public function __construct(BBApplication $app, Config $config, UserPreferenceManager $userPreferenceManager)
     {
         $this->config = $config;
+        $this->userPreferenceManager = $userPreferenceManager;
+
         parent::__construct($app);
     }
 
@@ -63,20 +73,22 @@ class KnowledgeGraphController extends AbstractController
         $this->assertIsAuthenticated();
 
         $configuration = $this->config->getSection('knowledge_graph');
+        $values = $this->userPreferenceManager->dataOf('knowledge-graph');
 
         return new JsonResponse(
             [
                 'graph' => [
-                    'organization' => $configuration['graph']['name'] ?? 'n/a',
-                    'organization_social_profiles' => $configuration['graph']['social_profiles'] ?? 'n/a',
-                    'website_name' => $configuration['graph']['website_name'] ?? 'n/a',
-                    'website_description' => $configuration['graph']['website_description'] ?? 'n/a',
+                    'organization' => $values['organization'] ?? $configuration['graph']['name'] ?? 'n/a',
+                    'organization_social_profiles' => json_decode(
+                        $values['organization_social_profiles'],
+                        false
+                    ) ?? $configuration['graph']['social_profiles'] ?? 'n/a',
+                    'website_name' => $values['website_name'] ?? $configuration['graph']['website_name'] ?? 'n/a',
+                    'website_description' => $values['website_description'] ??
+                        $configuration['graph']['website_description'] ?? 'n/a',
                     'website_logo' => $configuration['graph']['logo'] ?? 'n/a',
                     'website_image' => $configuration['graph']['image'] ?? 'n/a',
-                    'website_search' => $configuration['graph']['website_search'] ?? 'n/a',
-                    'twitter_card' => $configuration['graph']['twitter_card'] ?? 'n/a',
                 ],
-                'mapping_schema_types' => $configuration['mapping_schema_types'] ?? ['n/a' => ['n/a']]
             ]
         );
     }

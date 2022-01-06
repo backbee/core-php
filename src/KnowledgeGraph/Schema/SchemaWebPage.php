@@ -30,7 +30,7 @@ use Exception;
  *
  * @package BackBee\KnowledgeGraph\Schema
  *
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class SchemaWebPage implements SchemaInterface
 {

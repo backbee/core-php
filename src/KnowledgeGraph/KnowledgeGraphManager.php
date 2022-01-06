@@ -45,6 +45,7 @@ use function is_array;
  * @package BackBee\KnowledgeGraph
  *
  * @author  Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class KnowledgeGraphManager
 {
@@ -84,13 +85,18 @@ class KnowledgeGraphManager
     private $renderer;
 
     /**
+     * @var array
+     */
+    private $userPreferenceValues;
+
+    /**
      * KnowledgeGraphManager constructor.
      *
-     * @param BBApplication         $app
+     * @param BBApplication $app
      * @param UserPreferenceManager $userPreferenceManager
-     * @param Config                $config
-     * @param PageFromRawData       $pageFromRawData
-     * @param SeoMetadataManager    $seoMetadataManager
+     * @param Config $config
+     * @param PageFromRawData $pageFromRawData
+     * @param SeoMetadataManager $seoMetadataManager
      */
     public function __construct(
         BBApplication $app,
@@ -105,6 +111,7 @@ class KnowledgeGraphManager
         $this->config = $config->getSection('knowledge_graph');
         $this->pageFromRawData = $pageFromRawData;
         $this->seoMetadataManager = $seoMetadataManager;
+        $this->userPreferenceValues = $userPreferenceManager->dataOf('knowledge-graph') ?? [];
     }
 
     /**
@@ -115,7 +122,8 @@ class KnowledgeGraphManager
     public function indexOnGoogle(): bool
     {
         $data = $this->userPreferenceManager->dataOf(SearchEngineController::USER_PREFERENCE_DATA_KEY);
-        if ((null === $data) || (!isset($data['robots_index']))) {
+
+        if ((!isset($data['robots_index']))) {
             return false;
         }
 
@@ -205,8 +213,8 @@ class KnowledgeGraphManager
      */
     protected function getPieces(): array
     {
-        $organization = new SchemaOrganization($this->context);
-        $website = new SchemaWebSite($this->context);
+        $organization = new SchemaOrganization($this->context, $this->userPreferenceValues);
+        $website = new SchemaWebSite($this->context, $this->userPreferenceValues);
         $webpage = new SchemaWebPage($this->context);
 
         $pieces = [
@@ -215,9 +223,7 @@ class KnowledgeGraphManager
             $webpage->generate(),
         ];
 
-        $pieces = $this->getExtraMappingTypes($pieces);
-
-        return $pieces;
+        return $this->getExtraMappingTypes($pieces);
     }
 
     /**

@@ -28,7 +28,8 @@ use BackBee\Renderer\Renderer;
  *
  * @package BackBee\KnowledgeGraph\Schema
  *
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SchemaOrganization implements SchemaInterface
 {
@@ -43,14 +44,21 @@ class SchemaOrganization implements SchemaInterface
     private $config;
 
     /**
+     * @var array
+     */
+    private $userPreferenceValues;
+
+    /**
      * SchemaOrganization constructor.
      *
      * @param SchemaContext $context
+     * @param array         $userPreferenceValues
      */
-    public function __construct(SchemaContext $context)
+    public function __construct(SchemaContext $context, array $userPreferenceValues)
     {
         $this->config = $context->getConfig();
         $this->renderer = $context->getApplication()->getRenderer();
+        $this->userPreferenceValues = $userPreferenceValues;
     }
 
     /**
@@ -63,15 +71,14 @@ class SchemaOrganization implements SchemaInterface
         $data = [
             '@type' => 'Organization',
             '@id' => $this->renderer->getUri('/') . SchemaIds::ORGANIZATION_HASH,
-            'name' => $this->config['name'],
+            'name' => $this->userPreferenceValues['organization'] ?? $this->config['name'],
             'url' => $this->renderer->getUri('/'),
         ];
 
         $data = $this->addLogo($data);
         $data = $this->addImage($data);
-        $data = $this->processSocialProfiles($data);
 
-        return $data;
+        return $this->processSocialProfiles($data);
     }
 
     /**
@@ -123,11 +130,8 @@ class SchemaOrganization implements SchemaInterface
      */
     private function processSocialProfiles(array $data): array
     {
-        if (null === $this->config['social_profiles']) {
-            return $data;
-        }
-
-        $data['sameAs'] = $this->config['social_profiles'];
+        $data['sameAs'] = json_decode($this->userPreferenceValues['organization_social_profiles'] ??
+            $this->config['social_profiles'], false) ?? '';
 
         return $data;
     }
