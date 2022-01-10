@@ -30,6 +30,7 @@ use BackBeeCloud\Job\JobHandlerInterface;
 use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
+use Cocur\Slugify\Slugify;
 use Exception;
 use stdClass;
 
@@ -61,6 +62,11 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     protected $multiLangManager;
 
     /**
+     * @var \BackBee\Config\Config
+     */
+    protected $config;
+
+    /**
      * ElasticsearchManager constructor.
      *
      * @param BBApplication      $app
@@ -79,6 +85,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
         $this->elasticSearchQuery = $elasticsearchQuery;
         $this->pageContentManager = $pageContentManager;
         $this->multiLangManager = $multiLangManager;
+        $this->config = $app->getContainer()->get('config')->getSection('elasticsearch');
     }
 
     /**
@@ -86,7 +93,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      */
     public function getIndexName(): string
     {
-        return self::INDEX_BASE_NAME . str_replace(' ', '', strtolower($this->getSiteName()));
+        return (new Slugify())->slugify($this->config['index_name'] ?? (self::INDEX_BASE_NAME . $this->getSiteName()));
     }
 
     /**
@@ -95,6 +102,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     public function resetIndex(): ElasticsearchManager
     {
         $params = ['index' => $this->getIndexName()];
+
         if ($this->getClient()->indices()->exists($params)) {
             $this->getClient()->indices()->delete($params);
         }
