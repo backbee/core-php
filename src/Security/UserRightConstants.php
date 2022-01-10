@@ -21,14 +21,17 @@
 
 namespace BackBeeCloud\Security;
 
+use InvalidArgumentException;
 use function in_array;
+use function is_string;
 
 /**
  * Class UserRightConstants
  *
  * @package BackBeeCloud\Security
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 final class UserRightConstants
 {
@@ -74,10 +77,17 @@ final class UserRightConstants
     public const BUNDLE_FEATURE_PATTERN = 'BUNDLE_%s_FEATURE';
     public const BUNDLE_FEATURE_REGEX = '/^BUNDLE_[\w]+_FEATURE$/';
 
+    /**
+     * Assert subject exists.
+     *
+     * @param $subject
+     *
+     * @return bool|void
+     */
     public static function assertSubjectExists($subject)
     {
-        if (!\is_string($subject)) {
-            throw new \InvalidArgumentException('Provided value must be type of string.');
+        if (!is_string($subject)) {
+            throw new InvalidArgumentException('Provided value must be type of string.');
         }
 
         if (1 === preg_match(self::BUNDLE_FEATURE_REGEX, $subject)) {
@@ -102,7 +112,7 @@ final class UserRightConstants
         );
 
         if (false === $result) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Provided user right subject value (%s) does not exist.',
                     $subject
@@ -111,7 +121,14 @@ final class UserRightConstants
         }
     }
 
-    public static function assertAttributeExists($attribute)
+    /**
+     * Assert attribute exists.
+     *
+     * @param $attribute
+     *
+     * @return void
+     */
+    public static function assertAttributeExists($attribute): void
     {
         $result = in_array(
             $attribute,
@@ -130,7 +147,7 @@ final class UserRightConstants
         );
 
         if (false === $result) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Provided user right attribute value (%s) does not exist.',
                     $attribute
@@ -139,7 +156,14 @@ final class UserRightConstants
         }
     }
 
-    public static function assertContextMaskIsValid($contextMask)
+    /**
+     * Assert context mask is valid.
+     *
+     * @param $contextMask
+     *
+     * @return void
+     */
+    public static function assertContextMaskIsValid($contextMask): void
     {
         if (self::NO_CONTEXT_MASK === $contextMask) {
             return;
@@ -164,7 +188,7 @@ final class UserRightConstants
         }
 
         if ($contextMask) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Provided user right context mask value (%d) is not valid',
                     $contextMask
@@ -173,13 +197,21 @@ final class UserRightConstants
         }
     }
 
-    public static function normalizeContextData(array $data)
+    /**
+     * Normalize context data.
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    public static function normalizeContextData(array $data): array
     {
-        if (false === $data) {
+        if (empty($data)) {
             return $data;
         }
 
         ksort($data);
+
         foreach ($data as &$row) {
             sort($row);
         }
@@ -187,13 +219,18 @@ final class UserRightConstants
         return $data;
     }
 
-    public static function createBundleSubject($bundleId)
+    /**
+     * Create bundle subject.
+     *
+     * @param $bundleId
+     *
+     * @return string
+     */
+    public static function createBundleSubject($bundleId): string
     {
-        return strtoupper(
-            sprintf(
-                self::BUNDLE_FEATURE_PATTERN,
-                $bundleId
-            )
+        return sprintf(
+            self::BUNDLE_FEATURE_PATTERN,
+            $bundleId
         );
     }
 }
