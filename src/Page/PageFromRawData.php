@@ -29,6 +29,7 @@ use BackBee\NestedNode\Page;
 use BackBeeCloud\Elasticsearch\ElasticsearchCollection;
 use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use Doctrine\ORM\EntityManagerInterface;
+use function strlen;
 
 /**
  * Class PageFromRawData
@@ -103,14 +104,26 @@ class PageFromRawData
      */
     private function setAbstractData(?string $abstractUid): void
     {
-        if (null === $abstractUid) {
+        if ($abstractUid === null) {
             $this->data['abstract'] = null;
         } else {
             $abstract = $this->getContentWithDraft(ArticleAbstract::class, $abstractUid);
             $abstract = $abstract ?: $this->getContentWithDraft(Paragraph::class, $abstractUid);
-            if (null !== $abstract) {
-                $this->data['abstract'] = trim(
-                    preg_replace('#\s\s+#', ' ', preg_replace('#<[^>]+>#', ' ', $abstract->value))
+            if ($abstract !== null) {
+                $this->data['abstract'] = mb_substr(
+                    trim(
+                        html_entity_decode(
+                            strip_tags(
+                                preg_replace(
+                                    ['#<[^>]+>#', '#\s\s+#', '#&nbsp;#', '/\\\\n/', '#"#'],
+                                    [' ', ' ', '', ''],
+                                    $abstract->value
+                                )
+                            )
+                        )
+                    ),
+                    0,
+                    300
                 );
             }
         }
@@ -123,11 +136,11 @@ class PageFromRawData
      */
     private function setImageData($mediaUid): void
     {
-        if (null === $mediaUid) {
+        if ($mediaUid === null) {
             $this->data['image'] = null;
         } else {
             $media = $this->getContentWithDraft(AbstractClassContent::class, $mediaUid);
-            if ($media instanceof Image && null !== ($image = $media->image)) {
+            if ($media instanceof Image && ($image = $media->image) !== null) {
                 $this->data['image'] = [
                     'uid' => $image->getUid(),
                     'url' => $image->path,

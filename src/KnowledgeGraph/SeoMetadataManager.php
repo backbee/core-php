@@ -241,20 +241,20 @@ class SeoMetadataManager
                     $this->esResult['_source']['abstract_uid']
                 )
             ) {
-                $this->seoData['description'] = strip_tags(
-                    str_replace(
-                        "\n",
-                        '',
-                        str_replace(
-                            '&nbsp;',
-                            '',
-                            strlen($abstract->value) > 300 ? mb_substr(
-                                $abstract->value,
-                                0,
-                                300
-                            ) . '...' : $abstract->value
+                $this->seoData['description'] = mb_substr(
+                    trim(
+                        html_entity_decode(
+                            strip_tags(
+                                preg_replace(
+                                    ['#<[^>]+>#', '#\s\s+#', '#&nbsp;#', '/\\\\n/', '#"#'],
+                                    [' ', ' ', '', ''],
+                                    $abstract->value
+                                )
+                            )
                         )
-                    )
+                    ),
+                    0,
+                    300
                 );
             }
         } catch (Exception $exception) {
