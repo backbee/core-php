@@ -24,13 +24,14 @@ namespace BackBee\Renderer\Helper;
 use Exception;
 
 /**
- * Class bbtoolbar
+ * Class bbToolbar
  *
  * @package BackBee\Renderer\Helper
  *
  * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class bbtoolbar extends AbstractHelper
+class bbToolbar extends AbstractHelper
 {
     /**
      * Invoke.
@@ -40,7 +41,7 @@ class bbtoolbar extends AbstractHelper
      */
     public function __invoke(): string
     {
-        $settings = $this->getRenderer()->getApplication()->getContainer()->getParameter('cdn');
+        $settings = $this->getContainer()->getParameter('cdn');
 
         return $this->getRenderer()->partial(
             'common/toolbar.html.twig',
@@ -49,7 +50,9 @@ class bbtoolbar extends AbstractHelper
                 'appCssUrl' => $settings['app_css_url'],
                 'appRteUrl' => $settings['app_rte_url'],
                 'imageDomain' => $settings['image_domain'],
+                'multiLanguage' => (int)$this->getContainer()->get('multilang_manager')->isMultiLanguageEnabled(),
             ]
         );
     }
+
 }

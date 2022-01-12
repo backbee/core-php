@@ -25,12 +25,12 @@ use BackBee\BBApplication;
 use BackBee\Cache\RedisManager;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
+use BackBee\Site\SiteStatusManager;
 use BackBeeCloud\Entity\Lang;
 use BackBeeCloud\Entity\PageLang;
 use BackBeeCloud\Entity\PageRedirection;
 use BackBeeCloud\Importer\SimpleWriterInterface;
 use BackBeeCloud\Job\JobHandlerInterface;
-use BackBee\Site\SiteStatusManager;
 use BackBeePlanet\Job\JobInterface;
 use BackBeePlanet\Job\JobManager;
 use Doctrine\ORM\EntityManager;
@@ -47,7 +47,8 @@ use function in_array;
  *
  * @package BackBeeCloud\MultiLang
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class MultiLangManager implements JobHandlerInterface
 {
@@ -262,8 +263,10 @@ class MultiLangManager implements JobHandlerInterface
             throw new InvalidArgumentException(sprintf('Lang \'%s\' does not exist', $id));
         }
 
-        (new JobManager($this->redisManager))->pushJob(new MultiLangJob($this->getSite()->getLabel(), $id));
-        $this->siteStatusMgr->lock();
+        if ($this->getSite()) {
+            (new JobManager($this->redisManager))->pushJob(new MultiLangJob($this->getSite()->getLabel(), $id));
+            $this->siteStatusMgr->lock();
+        }
     }
 
     /**
@@ -276,7 +279,7 @@ class MultiLangManager implements JobHandlerInterface
      * @throws ORMException
      * @throws TransactionRequiredException
      */
-    public function updateLang($id, $newIsActive)
+    public function updateLang($id, $newIsActive): void
     {
         $data = $this->getLang($id);
         if (null === $data) {
@@ -289,12 +292,15 @@ class MultiLangManager implements JobHandlerInterface
                 throw new LogicException(sprintf('You cannot disable the default lang \'%s\'.', $id));
             }
 
-            if (null !== $lang) {
+            if (null !== $lang && $this->getSite()) {
                 $lang->disable();
                 $this->entityMgr->flush($lang);
                 $root = $this->getRootByLang($lang);
-                $root->setState(Page::STATE_OFFLINE);
-                $this->entityMgr->flush($root);
+
+                if ($root) {
+                    $root->setState(Page::STATE_OFFLINE);
+                    $this->entityMgr->flush($root);
+                }
             }
 
             $this->redisManager->removePageCache($this->getSite()->getLabel());
@@ -306,12 +312,15 @@ class MultiLangManager implements JobHandlerInterface
             return;
         }
 
-        if (null !== $lang) {
+        if (null !== $lang && $this->getSite()) {
             $lang->enable();
             $this->entityMgr->flush($lang);
             $root = $this->getRootByLang($lang);
-            $root->setState(Page::STATE_ONLINE);
-            $this->entityMgr->flush($root);
+
+            if ($root) {
+                $root->setState(Page::STATE_ONLINE);
+                $this->entityMgr->flush($root);
+            }
 
             $this->redisManager->removePageCache($this->getSite()->getLabel());
 
@@ -357,7 +366,9 @@ class MultiLangManager implements JobHandlerInterface
 
         $this->entityMgr->commit();
 
-        $this->redisManager->removePageCache($this->getSite()->getLabel());
+        if ($this->getSite()) {
+            $this->redisManager->removePageCache($this->getSite()->getLabel());
+        }
     }
 
     /**
@@ -396,7 +407,7 @@ class MultiLangManager implements JobHandlerInterface
      *
      * @param Page $page
      *
-     * @return PageLang|null
+     * @return null|object|PageLang
      */
     public function getAssociation(Page $page): ?PageLang
     {
@@ -426,9 +437,9 @@ class MultiLangManager implements JobHandlerInterface
      *
      * @param Lang $lang
      *
-     * @return Page|null
+     * @return null|object
      */
-    public function getRootByLang(Lang $lang): ?Page
+    public function getRootByLang(Lang $lang)
     {
         return $this->entityMgr->getRepository(Page::class)->findOneBy(
             [
@@ -440,7 +451,7 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * Handles the provided job.
      *
-     * @param JobInterface          $job
+     * @param JobInterface $job
      * @param SimpleWriterInterface $writer
      *
      * @throws ORMException
@@ -483,34 +494,45 @@ class MultiLangManager implements JobHandlerInterface
 
         $defaultLang = $this->getDefaultLangEntity();
 
-        $root = $this->entityMgr->getRepository(Page::class)->findOneBy(
-            [
-                '_url' => sprintf('/%s/', $defaultLang->getLang()),
-            ]
-        );
-        $pageIterator = $this->entityMgr->getRepository(Page::class)->createQueryBuilder('p')->getQuery()->iterate();
-        foreach ($pageIterator as $row) {
-            $page = $row[0];
-            if ($root !== $page && '/' !== $page->getUrl() && null === $this->getAssociation($page)) {
-                $this->entityMgr->getRepository(Page::class)->insertNodeAsLastChildOf($page, $root);
-                $newUrl = sprintf('/%s%s', $defaultLang->getLang(), $page->getUrl());
-                $pageRedirection = new PageRedirection($page->getUrl(), $newUrl);
-                $this->entityMgr->persist($pageRedirection);
-                $this->associate($page, $defaultLang);
-                $page->setUrl($newUrl);
-                $this->entityMgr->flush();
+        if ($defaultLang) {
+            $root = $this->entityMgr->getRepository(Page::class)->findOneBy(
+                [
+                    '_url' => sprintf('/%s/', $defaultLang->getLang()),
+                ]
+            );
 
-                $writer->write(
-                    sprintf(
-                        '> Migrated page #%s "%s" to default lang.',
-                        $page->getUid(),
-                        $page->getTitle()
-                    )
+            $pageIterator = $this
+                ->entityMgr
+                ->getRepository(Page::class)
+                ->createQueryBuilder('p')
+                ->getQuery()
+                ->iterate();
+
+            foreach ($pageIterator as $row) {
+                $page = $row[0];
+                if ($root && $root !== $page && '/' !== $page->getUrl() && null === $this->getAssociation($page)) {
+                    $this->entityMgr->getRepository(Page::class)->insertNodeAsLastChildOf($page, $root);
+                    $newUrl = sprintf('/%s%s', $defaultLang->getLang(), $page->getUrl());
+                    $pageRedirection = new PageRedirection($page->getUrl(), $newUrl);
+                    $this->entityMgr->persist($pageRedirection);
+                    $this->associate($page, $defaultLang);
+                    $page->setUrl($newUrl);
+                    $this->entityMgr->flush();
+
+                    $writer->write(
+                        sprintf(
+                            '> Migrated page #%s "%s" to default lang.',
+                            $page->getUid(),
+                            $page->getTitle()
+                        )
+                    );
+                }
+
+                $pagesCount++;
+                $this->siteStatusMgr->updateLockProgressPercent(
+                    15 + (int)(((($pagesCount / $maxPages) * 100 * 84) / 100))
                 );
             }
-
-            $pagesCount++;
-            $this->siteStatusMgr->updateLockProgressPercent(15 + (int)(((($pagesCount / $maxPages) * 100 * 84) / 100)));
         }
 
         $this->siteStatusMgr->updateLockProgressPercent(100);
@@ -537,7 +559,7 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * Get site.
      *
-     * @return Site|null
+     * @return null|object|Site
      */
     private function getSite(): ?Site
     {
@@ -547,9 +569,9 @@ class MultiLangManager implements JobHandlerInterface
     /**
      * Get default lang entity.
      *
-     * @return Lang
+     * @return null|object|Lang
      */
-    private function getDefaultLangEntity(): Lang
+    private function getDefaultLangEntity(): ?Lang
     {
         $lang = $this->entityMgr->getRepository(Lang::class)->findOneBy(['default' => true]);
 
@@ -558,5 +580,17 @@ class MultiLangManager implements JobHandlerInterface
         }
 
         return $lang;
+    }
+
+
+    /**
+     * Is multi language enabled.
+     *
+     * @return bool
+     */
+    public function isMultiLanguageEnabled(): bool
+    {
+        return $this->app->getContainer()->hasParameter('multi_language') ?
+            $this->app->getContainer()->getParameter('multi_language') : true;
     }
 }

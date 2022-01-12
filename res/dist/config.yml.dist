@@ -7,6 +7,7 @@ parameters:
     dev_mode: false
     privacy_policy: false
     knowledge_graph: true
+    multi_language: true
     bundles:
         core: BackBee\EntryPoint
     date:
