@@ -34,7 +34,6 @@ use BackBeeCloud\SearchEngine\SearchEngineManager;
 use Doctrine\ORM\EntityManager;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Exception;
-use function strlen;
 
 /**
  * Class SeoMetadataManager
@@ -222,6 +221,14 @@ class SeoMetadataManager
                 ]
             );
         } catch (Missing404Exception $exception) {
+            $this->bbApp->getLogging()->warning(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
             $this->esResult = null;
         }
     }
@@ -274,8 +281,7 @@ class SeoMetadataManager
     private function setImageUrl(): void
     {
         try {
-            if (
-                $this->esResult['_source']['image_uid'] &&
+            if ($this->esResult['_source']['image_uid'] &&
                 $image = $this->entityManager->find(Image::class, $this->esResult['_source']['image_uid'])
             ) {
                 $this->seoData['image_url'] = $image->image->path;
@@ -300,6 +306,5 @@ class SeoMetadataManager
             $searchEngine : $this->pageMetadataBag->get('index')->getAttribute('content');
         $this->seoData['follow'] = null === $this->pageMetadataBag->get('follow') ?
             $searchEngine : $this->pageMetadataBag->get('follow')->getAttribute('content');
-
     }
 }

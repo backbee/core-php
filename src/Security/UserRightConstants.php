@@ -72,7 +72,6 @@ final class UserRightConstants
     public const CUSTOM_DESIGN_FEATURE = 'CUSTOM_DESIGN_FEATURE';
     public const PRIVACY_POLICY_FEATURE = 'PRIVACY_POLICY_FEATURE';
     public const GLOBAL_CONTENT_FEATURE = 'GLOBAL_CONTENT_FEATURE';
-    public const KNOWLEDGE_GRAPH_FEATURE = 'KNOWLEDGE_GRAPH_FEATURE';
 
     public const BUNDLE_FEATURE_PATTERN = 'BUNDLE_%s_FEATURE';
     public const BUNDLE_FEATURE_REGEX = '/^BUNDLE_[\w]+_FEATURE$/';
@@ -105,7 +104,6 @@ final class UserRightConstants
                 self::CUSTOM_DESIGN_FEATURE,
                 self::PRIVACY_POLICY_FEATURE,
                 self::GLOBAL_CONTENT_FEATURE,
-                self::KNOWLEDGE_GRAPH_FEATURE,
                 self::OFFLINE_PAGE,
                 self::ONLINE_PAGE,
             ]

@@ -24,15 +24,19 @@ namespace BackBeeCloud\UserPreference;
 use BackBee\Bundle\Registry;
 use BackBeeCloud\MultiLang\MultiLangManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\OptimisticLockException;
+use Exception;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
+use function array_key_exists;
+use function is_array;
+use function is_callable;
 
 /**
  * Class UserPreferenceManager
  *
  * @package BackBeeCloud\UserPreference
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class UserPreferenceManager
 {
@@ -49,15 +53,22 @@ class UserPreferenceManager
     protected $multiLangManager;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * UserPreferenceManager constructor.
      *
-     * @param EntityManager    $entityMgr
-     * @param MultiLangManager $multiLangManager
+     * @param EntityManager            $entityMgr
+     * @param MultiLangManager         $multiLangManager
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(EntityManager $entityMgr, MultiLangManager $multiLangManager)
+    public function __construct(EntityManager $entityMgr, MultiLangManager $multiLangManager, LoggerInterface $logger)
     {
         $this->entityMgr = $entityMgr;
         $this->multiLangManager = $multiLangManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -65,7 +76,7 @@ class UserPreferenceManager
      *
      * @return array
      */
-    public function all()
+    public function all(): array
     {
         $result = [];
         $all = $this->entityMgr->getRepository(Registry::class)->findBy(
@@ -89,13 +100,11 @@ class UserPreferenceManager
      *
      * @param string $name
      * @param array  $data
-     *
-     * @throws OptimisticLockException
      */
-    public function setDataOf($name, array $data): void
+    public function setDataOf(string $name, array $data): void
     {
         foreach ($data as $key => $value) {
-            $this->addInto($name, $key, $value);
+            $this->addInto($name, $key, is_array($value) ? json_encode($value) : $value);
         }
     }
 
@@ -103,22 +112,31 @@ class UserPreferenceManager
      * Removes data associated to the given name.
      *
      * @param string $name
-     *
-     * @throws OptimisticLockException
      */
-    public function removeDataOf($name): void
+    public function removeDataOf(string $name): void
     {
-        $rawData = $this->entityMgr->getRepository(Registry::class)->findBy(
-            [
-                'scope' => self::REGISTRY_SCOPE,
-                'type' => $name,
-            ]
-        );
-        foreach ($rawData as $row) {
-            $this->entityMgr->remove($row);
-        }
+        try {
+            $rawData = $this->entityMgr->getRepository(Registry::class)->findBy(
+                [
+                    'scope' => self::REGISTRY_SCOPE,
+                    'type' => $name,
+                ]
+            );
+            foreach ($rawData as $row) {
+                $this->entityMgr->remove($row);
+            }
 
-        $this->entityMgr->flush();
+            $this->entityMgr->flush();
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
     }
 
     /**
@@ -127,11 +145,11 @@ class UserPreferenceManager
      * @param string $name
      * @param string $key
      * @param string $value
-     * @throws OptimisticLockException
      */
-    public function addInto($name, $key, $value)
+    public function addInto(string $name, string $key, string $value): void
     {
         $this->isAuthorizedNameAndKey($name, $key, $value);
+
         $registry = $this->entityMgr->getRepository(Registry::class)->findOneBy(
             [
                 'scope' => self::REGISTRY_SCOPE,
@@ -139,17 +157,29 @@ class UserPreferenceManager
                 'key' => $key,
             ]
         );
-        if (null === $registry) {
-            $registry = new Registry();
-            $registry->setScope(self::REGISTRY_SCOPE);
-            $registry->setType($name);
-            $registry->setKey($key);
 
-            $this->entityMgr->persist($registry);
+        try {
+            if (null === $registry) {
+                $registry = new Registry();
+                $registry->setScope(self::REGISTRY_SCOPE);
+                $registry->setType($name);
+                $registry->setKey($key);
+
+                $this->entityMgr->persist($registry);
+            }
+
+            $registry->setValue($value);
+            $this->entityMgr->flush($registry);
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
-
-        $registry->setValue($value);
-        $this->entityMgr->flush($registry);
     }
 
     /**
@@ -161,7 +191,7 @@ class UserPreferenceManager
      *
      * @return array
      */
-    public function dataOf($name)
+    public function dataOf(string $name): array
     {
         $result = [];
         $rawData = $this->entityMgr->getRepository(Registry::class)->findBy(
@@ -189,7 +219,7 @@ class UserPreferenceManager
      */
     public function singleDataOf(string $name, string $key): ?string
     {
-        $data = $this->getDataOf($name);
+        $data = $this->dataOf($name);
 
         return $data[$key] ?? null;
     }
@@ -221,7 +251,7 @@ class UserPreferenceManager
             return true;
         }
 
-        if (!in_array($key, array_keys($target))) {
+        if (!array_key_exists($key, $target)) {
             throw new InvalidArgumentException(
                 sprintf(
                     '[%s] %s is not authorized as user preference %s keyname',
@@ -284,17 +314,23 @@ class UserPreferenceManager
                 'url_152x152' => 'is_string',
             ],
             'google-analytics' => [
-                'code' => true
+                'code' => true,
             ],
             'gtm-analytics' => [
                 'code' => function ($code) {
-                    return preg_match('#^GTM\-[a-zA-Z0-9]+$#', $code) === 1;
+                    return preg_match('#^GTM-[a-zA-Z0-9]+$#', $code) === 1;
                 },
             ],
             'privacy-policy' => [
                 'banner_message' => 'is_string',
                 'learn_more_url' => 'is_string',
                 'learn_more_link_title' => 'is_string',
+            ],
+            'knowledge-graph' => [
+                'organization' => 'is_string',
+                'organization_social_profiles' => 'is_string',
+                'website_name' => 'is_string',
+                'website_description' => 'is_string'
             ],
         ];
 

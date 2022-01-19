@@ -10,11 +10,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
     <link rel="canonical" href="{{ bb.routing.getUri(this.getCurrentPage().getUrl(), '', this.getCurrentSite()) }}"/>
 
-    {% if this.knowledgeGraphHelper.isKnowledgeGraphEnabled() %}
-        {{ this.knowledgeGraphHelper.getSeoMetadata(this.getCurrentPage)|raw }}
-        {{ this.knowledgeGraphHelper.getMetaGoogleSiteVerification()|raw }}
-        {{ this.knowledgeGraphHelper.getGraph(this.getCurrentPage)|raw }}
-    {% endif %}
+    {{ this.knowledgeGraphHelper.getSeoMetadata(this.getCurrentPage)|raw }}
+    {{ this.knowledgeGraphHelper.getMetaGoogleSiteVerification()|raw }}
+    {{ this.knowledgeGraphHelper.getGraph(this.getCurrentPage)|raw }}
+
     <!--##FAVICON_SPOT##-->
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">

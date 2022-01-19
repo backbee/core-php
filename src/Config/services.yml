@@ -83,9 +83,7 @@ services:
 
     user_preference.manager:
         class: BackBeeCloud\UserPreference\UserPreferenceManager
-        arguments:
-            - "@em"
-            - "@multilang_manager"
+        arguments: [ '@em', '@multilang_manager', '@backbee.logger' ]
 
     site_option.manager:
         class: BackBeeCloud\SiteOption\OptionManager
@@ -187,8 +185,8 @@ services:
         arguments: [ "@site_status.manager" ]
 
     cloud.api.knowledge_graph.controller:
-        class: BackBeeCloud\Api\Controller\KnowledgeGraphController
-        arguments: [ '@bbapp', '@config' ]
+        class: BackBee\Api\Controller\KnowledgeGraphController
+        arguments: [ '@bbapp', '@config', '@user_preference.manager' ]
 
     cloud.api.about.controller:
         class: BackBee\Api\Controller\AboutController

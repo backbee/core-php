@@ -21,9 +21,9 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\NestedNode\Page;
 use BackBee\KnowledgeGraph\KnowledgeGraphManager;
 use BackBee\KnowledgeGraph\SeoMetadataManager;
+use BackBee\NestedNode\Page;
 use BackBee\Renderer\Exception\RendererException;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,7 +33,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @package BackBee\Renderer\Helper
  *
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class knowledgeGraphHelper extends AbstractHelper
 {
@@ -60,16 +60,6 @@ class knowledgeGraphHelper extends AbstractHelper
     public function __invoke(): knowledgeGraphHelper
     {
         return $this;
-    }
-
-    /**
-     * Is knowledge graph enabled.
-     *
-     * @return bool
-     */
-    public function isKnowledgeGraphEnabled(): bool
-    {
-        return $this->getRenderer()->getApplication()->getContainer()->getParameter('knowledge_graph');
     }
 
     /**
@@ -124,8 +114,7 @@ class knowledgeGraphHelper extends AbstractHelper
             'cloud.multilang.page_association.manager'
         );
 
-        if (
-            $multiLangManager->isActive() &&
+        if ($multiLangManager->isActive() &&
             null !== ($defaultLang = $multiLangManager->getDefaultLang()) &&
             null !== ($defaultPage = $pageAssociationMgr->getAssociatedPage($page, $defaultLang['id']))
         ) {

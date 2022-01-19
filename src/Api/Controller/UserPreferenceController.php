@@ -103,7 +103,7 @@ class UserPreferenceController extends AbstractController
             return new JsonResponse(
                 [
                     'error' => 'bad_request',
-                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+\] ~', '', $ex->getMessage()),
+                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+] ~', '', $ex->getMessage()),
                 ],
                 Response::HTTP_BAD_REQUEST
             );
@@ -129,7 +129,7 @@ class UserPreferenceController extends AbstractController
             return new JsonResponse(
                 [
                     'error' => 'bad_request',
-                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+\] ~', '', $ex->getMessage()),
+                    'reason' => preg_replace('~^\[[a-zA-Z:\\\]+] ~', '', $ex->getMessage()),
                 ],
                 Response::HTTP_BAD_REQUEST
             );

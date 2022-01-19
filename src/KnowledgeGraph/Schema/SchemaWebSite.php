@@ -29,6 +29,7 @@ use BackBee\Renderer\Renderer;
  * @package BackBee\KnowledgeGraph\Schema
  *
  * @author  Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SchemaWebSite implements SchemaInterface
 {
@@ -43,14 +44,21 @@ class SchemaWebSite implements SchemaInterface
     private $config;
 
     /**
+     * @var array
+     */
+    private $userPreferenceValues;
+
+    /**
      * SchemaWebSite constructor.
      *
      * @param SchemaContext $context
+     * @param array         $userPreferenceValues
      */
-    public function __construct(SchemaContext $context)
+    public function __construct(SchemaContext $context, array $userPreferenceValues)
     {
         $this->config = $context->getConfig();
         $this->renderer = $context->getApplication()->getRenderer();
+        $this->userPreferenceValues = $userPreferenceValues;
     }
 
     /**
@@ -63,16 +71,14 @@ class SchemaWebSite implements SchemaInterface
         $data = [
             '@type' => 'WebSite',
             '@id' => $this->renderer->getUri('/') . SchemaIds::WEBSITE_HASH,
-            'name' => $this->config['website_name'],
+            'name' => $this->userPreferenceValues['website_name'] ?? $this->config['website_name'] ?? '',
             'url' => $this->renderer->getUri('/'),
+            'description' => $this->userPreferenceValues['website_description'] ??
+                $this->config['website_description'] ?? '',
             'publisher' => [
                 '@id' => $this->renderer->getUri('/') . SchemaIds::ORGANIZATION_HASH,
             ],
         ];
-
-        if (null !== $this->config['website_description']) {
-            $data['description'] = $this->config['website_description'];
-        }
 
         return $this->processSearchSection($data);
     }
