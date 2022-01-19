@@ -19,178 +19,220 @@
  * along with BackBee Standalone. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace BackBeePlanet\Sitemap;
+namespace BackBee\Sitemap;
 
 use BackBee\BBApplication;
-use BackBee\Cache\AbstractExtendedCache;
+use BackBee\Cache\RedisManager;
 use BackBee\Config\Config;
-use BackBee\Exception\InvalidArgumentException;
-use BackBee\Util\Collection\Collection;
+use BackBeeCloud\Search\SearchManager;
 use DateTime;
-use DateTimeZone;
 use Exception;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class SitemapManager
  *
- * @package BackBeePlanet\Sitemap
+ * @package BackBee\Sitemap
  *
- * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
 class SitemapManager
 {
     /**
-     * @var BBApplication
+     * @var \BackBee\BBApplication
      */
     private $bbApp;
 
     /**
-     * @var Config
+     * @var \BackBee\Config\Config
      */
     private $config;
 
     /**
-     * A cache engine instance.
-     *
-     * @var AbstractExtendedCache
+     * @var \BackBeeCloud\Search\SearchManager
      */
-    private $cache;
+    private $searchManager;
 
     /**
-     * Cache control directives for every sitemap.
-     *
-     * @var array
+     * @var \BackBee\Cache\RedisManager
      */
-    private $cacheControl = [];
+    private $redisManager;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
 
     /**
      * SitemapManager constructor.
      *
-     * @param BBApplication $bbApp
-     * @param Config        $config
+     * @param \BackBee\BBApplication $bbApp
+     * @param \BackBee\Config\Config $config
+     * @param \BackBeeCloud\Search\SearchManager $searchManager
+     * @param \BackBee\Cache\RedisManager $redisManager
      */
-    public function __construct(BBApplication $bbApp, Config $config)
-    {
+    public function __construct(
+        BBApplication $bbApp,
+        Config $config,
+        SearchManager $searchManager,
+        RedisManager $redisManager
+    ) {
         $this->bbApp = $bbApp;
-        $this->config = $config;
-        $this->initCache();
+        $this->config = $config->getSection('sitemap');
+        $this->searchManager = $searchManager;
+        $this->logger = $bbApp->getLogging();
+        $this->redisManager = $redisManager;
     }
 
     /**
-     * Initialize cache.
+     * Generate sitemap.
+     *
+     * @return array
      */
-    public function initCache(): void
+    public function generate(): array
     {
-        if ($this->bbApp->getContainer()->has('cache.control')) {
-            $this->cache = $this->bbApp->getContainer()->get('cache.control');
-        }
+        try {
+            $locations = $this->searchManager->getBy(
+                [
+                    'is_online' => true,
+                    'seo_index' => true,
+                ],
+                0,
+                $this->config['limits'] ?? 10000,
+                [],
+                false
+            );
 
-        foreach ($this->config->getSection('sitemaps') ?? [] as $id => $definition) {
-            $cacheControl = Collection::get($definition, 'cache-control', []);
-            $this->setCacheControl($id, $cacheControl);
-        }
-    }
-
-    /**
-     * Sets cache control directive for sitemap $id.
-     *
-     * @param  string  $id           The sitemap identifier.
-     * @param  array   $cacheControl Optional, an array of cache directives.
-     */
-    public function setCacheControl(string $id, array $cacheControl = []): void
-    {
-        $this->cacheControl[$id] = $cacheControl;
-    }
-
-    /**
-     * Gets cache control directive for sitemap $id.
-     *
-     * @param string $id The sitemap identifier.
-     *
-     * @return array      An array of cache directives
-     */
-    public function getCacheControl(string $id): array
-    {
-        return $this->cacheControl[$id] ?? [];
-    }
-
-    /**
-     * Returns the cache stored content for sitemap.
-     *
-     * @param string $id       A sitemap id.
-     * @param string $pathInfo A path info to sitemap.
-     *
-     * @return mixed|false      The stored content if valid, false elsewhere.
-     * @throws Exception
-     */
-    public function loadCache(string $id, string $pathInfo)
-    {
-        if (!$this->isCacheAvailable($id)) {
-            return false;
-        }
-
-        $data = json_decode($this->cache->load($this->getCacheId($id, $pathInfo)), true);
-        if (isset($data['lastmod'])) {
-            $data['lastmod'] = new DateTime(
-                Collection::get($data['lastmod'], 'date'),
-                new DateTimeZone(Collection::get($data['lastmod'], 'timezone', ''))
+            $urlSet = $this->bbApp->getRenderer()->partial(
+                'Sitemap/UrlSet.html.twig',
+                [
+                    'changeFreq' => $this->config['change_freq'],
+                    'locations' => $locations->collection(),
+                ]
+            );
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
             );
         }
 
-        return $data;
+        return [
+            'lastModified' => (new DateTime())->format('c'),
+            'urlSet' => $urlSet ?? '',
+        ];
     }
 
     /**
-     * Saves a sitemap in cache.
+     * Builds a valid response.
      *
-     * @param string $id       A sitemap id.
-     * @param string $pathInfo A path info to sitemap.
-     * @param mixed  $data     The sitemap content.
+     * @param array $sitemap The sitemap content.
      *
-     * @return boolean
-     * @throws Exception
+     * @return Response          The valid response.
      */
-    public function saveCache(string $id, string $pathInfo, $data): bool
+    public function buildResponse(array $sitemap): Response
     {
-        if (!$this->isCacheAvailable($id)) {
-            return false;
+        $response = new Response();
+
+        try {
+            $response
+                ->setLastModified(new DateTime($sitemap['lastModified']['date'] ?? $sitemap['lastModified']))
+                ->setContent($sitemap['urlSet'])
+                ->setStatusCode(Response::HTTP_OK)
+                ->headers
+                ->set('content-type', 'text/xml');
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
-        return $this->cache->save(
-            $this->getCacheId($id, $pathInfo),
-            json_encode($data),
-            Collection::get($this->cacheControl, $id . ':max_age', 60 * 60),
-            'sitemap-' . $id
-        );
+        $response->headers->set('cache-control', 'no-cache');
+        $response->headers->set('pragma', 'no-cache');
+        $response->headers->set('expires', -1);
+
+        return $response;
     }
 
     /**
-     * Is cache is available for the sitemap?
+     * Load cache.
      *
-     * @param string $id A sitemap id.
-     *
-     * @return boolean
-     * @throws Exception
+     * @return array|null
      */
-    private function isCacheAvailable(string $id): bool
+    public function loadCache(): ?array
     {
-        return (
-            !$this->bbApp->isDebugMode()
-            && null !== $this->cache
-            && null === Collection::get($this->cacheControl, $id . ':no-cache')
-        );
+        if (!$this->isCacheAvailable()) {
+            return null;
+        }
+
+        $sitemap = $this->redisManager->getClient()->get($this->getCacheId());
+
+        return $sitemap ? json_decode($sitemap, true) : null;
+    }
+
+    /**
+     * Save sitemap into cache.
+     *
+     * @param array $sitemap Sitemap data.
+     *
+     * @return void
+     */
+    public function saveCache(array $sitemap): void
+    {
+        if ($this->isCacheAvailable()) {
+            $this->redisManager->getClient()->set($this->getCacheId(), json_encode($sitemap));
+            $this->redisManager->getClient()->expire($this->getCacheId(), $this->config['cache_ttl']);
+        }
+    }
+
+    /**
+     * Update sitemap into cache.
+     *
+     * @return void
+     */
+    public function updateCache(): void
+    {
+        $this->redisManager->getClient()->set($this->getCacheId(), json_encode($this->generate()));
+    }
+
+    /**
+     * Delete sitemap into cache.
+     *
+     * @return void
+     */
+    public function deleteCache(): void
+    {
+        if ($this->redisManager->getClient()->exists($this->getCacheId())) {
+            $this->redisManager->getClient()->del($this->getCacheId());
+        }
     }
 
     /**
      * Return a cache unique identifier.
      *
-     * @param  string $id       A sitemap id.
-     * @param  string $pathInfo A path info to sitemap.
-     *
      * @return string
      */
-    private function getCacheId(string $id, string $pathInfo): string
+    private function getCacheId(): string
     {
-        return md5('sitemap' . $id . $pathInfo);
+        return md5('sitemap_' . $this->bbApp->getContainer()->getParameter('app_name'));
+    }
+
+    /**
+     * Is cache is available for the sitemap?
+     *
+     * @return bool
+     */
+    public function isCacheAvailable(): bool
+    {
+        return (!$this->bbApp->isDebugMode() && null !== $this->redisManager->getClient());
     }
 }

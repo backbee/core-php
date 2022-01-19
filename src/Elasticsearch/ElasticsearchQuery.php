@@ -453,4 +453,28 @@ class ElasticsearchQuery
 
         return $baseQuery;
     }
+
+    /**
+     * Get query to filter page indexed or not.
+     *
+     * @param array $baseQuery
+     * @param bool  $isIndexed
+     *
+     * @return array
+     */
+    public function getQueryToFilterPageIndexedOrNot(array $baseQuery, bool $isIndexed): array
+    {
+        $baseQuery['query']['bool']['must'] = array_merge(
+            $baseQuery['query']['bool']['must'] ?? [],
+            [
+                [
+                    'match' => [
+                        'seo_index' => $isIndexed,
+                    ],
+                ],
+            ]
+        );
+
+        return $baseQuery;
+    }
 }

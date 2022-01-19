@@ -21,28 +21,26 @@
 
 namespace BackBee\Renderer\Helper;
 
+use BackBee\Config\Config;
+use BackBee\NestedNode\Page;
 use BackBee\Renderer\AbstractRenderer;
+use BackBeeCloud\PageType\HomeType;
 use Exception;
 
 /**
  * @author Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class sitemapUrlHelper extends AbstractHelper
+class sitemapHelper extends AbstractHelper
 {
     /**
-     * Pattern excluded.
+     * Sitemap configuration.
      *
-     * @var array
+     * @var Config
      */
-    private $excluded;
+    private $config;
 
     /**
-     * @var bool
-     */
-    private $forceUrlExtension;
-
-    /**
-     * sitemapUrlHelper constructor.
+     * sitemapHelper constructor.
      *
      * @param AbstractRenderer $renderer
      *
@@ -52,9 +50,7 @@ class sitemapUrlHelper extends AbstractHelper
     {
         parent::__construct($renderer);
 
-        $bbApp = $this->getRenderer()->getApplication();
-        $this->excluded = $bbApp->getConfig()->getSitemapsConfig('excluded') ?? [];
-        $this->forceUrlExtension = $bbApp->getContainer()->getParameter('force_url_extension') ?? false;
+        $this->config = $this->getRenderer()->getApplication()->getConfig()->getSection('sitemap');
     }
 
     /**
@@ -66,24 +62,38 @@ class sitemapUrlHelper extends AbstractHelper
      */
     public function isExcluded(string $url): bool
     {
+        $excluded = $this->config['excluded'] ?? [];
+
         return !(
-            !empty($this->excluded) &&
+            !empty($excluded) &&
             preg_match(
-                '/w*(' . str_replace('/', '\/', implode('.*|', $this->excluded)) . ')/',
+                '/w*(' . str_replace('/', '\/', implode('.*|', $excluded)) . ')/',
                 $url
             )
         );
     }
 
     /**
-     * Is url extension required.
+     * Return a computed priority for a page:
      *
-     * @param string $url
+     *  * for Home, return 1.0
+     *  * for page in the first level of the menu, return 0.8
+     *  * for others return 0.5
+     *
+     * @param array $page
      *
      * @return string
      */
-    public function isUrlExtensionRequired(string $url): string
+    public function getLocationPriority(array $page): string
     {
-        return !$this->forceUrlExtension ? str_replace('.html', '', $url) : $url;
+        $priority = 1 / (1 + ((int)$page['level'] * (int)$page['state'] / (Page::STATE_ONLINE + Page::STATE_HIDDEN)));
+
+        if ((new HomeType)->uniqueName() === $page['type']) {
+            $priority = '1.0';
+        } elseif (1 < (int)$page['level']) {
+            $priority = '0.5';
+        }
+
+        return number_format($priority, 1);
     }
 }

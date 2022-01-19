@@ -593,20 +593,12 @@ services:
 
     # Sitemap
     core.sitemap.manager:
-        class: BackBeePlanet\Sitemap\SitemapManager
-        arguments: [ '@bbapp', '@config' ]
+        class: BackBee\Sitemap\SitemapManager
+        arguments: [ '@bbapp', '@config', '@cloud.search_manager', '@core.redis.manager' ]
 
     core.sitemap.controller:
-        class: BackBeePlanet\Controller\SitemapController
-        arguments: [ '@bbapp', '@core.sitemap.manager', '@config' ]
-
-    core.sitemap.query_builder:
-        class: BackBeePlanet\Sitemap\Query\QueryBuilder
-        arguments: [ '@em', '@site' ]
-
-    core.sitemap.listener:
-        class: BackBeePlanet\Listener\SitemapListener
-        arguments: [ '@bbapp', '@config' ]
+        class: BackBee\Controller\SitemapController
+        arguments: [ '@bbapp', '@core.sitemap.manager' ]
 
     # Search engine
     core.search_engine.controller:
@@ -647,7 +639,7 @@ services:
     # Elasticsearch
     elasticsearch.manager:
         class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query' ]
+        arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query', '@core.search_engine.manager' ]
         tags:
             - { name: worker.job_handler, dispatch_event: false }
 

@@ -123,11 +123,17 @@ class SearchManager extends AbstractSearchManager
      * @param       $start
      * @param       $limit
      * @param array $sort
+     * @param bool  $formatResult
      *
      * @return ElasticsearchCollection
      */
-    public function getBy(array $criteria, $start, $limit, array $sort = []): ElasticsearchCollection
-    {
+    public function getBy(
+        array $criteria,
+        $start,
+        $limit,
+        array $sort = [],
+        bool $formatResult = true
+    ): ElasticsearchCollection {
         $query = [
             'query' => [
                 'bool' => [
@@ -197,6 +203,13 @@ class SearchManager extends AbstractSearchManager
             );
         }
 
+        if (($criteria['seo_index'] ?? null) !== null) {
+            $query = $this->elasticsearchQuery->getQueryToFilterPageIndexedOrNot(
+                $query,
+                (bool)$criteria['seo_index']
+            );
+        }
+
         $sortValidAttrNames = [
             'modified_at',
             'created_at',
@@ -228,7 +241,7 @@ class SearchManager extends AbstractSearchManager
             ];
         }
 
-        return $this->elasticsearchManager->customSearchPage($query, $start, $limit);
+        return $this->elasticsearchManager->customSearchPage($query, $start, $limit, [], $formatResult);
     }
 
     /**

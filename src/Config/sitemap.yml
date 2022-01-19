@@ -1,0 +1,4 @@
+change_freq: weekly
+limits: 50000
+cache_ttl: 86400
+excluded: [ ]

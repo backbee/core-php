@@ -89,11 +89,11 @@ class RedisManager
     }
 
     /**
-     * Get client.
+     * Get redis client.
      *
-     * @return null|Client
+     * @return \Predis\Client
      */
-    public function getClient(): ?Client
+    public function getClient(): Client
     {
         if (null === $this->redisClient) {
             $settings = $this->getConfig();

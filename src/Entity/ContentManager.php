@@ -26,7 +26,7 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ClassContentManager;
 use BackBee\ClassContent\ContentSet;
-use BackBee\ClassContent\Element\Image;
+use BackBee\ClassContent\Basic\Image;
 use BackBee\ClassContent\Exception\RevisionConflictedException;
 use BackBee\ClassContent\Exception\RevisionMissingException;
 use BackBee\ClassContent\Exception\RevisionUptodateException;
@@ -553,11 +553,12 @@ class ContentManager
 
             if (false === empty($images)) {
                 foreach ($images as $image) {
-                    if (null !== $image->path) {
+                    if (null !== $image->image->path) {
                         $entries[] = [
-                            'uid' => $image->getUid(),
-                            'original_name' => $image->originalname,
-                            'path' => $image->path
+                            'uid' => $image->image->getUid(),
+                            'original_name' => $image->image->originalname,
+                            'path' => $image->image->path,
+                            'alt' => $image->getParamValue('alt')
                         ];
                     }
                 }

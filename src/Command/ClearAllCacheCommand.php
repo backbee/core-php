@@ -60,12 +60,21 @@ class ClearAllCacheCommand extends AbstractCommand
             $io->error($exception->getMessage());
         }
 
-        $this->getContainer()->get('core.redis.manager')->removePageCache(
-            StandaloneHelper::appName(
-                $this->getContainer()
-            )
-        );
-        $io->section('Removed Redis page cache.');
+        $appName = $this->getContainer()->getParameter('app_name');
+
+        try {
+            $this->getContainer()->get('core.redis.manager')->removePageCache($appName);
+            $io->section('Removed Redis page cache.');
+        } catch (Exception $exception) {
+            $io->error($exception->getMessage());
+        }
+
+        try {
+            $this->getContainer()->get('core.sitemap.manager')->deleteCache();
+            $io->section('Removed Redis sitemap cache.');
+        } catch (Exception $exception) {
+            $io->error($exception->getMessage());
+        }
 
         $this->cleanup();
         $io->section('Removed filesystem cache.');
