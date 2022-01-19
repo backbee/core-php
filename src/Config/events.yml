@@ -1,15 +1,19 @@
 # Application listeners
 bbapplication.init:
     listeners:
+        # Legacy
         - [ BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit, -8000 ]
         - [ BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit ]
         - [ BackBee\Renderer\Listener\TwigListener, onApplicationReady ]
-        # BackBee Cloud listeners
+        # Core
         - [ '@core.core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
         - [ '@core.core.listener', onApplicationInit, 200 ]
         - [ '@core.page.listener', onApplicationInit ]
         - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
         - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
+        # App
+        - [ BackBee\Listener\AppListener, onApplicationInit, -7997 ]
+        - [ BackBee\Listener\AppListener, onLoadClassContent, -7000 ]
 
 bbapplication.start:
     listeners:

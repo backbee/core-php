@@ -21,6 +21,7 @@
 
 namespace BackBeeCloud\Listener;
 
+use App\Helper\StandaloneHelper;
 use BackBee\BBApplication;
 use BackBee\Bundle\Registry;
 use BackBee\ClassContent\AbstractClassContent;
@@ -42,7 +43,7 @@ use function dirname;
  *
  * @package BackBeeCloud\Listener
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class CoreListener
 {
@@ -93,10 +94,10 @@ class CoreListener
     {
         $app = $event->getTarget();
         $container = $app->getContainer();
-        $entyMgr = $app->getEntityManager();
+        $entityMgr = $app->getEntityManager();
         if ($app->isRestored()) {
             if ($container->hasParameter('all_classcontents_classnames')) {
-                $metadata = $entyMgr->getClassMetadata(AbstractClassContent::class);
+                $metadata = $entityMgr->getClassMetadata(AbstractClassContent::class);
                 foreach ($container->getParameter('all_classcontents_classnames') as $short => $full) {
                     $metadata->addDiscriminatorMapClass($short, $full);
                 }
@@ -111,14 +112,14 @@ class CoreListener
         try {
             foreach ($container->get('classcontent.manager')->getAllClassContentClassnames() as $classname) {
                 class_exists($classname);
-                $metadata[] = $entyMgr->getClassMetadata($classname);
+                $metadata[] = $entityMgr->getClassMetadata($classname);
                 $classnames[AbstractClassContent::getShortClassname($classname)] = $classname;
             }
         } catch (Exception $e) {
             return;
         }
 
-        $entyMgr->getProxyFactory()->generateProxyClasses($metadata);
+        $entityMgr->getProxyFactory()->generateProxyClasses($metadata);
         $container->setParameter('all_classcontents_classnames', $classnames);
     }
 
@@ -132,12 +133,12 @@ class CoreListener
         $app = $event->getApplication();
 
         // Checks that site is not suspended
-        $isSuspended = null !== $app->getEntityManager()->getRepository(Registry::class)->findOneBy([
-            'scope' => 'GLOBAL',
-            'type' => 'site',
-            'key' => 'status',
-            'value' => 'suspended',
-        ]);
+        $isSuspended = $app->getEntityManager()->getRepository(Registry::class)->findOneBy([
+                'scope' => 'GLOBAL',
+                'type' => 'site',
+                'key' => 'status',
+                'value' => 'suspended',
+            ]) !== null;
 
         if ($isSuspended) {
             throw new SiteSuspendedException();
