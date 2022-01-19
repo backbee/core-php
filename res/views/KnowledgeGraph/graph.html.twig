@@ -2,4 +2,4 @@
 {% if schemaTag.graph and schemaTag.graph|length > 0 %}
     <script type="application/ld+json">{"@context": "{{ schemaTag.context }}","@graph":{{ schemaTag.graph|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}}</script>
 {% endif %}
-<!-- End Knowledge Graph - graph -->
+    <!-- End Knowledge Graph - graph -->

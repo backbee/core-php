@@ -184,9 +184,7 @@ class UserRightManager
                     self::EDIT_CONTENT_RIGHT,
                     self::DELETE_CONTENT_RIGHT,
                 ],
-                $this->superAdminBundleRights,
-                $this->bbApp->getContainer()->getParameter('knowledge_graph') ?
-                    [UserRightConstants::KNOWLEDGE_GRAPH_FEATURE] : []
+                $this->superAdminBundleRights
             )
         );
     }
