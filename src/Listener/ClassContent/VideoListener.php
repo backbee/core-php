@@ -182,7 +182,7 @@ class VideoListener
 
         $imageDraft->path = $app->getContainer()->get('cloud.file_handler')->upload(
             $filename,
-            $tmpfilepath,
+            $tmpfilepath
         );
 
         $method = $unitOfWork->isScheduledForInsert($imageDraft) && !$isNewDraft
