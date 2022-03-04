@@ -74,12 +74,12 @@ class getFileStat extends AbstractHelper
             $this->getDataDir() . $file['value']
         );
 
-        $stat = stat($filepath);
+        if (file_exists($filepath) && $stat = stat($filepath)) {
+            $stat['sizeHumanReadable'] = $this->humanReadableFileSize($stat['size']);
+            $stat['extension'] = pathinfo($filepath, PATHINFO_EXTENSION);
+        }
 
-        $stat['sizeHumanReadable'] = $this->humanReadableFileSize($stat['size']);
-        $stat['extension'] = pathinfo($filepath, PATHINFO_EXTENSION);
-
-        return $stat;
+        return $stat ?? [];
     }
 
     /**

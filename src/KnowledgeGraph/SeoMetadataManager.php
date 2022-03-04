@@ -241,7 +241,7 @@ class SeoMetadataManager
     private function setDescription(): self
     {
         try {
-            if (null === $this->seoData['description'] &&
+            if (($this->seoData['description'] ?? null) === null &&
                 $this->esResult['_source']['abstract_uid'] &&
                 $abstract = $this->entityManager->find(
                     ArticleAbstract::class,

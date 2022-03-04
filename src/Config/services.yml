@@ -635,6 +635,10 @@ services:
             [ '@bbapp', '@core.page.content.manager' ]
 
     # Elasticsearch
+    elasticsearch.client:
+        class: BackBeeCloud\Elasticsearch\ElasticsearchClient
+        arguments: [ '@bbapp', '@config' ]
+
     elasticsearch.manager:
         class: BackBeeCloud\Elasticsearch\ElasticsearchManager
         arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query', '@core.search_engine.manager' ]

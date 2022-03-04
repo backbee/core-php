@@ -70,8 +70,8 @@ class SearchEngineManager
     public function getMetadataRobots(array $metadata): ?string
     {
         $content = [
-            $metadata['index'] && $this->googleSearchEngineIsActivated() ? 'index' : 'noindex',
-            $metadata['follow'] && $this->googleSearchEngineIsActivated() ? 'follow' : 'nofollow'
+            ($metadata['index'] ?? false) && $this->googleSearchEngineIsActivated() ? 'index' : 'noindex',
+            ($metadata['follow'] ?? false) && $this->googleSearchEngineIsActivated() ? 'follow' : 'nofollow'
         ];
 
         return implode(', ', $content);
