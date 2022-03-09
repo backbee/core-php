@@ -754,3 +754,6 @@ services:
         class: BackBee\Listener\Log\GroupTypeLogListener
         arguments:
             [ '@security.context', '@em', '@cloud.group_type.manager', '@?monolog.logger.admin_log' ]
+
+    core.recaptcha.listener:
+        class: BackBeeCloud\ReCaptcha\ReCaptchaListener

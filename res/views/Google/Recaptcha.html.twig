@@ -1,0 +1,22 @@
+{% if recaptcha_sitekey is defined and bb.token == null %}
+    <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+
+    {{ this.addFooterJs('https://www.google.com/recaptcha/api.js?render=' ~ recaptcha_sitekey) }}
+
+    <script>
+      (function () {
+        const init = function () {
+          grecaptcha.ready(function () {
+            grecaptcha.execute('{{ recaptcha_sitekey }}', { action: 'submit' }).then(function (token) {
+              document.getElementById('recaptchaResponse').value = token;
+            });
+          });
+        }
+        if (document.readyState === 'complete' || document.readyState === 'loaded') {
+          init();
+        } else {
+          document.addEventListener('DOMContentLoaded', init);
+        }
+      })();
+    </script>
+{% endif %}

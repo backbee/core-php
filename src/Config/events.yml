@@ -49,7 +49,7 @@ kernel.exception:
         - [ '@core.core.listener', onAuthenticationException, 100 ]
         - [ "@api.multilang.listener", onMultiLangException, 100 ]
         - [ '@core.core.listener', onKernelException, 50 ]
-        - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onRecaptchaFailedValidationException, 100 ]
+        - [ '@core.recaptcha.listener', onRecaptchaFailedValidationException, 100 ]
 
 kernel.controller:
     listeners:
@@ -172,8 +172,7 @@ cloudcontentset.render:
 
 basic.contact.render:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender ]
+        - [ '@core.recaptcha.listener', onContentRequireReCaptchaRender ]
 
 basic.pagebytagresult.render:
     listeners:
@@ -182,8 +181,7 @@ basic.pagebytagresult.render:
 
 basic.newsletter.render:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onContentRequireReCaptchaRender ]
+        - [ '@core.recaptcha.listener', onContentRequireReCaptchaRender ]
 
 basic.cards.render:
     listeners:
@@ -327,13 +325,11 @@ backbeecloud.api.controller.contentcontroller.publishall.postcall:
 
 backbeecloud.controller.contactcontroller.send.precall:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall ]
+        - [ '@core.recaptcha.listener', onReCaptchaFormSubmissionPreCall ]
 
 backbeecloud.controller.newslettercontroller.send.precall:
     listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\ReCaptcha\ReCaptchaListener, onReCaptchaFormSubmissionPreCall ]
+        - [ '@core.recaptcha.listener', onReCaptchaFormSubmissionPreCall ]
 
 backbeecloud.api.controller.userpreferencecontroller.put.postcall:
     listeners:

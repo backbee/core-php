@@ -9,14 +9,9 @@
                 <input name="newsletter" type="email" class="form-control" id="formNewsletter" placeholder="{{ placeholder.value }}">
             </div>
             <div class="form-action text-{{button_align.value}}">
-                {% if recaptcha_sitekey is defined and bb.token == null %}
-                    <div class="g-recaptcha" data-sitekey="{{ recaptcha_sitekey }}"></div>
-                    <p class="recaptcha-error error-form-message"></p>
-                    {{ this.addFooterJs('https://www.google.com/recaptcha/api.js') }}
-                {% endif %}
-
                 <button class="btn btn-{{button_color.value}} btn-{{button_size.value}} {{button_style.value}}" type="button">{{ button_title.value }}</button>
             </div>
+            {% include 'Google/Recaptcha.html.twig' %}
         </form>
 
         <script>
@@ -24,13 +19,9 @@
                 var init = function () {
                     var $content = $('#newsletter_{{ this.getObject().getUid() }}');
                     var $input = $content.find('input');
-                    var $error = $content.find('.error-form-message').not('.recaptcha-error');
+                    var $error = $content.find('.error-form-message');
 
                     $content.find('button').on('click', function () {
-                        {% if recaptcha_sitekey is defined and bb.token == null %}
-                        $('.recaptcha-error').addClass('hidden');
-                        {% endif %}
-
                         $content.find('.has-error').removeClass('has-error');
                         $error.css('display', 'none');
 
@@ -50,34 +41,12 @@
                                 'content_uid': '{{ this.getObject().getUid() }}',
                                 'email': $input.val(),
                             };
-
-                            {% if recaptcha_sitekey is defined and bb.token == null %}
-                            data['g-recaptcha-response'] = $('[name="g-recaptcha-response"]').val();
-                            {% endif %}
-
                             $.ajax({
                                 'method': 'POST',
                                 'url': '/newsletter/send',
                                 'data': data
                             }).done(function () {
                                 $content.find('.form').html('<p class="text-confirmation">{{ confirmation.value }}</p>');
-                            }).fail(function (res) {
-                                {% if recaptcha_sitekey is defined and bb.token == null %}
-                                var error = JSON.parse(res.responseText);
-                                if ('missing input response' !== error.reason) {
-                                    transformFormToSuccess();
-
-                                    return;
-                                }
-
-                                $('.recaptcha-error')
-                                    .removeClass('hidden')
-                                    .text('fr' === navigator.language
-                                        ? 'Vous devez cocher la case "Je ne suis pas un robot" pour pouvoir envoyer votre message'
-                                        : 'You must check the box "I\'m not a robot" to send your message'
-                                    )
-                                ;
-                                {% endif %}
                             });
                         }
                     });
