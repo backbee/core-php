@@ -28,6 +28,7 @@ use BackBee\Logging\Logger;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Elasticsearch\Client;
@@ -48,6 +49,7 @@ use function in_array;
  */
 class ElasticsearchClient
 {
+    public const INDEX_BASE_NAME = 'backbee_standalone_';
     public const DEFAULT_ANALYZER = 'standard';
     public const ELASTICSEARCH_INDEX_NAME = 'backbee';
 
@@ -380,7 +382,9 @@ class ElasticsearchClient
      */
     public function getIndexName(): string
     {
-        return self::ELASTICSEARCH_INDEX_NAME . '_' . $this->getAnalyzerName();
+        return (new Slugify())->slugify(
+            $this->settings['index_name'] ?? (self::INDEX_BASE_NAME . $this->getSiteName())
+        );
     }
 
     /**
@@ -520,7 +524,7 @@ class ElasticsearchClient
                         ],
                         'seo_follow' => [
                             'type' => 'boolean',
-                        ]
+                        ],
                     ],
                 ],
             ]

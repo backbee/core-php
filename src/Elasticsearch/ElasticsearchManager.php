@@ -31,7 +31,6 @@ use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeeCloud\SearchEngine\SearchEngineManager;
 use BackBeePlanet\Job\ElasticsearchJob;
 use BackBeePlanet\Job\JobInterface;
-use Cocur\Slugify\Slugify;
 use Exception;
 use stdClass;
 
@@ -45,8 +44,6 @@ use stdClass;
  */
 class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInterface
 {
-    public const INDEX_BASE_NAME = 'backbee_standalone_';
-
     /**
      * @var ElasticSearchQuery
      */
@@ -61,11 +58,6 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
      * @var MultiLangManager
      */
     protected $multiLangManager;
-
-    /**
-     * @var \BackBee\Config\Config
-     */
-    protected $config;
 
     /**
      * @var \BackBeeCloud\SearchEngine\SearchEngineManager
@@ -93,16 +85,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
         $this->elasticSearchQuery = $elasticsearchQuery;
         $this->pageContentManager = $pageContentManager;
         $this->multiLangManager = $multiLangManager;
-        $this->config = $app->getContainer()->get('config')->getSection('elasticsearch');
         $this->searchEngineManager = $searchEngineManager;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getIndexName(): string
-    {
-        return (new Slugify())->slugify($this->config['index_name'] ?? (self::INDEX_BASE_NAME . $this->getSiteName()));
     }
 
     /**

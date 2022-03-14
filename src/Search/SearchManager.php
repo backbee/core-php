@@ -171,7 +171,7 @@ class SearchManager extends AbstractSearchManager
             $query = $this->elasticsearchQuery->getQueryToFilterByPageIsOnline($query, (bool)$criteria['is_online']);
         }
 
-        if ($criteria['tags']) {
+        if ($criteria['tags'] ?? false) {
             $query = $this->elasticsearchQuery->getQueryToFilterByTags($query, $criteria['tags']);
         }
 
@@ -179,7 +179,7 @@ class SearchManager extends AbstractSearchManager
             $query = $this->elasticsearchQuery->getQueryToFilterByLang($query, [$criteria['lang']]);
         }
 
-        if ($criteria['title']) {
+        if ($criteria['title'] ?? false) {
             $query = $this->elasticsearchQuery->getQueryToFilterByTitle(
                 $query,
                 str_replace('%', '', $criteria['title']),
@@ -188,11 +188,14 @@ class SearchManager extends AbstractSearchManager
             );
         }
 
-        if ($criteria['has_draft_only'] && (bool)$criteria['has_draft_only'] === true) {
+        if (($criteria['has_draft_only'] ?? false) && (bool)$criteria['has_draft_only'] === true) {
             $query = $this->elasticsearchQuery->getQueryToFilterByPageWithDraftContents($query);
         }
 
-        if ($criteria['created_at'] || $criteria['modified_at'] || $criteria['published_at']) {
+        if (($criteria['created_at'] ?? false) ||
+            ($criteria['modified_at'] ?? false) ||
+            ($criteria['published_at'] ?? false)
+        ) {
             $query = $this->elasticsearchQuery->getQueryToFilterByDate(
                 $query,
                 [
