@@ -33,7 +33,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
  *
  * @package BackBeeCloud\ReCaptcha
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
  */
 class ReCaptchaListener
 {
@@ -92,12 +92,16 @@ class ReCaptchaListener
         }
 
         $recaptcha = new ReCaptcha($settings['secret']);
+
         $response = $recaptcha->verify(
             $request->request->get('g-recaptcha-response'),
             $request->getClientIp()
         );
 
-        if ($response->isSuccess() && $response->getHostName() === $request->getHost()) {
+        if ($response->isSuccess() &&
+            $response->getScore() >= 0.5 &&
+            $response->getHostName() === $request->getHost()
+        ) {
             return;
         }
 
@@ -126,7 +130,8 @@ class ReCaptchaListener
                 [
                     'error' => 'bad_request',
                     'reason' => str_replace('-', ' ', $event->getException()->getMessage()),
-                ], Response::HTTP_BAD_REQUEST
+                ],
+                Response::HTTP_BAD_REQUEST
             )
         );
     }

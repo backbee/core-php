@@ -130,8 +130,10 @@ class SchemaOrganization implements SchemaInterface
      */
     private function processSocialProfiles(array $data): array
     {
-        $data['sameAs'] = json_decode($this->userPreferenceValues['organization_social_profiles'] ??
-            $this->config['social_profiles'], false) ?? '';
+        $socialProfiles = $this->userPreferenceValues['organization_social_profiles'] ??
+            $this->config['social_profiles'];
+
+        $data['sameAs'] = is_string($socialProfiles) ? json_decode($socialProfiles, false) : $socialProfiles;
 
         return $data;
     }
