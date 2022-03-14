@@ -251,11 +251,7 @@ services:
     core.user_right.installer:
         class: BackBeeCloud\Security\UserRightInstaller
         arguments:
-            - '@em'
-            - '@cloud.group_type.manager'
-            - '@cloud.user_manager'
-            - '@backbee.logger'
-            - '@config'
+            [ '@em', '@cloud.group_type.manager', '@cloud.user_manager', '@backbee.logger' ]
 
     # Page type services
     cloud.page_type.manager:

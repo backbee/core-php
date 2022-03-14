@@ -21,6 +21,7 @@
 
 namespace BackBee\Installer;
 
+use BackBeeCloud\Security\UserRightConstants;
 use Exception;
 use RuntimeException;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -46,7 +47,7 @@ class UserRightsInstaller extends AbstractInstaller
         $io->section('Install user rights');
 
         try {
-            $securityConfig = $this->getApplication()->getConfig()->getSecurityConfig();
+            $securityConfig = $this->getApplication()->getConfig()->getSection('security');
         } catch (Exception $exception) {
             $io->error(
                 sprintf(
@@ -68,14 +69,42 @@ class UserRightsInstaller extends AbstractInstaller
 
         $installer = $this->getApplication()->getContainer()->get('core.user_right.installer');
 
+        if (($securityConfig['group_types']['admin'] ?? false) &&
+            $featuresRights = ($securityConfig['group_types']['admin']['features_rights'] ?? false)) {
+            $securityConfig['group_types']['admin']['features_rights'] =
+                $this->associateAllBundlesToAdminGroup($featuresRights);
+        }
+
         if ($installer->isInstalled()) {
             $installer->syncGroupTypes($securityConfig['group_types']);
             $io->success('User right successfully updated.');
+
             return;
         }
 
         $installer->install($securityConfig['group_types'], $securityConfig['default_group_type']);
 
         $io->success('User right successfully installed.');
+    }
+
+    /**
+     * Associate by default all bundles to the Admin group.
+     *
+     * @param array $featuresRights
+     *
+     * @return array
+     */
+    private function associateAllBundlesToAdminGroup(array $featuresRights): array
+    {
+        return array_merge(
+            $featuresRights,
+            array_map(
+                [
+                    UserRightConstants::class,
+                    'createBundleSubject',
+                ],
+                $this->getApplication()->getContainer()->get('core.bundle.manager')->getActivatedBundles()
+            )
+        );
     }
 }

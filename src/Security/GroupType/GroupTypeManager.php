@@ -30,39 +30,53 @@ use BackBeeCloud\Security\UserRightConstants;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use RuntimeException;
 use SplObjectStorage;
 
 /**
  * @author Quentin Guitard <quentin.guitard@lp-digital.fr>
+ * @author Djoudi Bensid <d.bensid@obione.eu>
  */
 class GroupTypeManager
 {
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    private $entityManager;
 
     /**
      * @var GroupTypeRightManager
      */
-    protected $groupTypeRightManager;
+    private $groupTypeRightManager;
 
     /**
      * @var \Doctrine\ORM\EntityRepository
      */
-    protected $groupRepository;
+    private $groupRepository;
 
     /**
      * @var \Doctrine\ORM\EntityRepository
      */
-    protected $groupTypeRepository;
+    private $groupTypeRepository;
 
     /**
      * @var TypeManager
      */
-    protected $pageTypeManager;
+    private $pageTypeManager;
 
+    /**
+     * @var \BackBeeCloud\PageCategory\PageCategoryManager
+     */
+    private $pageCategoryManager;
 
+    /**
+     * Constructor.
+     *
+     * @param \Doctrine\ORM\EntityManagerInterface                   $entityManager
+     * @param \BackBeeCloud\Security\GroupType\GroupTypeRightManager $groupTypeRightManager
+     * @param \BackBeeCloud\PageType\TypeManager                     $typeManager
+     * @param \BackBeeCloud\PageCategory\PageCategoryManager         $pageCategoryManager
+     */
     public function __construct(
         EntityManagerInterface $entityManager,
         GroupTypeRightManager $groupTypeRightManager,
@@ -77,43 +91,82 @@ class GroupTypeManager
         $this->groupTypeRepository = $entityManager->getRepository(GroupType::class);
     }
 
-    public function getAllGroupTypes()
+    /**
+     * Get all group types.
+     *
+     * @return array|\BackBeeCloud\Security\GroupType\GroupType[]
+     */
+    public function getAllGroupTypes(): array
     {
         return $this->groupTypeRepository->findAll();
     }
 
-    public function getById($id)
+    /**
+     * Get group type by id.
+     *
+     * @param $id
+     *
+     * @return null|\BackBeeCloud\Security\GroupType\GroupType
+     */
+    public function getById($id): ?GroupType
     {
         return $this->groupTypeRepository->findOneBy(['id' => $id]);
     }
 
-    public function findByGroups(array $groups)
+    /**
+     * Get group type by groups.
+     *
+     * @param array $groups
+     *
+     * @return array|\BackBeeCloud\Security\GroupType\GroupType[]
+     */
+    public function findByGroups(array $groups): array
     {
         return $this->groupTypeRepository->findBy(['group' => $groups]);
     }
 
-    public function getByGroup(Group $group)
+    /**
+     * Get group type by group.
+     *
+     * @param \BackBee\Security\Group $group
+     *
+     * @return null|\BackBeeCloud\Security\GroupType\GroupType
+     */
+    public function getByGroup(Group $group): ?GroupType
     {
         return $this->groupTypeRepository->findOneBy(['group' => $group]);
     }
 
+    /**
+     * Create group type.
+     *
+     * @param       $name
+     * @param       $description
+     * @param bool  $isOpen
+     * @param bool  $readOnly
+     * @param array $featuresSubject
+     * @param array $pageRightsData
+     * @param array $users
+     *
+     * @return \BackBeeCloud\Security\GroupType\GroupType
+     * @throws \Exception
+     */
     public function create(
         $name,
         $description,
-        $isOpen = true,
-        $readOnly = false,
+        bool $isOpen = true,
+        bool $readOnly = false,
         array $featuresSubject = [],
         array $pageRightsData = [],
         array $users = []
-    ) {
+    ): GroupType {
         $this->entityManager->beginTransaction();
 
-        $groupType = null;
-
         $group = $this->createGroupEntity($name, $description);
+
         foreach ($users as $user) {
             if (!($user instanceof User)) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf(
                         'Only user that is instance of %s can be added to group type.',
                         User::class
@@ -126,8 +179,8 @@ class GroupTypeManager
 
         try {
             $groupType = $this->createGroupTypeEntity(
-                (bool)$isOpen,
-                (bool)$readOnly,
+                $isOpen,
+                $readOnly,
                 $group
             );
 
@@ -288,7 +341,14 @@ class GroupTypeManager
         }
     }
 
-    public function delete(GroupType $groupType)
+    /**
+     * Delete group type.
+     *
+     * @param \BackBeeCloud\Security\GroupType\GroupType $groupType
+     *
+     * @return void
+     */
+    public function delete(GroupType $groupType): void
     {
         if ($groupType->getUsers()) {
             throw CannotDeleteGroupTypeWithUsersException::create();
@@ -302,19 +362,42 @@ class GroupTypeManager
         $this->entityManager->flush();
     }
 
-    public function addUserToGroupType(GroupType $groupType, User $user)
+    /**
+     * Add user to group type.
+     *
+     * @param \BackBeeCloud\Security\GroupType\GroupType $groupType
+     * @param \BackBee\Security\User                     $user
+     *
+     * @return void
+     */
+    public function addUserToGroupType(GroupType $groupType, User $user): void
     {
         $groupType->addUser($user);
         $this->entityManager->flush();
     }
 
-    public function removeUserFromGroupType(GroupType $groupType, User $user)
+    /**
+     * Remove user from group type.
+     *
+     * @param \BackBeeCloud\Security\GroupType\GroupType $groupType
+     * @param \BackBee\Security\User                     $user
+     *
+     * @return void
+     */
+    public function removeUserFromGroupType(GroupType $groupType, User $user): void
     {
         $groupType->removeUser($user);
         $this->entityManager->flush();
     }
 
-    public function searchByTerm($term)
+    /**
+     * Search group type by term.
+     *
+     * @param $term
+     *
+     * @return array
+     */
+    public function searchByTerm($term): array
     {
         $qb = $this->groupRepository->createQueryBuilder('g');
 
@@ -330,9 +413,14 @@ class GroupTypeManager
     }
 
     /**
-     * @throws \Exception if group name is already used
+     * Create group entity.
+     *
+     * @param $name
+     * @param $description
+     *
+     * @return \BackBee\Security\Group
      */
-    protected function createGroupEntity($name, $description)
+    protected function createGroupEntity($name, $description): Group
     {
         $this->assertNameIsNotUsed($name);
 
@@ -347,7 +435,16 @@ class GroupTypeManager
         return $group;
     }
 
-    protected function createGroupTypeEntity($isOpen, $readOnly, Group $group)
+    /**
+     * Create group type entity.
+     *
+     * @param                         $isOpen
+     * @param                         $readOnly
+     * @param \BackBee\Security\Group $group
+     *
+     * @return \BackBeeCloud\Security\GroupType\GroupType
+     */
+    protected function createGroupTypeEntity($isOpen, $readOnly, Group $group): GroupType
     {
         $slug = new Slugify();
         $name = $slug->slugify($group->getName(), ['separator' => '_']);
@@ -359,14 +456,26 @@ class GroupTypeManager
         return $groupType;
     }
 
-    protected function assertNameIsNotUsed($name)
+    /**
+     * Assert name is not used.
+     *
+     * @param $name
+     *
+     * @return void
+     */
+    protected function assertNameIsNotUsed($name): void
     {
-        if ($group = $this->groupRepository->findOneBy(['_name' => $name])) {
+        if ($this->groupRepository->findOneBy(['_name' => $name])) {
             throw NameAlreadyUsedException::create($name);
         }
     }
 
-    protected function getSite()
+    /**
+     * Get current site.
+     *
+     * @return null|Site
+     */
+    protected function getSite(): ?Site
     {
         return $this->entityManager->getRepository(Site::class)->findOneBy([]);
     }

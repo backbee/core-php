@@ -42,7 +42,7 @@ kernel.exception:
         - [ @rest.listener.exception, onKernelException ]
         - [ @exception.listener, onKernelException ]
         # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\Api\UserRightListener, onKernelException, 100 ]
+        - [ '@cloud.api.user_right.listener', onKernelException, 100 ]
         - [ "@cloud.api.user_controller.listener", onKernelException, 100 ]
         - [ '@core.page.listener', onPageNotFoundException, 100 ]
         - [ @cloud.disqus_listener, onDisqusControlledException, 100 ]

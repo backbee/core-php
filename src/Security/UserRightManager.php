@@ -21,7 +21,6 @@
 
 namespace BackBeeCloud\Security;
 
-use BackBee\BBApplication;
 use BackBee\NestedNode\Page;
 use BackBee\Security\SecurityContext;
 use BackBee\Security\User;
@@ -30,7 +29,6 @@ use BackBeeCloud\PageCategory\PageCategoryManager;
 use BackBeeCloud\Security\Authorization\Voter\UserRightPageAttribute;
 use BackBeeCloud\Security\GroupType\GroupTypeRight;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -52,11 +50,6 @@ class UserRightManager
     public const CREATE_CONTENT_RIGHT = 'CREATE_CONTENT';
     public const EDIT_CONTENT_RIGHT = 'EDIT_CONTENT';
     public const DELETE_CONTENT_RIGHT = 'DELETE_CONTENT';
-
-    /**
-     * @var BBApplication
-     */
-    private $bbApp;
 
     /**
      * @var SecurityContext
@@ -86,7 +79,6 @@ class UserRightManager
     /**
      * UserRightManager constructor.
      *
-     * @param BBApplication          $bbApp
      * @param SecurityContext        $securityContext
      * @param EntityManagerInterface $entityManager
      * @param PageCategoryManager    $pageCategoryManager
@@ -94,14 +86,12 @@ class UserRightManager
      * @param array                  $superAdminBundleRights
      */
     public function __construct(
-        BBApplication $bbApp,
         SecurityContext $securityContext,
         EntityManagerInterface $entityManager,
         PageCategoryManager $pageCategoryManager,
         LoggerInterface $logger,
         array $superAdminBundleRights = []
     ) {
-        $this->bbApp = $bbApp;
         $this->securityContext = $securityContext;
         $this->entityManager = $entityManager;
         $this->pageCategoryManager = $pageCategoryManager;
@@ -142,7 +132,7 @@ class UserRightManager
      */
     public function getUserAuthorizedCategories(User $user, $contextualPageType = null): array
     {
-        if (false === $this->pageCategoryManager->getCategories()) {
+        if (empty($this->pageCategoryManager->getCategories())) {
             return [];
         }
 
@@ -344,7 +334,8 @@ class UserRightManager
      * @param Page $page
      *
      * @return int|mixed|string
-     * @throws QueryException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     private function getPageTypeUniqueNameByPage(Page $page)
     {
@@ -409,7 +400,7 @@ class UserRightManager
             ->getQuery()
             ->getResult();
 
-        if (false === $result) {
+        if (empty($result)) {
             // if no results = current user is not restricted to any category;
             // same authorized categories as super admin
             return $this->getSuperAdminCategories();
