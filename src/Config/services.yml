@@ -204,7 +204,6 @@ services:
     cloud.api.user_right.manager:
         class: BackBeeCloud\Security\UserRightManager
         arguments:
-            - '@bbapp'
             - "@security.context"
             - "@em"
             - "@cloud.page_category.manager"

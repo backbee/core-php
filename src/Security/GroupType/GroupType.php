@@ -26,7 +26,6 @@ use BackBee\Security\Group;
 use BackBee\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use JsonSerializable;
 
 /**
  * @category BackbeeCloud
@@ -37,7 +36,7 @@ use JsonSerializable;
  * @ORM\Entity
  * @ORM\Table(name="group_type")
  */
-class GroupType implements JsonSerializable
+class GroupType implements \JsonSerializable
 {
     /**
      * Unique identifier of the group.
@@ -79,14 +78,6 @@ class GroupType implements JsonSerializable
      */
     protected $rights;
 
-    /**
-     * Constructor.
-     *
-     * @param                         $id
-     * @param                         $isOpen
-     * @param                         $readOnly
-     * @param \BackBee\Security\Group $group
-     */
     public function __construct($id, $isOpen, $readOnly, Group $group)
     {
         $this->id = $id;
@@ -100,9 +91,9 @@ class GroupType implements JsonSerializable
     /**
      * Get unique identifier of the group.
      *
-     * @return  string
+     * @return  integer
      */
-    public function getId(): string
+    public function getId()
     {
         return $this->id;
     }
@@ -112,7 +103,7 @@ class GroupType implements JsonSerializable
      *
      * @return  bool
      */
-    public function isOpen(): bool
+    public function isOpen()
     {
         return $this->isOpen;
     }
@@ -122,27 +113,25 @@ class GroupType implements JsonSerializable
      *
      * @return  bool
      */
-    public function isReadOnly(): bool
+    public function isReadOnly()
     {
         return $this->readOnly;
     }
 
     /**
-     * Get group name.
-     *
+     * Get group name
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->group->getName();
     }
 
     /**
-     * Set group name.
-     *
+     * Set group name
      * @param string $name
      */
-    public function setName(string $name): void
+    public function setName($name)
     {
         $this->assertIsNotReadOnly();
 
@@ -151,34 +140,25 @@ class GroupType implements JsonSerializable
 
     /**
      * Get group description
-     *
      * @return string
      */
-    public function getDescription(): string
+    public function getDescription()
     {
         return $this->group->getDescription();
     }
 
     /**
-     * Set group description.
-     *
+     * Set group description
      * @param string $description
      */
-    public function setDescription(string $description): void
+    public function setDescription($description)
     {
         $this->assertIsNotReadOnly();
 
         $this->group->setDescription($description);
     }
 
-    /**
-     * Add user for the current group type.
-     *
-     * @param \BackBee\Security\User $user
-     *
-     * @return void
-     */
-    public function addUser(User $user): void
+    public function addUser(User $user)
     {
         $this->assertIsOpen();
         if ($this->group->getUsers()->contains($user)) {
@@ -188,14 +168,7 @@ class GroupType implements JsonSerializable
         $this->group->addUser($user);
     }
 
-    /**
-     * Remove user for the current group type.
-     *
-     * @param \BackBee\Security\User $user
-     *
-     * @return void
-     */
-    public function removeUser(User $user): void
+    public function removeUser(User $user)
     {
         $this->assertIsOpen();
         if (!$this->group->getUsers()->contains($user)) {
@@ -205,32 +178,17 @@ class GroupType implements JsonSerializable
         $this->group->removeUser($user);
     }
 
-    /**
-     * Get all user for the current group type.
-     *
-     * @return array
-     */
-    public function getUsers(): array
+    public function getUsers()
     {
         return $this->group->getUsers()->toArray();
     }
 
-    /**
-     * Check if is removable.
-     *
-     * @return bool
-     */
-    public function isRemovable(): bool
+    public function isRemovable()
     {
-        return false === $this->readOnly && true === empty($this->getUsers());
+        return false === $this->readOnly && false == $this->getUsers();
     }
 
-    /**
-     * Return result serialized.
-     *
-     * @return array
-     */
-    public function jsonSerialize(): array
+    public function jsonSerialize()
     {
         $pageTypes = [];
         $categories = [];
@@ -242,7 +200,7 @@ class GroupType implements JsonSerializable
                 case UserRightConstants::ONLINE_PAGE:
                     $pageRights[] = sprintf('%s_%s', $subject, $right->getAttribute());
 
-                    if (false === $pageTypes) {
+                    if (false == $pageTypes) {
                         if ($right->hasPageTypeContext()) {
                             $pageTypes = $right->getPageTypeContextData();
                         } else {
@@ -250,7 +208,7 @@ class GroupType implements JsonSerializable
                         }
                     }
 
-                    if (false === $categories) {
+                    if (false == $categories) {
                         if ($right->hasCategoryContext()) {
                             $categories = $right->getCategoryContextData();
                         } else {
@@ -281,24 +239,14 @@ class GroupType implements JsonSerializable
         ];
     }
 
-    /**
-     * Assert is open.
-     *
-     * @return void
-     */
-    private function assertIsOpen(): void
+    private function assertIsOpen()
     {
         if (!$this->isOpen) {
             throw CannotAddOrRemoveUserToClosedGroupTypeException::create();
         }
     }
 
-    /**
-     * Assert is not read only.
-     *
-     * @return void
-     */
-    private function assertIsNotReadOnly(): void
+    private function assertIsNotReadOnly()
     {
         if ($this->readOnly) {
             throw CannotUpdateReadOnlyGroupTypeException::create();
