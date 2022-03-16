@@ -4,7 +4,7 @@ original:
 formats:
     lg:
         options:
-            resize: 1200
+            resize: 1400
         colsizes:
             - 12
     md:
