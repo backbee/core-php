@@ -32,7 +32,7 @@
 {% if multilang_equivalent_pages is not null and not multilang_equivalent_pages is empty %}
     <link rel="alternate" href="{{ this.getUri(this.knowledgeGraphHelper.getDefaultPageByLang(page).getUrl(), false) }}" hreflang="x-default"/>
     <link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ this.getCurrentLang.getCode() }}"/>
-    {% for lang, page in multilang_equivalent_pages %}<link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ lang }}"/>{% endfor %}
+    {% for lang, page in multilang_equivalent_pages %}<link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ lang }}"/>
+    {% endfor %}
 {% endif %}
-
-    <!-- End Knowledge Graph - metadata -->
+<!-- End Knowledge Graph - metadata -->

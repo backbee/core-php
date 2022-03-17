@@ -1,4 +1,4 @@
-{% if googleSiteVerification %}<!-- Knowledge Graph - google search console -->
-    <meta name="google-site-verification" content="{{ googleSiteVerification }}"/>
-    <!-- End Knowledge Graph - google search console -->
+{% if bb.token == null and gsc_content is defined %}<!-- Knowledge Graph - Google Search Console -->
+    {{ gsc_content|raw }}
+    <!-- End Knowledge Graph - Google Search Console -->
 {% endif %}

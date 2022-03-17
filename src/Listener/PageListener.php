@@ -27,7 +27,6 @@ use BackBee\ClassContent\Revision;
 use BackBee\Controller\Event\PreRequestEvent;
 use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Event\Event;
-use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Rewriting\Exception\RewritingException;
@@ -57,6 +56,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
  * @package BackBeeCloud\Listener
  *
  * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <d.bensid@obione.eu>
  */
 class PageListener
 {
@@ -212,7 +212,7 @@ class PageListener
         $changes = $uow->getEntityChangeSet($page);
 
         try {
-            if ($changes['_publishing'][1] && $changes['_publishing'][1]<= new DateTime('now')) {
+            if ($changes['_publishing'][1] && $changes['_publishing'][1] <= new DateTime('now')) {
                 $page->setState(Page::STATE_ONLINE);
             }
         } catch (Exception $exception) {
@@ -379,6 +379,7 @@ class PageListener
         $renderer->assign('layout_name', $type->layoutName());
 
         $userPreferenceManager = $app->getContainer()->get('user_preference.manager');
+
         if ($gaData = $userPreferenceManager->dataOf('google-analytics')) {
             $renderer->assign('google_analytics_code', isset($gaData['code']) ? (string)$gaData['code'] : '');
         }
@@ -390,8 +391,11 @@ class PageListener
             }
         }
 
-        if (
-            ($data = $userPreferenceManager->dataOf('privacy-policy')) &&
+        if (!empty(($gaData = $userPreferenceManager->dataOf('gsc-analytics')))) {
+            $renderer->assign('gsc_content', $gaData['content'] ?? '');
+        }
+
+        if (($data = $userPreferenceManager->dataOf('privacy-policy')) &&
             $app->getContainer()->getParameter('privacy_policy')
         ) {
             $multiLangManager = $app->getContainer()->get('multilang_manager');
@@ -511,8 +515,7 @@ class PageListener
     public static function onPageNotFoundException(GetResponseForExceptionEvent $event): void
     {
         $exception = $event->getException();
-        if (
-            !($exception instanceof FrontControllerException)
+        if (!($exception instanceof FrontControllerException)
             || Response::HTTP_NOT_FOUND !== $exception->getStatusCode()
         ) {
             return;

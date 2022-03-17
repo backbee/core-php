@@ -164,19 +164,22 @@ class KnowledgeGraphManager
     }
 
     /**
+     * Get Meta Google site verification
+     *
      * @return string|null
-     * @throws RendererException
+     * @throws \BackBee\Renderer\Exception\RendererException
      */
     public function getMetaGoogleSiteVerification(): ?string
     {
-        if (false === $this->indexOnGoogle()) {
+        if (false === $this->indexOnGoogle() ||
+            empty(($gaData = $this->userPreferenceManager->dataOf('gsc-analytics')))) {
             return null;
         }
 
         return $this->renderer->partial(
             'KnowledgeGraph/metaGoogleSiteVerification.html.twig',
             [
-                'googleSiteVerification' => $this->config['google_site_verification'],
+                'gsc_content' => $gaData['content'] ?? '',
             ]
         );
     }
