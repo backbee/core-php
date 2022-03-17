@@ -325,14 +325,16 @@ class ContentManager
 
         $this->entyMgr->flush();
 
-        $qb = $this->entyMgr->createQueryBuilder();
-        $result = $qb
-            ->update(AbstractClassContent::class, 'c')
-            ->set('c._state', AbstractClassContent::STATE_NORMAL)
-            ->where($qb->expr()->in('c._uid', $this->getUidsFromPage($page, $token)))
-            ->getQuery()
-            ->execute();
-        $commitedCount += $result;
+        if (!empty(($contents = $this->getUidsFromPage($page, $token)))) {
+            $qb = $this->entyMgr->createQueryBuilder();
+            $result = $qb
+                ->update(AbstractClassContent::class, 'c')
+                ->set('c._state', AbstractClassContent::STATE_NORMAL)
+                ->where($qb->expr()->in('c._uid', $contents))
+                ->getQuery()
+                ->execute();
+            $commitedCount += $result;
+        }
 
         // commit transaction
         $this->entyMgr->commit();
