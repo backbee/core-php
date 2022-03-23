@@ -85,8 +85,6 @@ class HighlightContentListener
         $app = $event->getApplication();
         $renderer = $event->getRenderer();
         $block = $event->getTarget();
-        $page = null;
-        $content = null;
         $param = $block->getParamValue('content');
         $contents = [];
 
@@ -168,9 +166,6 @@ class HighlightContentListener
      * @param BBApplication        $bbApp
      *
      * @return string
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
      */
     public static function renderPageFromRawData(
         array $pageRawData,
@@ -184,20 +179,35 @@ class HighlightContentListener
 
         $mode = '';
         $displayImage = $wrapper->getParamValue('display_image');
+
         if ($currentMode === 'rss') {
             $mode = '.rss';
         } elseif ($displayImage) {
             $mode = '.' . $wrapper->getParamValue('format');
         }
+
         $title = $wrapper->getParamValue('title_to_be_displayed') === 'first_heading' ?
             $pageRawData['_source']['first_heading'] : $pageRawData['_source']['title'];
+
         $abstract = null;
-        if (null !== $abstractUid = $pageRawData['_source']['abstract_uid'] ?: null) {
-            $abstract = self::getContentWithDraft(ArticleAbstract::class, $abstractUid, $bbApp);
-            $abstract = $abstract ?: self::getContentWithDraft(Paragraph::class, $abstractUid, $bbApp);
-            if (null !== $abstract) {
-                $abstract = trim(preg_replace('#\s\s+#', ' ', preg_replace('#<[^>]+>#', ' ', $abstract->value)));
+
+        try {
+            if (null !== $abstractUid = $pageRawData['_source']['abstract_uid'] ?: null) {
+                $abstract = self::getContentWithDraft(ArticleAbstract::class, $abstractUid, $bbApp);
+                $abstract = $abstract ?: self::getContentWithDraft(Paragraph::class, $abstractUid, $bbApp);
+                if (null !== $abstract) {
+                    $abstract = trim(preg_replace('#\s\s+#', ' ', preg_replace('#<[^>]+>#', ' ', $abstract->value)));
+                }
             }
+        } catch (Exception $exception) {
+            $bbApp->getLogging()->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
         $imageData = [
@@ -206,31 +216,42 @@ class HighlightContentListener
 
         if (null !== $mediaUid = $pageRawData['_source']['image_uid'] ?: null) {
             $image = null;
-            $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $bbApp);
-            if ($media instanceof Video) {
-                $image = $media->thumbnail->image;
-                $imageData['is_video_thumbnail'] = true;
-            } elseif ($media instanceof Image) {
-                $image = $media->image;
-            }
 
-            if (null !== $image) {
-                $imageData = [
-                        'uid' => $image->getUid(),
-                        'url' => $image->path,
-                        'title' => $image->getParamValue('title'),
-                        'legend' => $image->getParamValue('description'),
-                        'alt' => ($media instanceof Image)
-                            ? $bbApp->getRenderer()->getImageAlternativeText($media, $title)
-                            : $title,
-                        'stat' => $image->getParamValue('stat'),
-                    ] + $imageData;
+            try {
+                $media = self::getContentWithDraft(AbstractClassContent::class, $mediaUid, $bbApp);
+                if ($media instanceof Video) {
+                    $image = $media->thumbnail->image;
+                    $imageData['is_video_thumbnail'] = true;
+                } elseif ($media instanceof Image) {
+                    $image = $media->image;
+                }
+
+                if (null !== $image) {
+                    $imageData = [
+                            'uid' => $image->getUid(),
+                            'url' => $image->path,
+                            'title' => $image->getParamValue('title'),
+                            'legend' => $image->getParamValue('description'),
+                            'alt' => ($media instanceof Image)
+                                ? $bbApp->getRenderer()->getImageAlternativeText($media, $title)
+                                : $title,
+                            'stat' => $image->getParamValue('stat'),
+                        ] + $imageData;
+                }
+            } catch (Exception $exception) {
+                $bbApp->getLogging()->error(
+                    sprintf(
+                        '%s : %s :%s',
+                        __CLASS__,
+                        __FUNCTION__,
+                        $exception->getMessage()
+                    )
+                );
             }
         }
 
-        return $bbApp->getRenderer()->partial(
-            sprintf('ContentAutoblock/item%s.html.twig', $mode),
-            [
+        try {
+            $params = [
                 'title' => $title,
                 'abstract' => (string)$abstract,
                 'tags' => array_map('ucfirst', $pageRawData['_source']['tags']),
@@ -249,7 +270,21 @@ class HighlightContentListener
                 'title_max_length' => $wrapper->getParamValue('title_max_length'),
                 'abstract_max_length' => $wrapper->getParamValue('abstract_max_length'),
                 'wrapper' => $wrapper,
-            ]
+            ];
+        } catch (Exception $exception) {
+            $bbApp->getLogging()->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
+
+        return $bbApp->getRenderer()->partial(
+            sprintf('ContentAutoblock/item%s.html.twig', $mode),
+            $params ?? []
         );
     }
 
@@ -262,20 +297,28 @@ class HighlightContentListener
      * @param BBApplication    $bbApp
      *
      * @return object|null
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws TransactionRequiredException
      */
     protected static function getContentWithDraft($classname, $uid, BBApplication $bbApp)
     {
-        $content = $bbApp->getEntityManager()->find($classname, $uid);
+        try {
+            $content = $bbApp->getEntityManager()->find($classname, $uid);
 
-        if (null !== $content && null !== ($bbToken = $bbApp->getBBUserToken())) {
-            $draft = $bbApp->getEntityManager()->getRepository(Revision::class)->getDraft($content, $bbToken);
-            $content->setDraft($draft);
+            if (null !== $content && null !== ($bbToken = $bbApp->getBBUserToken())) {
+                $draft = $bbApp->getEntityManager()->getRepository(Revision::class)->getDraft($content, $bbToken);
+                $content->setDraft($draft);
+            }
+        } catch (Exception $exception) {
+            $bbApp->getLogging()->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
-        return $content;
+        return $content ?? null;
     }
 
     /**

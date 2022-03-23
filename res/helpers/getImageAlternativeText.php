@@ -29,15 +29,19 @@ use BackBee\ClassContent\Basic\Image;
 class getImageAlternativeText extends AbstractHelper
 {
     /**
+     * Invoke.
+     *
      * @param \BackBee\ClassContent\Basic\Image $image
      * @param string                            $defaultText
      *
-     * @return string|null
+     * @return string
      */
     public function __invoke(Image $image, string $defaultText = ''): string
     {
-        return empty($image->getParamValue('alt')) ? (empty($image->getParamValue('description') ?
-            $defaultText : trim(str_replace("\n", " ", strip_tags($image->getParamValue('description')))))) :
-            $image->getParamValue('alt');
+        $description = null === $image->getParamValue('description') || empty($image->getParamValue('description')) ?
+            $defaultText : trim(str_replace("\n", " ", strip_tags($image->getParamValue('description'))));
+
+        return (null === $image->getParamValue('alt') || empty($image->getParamValue('alt'))) ?
+            $description : $image->getParamValue('alt');
     }
 }

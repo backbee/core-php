@@ -26,7 +26,15 @@ namespace BackBee\Renderer\Helper;
  */
 class perfectTruncate extends AbstractHelper
 {
-    public function __invoke($text, $maxLength)
+    /**
+     * Invoke.
+     *
+     * @param $text
+     * @param $maxLength
+     *
+     * @return string
+     */
+    public function __invoke($text, $maxLength): string
     {
         $cleaned = html_entity_decode(strip_tags($text));
         if (strlen($cleaned) < $maxLength) {
