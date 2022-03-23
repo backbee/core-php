@@ -22,7 +22,6 @@
 namespace BackBeeCloud\Security;
 
 use BackBee\Bundle\Registry;
-use BackBee\Config\Config;
 use BackBee\Security\Group;
 use BackBeeCloud\Security\GroupType\GroupType;
 use BackBeeCloud\Security\GroupType\GroupTypeManager;
@@ -36,7 +35,8 @@ use Psr\Log\LoggerInterface;
  *
  * @package BackBeeCloud\Security
  *
- * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <d.bensid@obione.eu>
  */
 class UserRightInstaller
 {
@@ -65,31 +65,23 @@ class UserRightInstaller
     private $logger;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * UserRightInstaller constructor.
+     * Constructor.
      *
-     * @param EntityManagerInterface $entityManager
-     * @param GroupTypeManager       $groupTypeManager
-     * @param UserManager            $userManager
-     * @param LoggerInterface        $logger
-     * @param Config                 $config
+     * @param \Doctrine\ORM\EntityManagerInterface $entityManager
+     * @param \BackBeeCloud\Security\GroupType\GroupTypeManager $groupTypeManager
+     * @param \BackBeeCloud\User\UserManager $userManager
+     * @param \Psr\Log\LoggerInterface $logger
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         GroupTypeManager $groupTypeManager,
         UserManager $userManager,
-        LoggerInterface $logger,
-        Config $config
+        LoggerInterface $logger
     ) {
         $this->entityManager = $entityManager;
         $this->groupTypeManager = $groupTypeManager;
         $this->userManager = $userManager;
         $this->logger = $logger;
-        $this->config = $config;
     }
 
     /**
@@ -204,8 +196,6 @@ class UserRightInstaller
         $regularUsers = array_diff($users, $superAdminUsers);
 
         // creating group types...
-        $superAdminGroupType = null;
-        $defaultGroupType = null;
         foreach ($rawGroupTypes as $id => $data) {
             $users = [];
             if ($defaultGroupTypeId === $id) {
@@ -286,12 +276,10 @@ class UserRightInstaller
      * @param array $data
      * @param array $users
      *
-     * @return GroupType
+     * @return void
      */
-    private function createGroupTypeFromRawData($id, array $data, array $users = []): GroupType
+    private function createGroupTypeFromRawData($id, array $data, array $users = []): void
     {
-        $groupType = null;
-
         try {
             $groupType = $this->groupTypeManager->create(
                 $id,
@@ -317,8 +305,6 @@ class UserRightInstaller
                 )
             );
         }
-
-        return $groupType;
     }
 
     /**
@@ -329,8 +315,7 @@ class UserRightInstaller
      */
     private function updateGroupTypeName(GroupType $groupType, $newName = null): void
     {
-        if ($newName && $newName !== $groupType->getName()) {
-            $group = $this->getGroupByGroupType($groupType);
+        if ($newName && $newName !== $groupType->getName() && $group = $this->getGroupByGroupType($groupType)) {
             $group->setName($newName);
         }
     }

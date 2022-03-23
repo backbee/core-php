@@ -21,39 +21,29 @@
 
 namespace BackBeeCloud\Listener;
 
-use BackBeeCloud\Security\UserRightConstants;
 use BackBee\Event\Event;
+use BackBeeCloud\Security\UserRightConstants;
 
 /**
  * @author Eric Chau <eriic.chau@gmail.com>
+ * @author Djoudi Bensid <d.bensid@obione.eu>
  */
 class UserRightListener
 {
-    public static function onApplicationInit(Event $event)
+    /**
+     * @param \BackBee\Event\Event $event
+     *
+     * @return void
+     */
+    public static function onApplicationInit(Event $event): void
     {
         $app = $event->getTarget();
+
         if ($app->isRestored()) {
             return;
         }
 
-        $routing = $app->getRouting();
-        $enableUserRightForBundles = [];
-        foreach ($app->getBundles() as $bundle) {
-            if (true === $bundle->getProperty('enable_user_right')) {
-                $enableUserRightForBundles[] = $bundle->getId();
-
-                continue;
-            }
-
-            $expectedAdminEntryPointRouteName = sprintf(
-                'bundle.%s.admin_entrypoint',
-                $bundle->getId()
-            );
-
-            if ($routing->get($expectedAdminEntryPointRouteName)) {
-                $enableUserRightForBundles[] = $bundle->getId();
-            }
-        }
+        $enableUserRightForBundles = $app->getContainer()->get('core.bundle.manager')->getActivatedBundles();
 
         $app->getContainer()->setParameter(
             'user_right.super_admin_bundles_rights',
