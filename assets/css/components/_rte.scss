@@ -46,3 +46,11 @@
 .paragraph, .lead {
     @include padding-y(math.div($spacer, 4));
 }
+
+.rte-text {
+  a {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+}
