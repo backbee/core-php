@@ -106,7 +106,7 @@ class UserListener
 
         $response->setContent(
             json_encode(
-                $this->formatRawUserData($rawData)
+                $this->userManager->formatRawUserData($rawData)
             )
         );
     }
@@ -156,42 +156,6 @@ class UserListener
         $user->setApiKeyEnabled(true);
 
         $this->entityManager->flush($user);
-    }
-
-    public function onGetCollectionPostCall(PostResponseEvent $event)
-    {
-        $response = $event->getResponse();
-        if (
-            Response::HTTP_OK !== $response->getStatusCode()
-            && 'application/json' !== $response->headers->get('content-type')
-        ) {
-            return;
-        }
-
-        $currentUser = $this->bbtoken ? $this->bbtoken->getUser() : null;
-        $data = json_decode($response->getContent(), true);
-        foreach ($data as &$row) {
-            $row = $this->formatRawUserData($row, $currentUser);
-        }
-
-        $response->setContent(json_encode($data));
-    }
-
-    public function onGetPostCall(PostResponseEvent $event)
-    {
-        $response = $event->getResponse();
-        if (
-            Response::HTTP_OK !== $response->getStatusCode()
-            && 'application/json' !== $response->headers->get('content-type')
-        ) {
-            return;
-        }
-
-        $currentUser = $this->bbtoken ? $this->bbtoken->getUser() : null;
-        $data = json_decode($response->getContent(), true);
-        $data = $this->formatRawUserData($data, $currentUser);
-
-        $response->setContent(json_encode($data));
     }
 
     public function onKernelException(GetResponseForExceptionEvent $event)
@@ -246,40 +210,5 @@ class UserListener
 
         $this->entityManager->flush();
         $this->entityManager->refresh($user);
-    }
-
-    private function formatRawUserData(array $rawData, User $currentUser = null)
-    {
-        $isRemovable = true;
-        if ($user = $this->userManager->getById($rawData['id'])) {
-            if (
-                $this->userManager->isMainUser($user)
-                || ($currentUser && $currentUser->getId() === $user->getId())
-            ) {
-                $isRemovable = false;
-            }
-
-            $rawData['created'] = $user->getCreated()->format(DATE_ATOM);
-            $rawData['modified'] = $user->getModified()->format(DATE_ATOM);
-
-            $rawData['group_types'] = [];
-            foreach ($user->getGroups() as $group) {
-                if ($groupType = $this->groupTypeManager->getByGroup($group)) {
-                    $rawData['group_types'][] = $groupType->getId();
-                }
-            }
-        }
-
-        $rawData['is_removable'] = $isRemovable;
-
-        unset(
-            $rawData['activated'],
-            $rawData['api_key_enabled'],
-            $rawData['api_key_public'],
-            $rawData['groups'],
-            $rawData['state']
-        );
-
-        return $rawData;
     }
 }

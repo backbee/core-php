@@ -22,13 +22,23 @@
 namespace BackBeeCloud\Security\User;
 
 use BackBee\Security\User;
+use Cocur\Slugify\Slugify;
 
 /**
  * @author Quentin Guitard <quentin.guitard@lp-digital.fr>
+ * @author Djoudi Bensid <d.bensid@obione.eu>
  */
 class UserDataFormatter
 {
-    public static function format(User $user)
+    /**
+     * User data formatter.
+     *
+     * @param \BackBee\Security\User      $user
+     * @param null|\BackBee\Security\User $bbUser
+     *
+     * @return array
+     */
+    public static function format(User $user, ?User $bbUser = null): array
     {
         return [
             'id' => $user->getId(),
@@ -36,8 +46,12 @@ class UserDataFormatter
             'email' => $user->getEmail(),
             'firstname' => $user->getFirstName(),
             'lastname' => $user->getLastName(),
+            'group_types' => array_map(static function ($group) {
+                return (new Slugify())->slugify(str_replace('_name', '', $group->getName()), ['separator' => '_']);
+            }, $user->getGroups()->toArray()),
             'created' => $user->getCreated()->format(DATE_ATOM),
             'modified' => $user->getModified()->format(DATE_ATOM),
+            'is_removable' => !(1 === $user->getId() || ($bbUser && $bbUser->getId() === $user->getId())),
         ];
     }
 }

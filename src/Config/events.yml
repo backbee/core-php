@@ -341,21 +341,6 @@ backbeecloud.api.controller.userpreferencecontroller.delete.postcall:
         # BackBee Cloud listeners
         - [ '@core.cache.listener', onChangePostCall ]
 
-rest.controller.usercontroller.getcollectionaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@cloud.api.user_controller.listener", onGetCollectionPostCall ]
-
-rest.controller.usercontroller.getaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@cloud.api.user_controller.listener", onGetPostCall ]
-
-rest.controller.usercontroller.getcurrentaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@cloud.api.user_controller.listener", onGetPostCall ]
-
 rest.controller.usercontroller.postaction.postcall:
     listeners:
         - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
