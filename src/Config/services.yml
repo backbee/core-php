@@ -232,7 +232,6 @@ services:
             - "@bbapp"
             - "@cloud.group_type.manager"
             - "@cloud.user_manager"
-            - "@cloud.group_type_right.manager"
 
     cloud.group_type.manager:
         class: BackBeeCloud\Security\GroupType\GroupTypeManager
@@ -454,8 +453,7 @@ services:
 
     cloud.user_manager:
         class: BackBeeCloud\User\UserManager
-        arguments:
-            - "@em"
+        arguments: [ '@em', '@backbee.logger' ]
 
     # Migrations services
     media_image.migration:

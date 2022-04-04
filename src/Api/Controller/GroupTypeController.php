@@ -27,7 +27,6 @@ use BackBeeCloud\Security\GroupType\CannotDeleteGroupTypeWithUsersException;
 use BackBeeCloud\Security\GroupType\CannotDeleteReadOnlyException;
 use BackBeeCloud\Security\GroupType\CannotUpdateReadOnlyGroupTypeException;
 use BackBeeCloud\Security\GroupType\GroupTypeManager;
-use BackBeeCloud\Security\GroupType\GroupTypeRightManager;
 use BackBeeCloud\Security\GroupType\NameAlreadyUsedException;
 use BackBeeCloud\Security\User\UserDataFormatter;
 use BackBeeCloud\Security\UserRightConstants;
@@ -55,22 +54,19 @@ class GroupTypeController extends AbstractController
     /**
      * Constructor.
      *
-     * @param \BackBee\BBApplication                                 $app
-     * @param \BackBeeCloud\Security\GroupType\GroupTypeManager      $groupTypeManager
-     * @param \BackBeeCloud\User\UserManager                         $userManager
-     * @param \BackBeeCloud\Security\GroupType\GroupTypeRightManager $groupTypeRightManager
+     * @param \BackBee\BBApplication                            $app
+     * @param \BackBeeCloud\Security\GroupType\GroupTypeManager $groupTypeManager
+     * @param \BackBeeCloud\User\UserManager                    $userManager
      */
     public function __construct(
         BBApplication $app,
         GroupTypeManager $groupTypeManager,
-        UserManager $userManager,
-        GroupTypeRightManager $groupTypeRightManager
+        UserManager $userManager
     ) {
         parent::__construct($app);
 
         $this->groupTypeManager = $groupTypeManager;
         $this->userManager = $userManager;
-        $this->groupTypeRightManager = $groupTypeRightManager;
     }
 
     /**
@@ -238,12 +234,13 @@ class GroupTypeController extends AbstractController
             return $this->getNotFoundResponseOnInvalidId();
         }
 
-        $users = array_map(
-            [UserDataFormatter::class, 'format'],
-            $groupType->getUsers()
-        );
+        $bbUser = $this->securityContext->getToken() ? $this->securityContext->getToken()->getUser() : null;
 
-        return new JsonResponse($users, Response::HTTP_OK);
+        return new JsonResponse(
+            array_map(static function ($user) use ($bbUser) {
+                return UserDataFormatter::format($user, $bbUser);
+            }, $groupType->getUsers())
+        );
     }
 
     /**
@@ -271,7 +268,7 @@ class GroupTypeController extends AbstractController
 
         try {
             $this->groupTypeManager->addUserToGroupType($groupType, $user);
-        } catch (CannotAddOrRemoveUserToClosedGroupTypeException $execption) {
+        } catch (CannotAddOrRemoveUserToClosedGroupTypeException $exception) {
             return $this->createErrorJsonResponse(
                 'bad_request',
                 'cannot_add_user_to_closed_group_type',
