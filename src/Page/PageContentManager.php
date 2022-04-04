@@ -125,7 +125,7 @@ class PageContentManager
             $contentIds
         );
 
-        return $title ? trim(strip_tags($title->value)) : '';
+        return $title ? trim($title->value) : '';
     }
 
     /**

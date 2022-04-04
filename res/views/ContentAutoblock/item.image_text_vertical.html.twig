@@ -39,7 +39,7 @@
                         {% if title_max_length > 0 %}
                             {{this.perfectTruncate(title, title_max_length)}}
                         {% else %}
-                            {{title|striptags|raw}}
+                            {{title|raw}}
                         {% endif %}
                     </span>
                 </a>
