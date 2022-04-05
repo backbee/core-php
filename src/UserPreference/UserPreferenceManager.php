@@ -36,7 +36,8 @@ use function is_callable;
  *
  * @package BackBeeCloud\UserPreference
  *
- * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <d.bensid@obione.eu>
  */
 class UserPreferenceManager
 {
@@ -321,6 +322,9 @@ class UserPreferenceManager
                     return preg_match('#^GTM-[a-zA-Z0-9]+$#', $code) === 1;
                 },
             ],
+            'gsc-analytics' => [
+                'content' => true,
+            ],
             'privacy-policy' => [
                 'banner_message' => 'is_string',
                 'learn_more_url' => 'is_string',
@@ -330,7 +334,7 @@ class UserPreferenceManager
                 'organization' => 'is_string',
                 'organization_social_profiles' => 'is_string',
                 'website_name' => 'is_string',
-                'website_description' => 'is_string'
+                'website_description' => 'is_string',
             ],
         ];
 

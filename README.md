@@ -62,7 +62,6 @@ graph:
     image: https://www.backbee.com/resources/integration/html/mstile-310x310.png
     social_profiles: [ https://twitter.com, https://www.facebook.com ]
     twitter_card: summary_large_image
-google_site_verification: xeNRmYBm7WOzGsdDw0NoVq0zxgQS9UXPpPEOjfKWVKQ
 google_website_verification: https://www.google.com/webmasters/verification/home?hl=en
 google_search_console: https://search.google.com/search-console
 mapping_schema_types:
@@ -77,7 +76,6 @@ mapping_schema_types:
 * **image**: Organization image
 * **social_profiles**: Organization social profiles
 * **twitter_card**: Metadata twitter:card (*summary* or *summary_large_image*)
-* **google_site_verification**: xeNRmYBm7WOzGsdDw0NoVq0zxgQS9UXPpPEOjfKWVKQ *(Google Site verification: optional)*
 * **google_website_verification**: https://search.google.com/search-console *(fixed link)*
 * **google_search_console**: https://search.google.com/search-console *(fixed link)*
 * **mapping_schema_types**: Mapping schema types *(See example above: SchemaArticle mapped for scientific_article and
