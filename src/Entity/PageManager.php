@@ -690,6 +690,8 @@ class PageManager
             return;
         }
 
+        $data['description'] = $this->seoMetadataManager->getValueWithoutForbiddenCharacters($data['description']);
+
         $bag = $page->getMetaData() ?: new MetaDataBag();
 
         $data = array_merge(
