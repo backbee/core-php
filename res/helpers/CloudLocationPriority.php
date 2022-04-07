@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2011-2021 Lp Digital
+ * Copyright (c) 2022 Obione
  *
  * This file is part of BackBee Standalone.
  *
@@ -22,12 +22,10 @@
 namespace BackBee\Renderer\Helper;
 
 use BackBee\NestedNode\Page;
-use BackBee\Renderer\Helper\AbstractHelper;
 
 /**
  * Helper computing a priority for pages in sitemaps.
  *
- * @copyright    ©2017 - Lp digital
  * @author       Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 class CloudLocationPriority extends AbstractHelper

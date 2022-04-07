@@ -1,4 +1,4 @@
-// ©BackBee - v1.0.0 FEBRUARY 2018 - LP Digital*/
+// ©BackBee - v4.2.6 - Obione*/
 //
 // SASS functions
 
@@ -9,7 +9,7 @@
   $red: red($color);
   $green: green($color);
   $blue: blue($color);
-  
+
   $brightness: math.div(($red * 299 + $green * 587 + $blue * 114), 1000);
 
   @if ($brightness < 125) {

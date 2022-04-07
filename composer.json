@@ -1,21 +1,21 @@
 {
     "name": "backbee/core-php",
-    "description": "Core PHP of BackBee Planet",
+    "description": "Core PHP of BackBee",
     "keywords": [],
     "type": "library",
     "license": "GPL-3.0+",
     "authors": [
         {
-            "name": "Eric Chau",
-            "email": "eric.chau@lp-digital.fr"
+            "name": "Djoudi Bensid",
+            "email": "d.bensid@obione.eu"
         },
         {
-            "name": "Djoudi Bensid",
-            "email": "djoudi.bensid@lp-digital.fr"
+            "name": "Eric Chau",
+            "email": "eric.chau@lp-digital.fr"
         }
     ],
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.2",
         "cocur/slugify": "^3.1",
         "drewm/mailchimp-api": "^2.4",
         "elasticsearch/elasticsearch": "v7.13.1",

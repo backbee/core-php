@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2011-2021 Lp Digital
+ * Copyright (c) 2022 Obione
  *
  * This file is part of BackBee Standalone.
  *
@@ -133,7 +133,7 @@ class GlobalContentFactory
      * Returns an unique instance of header logo (classcontent: BackBee\ClassContent\Basic\Image).
      *
      * @param string $name
-     * 
+     *
      * @return Image
      * @throws ORMException
      * @throws OptimisticLockException
@@ -148,7 +148,7 @@ class GlobalContentFactory
      * Returns an unique instance of footer logo (classcontent: BackBee\ClassContent\Basic\Image).
      *
      * @param string $name
-     * 
+     *
      * @return Image
      * @throws ORMException
      * @throws OptimisticLockException
