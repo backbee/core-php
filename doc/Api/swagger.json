@@ -3,7 +3,7 @@
     "info": {
         "title": "BackBee API",
         "description": "This documentation lists all the routes used by the BackBee Toolbar.",
-        "version": "1.0.0"
+        "version": "4.3.0"
     },
     "paths": {
         "/api/color-panel": {

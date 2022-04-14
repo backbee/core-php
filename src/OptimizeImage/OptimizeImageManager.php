@@ -21,11 +21,13 @@
 
 namespace BackBeePlanet\OptimizeImage;
 
+use BackBee\ApplicationInterface;
 use BackBee\BBApplication;
 use BackBee\ClassContent\Basic\Image;
 use BackBee\Config\Config;
 use BackBee\HttpClient\UserAgent;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use function count;
 
@@ -34,7 +36,7 @@ use function count;
  *
  * @package BackBeePlanet\OptimizeImage
  *
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class OptimizeImageManager
 {
@@ -59,14 +61,14 @@ class OptimizeImageManager
     ];
 
     /**
+     * @var \BackBee\ApplicationInterface
+     */
+    private $app;
+
+    /**
      * @var Filesystem
      */
     private $filesystem;
-
-    /**
-     * @var string
-     */
-    private $mediaDir;
 
     /**
      * @var array
@@ -79,19 +81,24 @@ class OptimizeImageManager
     private $config;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * OptimizeImageManager constructor.
      *
-     * @param BBApplication $app
-     * @param Config        $config
-     *
-     * @throws Exception
+     * @param BBApplication            $app
+     * @param Config                   $config
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(BBApplication $app, Config $config)
+    public function __construct(ApplicationInterface $app, Config $config, LoggerInterface $logger)
     {
+        $this->app = $app;
         $this->filesystem = new Filesystem();
-        $this->mediaDir = $app->getMediaDir();
         $this->config = $config;
         $this->settings = $this->getSettings();
+        $this->logger = $logger;
     }
 
     /**
@@ -156,8 +163,7 @@ class OptimizeImageManager
      */
     public function convertAllImages($filepath): void
     {
-        if (
-            null === ($this->settings['original'] ?? null) ||
+        if (null === ($this->settings['original'] ?? null) ||
             false === $this->filesystem->exists($filepath) ||
             1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp)$~', @mime_content_type($filepath))
         ) {
@@ -196,9 +202,9 @@ class OptimizeImageManager
      * @param string $filepathOut
      * @param array  $options
      *
-     * @return int
+     * @return void
      */
-    private function convert(string $filepathIn, string $filepathOut, array $options): int
+    private function convert(string $filepathIn, string $filepathOut, array $options): void
     {
         $cmd = sprintf(
             self::CMD,
@@ -208,14 +214,12 @@ class OptimizeImageManager
         );
 
         // execute command
-        exec($cmd, $output, $code);
+        exec($cmd);
 
         // error
         if (false === $this->filesystem->exists($filepathOut)) {
-            return self::CODE_ERROR;
+            $this->logger->warning(sprintf('File path out %s does not exist.', $filepathOut));
         }
-
-        return self::CODE_OK;
     }
 
     /**
@@ -231,7 +235,7 @@ class OptimizeImageManager
             return !(
                 (1 !== preg_match('~^image/(gif|jpeg|jpg|png|bmp)$~', @mime_content_type($filePath)))
                 || ('image/gif' === @mime_content_type($filePath) && (true === $this->isAnimated($filePath)))
-                || ('image/png' === @mime_content_type($filePath)) && (true === $this->isTransparent($filePath))
+                || (('image/png' === @mime_content_type($filePath)) && (true === $this->isTransparent($filePath)))
             );
         }
 
@@ -253,7 +257,7 @@ class OptimizeImageManager
         );
 
         // execute command
-        exec($cmd, $output, $code);
+        exec($cmd, $output);
 
         return (!json_decode(reset($output)));
     }
@@ -273,7 +277,7 @@ class OptimizeImageManager
         );
 
         // execute command
-        exec($cmd, $output, $code);
+        exec($cmd, $output);
 
         return (1 !== json_decode(reset($output)));
     }
@@ -291,27 +295,39 @@ class OptimizeImageManager
             return ' ';
         }
 
-        return ' ' . (implode(
-                ' ',
-                array_map(
-                    static function ($key) use ($options) {
-                        return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
-                    },
-                    array_keys($options)
-                )
-            )) . ' ';
+        return ' ' . (implode(' ', array_map(static function ($key) use ($options) {
+            return '-' . $key . ($options[$key] ? ' ' . $options[$key] : '');
+        }, array_keys($options)))) . ' ';
     }
 
     //@TODO current media directory <> current web media
+
+    /**
+     * @param $filePath
+     *
+     * @return string
+     */
     public function getMediaPath($filePath): string
     {
-        $filePath = preg_replace(
-            '#^(https?\:)?\/\/([a-z0-9][a-z0-9\-]{0,61}[a-z0-9]\.)+[a-z0-9][a-z0-9\-]*[a-z0-9]#',
-            '',
-            $filePath
-        );
+        try {
+            $filePath = preg_replace(
+                '#^(https?:)?//([a-z0-9][a-z0-9\-]{0,61}[a-z0-9]\.)+[a-z0-9][a-z0-9\-]*[a-z0-9]#',
+                '',
+                $filePath
+            );
+            $mediaPath = $this->app->getMediaDir() . str_replace(['/media/', '/img/'], '/', $filePath);
+        } catch (Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    '%s : %s :%s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
+        }
 
-        return $this->mediaDir . str_replace(['/media/', '/img/'], '/', $filePath);
+        return $mediaPath ?? '';
     }
 
     /**
@@ -346,10 +362,9 @@ class OptimizeImageManager
     public function getOptimizeImagePath(string $path, bool $inFluid, int $colSize): string
     {
         // skipping if path is false or parameter in fluid is true or image is transparency png or animated gif...
-        if (
-            null === ($this->settings['colsizes'] ?? null) ||
+        if (null === ($this->settings['colsizes'] ?? null) ||
             null === ($this->settings['browsercolsizes'] ?? null) ||
-            false === $path ||
+            '' === $path ||
             true === $inFluid ||
             false === $this->isValidToOptimize($filePath = $this->getMediaPath($path)) ||
             ($this->checkImageHasAlreadyBeenOptimized($path) && $this->filesystem->exists($this->getMediaPath($path)))
@@ -388,8 +403,8 @@ class OptimizeImageManager
     private function checkImageHasAlreadyBeenOptimized(string $path): bool
     {
         return 1 === preg_match(
-                '/.*_[' . sprintf("'%s'", implode("','", array_keys($this->settings['formats']))) . '].*/',
-                $path
-            );
+            '/.*_[' . sprintf("'%s'", implode("','", array_keys($this->settings['formats']))) . '].*/',
+            $path
+        );
     }
 }

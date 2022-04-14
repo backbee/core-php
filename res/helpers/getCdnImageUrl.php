@@ -32,6 +32,8 @@ class getCdnImageUrl extends getCdnUri
     public const CDN_SETTINGS_KEY = 'image_domain';
 
     /**
+     * Invoke
+     *
      * @param       $uri
      * @param false $preserveScheme
      *
@@ -47,7 +49,7 @@ class getCdnImageUrl extends getCdnUri
 
         $url = $this->_renderer->getUri(
             str_replace(
-                '/images',
+                '/images/',
                 '',
                 false === strpos($path, '/') ? '/' . $path : $path
             ),

@@ -576,11 +576,11 @@ services:
     # Optimize image
     app.optimize_image.manager:
         class: BackBeePlanet\OptimizeImage\OptimizeImageManager
-        arguments: [ '@bbapp', '@config' ]
+        arguments: [ '@bbapp', '@config', '@backbee.logger' ]
 
     app.optimize_image.listener:
         class: BackBeePlanet\Listener\OptimizeImageListener
-        arguments: [ '@app.optimize_image.manager' ]
+        arguments: [ '@app.optimize_image.manager', '@backbee.logger' ]
 
     # Sitemap
     core.sitemap.manager:
