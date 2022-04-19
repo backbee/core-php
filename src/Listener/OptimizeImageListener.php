@@ -25,13 +25,14 @@ use BackBee\Controller\Event\PostResponseEvent;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBeePlanet\OptimizeImage\OptimizeImageManager;
 use BackBeePlanet\OptimizeImage\OptimizeImageUtils;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class OptimizeImageListener
  *
  * @package BackBeePlanet\Listener
  *
- * @author Michel Baptista <michel.baptista@lp-digital.fr>
+ * @author  Michel Baptista <michel.baptista@lp-digital.fr>
  */
 class OptimizeImageListener
 {
@@ -41,13 +42,20 @@ class OptimizeImageListener
     private $optimizeImageManager;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * OptimizeImageListener constructor.
      *
-     * @param OptimizeImageManager $optimizeImageManager
+     * @param OptimizeImageManager     $optimizeImageManager
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(OptimizeImageManager $optimizeImageManager)
+    public function __construct(OptimizeImageManager $optimizeImageManager, LoggerInterface $logger)
     {
         $this->optimizeImageManager = $optimizeImageManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -58,7 +66,7 @@ class OptimizeImageListener
     public function onCloudContentSetRender(RendererEvent $event): void
     {
         $cloudContentSet = $event->getTarget();
-        if (false === $bgImageUrl = $cloudContentSet->getParamValue('bg_image')) {
+        if (false === ($bgImageUrl = $cloudContentSet->getParamValue('bg_image'))) {
             return;
         }
 
@@ -66,7 +74,7 @@ class OptimizeImageListener
 
         // skipping transparency png and animated gif...
         if (false === $this->optimizeImageManager->isValidToOptimize($filePath)) {
-            return;
+            $this->logger->info(sprintf('Image with path : %s has been skipping.', $filePath));
         }
     }
 

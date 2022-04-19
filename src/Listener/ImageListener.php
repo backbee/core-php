@@ -114,13 +114,11 @@ class ImageListener
 
         $changeSet = $uow->getEntityChangeSet($event->getTarget());
 
-        if (
-            null !== ($changeSet['_data'] ?? null) &&
+        if (null !== ($changeSet['_data'] ?? null) &&
             null !== ($oldData = $changeSet['_data'][0] ?? null) &&
             null !== ($newData = $changeSet['_data'][1] ?? null)
         ) {
-            if (
-                $oldData['path'] === $newData['path'] ||
+            if ($oldData['path'] === $newData['path'] ||
                 false !== strpos($oldData['path'][0]['scalar'], 'theme-default-resources') ||
                 $uow->isScheduledForInsert($event->getTarget())
             ) {

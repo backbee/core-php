@@ -55,7 +55,7 @@ class OptimizeImageUtils
             $data[$key] = preg_replace('~\.([a-z]+)$~i', '.' . $ext, $value);
             if ($key === 'path') {
                 $data[$key] = preg_replace(
-                    '#^(https?\:)?\/\/([a-z0-9][a-z0-9\-]{0,61}[a-z0-9]\.)+[a-z0-9][a-z0-9\-]*[a-z0-9]#',
+                    '#^(https?:)?//([a-z0-9][a-z0-9\-]{0,61}[a-z0-9]\.)+[a-z0-9][a-z0-9\-]*[a-z0-9]#',
                     '',
                     $data[$key]
                 );
