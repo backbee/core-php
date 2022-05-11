@@ -713,7 +713,7 @@ services:
     core.core.listener:
         class: BackBeeCloud\Listener\CoreListener
         arguments:
-            [ '@bbapp' ]
+            [ '@bbapp', '@user_preference.manager' ]
 
     core.class_content.video.listener:
         class: BackBeeCloud\Listener\ClassContent\VideoListener

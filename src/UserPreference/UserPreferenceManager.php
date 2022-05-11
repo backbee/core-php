@@ -336,6 +336,9 @@ class UserPreferenceManager
                 'website_name' => 'is_string',
                 'website_description' => 'is_string',
             ],
+            'dev-mode' => [
+                'enabled' => null
+            ]
         ];
 
         foreach ($this->multiLangManager->getActiveLangs() as $lang) {
