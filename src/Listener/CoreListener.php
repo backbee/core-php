@@ -27,6 +27,7 @@ use BackBee\Bundle\Registry;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
 use BackBee\Routing\Route;
+use BackBeeCloud\UserPreference\UserPreferenceManager;
 use Exception;
 use LogicException;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +45,7 @@ use function dirname;
  * @package BackBeeCloud\Listener
  *
  * @author  Eric Chau <eric.chau@lp-digital.fr>
+ * @author  Djoudi Bensid <d.bensid@obione.eu>
  */
 class CoreListener
 {
@@ -53,13 +55,20 @@ class CoreListener
     private static $bbApp;
 
     /**
+     * @var UserPreferenceManager
+     */
+    private static $userPreferenceManager;
+
+    /**
      * CoreListener constructor.
      *
-     * @param BBApplication $bbApp
+     * @param BBApplication                                      $bbApp
+     * @param \BackBeeCloud\UserPreference\UserPreferenceManager $userPreferenceManager
      */
-    public function __construct(BBApplication $bbApp)
+    public function __construct(BBApplication $bbApp, UserPreferenceManager $userPreferenceManager)
     {
         self::$bbApp = $bbApp;
+        self::$userPreferenceManager = $userPreferenceManager;
     }
 
     /**
@@ -200,7 +209,12 @@ class CoreListener
 
         $request = Request::createFromGlobals();
         $isDevMode = self::$bbApp->getContainer()->getParameter('dev_mode');
-        if ($isDevMode || $request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')) {
+        $isDevModeEnabled = self::$userPreferenceManager->singleDataOf('dev-mode', 'enabled');
+
+        if ($isDevMode ||
+            $isDevModeEnabled === '1' ||
+            $request->headers->get('x-debug-token') === sha1(date('Y-m-d') . '-backbee')
+        ) {
             $whoops = new Run();
             $whoops->pushHandler(new PrettyPageHandler());
             $whoops->register();
