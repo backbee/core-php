@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-
 {% set global_content_settings = this.getDesignSettings('global_content') %}
 {% set has_header_margin = global_content_settings['has_header_margin'] %}
-
 <html lang="{{ this.getCurrentLang.getCode() ?: 'fr' }}">
 <head>
     <meta charset="utf-8">
@@ -16,7 +14,6 @@
 
     <!--##FAVICON_SPOT##-->
     {% block stylesheets %}<link rel="stylesheet" href="{{ this.getCdnUri('/css/gen.css') }}">{% endblock %}
-
 
     <script>
       window.onDocumentReady = function (fn) {
@@ -106,7 +103,7 @@
     <![endif]-->
 
     {% block main_content %}
-        {{ this.render(this.globalContentFactory().getHeader())|raw }}
+        {{ this.render(this.globalContentFactory().getHeader(), 'header', {'multilang_equivalent_pages' : multilang_equivalent_pages})|raw }}
 
         <main class="main" role="main" id="content" dir="{{ this.getCurrentLang.getCode() == 'ar' ? 'rtl' : 'ltr' }}">
             {% block content %}{% endblock %}

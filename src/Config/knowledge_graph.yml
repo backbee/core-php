@@ -4,9 +4,9 @@ graph:
     website_description: Backbee
     website_search: /search
     website_search_term_string: '?q='
-    logo: https://www.backbee.com/resources/integration/html/mstile-70x70.png
-    image: https://www.backbee.com/resources/integration/html/mstile-310x310.png
-    social_profiles: [ https://twitter.com, https://www.facebook.com ]
+    logo: ~
+    image: ~
+    social_profiles: [ https://twitter.com, https://www.facebook.com, https://www.linkedin.com ]
     twitter_card: summary_large_image
 google_website_verification: https://www.google.com/webmasters/verification/home?hl=en
 google_search_console: https://search.google.com/search-console

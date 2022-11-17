@@ -31,51 +31,52 @@ use BackBeeCloud\Elasticsearch\ElasticsearchManager;
 use BackBeeCloud\MultiLang\MultiLangManager;
 use BackBeeCloud\MultiLang\PageAssociationManager;
 use BackBeeCloud\SearchEngine\SearchEngineManager;
-use Doctrine\ORM\EntityManager;
-use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
 /**
  * Class SeoMetadataManager
  *
  * @package BackBee\KnowledgeGraph
+ *
+ * @author Djoudi Bensid <d.bensid@obione.eu>
  */
 class SeoMetadataManager
 {
     /**
      * @var BBApplication
      */
-    private $bbApp;
+    private BBApplication $bbApp;
 
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     /**
      * @var SearchEngineManager
      */
-    private $searchEngineManager;
+    private SearchEngineManager $searchEngineManager;
 
     /**
      * @var ElasticsearchManager
      */
-    private $elasticsearchManager;
+    private ElasticsearchManager $elasticsearchManager;
 
     /**
      * @var PageAssociationManager
      */
-    private $pageAssociationManager;
+    private PageAssociationManager $pageAssociationManager;
 
     /**
      * @var MultiLangManager
      */
-    private $multiLangManager;
+    private MultiLangManager $multiLangManager;
 
     /**
      * @var array
      */
-    private $seoData;
+    private array $seoData;
 
     /**
      * @var MetaDataBag|array
@@ -83,15 +84,15 @@ class SeoMetadataManager
     private $pageMetadataBag;
 
     /**
-     * @var array
+     * @var null|array
      */
-    private $esResult;
+    private ?array $esResult;
 
     /**
      * SeoMetadataManager constructor.
      *
      * @param BBApplication          $bbApp
-     * @param EntityManager          $entityManager
+     * @param EntityManagerInterface $entityManager
      * @param SearchEngineManager    $searchEngineManager
      * @param ElasticsearchManager   $elasticsearchManager
      * @param MultiLangManager       $multiLangManager
@@ -99,7 +100,7 @@ class SeoMetadataManager
      */
     public function __construct(
         BBApplication $bbApp,
-        EntityManager $entityManager,
+        EntityManagerInterface $entityManager,
         SearchEngineManager $searchEngineManager,
         ElasticsearchManager $elasticsearchManager,
         MultiLangManager $multiLangManager,
@@ -128,6 +129,7 @@ class SeoMetadataManager
         $this->pageMetadataBag = $page->getMetaData() ?: new MetaDataBag();
 
         $this
+            ->setHost()
             ->setMetadata()
             ->getElasticSearchResult($page->getUid());
 
@@ -135,11 +137,8 @@ class SeoMetadataManager
             $this
                 ->setTitle()
                 ->setDescription()
+                ->setImageUrl()
                 ->setSearchEngineOptions();
-
-            if ('article' === $this->esResult['_source']['type']) {
-                $this->setImageUrl();
-            }
         }
 
         return $this->seoData;
@@ -172,6 +171,8 @@ class SeoMetadataManager
             );
         }
 
+        //dump($params);
+
         return $this->bbApp->getRenderer()->partial('KnowledgeGraph/seoMetadata.html.twig', $params);
     }
 
@@ -193,6 +194,18 @@ class SeoMetadataManager
             . "\x{2700}-\x{27BF}"; // Dingbats
 
         return trim(preg_replace('/[' . $symbols . ']+/u', '', $value));
+    }
+
+    /**
+     * Set host.
+     *
+     * @return $this
+     */
+    private function setHost(): self
+    {
+        $this->seoData['host'] = $this->bbApp->getRequest()->getHost();
+
+        return $this;
     }
 
     /**
@@ -240,7 +253,7 @@ class SeoMetadataManager
                     '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
                 ]
             );
-        } catch (Missing404Exception $exception) {
+        } catch (Exception $exception) {
             $this->bbApp->getLogging()->warning(
                 sprintf(
                     '%s : %s :%s',
@@ -258,7 +271,7 @@ class SeoMetadataManager
      *
      * @return $this
      */
-    private function setDescription(): self
+    public function setDescription(): self
     {
         try {
             if (($this->seoData['description'] ?? null) === null &&
@@ -288,7 +301,12 @@ class SeoMetadataManager
             }
         } catch (Exception $exception) {
             $this->bbApp->getLogging()->error(
-                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+                sprintf(
+                    '%s : %s : %s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
             );
         }
 
@@ -298,21 +316,35 @@ class SeoMetadataManager
     /**
      * Set image url.
      *
-     * @return void
+     * @return $this
      */
-    private function setImageUrl(): void
+    public function setImageUrl(): self
     {
         try {
-            if ($this->esResult['_source']['image_uid'] &&
-                $image = $this->entityManager->find(Image::class, $this->esResult['_source']['image_uid'])
-            ) {
+            $image = $this->entityManager->find(
+                Image::class,
+                $this->esResult['_source']['image_uid']
+            );
+
+            if ($this->esResult['_source']['image_uid'] && $image) {
                 $this->seoData['image_url'] = $image->image->path;
+            } else {
+                $knowledgeGraphConfig = $this->bbApp->getConfig()->getSection('knowledge_graph');
+                $this->seoData['image_url'] = $knowledgeGraphConfig['graph']['image'] ??
+                    $knowledgeGraphConfig['graph']['logo'];
             }
         } catch (Exception $exception) {
             $this->bbApp->getLogging()->error(
-                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+                sprintf(
+                    '%s : %s : %s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
             );
         }
+
+        return $this;
     }
 
     /**
@@ -324,9 +356,9 @@ class SeoMetadataManager
     {
         $searchEngine = $this->searchEngineManager->googleSearchEngineIsActivated();
 
-        $this->seoData['index'] = null === $this->pageMetadataBag->get('index') ?
+        $this->seoData['index'] = $this->pageMetadataBag->get('index') === null ?
             $searchEngine : $this->pageMetadataBag->get('index')->getAttribute('content');
-        $this->seoData['follow'] = null === $this->pageMetadataBag->get('follow') ?
+        $this->seoData['follow'] = $this->pageMetadataBag->get('follow') === null ?
             $searchEngine : $this->pageMetadataBag->get('follow')->getAttribute('content');
     }
 }

@@ -5,34 +5,46 @@
 <!-- Knowledge Graph - metadata -->
     <title>{{ title|striptags|raw }}</title>
     <meta name="title" content="{{ title|striptags|raw }}"/>
-    <meta property="og:title" content="{{ title|striptags|raw }}"/>
-    <meta name="twitter:title" content="{{ title|striptags|raw }}"/>
 {% if description != false %}
     <meta name="description" content="{{ description|striptags|raw }}"/>
-    <meta property="og:description" content="{{ description|striptags|raw }}"/>
-    <meta property="twitter:description" content="{{ description|striptags|raw }}"/>
 {% endif %}
-    <meta property="og:type" content="website"/>
-    <meta property="og:url" content="{{ this.getUri(page.getUrl(), false) }}"/>
-    <meta name="twitter:url" content="{{ this.getUri(page.getUrl(), false) }}"/>
-{% if image_url != false %}
-    <meta property="og:image" content="{{ this.getCdnImageUrl(image_url) }}"/>
-    <meta name="twitter:card" content="{{ (schema_context.getConfig()['twitter_card']) ? schema_context.getConfig()['twitter_card'] : 'summary' }}"/>
-    <meta name="twitter:image" content="{{ this.getCdnImageUrl(image_url) }}">
-{% endif %}
-{% if metadata.locale != false %}
-    <meta property="og:locale" content="{{ metadata.locale }}"/>
-{% endif %}
-    <meta property="og:site_name" content="{{ this.sitename()|raw }}"/>
-    <meta name="twitter:site" content="{{ this.sitename()|raw }}"/>
 {% if not metadata_robots is null %}
     <meta name="robots" content="{{ metadata_robots }}">
 {% endif %}
 
+    <!-- Facebook Meta Tags -->
+    <meta property="og:url" content="{{ this.getUri(page.getUrl(), false) }}"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="{{ title|striptags|raw }}"/>
+{% if description != false %}
+    <meta property="og:description" content="{{ description|striptags|raw }}"/>
+{% endif %}
+{% if image_url != false %}
+    <meta property="og:image" content="{{ this.getCdnImageUrl(image_url, true) }}"/>
+{% endif %}
+    <meta property="og:site_name" content="{{ this.sitename()|raw }}"/>
+{% if metadata.locale != false %}
+    <meta property="og:locale" content="{{ metadata.locale }}"/>
+{% endif %}
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="{{ (schema_context.getConfig()['twitter_card']) ? schema_context.getConfig()['twitter_card'] : 'summary' }}"/>
+{% if metadata.host != false %}
+    <meta property="twitter:domain" content="{{ metadata.host }}">
+{% endif %}
+    <meta name="twitter:url" content="{{ this.getUri(page.getUrl(), false) }}"/>
+    <meta name="twitter:title" content="{{ title|striptags|raw }}"/>
+{% if description != false %}
+    <meta property="twitter:description" content="{{ description|striptags|raw }}"/>
+{% endif %}
+{% if image_url != false %}
+    <meta name="twitter:image" content="{{ this.getCdnImageUrl(image_url, true) }}">
+{% endif %}
+    <meta name="twitter:site" content="{{ this.sitename()|raw }}"/>
+    <!-- End Knowledge Graph - metadata -->
+
 {% if multilang_equivalent_pages is not null and not multilang_equivalent_pages is empty %}
     <link rel="alternate" href="{{ this.getUri(this.knowledgeGraphHelper.getDefaultPageByLang(page).getUrl(), false) }}" hreflang="x-default"/>
     <link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ this.getCurrentLang.getCode() }}"/>
-    {% for lang, page in multilang_equivalent_pages %}<link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ lang }}"/>
-    {% endfor %}
+    {% for lang, page in multilang_equivalent_pages %}<link rel="alternate" href="{{ this.getUri(page.getUrl(), false) }}" hreflang="{{ lang }}"/>{% endfor %}
 {% endif %}
-<!-- End Knowledge Graph - metadata -->
