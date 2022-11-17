@@ -28,8 +28,7 @@ use BackBee\KnowledgeGraph\Schema\SchemaOrganization;
 use BackBee\KnowledgeGraph\Schema\SchemaWebPage;
 use BackBee\KnowledgeGraph\Schema\SchemaWebSite;
 use BackBee\NestedNode\Page;
-use BackBee\Renderer\Exception\RendererException;
-use BackBee\Renderer\Renderer;
+use BackBee\Renderer\RendererInterface;
 use BackBeeCloud\Controller\SearchEngineController;
 use BackBeeCloud\Page\PageFromRawData;
 use BackBeeCloud\UserPreference\UserPreferenceManager;
@@ -45,49 +44,49 @@ use function is_array;
  * @package BackBee\KnowledgeGraph
  *
  * @author  Michel Baptista <michel.baptista@lp-digital.fr>
- * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
+ * @author  Djoudi Bensid <d.bensid@obione.eu>
  */
 class KnowledgeGraphManager
 {
     /**
      * @var BBApplication
      */
-    private $app;
+    private BBApplication $app;
 
     /**
      * @var UserPreferenceManager
      */
-    private $userPreferenceManager;
+    private UserPreferenceManager $userPreferenceManager;
 
     /**
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * @var SchemaContext
      */
-    private $context;
+    private SchemaContext $context;
 
     /**
      * @var PageFromRawData
      */
-    private $pageFromRawData;
+    private PageFromRawData $pageFromRawData;
 
     /**
      * @var SeoMetadataManager
      */
-    private $seoMetadataManager;
+    private SeoMetadataManager $seoMetadataManager;
 
     /**
-     * @var Renderer
+     * @var \BackBee\Renderer\RendererInterface
      */
-    private $renderer;
+    private RendererInterface $renderer;
 
     /**
      * @var array
      */
-    private $userPreferenceValues;
+    private array $userPreferenceValues;
 
     /**
      * KnowledgeGraphManager constructor.
@@ -148,7 +147,7 @@ class KnowledgeGraphManager
      */
     public function getGraph(Page $page): ?string
     {
-        if (false === $this->indexOnGoogle()) {
+        if ($this->indexOnGoogle() === false) {
             return null;
         }
 
@@ -167,11 +166,10 @@ class KnowledgeGraphManager
      * Get Meta Google site verification
      *
      * @return string|null
-     * @throws \BackBee\Renderer\Exception\RendererException
      */
     public function getMetaGoogleSiteVerification(): ?string
     {
-        if (false === $this->indexOnGoogle() ||
+        if ($this->indexOnGoogle() === false ||
             empty(($gaData = $this->userPreferenceManager->dataOf('gsc-analytics')))) {
             return null;
         }
@@ -236,7 +234,7 @@ class KnowledgeGraphManager
      */
     protected function getExtraMappingTypes(array $pieces): array
     {
-        if (false === is_array($this->config['mapping_schema_types'])) {
+        if (is_array($this->config['mapping_schema_types']) === false) {
             return $pieces;
         }
 
@@ -245,7 +243,7 @@ class KnowledgeGraphManager
 
         try {
             foreach ($this->config['mapping_schema_types'] as $key => $mapping) {
-                if (true === in_array($pageType, $mapping, true)) {
+                if (in_array($pageType, $mapping, true) === true) {
                     $schema = new ReflectionClass('BackBee\KnowledgeGraph\Schema\Schema' . $key);
                     $instance = $schema->newInstance($this->context);
                     $pieces[] = $instance->generate();
@@ -266,6 +264,14 @@ class KnowledgeGraphManager
     public function initSchemaContext(Page $page): SchemaContext
     {
         $esData = $this->pageFromRawData->getData($page);
+
+        if ($esData['type'] === 'home') {
+            $seoData = $this->seoMetadataManager->getPageSeoMetadata($page);
+            $esData['title'] = $seoData['title'] ?? $esData['title'];
+            $esData['abstract'] = $seoData['description'] ?? $esData['abstract'];
+            $esData['contents'] = $seoData['description'] ?? $esData['contents'];
+            $esData['image'] = $seoData['image_url'] ?? $esData['image'];
+        }
 
         return new SchemaContext($this->app, $esData, $this->config['graph']);
     }
