@@ -22,25 +22,47 @@
 namespace BackBee\Renderer\Helper;
 
 use BackBee\Bundle\Registry;
-use BackBee\Renderer\Helper\AbstractHelper;
+use Exception;
 
 /**
+ * Class sitename
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <d.bensid@obione.eu>
  */
 class sitename extends AbstractHelper
 {
-    public function __invoke()
+    /**
+     * Invoke.
+     *
+     * @return string
+     */
+    public function __invoke(): string
     {
         $app = $this->_renderer->getApplication();
-        $sitename = $app->getSite()->getLabel();
-        $registry = $app->getEntityManager()->getRepository(Registry::class)->findOneBy([
-            'key' => 'site_label',
-            'scope' => 'GLOBAL',
-        ]);
-        if ($registry && false != trim($registry->getValue())) {
-            $sitename = $registry->getValue();
+        $siteName = $app->getSite() ? $app->getSite()->getLabel() : '';
+
+        try {
+            $registry = $app->getEntityManager()->getRepository(Registry::class)->findOneBy([
+                'key' => 'site_label',
+                'scope' => 'GLOBAL',
+            ]);
+
+            if ($registry && trim($registry->getValue())) {
+                $siteName = $registry->getValue();
+            }
+
+        } catch (Exception $exception) {
+            $app->getLogging()->error(
+                sprintf(
+                    '%s : %s : %s',
+                    __CLASS__,
+                    __FUNCTION__,
+                    $exception->getMessage()
+                )
+            );
         }
 
-        return $sitename;
+        return $siteName;
     }
 }
