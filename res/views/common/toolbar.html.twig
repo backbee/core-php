@@ -22,111 +22,22 @@
     <script src="{{ appRteUrl }}"></script>
 {% else %}
     <style>
-        @-webkit-keyframes load8 {
-            0% {
-                -webkit-transform: rotate(0);
-                transform: rotate(0)
-            }
-            100% {
-                -webkit-transform: rotate(360deg);
-                transform: rotate(360deg)
-            }
-        }
-
-        @-moz-keyframes load8 {
-            0% {
-                -webkit-transform: rotate(0);
-                transform: rotate(0)
-            }
-            100% {
-                -webkit-transform: rotate(360deg);
-                transform: rotate(360deg)
-            }
-        }
-
-        @-o-keyframes load8 {
-            0% {
-                -webkit-transform: rotate(0);
-                transform: rotate(0)
-            }
-            100% {
-                -webkit-transform: rotate(360deg);
-                transform: rotate(360deg)
-            }
-        }
-
-        @keyframes load8 {
-            0% {
-                -webkit-transform: rotate(0);
-                transform: rotate(0)
-            }
-            100% {
-                -webkit-transform: rotate(360deg);
-                transform: rotate(360deg)
-            }
-        }
-
-        #cloud-starter-overlay {
-            position: fixed;
-            z-index: 10000;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: rgba(0, 0, 0, .2)
-        }
-
-        #cloud-starter-overlay .loader-wrapper {
-            padding: 25px 35px;
-            background-color: hsla(0, 0%, 47%, .8);
-            border-radius: 10px;
-            position: fixed;
-            z-index: 10001;
-            top: 50%;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        #cloud-starter-overlay .loader-wrapper .loader {
-            margin: 0;
-            width: 30px;
-            height: 30px;
-            border-radius: 100%;
-            border: 2px solid #d94717;
-            border-color: #d94717 #d94717 #ddd #ddd;
-            -webkit-animation: load8 1s infinite linear;
-            -moz-animation: load8 1s infinite linear;
-            -o-animation: load8 1s infinite linear;
-            animation: load8 1s infinite linear
-        }
+        @-webkit-keyframes load8{0%{-webkit-transform:rotate(0);transform:rotate(0)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-moz-keyframes load8{0%{-webkit-transform:rotate(0);transform:rotate(0)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-o-keyframes load8{0%{-webkit-transform:rotate(0);transform:rotate(0)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes load8{0%{-webkit-transform:rotate(0);transform:rotate(0)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}#cloud-starter-overlay{position:fixed;z-index:10000;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.2)}#cloud-starter-overlay .loader-wrapper{padding:25px 35px;background-color:hsla(0,0%,47%,.8);border-radius:10px;position:fixed;z-index:10001;top:50%;left:50%;transform:translateX(-50%)}#cloud-starter-overlay .loader-wrapper .loader{margin:0;width:30px;height:30px;border-radius:100%;border:2px solid #d94717;border-color:#d94717 #d94717 #ddd #ddd;-webkit-animation:load8 1s infinite linear;-moz-animation:load8 1s infinite linear;-o-animation:load8 1s infinite linear;animation:load8 1s infinite linear}
     </style>
-    {% if this.checkUserIP() %}
-        <script>
-          (function () {
-            'use strict'
-            var a = !1, b = [], c = function (i, j, k) {
-              var l, m = document
-              switch (i) {
-                case'js':
-                  l = m.createElement('script'), l.src = j
-                  break
-                case'css':
-                  l = m.createElement('link'), l.href = j, l.rel = 'stylesheet'
-                  break
-                default:
-                  return
-              }
-              k && l.addEventListener('load', k, !1), m.getElementsByTagName('head')[0].appendChild(l)
-            }, d = function () {
-              var i = document.createElement('div'), j = document.createElement('div'),
-                k = document.createElement('div')
-              i.setAttribute('id', 'cloud-starter-overlay'), j.setAttribute('class', 'loader-wrapper'), k.setAttribute('class', 'loader'), j.appendChild(k), i.appendChild(j), document.body.appendChild(i)
-            }
-            document.addEventListener('keydown', function f (i) {a || ('keyB' === i.code || 66 === i.which) && i.ctrlKey && i.altKey && (d(), c('css', '{{ appCssUrl }}', function () {c('js', '{{ appJsUrl }}')}), a = !0)})
-            var g = function () {b = []},
-              h = function () {b = []}
-            window.navigator.msPointerEnabled ? (document.addEventListener('MSPointerDown', g), document.addEventListener('MSPointerMove', h)) : (document.addEventListener('touchstart', g), document.addEventListener('touchmove', h))
-          })()
-        </script>
-    {% endif %}
+{% if this.checkUserIP() %}
+    <script>
+      (function(){'use strict'
+        var a=!1,b=[],c=function(i,j,k){var l,m=document
+          switch(i){case'js':l=m.createElement('script'),l.src=j
+            break
+            case'css':l=m.createElement('link'),l.href=j,l.rel='stylesheet'
+              break
+            default:return}
+          k&&l.addEventListener('load',k,!1),m.getElementsByTagName('head')[0].appendChild(l)},d=function(){var i=document.createElement('div'),j=document.createElement('div'),k=document.createElement('div')
+          i.setAttribute('id','cloud-starter-overlay'),j.setAttribute('class','loader-wrapper'),k.setAttribute('class','loader'),j.appendChild(k),i.appendChild(j),document.body.appendChild(i)}
+        document.addEventListener('keydown',function f(i){a||('keyB'===i.code||66===i.which)&&i.ctrlKey&&i.altKey&&(d(),c('css','{{ appCssUrl }}',function(){c('js','{{ appJsUrl }}')}),a=!0)})
+        var g=function(){b=[]},h=function(){b=[]}
+        window.navigator.msPointerEnabled?(document.addEventListener('MSPointerDown',g),document.addEventListener('MSPointerMove',h)):(document.addEventListener('touchstart',g),document.addEventListener('touchmove',h))})()
+    </script>
+{% endif %}
 {% endif %}
