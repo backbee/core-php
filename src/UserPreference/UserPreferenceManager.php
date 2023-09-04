@@ -325,6 +325,10 @@ class UserPreferenceManager
             'gsc-analytics' => [
                 'content' => true,
             ],
+            'matomo-analytics' => [
+                'tracker_url' => 'is_string',
+                'site_id' => 'is_string',
+            ],
             'privacy-policy' => [
                 'banner_message' => 'is_string',
                 'learn_more_url' => 'is_string',

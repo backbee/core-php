@@ -1,0 +1,12 @@
+{% if google_analytics_code is defined and google_analytics_code and (disable_google_analytics is not defined or disable_google_analytics == false) %}
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_code }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag () {dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ google_analytics_code }}');
+    </script>
+    <!-- Google tag (gtag.js) -->
+{% endif %}

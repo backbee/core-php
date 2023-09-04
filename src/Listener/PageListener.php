@@ -423,6 +423,12 @@ class PageListener
                 $data['learn_more_link_title'] ?? null
             );
         }
+
+        if (($trackerUrl = $userPreferenceManager->singleDataOf('matomo-analytics', 'tracker_url')) &&
+            ($siteId = $userPreferenceManager->singleDataOf('matomo-analytics', 'site_id'))) {
+            $renderer->assign('matomo_tracker_url', $trackerUrl);
+            $renderer->assign('matomo_site_id', $siteId);
+        }
     }
 
     /**
