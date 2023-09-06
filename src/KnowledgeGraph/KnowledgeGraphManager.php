@@ -51,42 +51,42 @@ class KnowledgeGraphManager
     /**
      * @var BBApplication
      */
-    private BBApplication $app;
+    private $app;
 
     /**
      * @var UserPreferenceManager
      */
-    private UserPreferenceManager $userPreferenceManager;
+    private $userPreferenceManager;
 
     /**
      * @var array
      */
-    private array $config;
+    private $config;
 
     /**
      * @var SchemaContext
      */
-    private SchemaContext $context;
+    private $context;
 
     /**
      * @var PageFromRawData
      */
-    private PageFromRawData $pageFromRawData;
+    private $pageFromRawData;
 
     /**
      * @var SeoMetadataManager
      */
-    private SeoMetadataManager $seoMetadataManager;
+    private $seoMetadataManager;
 
     /**
      * @var \BackBee\Renderer\RendererInterface
      */
-    private RendererInterface $renderer;
+    private $renderer;
 
     /**
      * @var array
      */
-    private array $userPreferenceValues;
+    private $userPreferenceValues;
 
     /**
      * KnowledgeGraphManager constructor.

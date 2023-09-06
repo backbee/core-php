@@ -46,37 +46,37 @@ class SeoMetadataManager
     /**
      * @var BBApplication
      */
-    private BBApplication $bbApp;
+    private $bbApp;
 
     /**
      * @var EntityManagerInterface
      */
-    private EntityManagerInterface $entityManager;
+    private $entityManager;
 
     /**
      * @var SearchEngineManager
      */
-    private SearchEngineManager $searchEngineManager;
+    private $searchEngineManager;
 
     /**
      * @var ElasticsearchManager
      */
-    private ElasticsearchManager $elasticsearchManager;
+    private $elasticsearchManager;
 
     /**
      * @var PageAssociationManager
      */
-    private PageAssociationManager $pageAssociationManager;
+    private $pageAssociationManager;
 
     /**
      * @var MultiLangManager
      */
-    private MultiLangManager $multiLangManager;
+    private $multiLangManager;
 
     /**
      * @var array
      */
-    private array $seoData;
+    private $seoData;
 
     /**
      * @var MetaDataBag|array
@@ -86,7 +86,7 @@ class SeoMetadataManager
     /**
      * @var null|array
      */
-    private ?array $esResult;
+    private $esResult;
 
     /**
      * SeoMetadataManager constructor.
