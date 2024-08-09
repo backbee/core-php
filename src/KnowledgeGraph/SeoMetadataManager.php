@@ -320,18 +320,19 @@ class SeoMetadataManager
      */
     public function setImageUrl(): self
     {
-        try {
-            $image = $this->entityManager->find(
-                Image::class,
-                $this->esResult['_source']['image_uid']
-            );
+        $imageUid = $this->esResult['_source']['image_uid'] ?? null;
 
-            if ($this->esResult['_source']['image_uid'] && $image) {
-                $this->seoData['image_url'] = $image->image->path;
-            } else {
+        try {
+            if ($imageUid === null) {
                 $knowledgeGraphConfig = $this->bbApp->getConfig()->getSection('knowledge_graph');
                 $this->seoData['image_url'] = $knowledgeGraphConfig['graph']['image'] ??
                     $knowledgeGraphConfig['graph']['logo'];
+            } else {
+                $image = $this->entityManager->find(Image::class, $imageUid);
+
+                if ($image) {
+                    $this->seoData['image_url'] = $image->image->path;
+                }
             }
         } catch (Exception $exception) {
             $this->bbApp->getLogging()->error(
