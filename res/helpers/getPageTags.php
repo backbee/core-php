@@ -23,21 +23,37 @@ namespace BackBee\Renderer\Helper;
 
 use BackBeeCloud\Entity\PageTag;
 use BackBee\NestedNode\Page;
-use BackBee\Renderer\Helper\AbstractHelper;
 
 /**
+ * Class getPageTags
+ *
  * @author Eric Chau <eric.chau@lp-digital.fr>
+ * @author Djoudi Bensid <d.bensid@team-one.fr>
  */
 class getPageTags extends AbstractHelper
 {
-    public function __invoke(Page $page, $rawResult = false)
+    /**
+     * Get the tags associated with this page.
+     *
+     * @param null|\BackBee\NestedNode\Page $page
+     * @param bool                          $rawResult
+     *
+     * @return array
+     */
+    public function __invoke(?Page $page, bool $rawResult = false)
     {
+        if ($page === null) {
+            return [];
+        }
+
         $entyMgr = $this->_renderer->getApplication()->getEntityManager();
 
-        $pagetag = $entyMgr->getRepository(PageTag::class)->findOneBy([
+        $pageTag = $entyMgr->getRepository(PageTag::class)->findOneBy([
             'page' => $page,
         ]);
-        $tags = $pagetag ? $pagetag->getTags() : [];
+
+        $tags = $pageTag ? $pageTag->getTags() : [];
+
         if ($rawResult) {
             return $tags;
         }
