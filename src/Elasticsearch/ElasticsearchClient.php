@@ -24,6 +24,9 @@ namespace BackBeeCloud\Elasticsearch;
 use BackBee\BBApplication;
 use BackBee\Bundle\Registry;
 use BackBee\Config\Config;
+use BackBee\Elasticsearch\Config\IndexAnalysisConfigInterface;
+use BackBee\Elasticsearch\Config\PageMappingConfigInterface;
+use BackBee\Elasticsearch\Config\TagMappingConfigInterface;
 use BackBee\Logging\Logger;
 use BackBee\NestedNode\KeyWord as Tag;
 use BackBee\NestedNode\Page;
@@ -33,9 +36,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
-use Elasticsearch\Common\Exceptions\Missing404Exception;
-use Exception;
-use Generator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use function in_array;
 
@@ -79,10 +79,25 @@ class ElasticsearchClient
     protected $logger;
 
     /**
-     * ElasticsearchManager constructor.
+     * @var \BackBee\Elasticsearch\Config\IndexAnalysisConfigInterface
+     */
+    private IndexAnalysisConfigInterface $indexAnalysisConfig;
+
+    /**
+     * @var \BackBee\Elasticsearch\Config\PageMappingConfigInterface
+     */
+    private PageMappingConfigInterface $pageMappingConfig;
+
+    /**
+     * @var \BackBee\Elasticsearch\Config\TagMappingConfigInterface
+     */
+    private TagMappingConfigInterface $tagMappingConfig;
+
+    /**
+     * Constructor.
      *
-     * @param BBApplication $bbApp
-     * @param Config        $config
+     * @param \BackBee\BBApplication $bbApp
+     * @param \BackBee\Config\Config $config
      */
     public function __construct(BBApplication $bbApp, Config $config)
     {
@@ -90,6 +105,9 @@ class ElasticsearchClient
         $this->entityMgr = $bbApp->getEntityManager();
         $this->settings = $config->getSection('elasticsearch');
         $this->logger = $bbApp->getLogging();
+        $this->indexAnalysisConfig = $bbApp->getContainer()->get('core.elasticsearch.index_analysis.config');
+        $this->pageMappingConfig = $bbApp->getContainer()->get('core.elasticsearch.page_mapping.config');
+        $this->tagMappingConfig = $bbApp->getContainer()->get('core.elasticsearch.tag_mapping.config');
     }
 
     /**
@@ -156,68 +174,7 @@ class ElasticsearchClient
                         'number_of_shards' => $this->settings['index']['number_of_shards'],
                         'number_of_replicas' => $this->settings['index']['number_of_replicas'],
                         'max_result_window' => 50000,
-                        'analysis' => [
-                            'filter' => [
-                                'autocomplete_filter' => [
-                                    'type' => 'edge_ngram',
-                                    'min_gram' => 1,
-                                    'max_gram' => 20,
-                                ],
-                                'my_ascii_folding' => [
-                                    'type' => 'asciifolding',
-                                    'preserve_original' => true,
-                                ],
-                                'my_stemmer_french' => [
-                                    'type' => 'stemmer',
-                                    'language' => 'french',
-                                ],
-                                'my_stemmer_english' => [
-                                    'type' => 'stemmer',
-                                    'language' => 'english',
-                                ],
-                                'my_french_elision' => [
-                                    'type' => 'elision',
-                                    'articles_case' => true,
-                                    'articles' => [
-                                        0 => 'l',
-                                        1 => 'm',
-                                        2 => 't',
-                                        3 => 'qu',
-                                        4 => 'n',
-                                        5 => 's',
-                                        6 => 'j',
-                                        7 => 'd',
-                                        8 => 'c',
-                                        9 => 'jusqu',
-                                        10 => 'quoiqu',
-                                        11 => 'lorsqu',
-                                        12 => 'puisqu',
-                                    ],
-                                ],
-                            ],
-                            'analyzer' => [
-                                'std_folded' => [
-                                    'type' => 'custom',
-                                    'tokenizer' => 'standard',
-                                    'filter' => [
-                                        'lowercase',
-                                        'asciifolding',
-                                        'my_stemmer_english',
-                                        'my_french_elision',
-                                        'my_stemmer_french',
-                                    ],
-                                ],
-                                'autocomplete' => [
-                                    'type' => 'custom',
-                                    'tokenizer' => 'standard',
-                                    'filter' => [
-                                        'lowercase',
-                                        'my_ascii_folding',
-                                        'autocomplete_filter',
-                                    ],
-                                ],
-                            ],
-                        ],
+                        'analysis' => $this->indexAnalysisConfig->toArray(),
                     ],
                 ],
             ]
@@ -240,21 +197,6 @@ class ElasticsearchClient
     }
 
     /**
-     * Shortcut to index all pages and all tags.
-     *
-     * @return self
-     *
-     * @see ::indexAllTags()
-     * @see ::indexAllPages()
-     */
-    public function indexAll(): self
-    {
-        return $this
-            ->indexAllPages()
-            ->indexAllTags();
-    }
-
-    /**
      * Indexes the provide page into the 'page' type.
      *
      * @param Page $page
@@ -263,66 +205,116 @@ class ElasticsearchClient
      */
     final public function indexPage(Page $page): self
     {
-        $params = [
+        $pageDocument = [
             'index' => $this->getIndexName(),
             'id' => $page->getUid(),
-            'body' => array_merge(
-                [
-                    'title' => $page->getTitle(),
-                    'tags' => [],
-                    'contents' => '',
-                    'is_online' => $page->isOnline(),
-                    'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
-                    'has_draft_contents' => false,
-                    'source' => Page::SOURCE_TYPE,
-                ],
-                $this->getPageCustomDataToIndex($page)
-            ),
+            'body' => $this->buildPageDocument($page),
         ];
 
-        $this->getClient()->index($params);
+        $this->getClient()->index($pageDocument);
 
         return $this;
     }
 
     /**
+     * Build page document.
+     *
+     * @param \BackBee\NestedNode\Page $page
+     *
+     * @return array
+     */
+    private function buildPageDocument(Page $page): array
+    {
+        return array_merge(
+            [
+                'title' => $page->getTitle(),
+                'tags' => [],
+                'contents' => '',
+                'is_online' => $page->isOnline(),
+                'modified_at' => $page->getModified()->format('Y-m-d H:i:s'),
+                'has_draft_contents' => false,
+                'source' => Page::SOURCE_TYPE,
+            ],
+            $this->getPageCustomDataToIndex($page)
+        );
+    }
+
+    private function buildTagDocument(Tag $tag): array
+    {
+        return array_merge(
+            [
+                'name' => $tag->getKeyWord(),
+                'source' => Tag::SOURCE_TYPE,
+            ],
+            $this->getTagCustomDataToIndex($tag)
+        );
+    }
+
+    /**
      * Gets all pages of current application and index these.
      *
-     * @param bool $memoryHardCleanup
+     * @param bool              $memoryHardCleanup
      * @param SymfonyStyle|null $output
+     * @param int               $batchSize
      *
      * @return self
      * @see ::indexPage
      */
-    public function indexAllPages(bool $memoryHardCleanup = false, ?SymfonyStyle $output = null): self
-    {
-        foreach ($this->getAllPages() as $page) {
+    public function indexAllPages(
+        bool $memoryHardCleanup = false,
+        ?SymfonyStyle $output = null,
+        int $batchSize = 1000
+    ): self {
+        $params = ['body' => []];
+        $docCount = 0;
+
+        $this->getClient()->indices()->putSettings([
+            'index' => $this->getIndexName(),
+            'body' => ['refresh_interval' => '-1'],
+        ]);
+
+        foreach ($this->entityMgr->getRepository(Page::class)->getAllPages() as $page) {
             if ($page->getState() === Page::STATE_DELETED) {
-                try {
-                    $this->getClient()->delete(
-                        [
-                            'index' => $this->getIndexName(),
-                            'id' => $page->getUid(),
-                        ]
-                    );
-                } catch (Missing404Exception $exception) {
-                    // It means that page has already been deleted from Elasticsearch indices, nothing to do
-                    $this->logger->warning(sprintf('%s : %s :%s', __CLASS__, __FUNCTION__, $exception->getMessage()));
-                }
+                $params['body'][] = [
+                    'delete' => [
+                        '_index' => $this->getIndexName(),
+                        '_id' => $page->getUid(),
+                    ],
+                ];
             } else {
-                $this->indexPage($page);
-                if ($output) {
-                    $output->progressAdvance();
-                }
+                $params['body'][] = [
+                    'index' => [
+                        '_index' => $this->getIndexName(),
+                        '_id' => $page->getUid(),
+                    ],
+                ];
+                $params['body'][] = $this->buildPageDocument($page);
             }
 
+            $docCount++;
 
-            if ($memoryHardCleanup) {
-                $this->entityMgr->clear();
-                gc_disable();
-                gc_enable();
+            if ($docCount % $batchSize === 0) {
+                $this->flushBulk($params, $docCount, $output);
+                $params = ['body' => []];
+                $docCount = 0;
+
+                if ($memoryHardCleanup) {
+                    $this->entityMgr->clear();
+                    gc_collect_cycles();
+                }
             }
         }
+
+        if (!empty($params['body'])) {
+            $this->flushBulk($params, $docCount, $output);
+        }
+
+        $this->getClient()->indices()->putSettings([
+            'index' => $this->getIndexName(),
+            'body' => ['refresh_interval' => '1s'],
+        ]);
+
+        $this->getClient()->indices()->refresh(['index' => $this->getIndexName()]);
 
         return $this;
     }
@@ -340,13 +332,7 @@ class ElasticsearchClient
             [
                 'index' => $this->getIndexName(),
                 'id' => $tag->getUid(),
-                'body' => array_merge(
-                    [
-                        'name' => $tag->getKeyWord(),
-                        'source' => Tag::SOURCE_TYPE,
-                    ],
-                    $this->getTagCustomDataToIndex($tag)
-                ),
+                'body' => $this->buildTagDocument($tag),
             ]
         );
 
@@ -357,19 +343,40 @@ class ElasticsearchClient
      * Indexes all tags into Elasticsearch except the root keyword.
      *
      * @param SymfonyStyle|null $output
+     * @param int               $batchSize
      *
      * @return self
      */
-    public function indexAllTags(?SymfonyStyle $output = null): self
+    public function indexAllTags(?SymfonyStyle $output = null, int $batchSize = 1000): self
     {
         $rootUid = md5('root');
-        foreach ($this->entityMgr->getRepository(Tag::class)->findAll() as $tag) {
-            if ($rootUid !== $tag->getUid()) {
-                $this->indexTag($tag);
-                if ($output) {
-                    $output->progressAdvance();
-                }
+        $params = ['body' => []];
+        $docCount = 0;
+
+        foreach ($this->entityMgr->getRepository(Tag::class)->getAllTags() as $tag) {
+            if ($rootUid === $tag->getUid()) {
+                continue;
             }
+
+            $params['body'][] = [
+                'index' => [
+                    '_index' => $this->getIndexName(),
+                    '_id' => $tag->getUid(),
+                ],
+            ];
+            $params['body'][] = $this->buildTagDocument($tag);
+
+            $docCount++;
+
+            if ($docCount % $batchSize === 0) {
+                $this->flushBulk($params, $docCount, $output);
+                $params = ['body' => []];
+                $docCount = 0;
+            }
+        }
+
+        if (!empty($params['body'])) {
+            $this->flushBulk($params, $docCount, $output);
         }
 
         return $this;
@@ -421,111 +428,7 @@ class ElasticsearchClient
                     '_source' => [
                         'enabled' => true,
                     ],
-                    'properties' => [
-                        'title' => [
-                            'type' => 'text',
-                            'analyzer' => $this->getAnalyzerName(),
-                            'fields' => [
-                                'raw' => [
-                                    'type' => 'keyword',
-                                ],
-                                'folded' => [
-                                    'type' => 'text',
-                                    'analyzer' => 'std_folded',
-                                ],
-                            ],
-                        ],
-                        'first_heading' => [
-                            'type' => 'text',
-                            'analyzer' => $this->getAnalyzerName(),
-                            'fields' => [
-                                'raw' => [
-                                    'type' => 'keyword',
-                                ],
-                                'folded' => [
-                                    'type' => 'text',
-                                    'analyzer' => 'std_folded',
-                                ],
-                            ],
-                        ],
-                        'abstract_uid' => [
-                            'type' => 'keyword',
-                        ],
-                        'url' => [
-                            'type' => 'keyword',
-                        ],
-                        'image_uid' => [
-                            'type' => 'keyword',
-                        ],
-                        'contents' => [
-                            'type' => 'text',
-                            'analyzer' => $this->getAnalyzerName(),
-                            'fields' => [
-                                'folded' => [
-                                    'type' => 'text',
-                                    'analyzer' => 'std_folded',
-                                ],
-                            ],
-                        ],
-                        'tags' => [
-                            'type' => 'text',
-                            'analyzer' => $this->getAnalyzerName(),
-                            'fields' => [
-                                'raw' => [
-                                    'type' => 'keyword',
-                                ],
-                                'folded' => [
-                                    'type' => 'text',
-                                    'analyzer' => 'std_folded',
-                                ],
-                            ],
-                        ],
-                        'has_draft_contents' => [
-                            'type' => 'boolean',
-                        ],
-                        'created_at' => [
-                            'type' => 'date',
-                            'format' => 'yyyy-MM-dd HH:mm:ss',
-                        ],
-                        'modified_at' => [
-                            'type' => 'date',
-                            'format' => 'yyyy-MM-dd HH:mm:ss',
-                        ],
-                        'published_at' => [
-                            'type' => 'date',
-                            'format' => 'yyyy-MM-dd HH:mm:ss',
-                        ],
-                        'type' => [
-                            'type' => 'keyword',
-                        ],
-                        'is_online' => [
-                            'type' => 'boolean',
-                        ],
-                        'is_pullable' => [
-                            'type' => 'boolean',
-                        ],
-                        'category' => [
-                            'type' => 'keyword',
-                        ],
-                        'source' => [
-                            'type' => 'keyword',
-                        ],
-                        'lang' => [
-                            'type' => 'keyword',
-                        ],
-                        'level' => [
-                            'type' => 'integer',
-                        ],
-                        'state' => [
-                            'type' => 'integer',
-                        ],
-                        'seo_index' => [
-                            'type' => 'boolean',
-                        ],
-                        'seo_follow' => [
-                            'type' => 'boolean',
-                        ],
-                    ],
+                    'properties' => $this->pageMappingConfig->getProperties(),
                 ],
             ]
         );
@@ -538,21 +441,8 @@ class ElasticsearchClient
                         'enabled' => true,
                     ],
                     'properties' => array_merge(
+                        $this->tagMappingConfig->getProperties(),
                         $this->getCustomTagTypeProperties(),
-                        [
-                            'name' => [
-                                'type' => 'text',
-                                'analyzer' => 'autocomplete',
-                                'search_analyzer' => 'standard',
-                                'fielddata' => true,
-                            ],
-                            'source' => [
-                                'type' => 'keyword',
-                            ],
-                            'parents' => [
-                                'type' => 'keyword',
-                            ],
-                        ]
                     ),
                 ],
             ]
@@ -623,94 +513,6 @@ class ElasticsearchClient
     }
 
     /**
-     * Get all pages.
-     *
-     * @return Generator|null
-     */
-    protected function getAllPages(): ?Generator
-    {
-        try {
-            $stmt = $this->entityMgr->getConnection()->query('SELECT uid FROM page');
-            while ($row = $stmt->fetch()) {
-                yield $this->entityMgr->find(Page::class, $row['uid']);
-            }
-        } catch (Exception $exception) {
-            $this->logger->error(
-                sprintf(
-                    '%s : %s :%s',
-                    __CLASS__,
-                    __FUNCTION__,
-                    $exception->getMessage()
-                )
-            );
-        }
-    }
-
-    /**
-     * Get total of undeleted pages.
-     *
-     * @return int
-     */
-    public function getTotalOfUndeletedPages(): int
-    {
-        $total = 0;
-
-        try {
-            $total = $this
-                ->entityMgr
-                ->getRepository(Page::class)
-                ->createQueryBuilder('p')
-                ->select('count(p._uid)')
-                ->where('p._state != :state')
-                ->setParameter('state', Page::STATE_DELETED)
-                ->getQuery()
-                ->getSingleScalarResult();
-        } catch (Exception $exception) {
-            $this->logger->error(
-                sprintf(
-                    '%s : %s :%s',
-                    __CLASS__,
-                    __FUNCTION__,
-                    $exception->getMessage()
-                )
-            );
-        }
-
-        return $total;
-    }
-
-    /**
-     * Get total of tags.
-     *
-     * @return int
-     */
-    public function getTotalOfTags(): int
-    {
-        $total = 0;
-
-        try {
-            $total = $this
-                ->entityMgr
-                ->getRepository(Tag::class)
-                ->createQueryBuilder('k')
-                ->select('count(k._uid)')
-                ->getQuery()
-                ->getSingleScalarResult();
-        } catch (Exception $exception) {
-            $this->logger->error(
-                sprintf(
-                    '%s : %s :%s',
-                    __CLASS__,
-                    __FUNCTION__,
-                    $exception->getMessage()
-                )
-            );
-        }
-
-        return $total;
-    }
-
-    /**
      * Returns the registry that contains the custom analyzer to use. It can be
      * null if current application has no settings.
      *
@@ -727,13 +529,42 @@ class ElasticsearchClient
     }
 
     /**
-     * Get analyser name.
+     * Flush bulk.
      *
-     * @return string
+     * @param array                                              $params
+     * @param int                                                $docCount
+     * @param null|\Symfony\Component\Console\Style\SymfonyStyle $output
+     *
+     * @return void
      */
-    protected function getAnalyzerName(): string
+    private function flushBulk(array $params, int $docCount, ?SymfonyStyle $output): void
     {
-        return $this->getAnalyzerRegistry() === null ?
-            self::DEFAULT_ANALYZER : $this->getAnalyzerRegistry()->getValue();
+        if (empty($params['body'])) {
+            return;
+        }
+
+        $response = $this->getClient()->bulk($params);
+
+        if ($response['errors'] ?? false) {
+            foreach ($response['items'] as $item) {
+                $action = array_key_first($item);
+                if (isset($item[$action]['error'])) {
+                    $this->logger->error(
+                        \sprintf(
+                            '%s::%s — Bulk error [%s] id=%s : %s',
+                            __CLASS__,
+                            __FUNCTION__,
+                            $action,
+                            $item[$action]['_id'],
+                            $item[$action]['error']['reason'] ?? 'unknown'
+                        )
+                    );
+                }
+            }
+        }
+
+        if ($output) {
+            $output->progressAdvance($docCount);
+        }
     }
 }

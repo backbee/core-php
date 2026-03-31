@@ -1,756 +1,767 @@
 parameters:
-    bbapp.classcontent.exception_on_unknown_classname: false
-    error.base_folder: ''
-    error.404: error_404.html.twig
-    error.500: error_500.html.twig
-    error.default: error_default.html.twig
-    cloud.default.ordered.categories: [ ]
-    cloud.override.default.categories: false
-    cloud.strictly.default.categories: true
+  bbapp.classcontent.exception_on_unknown_classname: false
+  error.base_folder: ''
+  error.404: error_404.html.twig
+  error.500: error_500.html.twig
+  error.default: error_default.html.twig
+  cloud.default.ordered.categories: [ ]
+  cloud.override.default.categories: false
+  cloud.strictly.default.categories: true
 
-    # this parameter will be hydrated by \BackBeeCloud\Listener\UserRightListener::onApplicationInit()
-    user_right.super_admin_bundles_rights: [ ]
+  # this parameter will be hydrated by \BackBeeCloud\Listener\UserRightListener::onApplicationInit()
+  user_right.super_admin_bundles_rights: [ ]
 
 services:
-    # Twig
-    twig.extension.intl:
-        class: Twig_Extensions_Extension_Intl
-        tags:
-            -   name: twig.extension
-
-    twig.extension.text:
-        class: Twig_Extensions_Extension_Text
-        tags:
-            -   name: twig.extension
-
-    # Doctrine
-    doctrine.metadata.cache.driver:
-        class: Doctrine\Common\Cache\FilesystemCache
-        arguments:
-            - '%bbapp.cache.dir%/metadata'
-
-    # BackBee
-    backbee.logger:
-        class: BackBee\Logging\Logger
-        arguments: [ '@bbapp' ]
-
-    # Page
-    cloud.page_manager:
-        class: BackBeeCloud\Entity\PageManager
-        arguments:
-            - '@bbapp'
-            - '@core.knowledge_graph.seo_metadata.manager'
-            - '@cloud.page_type.manager'
-            - '@cloud.content_manager'
-            - '@elasticsearch.manager'
-            - '@cloud.tag_manager'
-            - '@multilang_manager'
-            - '@cloud.page_category.manager'
-            - '@cloud.multilang.page_association.manager'
-            - '@core.search_engine.manager'
-            - '@backbee.logger'
-
-    core.page.page_from_raw_data:
-        class: BackBeeCloud\Page\PageFromRawData
-        arguments:
-            [ '@em', '@elasticsearch.manager' ]
-
-    core.page.content.manager:
-        class: BackBee\Page\PageContentManager
-        arguments:
-            - '@em'
-            - '@cloud.content_manager'
-            - '@security.context'
-            - '@cloud.page_type.manager'
-            - '@cloud.page_category.manager'
-
-    # Content
-    cloud.content_manager:
-        class: BackBeeCloud\Entity\ContentManager
-        arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp', '@backbee.logger' ]
-
-    cloud.tag_manager:
-        class: BackBeeCloud\Tag\TagManager
-        arguments: [ "@em", "@elasticsearch.manager", "@backbee.logger" ]
-
-    cloud.image_listener:
-        class: BackBeeCloud\Listener\ImageListener
-        arguments: [ '@bbapp', '@cloud.file_handler' ]
-
-    cloud.file_handler:
-        class: BackBee\FileSystem\ImageFilesystemHandler
-        arguments: [ "@bbapp" ]
-
-    user_preference.manager:
-        class: BackBeeCloud\UserPreference\UserPreferenceManager
-        arguments: [ '@em', '@multilang_manager', '@backbee.logger' ]
-
-    site_option.manager:
-        class: BackBeeCloud\SiteOption\OptionManager
-        arguments: [ '@em', '@config' ]
-
-    content.category_listener:
-        class: BackBee\Listener\ContentCategoryListener
-        arguments:
-            - "@routing"
-            - "%cloud.default.ordered.categories%"
-            - "%cloud.override.default.categories%"
-            - "%cloud.strictly.default.categories%"
-
-    site_status.manager:
-        class: BackBee\Site\SiteStatusManager
-        arguments: [ "@em", "@backbee.logger" ]
-
-    cloud.favicon.listener:
-        class: BackBeeCloud\Listener\FaviconListener
-        arguments:
-            - "@user_preference.manager"
-            - "@renderer"
-
-    cloud.highlightcontent.listener:
-        class: BackBeeCloud\Listener\HighlightContentListener
-        arguments: [ '@bbapp', '@em' ]
-
-    # Contact service
-    contact_controller:
-        class: BackBeeCloud\Controller\ContactController
-        arguments: [ "@bbapp" ]
-
-    # Newsletter service
-    newsletter_controller:
-        class: BackBeeCloud\Controller\NewsletterController
-        arguments: [ '@bbapp', '@em' ]
-
-    # Search service
-    cloud.search_manager:
-        class: BackBeeCloud\Search\SearchManager
-        arguments:
-            - '@cloud.page_manager'
-            - '@cloud.content_manager'
-            - '@em'
-            - '@backbee.logger'
-            - '@multilang_manager'
-            - '@elasticsearch.manager'
-            - '@elasticsearch.query'
-
-    cloud.search_controller:
-        class: BackBeeCloud\Controller\SearchController
-        arguments: [ "@cloud.search_manager", "@multilang_manager", "@routing", "@renderer" ]
-
-    # API services
-    cloud.api.user_controller:
-        class: BackBeeCloud\Api\Controller\UserController
-        arguments: [ "@bbapp" ]
-
-    cloud.api.user_preference_controller:
-        class: BackBeeCloud\Api\Controller\UserPreferenceController
-        arguments: [ "@bbapp" ]
-
-    cloud.api.import_status_controller:
-        class: BackBeeCloud\Api\Controller\ImportStatusController
-        arguments: [ "@em" ]
-
-    cloud.api.mailchimp_controller:
-        class: BackBeeCloud\Api\Controller\MailchimpController
-        arguments: [ "@bbapp" ]
-
-    cloud.api.page_controller:
-        class: BackBeeCloud\Api\Controller\PageController
-        arguments:
-            - "@cloud.page_manager"
-            - "@cloud.page_type.manager"
-            - "@cloud.page_category.manager"
-            - "@bbapp"
-            - '@cloud.search_manager'
-
-    cloud.api.content_controller:
-        class: BackBeeCloud\Api\Controller\ContentController
-        arguments: [ "@bbapp" ]
-
-    cloud.api.page_type_controller:
-        class: BackBeeCloud\Api\Controller\PageTypeController
-        arguments:
-            - "@cloud.page_type.manager"
-            - "@bbapp"
-
-    cloud.api.tag_controller:
-        class: BackBeeCloud\Api\Controller\TagController
-        arguments:
-            - "@security.context"
-            - "@cloud.tag_manager"
-            - "@cloud.data_transformer.tag"
-
-    cloud.api.site_controller:
-        class: BackBeeCloud\Api\Controller\SiteController
-        arguments: [ "@site_status.manager" ]
-
-    cloud.api.knowledge_graph.controller:
-        class: BackBee\Api\Controller\KnowledgeGraphController
-        arguments: [ '@bbapp', '@config', '@user_preference.manager' ]
-
-    cloud.api.about.controller:
-        class: BackBee\Api\Controller\AboutController
-        arguments: [ '@bbapp' ]
-
-    cloud.api.user_controller.listener:
-        class: BackBeeCloud\Listener\Api\UserListener
-        arguments:
-            - "@cloud.user_manager"
-            - "@cloud.group_type.manager"
-            - "@em"
-            - "@bbapp"
-
-    # User right services
-    cloud.api.user_right.manager:
-        class: BackBeeCloud\Security\UserRightManager
-        arguments:
-            - "@security.context"
-            - "@em"
-            - "@cloud.page_category.manager"
-            - "@backbee.logger"
-            - "%user_right.super_admin_bundles_rights%"
-
-    cloud.api.user_right.listener:
-        class: BackBeeCloud\Listener\Api\UserRightListener
-        arguments:
-            - "@em"
-            - "@security.context"
-            - "@cloud.page_manager"
-            - "@cloud.page_type.manager"
-            - "@cloud.page_category.manager"
-
-    cloud.api.user_right.controller:
-        class: BackBeeCloud\Api\Controller\UserRightController
-        arguments:
-            - "@cloud.api.user_right.manager"
-            - "@cloud.page_manager"
-            - "@bbapp"
-
-    cloud.api.group_type.controller:
-        class: BackBeeCloud\Api\Controller\GroupTypeController
-        arguments:
-            - "@bbapp"
-            - "@cloud.group_type.manager"
-            - "@cloud.user_manager"
-
-    cloud.group_type.manager:
-        class: BackBeeCloud\Security\GroupType\GroupTypeManager
-        arguments:
-            - "@em"
-            - "@cloud.group_type_right.manager"
-            - "@cloud.page_type.manager"
-            - "@cloud.page_category.manager"
-
-    cloud.group_type_right.manager:
-        class: BackBeeCloud\Security\GroupType\GroupTypeRightManager
-        arguments:
-            - "@em"
-
-    core.user_right.installer:
-        class: BackBeeCloud\Security\UserRightInstaller
-        arguments:
-            [ '@em', '@cloud.group_type.manager', '@cloud.user_manager', '@backbee.logger' ]
-
-    # Page type services
-    cloud.page_type.manager:
-        class: BackBeeCloud\PageType\TypeManager
-        arguments: [ "@service_container", "@cloud.structure.schema_parser" ]
-
-    cloud.page_type.home_type:
-        class: BackBeeCloud\PageType\HomeType
-        tags:
-            - { name: page.type, dispatch_event: false }
-
-    cloud.page_type.blank_type:
-        class: BackBeeCloud\PageType\BlankType
-        tags:
-            - { name: page.type, dispatch_event: false }
-
-    cloud.page_type.article_type:
-        class: BackBeeCloud\PageType\ArticleType
-        tags:
-            - { name: page.type, dispatch_event: false }
-
-    cloud.page_type.search_result_type:
-        class: BackBeeCloud\PageType\SearchResultType
-        tags:
-            - { name: page.type, dispatch_event: false }
-
-    cloud.disqus_listener:
-        class: BackBeeCloud\Listener\ClassContent\DisqusListener
-        arguments: [ '@bbapp', '@em' ]
-
-    cloud.auto_height_content.listener:
-        class: BackBeeCloud\Listener\ClassContent\AutoHeightContentListener
-        arguments:
-            - "@bbapp"
-
-    # Page category services
-    cloud.page_category.manager:
-        class: BackBeeCloud\PageCategory\PageCategoryManager
-        factory: [ BackBeeCloud\PageCategory\PageCategoryManagerFactory, createPageCategoryManager ]
-        arguments:
-            - "@service_container"
-            - "@em"
-
-    cloud.page_category.api_controller:
-        class: BackBeeCloud\Api\Controller\PageCategoryController
-        arguments:
-            - "@cloud.page_category.manager"
-            - "@bbapp"
-
-    # MultiLang service
-    multilang_manager:
-        class: BackBeeCloud\MultiLang\MultiLangManager
-        arguments: [ '@bbapp', '@core.redis.manager' ]
-        tags:
-            - { name: worker.job_handler, dispatch_event: false }
-
-    api.multilang_controller:
-        class: BackBeeCloud\Api\Controller\MultiLangController
-        arguments: [ "@multilang_manager", "@bbapp" ]
-
-    api.multilang.listener:
-        class: BackBeeCloud\Listener\MultiLangListener
-        arguments:
-            - "@multilang_manager"
-            - "@cloud.multilang.page_association.manager"
-            - "@em"
-
-    cloud.multilang.page_association.controller:
-        class: BackBeeCloud\Api\Controller\PageAssociationController
-        arguments:
-            - "@bbapp"
-            - "@cloud.multilang.page_association.manager"
-            - "@cloud.page_manager"
-
-    cloud.multilang.page_association.manager:
-        class: BackBeeCloud\MultiLang\PageAssociationManager
-        arguments:
-            - "@em"
-            - "@multilang_manager"
-            - "@elasticsearch.manager"
-            - '@elasticsearch.query'
-
-    # Structure's services
-    cloud.structure.schema_parser:
-        class: BackBeeCloud\Structure\DefaultSchemaParser
-
-    cloud.structure.content_builder:
-        class: BackBeeCloud\Structure\ContentBuilder
-        arguments: [ "@service_container", "@em" ]
-
-    cloud.structure_builder:
-        class: BackBeeCloud\Structure\StructureBuilder
-        arguments: [ "@bbapp", "@cloud.structure.schema_parser" ]
-
-    yaml_structure_dumper.manager:
-        class: BackBeeCloud\Structure\YamlStructureDumperManager
-        arguments: [ '@bbapp', '@config' ]
-        tags:
-            - { name: worker.job_handler, dispatch_event: false }
-
-    structure.parameter_handler:
-        class: BackBeeCloud\Structure\ContentHandler\ParameterHandler
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.paragraph_handler:
-        class: BackBeeCloud\Structure\ContentHandler\ParagraphHandler
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.image_handler:
-        class: BackBeeCloud\Structure\ContentHandler\ImageHandler
-        arguments:
-            - "@cloud.file_handler"
-            - "@structure.parameter_handler"
-            - '@service_container'
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.slider_handler:
-        class: BackBeeCloud\Structure\ContentHandler\SliderHandler
-        arguments:
-            - "@structure.image_handler"
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.highlightcontent_handler:
-        class: BackBeeCloud\Structure\ContentHandler\HighlightContentHandler
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.contact_handler:
-        class: BackBeeCloud\Structure\ContentHandler\ContactHandler
-        arguments: [ "@em" ]
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.socialicons_handler:
-        class: BackBeeCloud\Structure\ContentHandler\SocialIconsHandler
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.cards_handler:
-        class: BackBeeCloud\Structure\ContentHandler\CardsHandler
-        arguments:
-            - "@structure.image_handler"
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    structure.liner_and_spacer_handler:
-        class: BackBeeCloud\Structure\ContentHandler\LinerAndSpacerHandler
-        tags:
-            - { name: structure.content_handler, dispatch_event: false }
-
-    cloud.global_content_factory:
-        class: BackBeeCloud\Structure\GlobalContentFactory
-        arguments: [ "@bbapp" ]
-
-    # Security services
-    security.access.decision_manager:
-        class: BackBee\Security\Access\DecisionManager
-        arguments:
-            - [ "@security.voter.sudo", "@security.voter.bb_role", "@security.voter.authenticated", "@security.voter.bb_acl" ]
-            - affirmative
-            - false
-            - true
-            - false
-        calls:
-            - [ setApplication, [ @bbapp ] ]
-
-    security.voter.sudo:
-        class: BackBeeCloud\Security\Authorization\Voter\BackBeeSudoVoter
-        arguments:
-            - "@em"
-            - "@security.voter.user_right"
-            - "@bbapp"
-
-    security.voter.user_right:
-        class: BackBeeCloud\Security\Authorization\Voter\UserRightVoter
-        arguments:
-            - "@cloud.group_type.manager"
-            - "@cloud.group_type_right.manager"
-
-    #    cloud.api.acl_controller:
-    #        class: BackBeeCloud\Api\Controller\AclController
-    #        arguments: [ "@bbapp" ]
-
-    # Search pages by tag services
-    cloud.page_by_tag.manager:
-        class: BackBeeCloud\Search\PageByTagManager
-        arguments: [ '@cloud.page_manager', '@cloud.content_manager', '@em', '@backbee.logger' ]
-
-    cloud.page_by_tag.controller:
-        class: BackBeeCloud\Controller\PageByTagController
-        arguments: [ "@cloud.page_by_tag.manager", "@multilang_manager", "@routing", "@renderer" ]
-
-    cloud.page_type.page_by_tag_result_type:
-        class: BackBeeCloud\PageType\PageByTagResultType
-        tags:
-            - { name: page.type, dispatch_event: false }
-
-    cloud.user_manager:
-        class: BackBeeCloud\User\UserManager
-        arguments: [ '@em', '@backbee.logger' ]
-
-    # Migrations services
-    media_image.migration:
-        class: BackBeeCloud\Migration\MediaImageMigration
-        arguments: [ "@em", "@site_status.manager", "@elasticsearch.manager" ]
-        tags:
-            - { name: worker.job_handler, dispatch_event: false }
-
-    # ClassContentOverrider
-    cloud.classcontent_overrider:
-        class: BackBeeCloud\ClassContent\ClassContentOverrider
-        factory: [ "BackBeeCloud\ClassContent\ClassContentOverriderFactory", createClassContentOverrider ]
-        arguments:
-            - "@service_container"
-            - "@bbapp"
-
-    cloud.classcontent_overrider.listener:
-        class: BackBeeCloud\Listener\ClassContentOverriderListener
-        arguments:
-            - "@cloud.classcontent_overrider"
-
-    # ThemeColor services
-    cloud.theme_color.manager:
-        class: BackBeeCloud\ThemeColor\ThemeColorManager
-        factory: [ "BackBeeCloud\ThemeColor\ThemeColorManagerFactory", createThemeColorManager ]
-        arguments: [ "@service_container" ]
-
-    cloud.theme_color.default:
-        class: BackBeeCloud\ThemeColor\DefaultThemeColor
-        tags:
-            - { name: theme_color, dispatch_event: false }
-
-    cloud.api.theme_color.controller:
-        class: BackBeeCloud\Api\Controller\ThemeColorController
-        arguments:
-            - "@cloud.theme_color.manager"
-            - "@cloud.color_panel.manager"
-            - "@bbapp"
-
-    cloud.color_panel.manager:
-        class: BackBeeCloud\ThemeColor\ColorPanelManager
-        factory: [ "BackBeeCloud\ThemeColor\ColorPanelManagerFactory", createColorPanelManager ]
-        arguments:
-            - "@em"
-            - "@cloud.theme_color.manager"
-
-    cloud.api.color_panel.controller:
-        class: BackBeeCloud\Api\Controller\ColorPanelController
-        arguments: [ "@cloud.color_panel.manager", "@bbapp" ]
-
-    cloud.color_panel.css_generator:
-        class: BackBeeCloud\ThemeColor\ColorPanelCssGenerator
-        arguments: [ "@cloud.color_panel.manager", "@renderer" ]
-
-    cloud.color_panel_css_genrator.controller:
-        class: BackBeeCloud\Controller\ColorPanelController
-        arguments:
-            - '@cloud.color_panel.css_generator'
-            - '@em'
-            - '@core.redis.manager'
-
-    cloud.theme_color.listener:
-        class: BackBeeCloud\Listener\ThemeColorListener
-        arguments: [ "@cloud.color_panel.css_generator", "@routing" ]
-
-    # Design services
-    cloud.design.font.manager:
-        class: BackBeeCloud\Design\FontManager
-
-    cloud.design.button.manager:
-        class: BackBeeCloud\Design\ButtonManager
-        factory: [ "BackBeeCloud\Design\ButtonManagerFactory", createButtonManager ]
-        arguments:
-            - "@em"
-            - "@cloud.design.font.manager"
-
-    cloud.api.design.font.controller:
-        class: BackBeeCloud\Api\Controller\DesignFontController
-        arguments:
-            - "@cloud.design.font.manager"
-            - "@bbapp"
-
-    cloud.api.design.button.controller:
-        class: BackBeeCloud\Api\Controller\DesignButtonController
-        arguments:
-            - "@cloud.design.button.manager"
-            - "@bbapp"
-
-    cloud.design.global.content.manager:
-        class: BackBeeCloud\Design\GlobalContentManager
-        factory: [ "BackBeeCloud\Design\GlobalContentManagerFactory", createGlobalContentManager ]
-        arguments:
-            - "@em"
-            - "@cloud.color_panel.manager"
-
-    cloud.api.design.global.content.controller:
-        class: BackBeeCloud\Api\Controller\DesignGlobalContentController
-        arguments:
-            - "@cloud.design.global.content.manager"
-            - "@bbapp"
-
-    # Translator override
-    translator:
-        class: Symfony\Component\Translation\Translator
-        factory: [ "BackBeeCloud\Translation\TranslatorFactory", getTranslator ]
-        arguments:
-            - "@service_container"
-
-    # CSRF Security
-    app.csrf_token.manager:
-        class: Symfony\Component\Security\Csrf\CsrfTokenManager
-
-    # API Data formatter
-    cloud.data_transformer.tag:
-        class: BackBeeCloud\Api\DataFormatter\TagDataFormatter
-        arguments:
-            - "@multilang_manager"
-            - "@em"
-
-    # Optimize image
-    app.optimize_image.manager:
-        class: BackBeePlanet\OptimizeImage\OptimizeImageManager
-        arguments: [ '@bbapp', '@config', '@backbee.logger' ]
-
-    app.optimize_image.listener:
-        class: BackBeePlanet\Listener\OptimizeImageListener
-        arguments: [ '@app.optimize_image.manager', '@backbee.logger' ]
-
-    # Sitemap
-    core.sitemap.manager:
-        class: BackBee\Sitemap\SitemapManager
-        arguments: [ '@bbapp', '@config', '@cloud.search_manager', '@core.redis.manager' ]
-
-    core.sitemap.controller:
-        class: BackBee\Controller\SitemapController
-        arguments: [ '@bbapp', '@core.sitemap.manager' ]
-
-    # Search engine
-    core.search_engine.controller:
-        class: BackBeeCloud\Controller\SearchEngineController
-        arguments: [ '@renderer', '@core.search_engine.manager' ]
-
-    core.search_engine.manager:
-        class: BackBeeCloud\SearchEngine\SearchEngineManager
-        arguments:
-            [ '@user_preference.manager' ]
-
-    # Knowledge Graph
-    core.knowledge_graph.seo_metadata.manager:
-        class: BackBee\KnowledgeGraph\SeoMetadataManager
-        arguments:
-            - '@bbapp'
-            - '@em'
-            - '@core.search_engine.manager'
-            - '@elasticsearch.manager'
-            - '@multilang_manager'
-            - '@cloud.multilang.page_association.manager'
-
-    core.knowledge_graph.manager:
-        class: BackBee\KnowledgeGraph\KnowledgeGraphManager
-        arguments:
-            - '@bbapp'
-            - '@user_preference.manager'
-            - '@config'
-            - '@core.page.page_from_raw_data'
-            - '@core.knowledge_graph.seo_metadata.manager'
-
-    # Menu
-    core.menu.listener:
-        class: BackBeeCloud\Listener\MenuListener
-        arguments:
-            [ '@bbapp', '@core.page.content.manager' ]
-
-    # Elasticsearch
-    elasticsearch.client:
-        class: BackBeeCloud\Elasticsearch\ElasticsearchClient
-        arguments: [ '@bbapp', '@config' ]
-
-    elasticsearch.manager:
-        class: BackBeeCloud\Elasticsearch\ElasticsearchManager
-        arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query', '@core.search_engine.manager' ]
-        tags:
-            - { name: worker.job_handler, dispatch_event: false }
-
-    elasticsearch.query:
-        class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
-        arguments:
-            - '@bbapp'
-            - '@cloud.page_type.manager'
-            - '@core.elasticsearch.title.filter'
-
-    core.elasticsearch.title.filter:
-        class: BackBee\Elasticsearch\Filter\TitleFilter
-
-    # Installer
-    core.installer.page:
-        class: BackBee\Installer\PageInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.keyword:
-        class: BackBee\Installer\KeywordInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.site:
-        class: BackBee\Installer\SiteInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.layout:
-        class: BackBee\Installer\LayoutInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.sudoer:
-        class: BackBee\Installer\SudoerInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.database:
-        class: BackBee\Installer\DatabaseInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.repository:
-        class: BackBee\Installer\RepositoryInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.assets:
-        class: BackBee\Installer\AssetsInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.user_rights:
-        class: BackBee\Installer\UserRightsInstaller
-        arguments: [ '@bbapp' ]
-
-    core.installer.elasticsearch:
-        class: BackBee\Installer\ElasticsearchInstaller
-        arguments: [ '@bbapp' ]
-
-    # Standalone
-    core.standalone.abstract_standalone.helper:
-        class: BackBeePlanet\Standalone\AbstractStandaloneHelper
-
-    # Redis
-    core.redis.manager:
-        class: BackBee\Cache\RedisManager
-        arguments:
-            [ '@config', '@backbee.logger' ]
-
-    # Class content
-    core.class_content.media.video.manager:
-        class: BackBee\ClassContent\Media\VideoManager
-        arguments: [ '@backbee.logger' ]
-
-    # Listener
-    core.cache.listener:
-        class: BackBeeCloud\Listener\CacheListener
-        arguments:
-            [ '@core.redis.manager' ]
-
-    core.core.listener:
-        class: BackBeeCloud\Listener\CoreListener
-        arguments:
-            [ '@bbapp', '@user_preference.manager' ]
-
-    core.class_content.video.listener:
-        class: BackBeeCloud\Listener\ClassContent\VideoListener
-        arguments:
-            [ '@core.class_content.media.video.manager', '@backbee.logger' ]
-
-    core.page.listener:
-        class: BackBeeCloud\Listener\PageListener
-
-    core.search_result.listener:
-        class: BackBeeCloud\Listener\ClassContent\SearchResultListener
-        arguments: [ '@config' ]
-
-    core.log.class_content.listener:
-        class: BackBee\Listener\Log\ClassContentLogListener
-        arguments:
-            [ '@security.context', '@em', '@?monolog.logger.admin_log' ]
-
-    core.log.page.listener:
-        class: BackBee\Listener\Log\PageLogListener
-        arguments:
-            [ '@security.context', '@em', '@cloud.page_manager', '@?monolog.logger.admin_log' ]
-
-    core.log.tag.listener:
-        class: BackBee\Listener\Log\TagLogListener
-        arguments:
-            [ '@security.context', '@em', '@cloud.tag_manager', '@?monolog.logger.admin_log' ]
-
-    core.log.user.listener:
-        class: BackBee\Listener\Log\UserLogListener
-        arguments:
-            [ '@security.context', '@em', '@cloud.user_manager', '@?monolog.logger.admin_log' ]
-
-    core.log.group_type.listener:
-        class: BackBee\Listener\Log\GroupTypeLogListener
-        arguments:
-            [ '@security.context', '@em', '@cloud.group_type.manager', '@?monolog.logger.admin_log' ]
-
-    core.recaptcha.listener:
-        class: BackBeeCloud\ReCaptcha\ReCaptchaListener
+  # Twig
+  twig.extension.intl:
+    class: Twig_Extensions_Extension_Intl
+    tags:
+      - name: twig.extension
+
+  twig.extension.text:
+    class: Twig_Extensions_Extension_Text
+    tags:
+      - name: twig.extension
+
+  # Doctrine
+  doctrine.metadata.cache.driver:
+    class: Doctrine\Common\Cache\FilesystemCache
+    arguments:
+      - '%bbapp.cache.dir%/metadata'
+
+  # BackBee
+  backbee.logger:
+    class: BackBee\Logging\Logger
+    arguments: [ '@bbapp' ]
+
+  # Page
+  cloud.page_manager:
+    class: BackBeeCloud\Entity\PageManager
+    arguments:
+      - '@bbapp'
+      - '@core.knowledge_graph.seo_metadata.manager'
+      - '@cloud.page_type.manager'
+      - '@cloud.content_manager'
+      - '@elasticsearch.manager'
+      - '@cloud.tag_manager'
+      - '@multilang_manager'
+      - '@cloud.page_category.manager'
+      - '@cloud.multilang.page_association.manager'
+      - '@core.search_engine.manager'
+      - '@backbee.logger'
+
+  core.page.page_from_raw_data:
+    class: BackBeeCloud\Page\PageFromRawData
+    arguments:
+        [ '@em', '@elasticsearch.manager' ]
+
+  core.page.content.manager:
+    class: BackBee\Page\PageContentManager
+    arguments:
+      - '@em'
+      - '@cloud.content_manager'
+      - '@security.context'
+      - '@cloud.page_type.manager'
+      - '@cloud.page_category.manager'
+
+  # Content
+  cloud.content_manager:
+    class: BackBeeCloud\Entity\ContentManager
+    arguments: [ "@em", "@classcontent.manager", "@event.dispatcher", '@bbapp', '@backbee.logger' ]
+
+  cloud.tag_manager:
+    class: BackBeeCloud\Tag\TagManager
+    arguments: [ "@em", "@elasticsearch.manager", "@backbee.logger" ]
+
+  cloud.image_listener:
+    class: BackBeeCloud\Listener\ImageListener
+    arguments: [ '@bbapp', '@cloud.file_handler' ]
+
+  cloud.file_handler:
+    class: BackBee\FileSystem\ImageFilesystemHandler
+    arguments: [ "@bbapp" ]
+
+  user_preference.manager:
+    class: BackBeeCloud\UserPreference\UserPreferenceManager
+    arguments: [ '@em', '@multilang_manager', '@backbee.logger' ]
+
+  site_option.manager:
+    class: BackBeeCloud\SiteOption\OptionManager
+    arguments: [ '@em', '@config' ]
+
+  content.category_listener:
+    class: BackBee\Listener\ContentCategoryListener
+    arguments:
+      - "@routing"
+      - "%cloud.default.ordered.categories%"
+      - "%cloud.override.default.categories%"
+      - "%cloud.strictly.default.categories%"
+
+  site_status.manager:
+    class: BackBee\Site\SiteStatusManager
+    arguments: [ "@em", "@backbee.logger" ]
+
+  cloud.favicon.listener:
+    class: BackBeeCloud\Listener\FaviconListener
+    arguments:
+      - "@user_preference.manager"
+      - "@renderer"
+
+  cloud.highlightcontent.listener:
+    class: BackBeeCloud\Listener\HighlightContentListener
+    arguments: [ '@bbapp', '@em' ]
+
+  # Contact service
+  contact_controller:
+    class: BackBeeCloud\Controller\ContactController
+    arguments: [ "@bbapp" ]
+
+  # Newsletter service
+  newsletter_controller:
+    class: BackBeeCloud\Controller\NewsletterController
+    arguments: [ '@bbapp', '@em' ]
+
+  # Search service
+  cloud.search_manager:
+    class: BackBeeCloud\Search\SearchManager
+    arguments:
+      - '@cloud.page_manager'
+      - '@cloud.content_manager'
+      - '@em'
+      - '@backbee.logger'
+      - '@multilang_manager'
+      - '@elasticsearch.manager'
+      - '@elasticsearch.query'
+
+  cloud.search_controller:
+    class: BackBeeCloud\Controller\SearchController
+    arguments: [ "@cloud.search_manager", "@multilang_manager", "@routing", "@renderer" ]
+
+  # API services
+  cloud.api.user_controller:
+    class: BackBeeCloud\Api\Controller\UserController
+    arguments: [ "@bbapp" ]
+
+  cloud.api.user_preference_controller:
+    class: BackBeeCloud\Api\Controller\UserPreferenceController
+    arguments: [ "@bbapp" ]
+
+  cloud.api.import_status_controller:
+    class: BackBeeCloud\Api\Controller\ImportStatusController
+    arguments: [ "@em" ]
+
+  cloud.api.mailchimp_controller:
+    class: BackBeeCloud\Api\Controller\MailchimpController
+    arguments: [ "@bbapp" ]
+
+  cloud.api.page_controller:
+    class: BackBeeCloud\Api\Controller\PageController
+    arguments:
+      - "@cloud.page_manager"
+      - "@cloud.page_type.manager"
+      - "@cloud.page_category.manager"
+      - "@bbapp"
+      - '@cloud.search_manager'
+
+  cloud.api.content_controller:
+    class: BackBeeCloud\Api\Controller\ContentController
+    arguments: [ "@bbapp" ]
+
+  cloud.api.page_type_controller:
+    class: BackBeeCloud\Api\Controller\PageTypeController
+    arguments:
+      - "@cloud.page_type.manager"
+      - "@bbapp"
+
+  cloud.api.tag_controller:
+    class: BackBeeCloud\Api\Controller\TagController
+    arguments:
+      - "@security.context"
+      - "@cloud.tag_manager"
+      - "@cloud.data_transformer.tag"
+
+  cloud.api.site_controller:
+    class: BackBeeCloud\Api\Controller\SiteController
+    arguments: [ "@site_status.manager" ]
+
+  cloud.api.knowledge_graph.controller:
+    class: BackBee\Api\Controller\KnowledgeGraphController
+    arguments: [ '@bbapp', '@config', '@user_preference.manager' ]
+
+  cloud.api.about.controller:
+    class: BackBee\Api\Controller\AboutController
+    arguments: [ '@bbapp' ]
+
+  cloud.api.user_controller.listener:
+    class: BackBeeCloud\Listener\Api\UserListener
+    arguments:
+      - "@cloud.user_manager"
+      - "@cloud.group_type.manager"
+      - "@em"
+      - "@bbapp"
+
+  # User right services
+  cloud.api.user_right.manager:
+    class: BackBeeCloud\Security\UserRightManager
+    arguments:
+      - "@security.context"
+      - "@em"
+      - "@cloud.page_category.manager"
+      - "@backbee.logger"
+      - "%user_right.super_admin_bundles_rights%"
+
+  cloud.api.user_right.listener:
+    class: BackBeeCloud\Listener\Api\UserRightListener
+    arguments:
+      - "@em"
+      - "@security.context"
+      - "@cloud.page_manager"
+      - "@cloud.page_type.manager"
+      - "@cloud.page_category.manager"
+
+  cloud.api.user_right.controller:
+    class: BackBeeCloud\Api\Controller\UserRightController
+    arguments:
+      - "@cloud.api.user_right.manager"
+      - "@cloud.page_manager"
+      - "@bbapp"
+
+  cloud.api.group_type.controller:
+    class: BackBeeCloud\Api\Controller\GroupTypeController
+    arguments:
+      - "@bbapp"
+      - "@cloud.group_type.manager"
+      - "@cloud.user_manager"
+
+  cloud.group_type.manager:
+    class: BackBeeCloud\Security\GroupType\GroupTypeManager
+    arguments:
+      - "@em"
+      - "@cloud.group_type_right.manager"
+      - "@cloud.page_type.manager"
+      - "@cloud.page_category.manager"
+
+  cloud.group_type_right.manager:
+    class: BackBeeCloud\Security\GroupType\GroupTypeRightManager
+    arguments:
+      - "@em"
+
+  core.user_right.installer:
+    class: BackBeeCloud\Security\UserRightInstaller
+    arguments:
+        [ '@em', '@cloud.group_type.manager', '@cloud.user_manager', '@backbee.logger' ]
+
+  # Page type services
+  cloud.page_type.manager:
+    class: BackBeeCloud\PageType\TypeManager
+    arguments: [ "@service_container", "@cloud.structure.schema_parser" ]
+
+  cloud.page_type.home_type:
+    class: BackBeeCloud\PageType\HomeType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.page_type.blank_type:
+    class: BackBeeCloud\PageType\BlankType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.page_type.article_type:
+    class: BackBeeCloud\PageType\ArticleType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.page_type.search_result_type:
+    class: BackBeeCloud\PageType\SearchResultType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.disqus_listener:
+    class: BackBeeCloud\Listener\ClassContent\DisqusListener
+    arguments: [ '@bbapp', '@em' ]
+
+  cloud.auto_height_content.listener:
+    class: BackBeeCloud\Listener\ClassContent\AutoHeightContentListener
+    arguments:
+      - "@bbapp"
+
+  # Page category services
+  cloud.page_category.manager:
+    class: BackBeeCloud\PageCategory\PageCategoryManager
+    factory: [ BackBeeCloud\PageCategory\PageCategoryManagerFactory, createPageCategoryManager ]
+    arguments:
+      - "@service_container"
+      - "@em"
+
+  cloud.page_category.api_controller:
+    class: BackBeeCloud\Api\Controller\PageCategoryController
+    arguments:
+      - "@cloud.page_category.manager"
+      - "@bbapp"
+
+  # MultiLang service
+  multilang_manager:
+    class: BackBeeCloud\MultiLang\MultiLangManager
+    arguments: [ '@bbapp', '@core.redis.manager' ]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  api.multilang_controller:
+    class: BackBeeCloud\Api\Controller\MultiLangController
+    arguments: [ "@multilang_manager", "@bbapp" ]
+
+  api.multilang.listener:
+    class: BackBeeCloud\Listener\MultiLangListener
+    arguments:
+      - "@multilang_manager"
+      - "@cloud.multilang.page_association.manager"
+      - "@em"
+
+  cloud.multilang.page_association.controller:
+    class: BackBeeCloud\Api\Controller\PageAssociationController
+    arguments:
+      - "@bbapp"
+      - "@cloud.multilang.page_association.manager"
+      - "@cloud.page_manager"
+
+  cloud.multilang.page_association.manager:
+    class: BackBeeCloud\MultiLang\PageAssociationManager
+    arguments:
+      - "@em"
+      - "@multilang_manager"
+      - "@elasticsearch.manager"
+      - '@elasticsearch.query'
+
+  # Structure's services
+  cloud.structure.schema_parser:
+    class: BackBeeCloud\Structure\DefaultSchemaParser
+
+  cloud.structure.content_builder:
+    class: BackBeeCloud\Structure\ContentBuilder
+    arguments: [ "@service_container", "@em" ]
+
+  cloud.structure_builder:
+    class: BackBeeCloud\Structure\StructureBuilder
+    arguments: [ "@bbapp", "@cloud.structure.schema_parser" ]
+
+  yaml_structure_dumper.manager:
+    class: BackBeeCloud\Structure\YamlStructureDumperManager
+    arguments: [ '@bbapp', '@config' ]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  structure.parameter_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ParameterHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.paragraph_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ParagraphHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.image_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ImageHandler
+    arguments:
+      - "@cloud.file_handler"
+      - "@structure.parameter_handler"
+      - '@service_container'
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.slider_handler:
+    class: BackBeeCloud\Structure\ContentHandler\SliderHandler
+    arguments:
+      - "@structure.image_handler"
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.highlightcontent_handler:
+    class: BackBeeCloud\Structure\ContentHandler\HighlightContentHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.contact_handler:
+    class: BackBeeCloud\Structure\ContentHandler\ContactHandler
+    arguments: [ "@em" ]
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.socialicons_handler:
+    class: BackBeeCloud\Structure\ContentHandler\SocialIconsHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.cards_handler:
+    class: BackBeeCloud\Structure\ContentHandler\CardsHandler
+    arguments:
+      - "@structure.image_handler"
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  structure.liner_and_spacer_handler:
+    class: BackBeeCloud\Structure\ContentHandler\LinerAndSpacerHandler
+    tags:
+      - { name: structure.content_handler, dispatch_event: false }
+
+  cloud.global_content_factory:
+    class: BackBeeCloud\Structure\GlobalContentFactory
+    arguments: [ "@bbapp" ]
+
+  # Security services
+  security.access.decision_manager:
+    class: BackBee\Security\Access\DecisionManager
+    arguments:
+      - [ "@security.voter.sudo", "@security.voter.bb_role", "@security.voter.authenticated", "@security.voter.bb_acl" ]
+      - affirmative
+      - false
+      - true
+      - false
+    calls:
+      - [ setApplication, [ @bbapp ] ]
+
+  security.voter.sudo:
+    class: BackBeeCloud\Security\Authorization\Voter\BackBeeSudoVoter
+    arguments:
+      - "@em"
+      - "@security.voter.user_right"
+      - "@bbapp"
+
+  security.voter.user_right:
+    class: BackBeeCloud\Security\Authorization\Voter\UserRightVoter
+    arguments:
+      - "@cloud.group_type.manager"
+      - "@cloud.group_type_right.manager"
+
+  #    cloud.api.acl_controller:
+  #        class: BackBeeCloud\Api\Controller\AclController
+  #        arguments: [ "@bbapp" ]
+
+  # Search pages by tag services
+  cloud.page_by_tag.manager:
+    class: BackBeeCloud\Search\PageByTagManager
+    arguments: [ '@cloud.page_manager', '@cloud.content_manager', '@em', '@backbee.logger' ]
+
+  cloud.page_by_tag.controller:
+    class: BackBeeCloud\Controller\PageByTagController
+    arguments: [ "@cloud.page_by_tag.manager", "@multilang_manager", "@routing", "@renderer" ]
+
+  cloud.page_type.page_by_tag_result_type:
+    class: BackBeeCloud\PageType\PageByTagResultType
+    tags:
+      - { name: page.type, dispatch_event: false }
+
+  cloud.user_manager:
+    class: BackBeeCloud\User\UserManager
+    arguments: [ '@em', '@backbee.logger' ]
+
+  # Migrations services
+  media_image.migration:
+    class: BackBeeCloud\Migration\MediaImageMigration
+    arguments: [ "@em", "@site_status.manager", "@elasticsearch.manager" ]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  # ClassContentOverrider
+  cloud.classcontent_overrider:
+    class: BackBeeCloud\ClassContent\ClassContentOverrider
+    factory: [ "BackBeeCloud\ClassContent\ClassContentOverriderFactory", createClassContentOverrider ]
+    arguments:
+      - "@service_container"
+      - "@bbapp"
+
+  cloud.classcontent_overrider.listener:
+    class: BackBeeCloud\Listener\ClassContentOverriderListener
+    arguments:
+      - "@cloud.classcontent_overrider"
+
+  # ThemeColor services
+  cloud.theme_color.manager:
+    class: BackBeeCloud\ThemeColor\ThemeColorManager
+    factory: [ "BackBeeCloud\ThemeColor\ThemeColorManagerFactory", createThemeColorManager ]
+    arguments: [ "@service_container" ]
+
+  cloud.theme_color.default:
+    class: BackBeeCloud\ThemeColor\DefaultThemeColor
+    tags:
+      - { name: theme_color, dispatch_event: false }
+
+  cloud.api.theme_color.controller:
+    class: BackBeeCloud\Api\Controller\ThemeColorController
+    arguments:
+      - "@cloud.theme_color.manager"
+      - "@cloud.color_panel.manager"
+      - "@bbapp"
+
+  cloud.color_panel.manager:
+    class: BackBeeCloud\ThemeColor\ColorPanelManager
+    factory: [ "BackBeeCloud\ThemeColor\ColorPanelManagerFactory", createColorPanelManager ]
+    arguments:
+      - "@em"
+      - "@cloud.theme_color.manager"
+
+  cloud.api.color_panel.controller:
+    class: BackBeeCloud\Api\Controller\ColorPanelController
+    arguments: [ "@cloud.color_panel.manager", "@bbapp" ]
+
+  cloud.color_panel.css_generator:
+    class: BackBeeCloud\ThemeColor\ColorPanelCssGenerator
+    arguments: [ "@cloud.color_panel.manager", "@renderer" ]
+
+  cloud.color_panel_css_genrator.controller:
+    class: BackBeeCloud\Controller\ColorPanelController
+    arguments:
+      - '@cloud.color_panel.css_generator'
+      - '@em'
+      - '@core.redis.manager'
+
+  cloud.theme_color.listener:
+    class: BackBeeCloud\Listener\ThemeColorListener
+    arguments: [ "@cloud.color_panel.css_generator", "@routing" ]
+
+  # Design services
+  cloud.design.font.manager:
+    class: BackBeeCloud\Design\FontManager
+
+  cloud.design.button.manager:
+    class: BackBeeCloud\Design\ButtonManager
+    factory: [ "BackBeeCloud\Design\ButtonManagerFactory", createButtonManager ]
+    arguments:
+      - "@em"
+      - "@cloud.design.font.manager"
+
+  cloud.api.design.font.controller:
+    class: BackBeeCloud\Api\Controller\DesignFontController
+    arguments:
+      - "@cloud.design.font.manager"
+      - "@bbapp"
+
+  cloud.api.design.button.controller:
+    class: BackBeeCloud\Api\Controller\DesignButtonController
+    arguments:
+      - "@cloud.design.button.manager"
+      - "@bbapp"
+
+  cloud.design.global.content.manager:
+    class: BackBeeCloud\Design\GlobalContentManager
+    factory: [ "BackBeeCloud\Design\GlobalContentManagerFactory", createGlobalContentManager ]
+    arguments:
+      - "@em"
+      - "@cloud.color_panel.manager"
+
+  cloud.api.design.global.content.controller:
+    class: BackBeeCloud\Api\Controller\DesignGlobalContentController
+    arguments:
+      - "@cloud.design.global.content.manager"
+      - "@bbapp"
+
+  # Translator override
+  translator:
+    class: Symfony\Component\Translation\Translator
+    factory: [ "BackBeeCloud\Translation\TranslatorFactory", getTranslator ]
+    arguments:
+      - "@service_container"
+
+  # CSRF Security
+  app.csrf_token.manager:
+    class: Symfony\Component\Security\Csrf\CsrfTokenManager
+
+  # API Data formatter
+  cloud.data_transformer.tag:
+    class: BackBeeCloud\Api\DataFormatter\TagDataFormatter
+    arguments:
+      - "@multilang_manager"
+      - "@em"
+
+  # Optimize image
+  app.optimize_image.manager:
+    class: BackBeePlanet\OptimizeImage\OptimizeImageManager
+    arguments: [ '@bbapp', '@config', '@backbee.logger' ]
+
+  app.optimize_image.listener:
+    class: BackBeePlanet\Listener\OptimizeImageListener
+    arguments: [ '@app.optimize_image.manager', '@backbee.logger' ]
+
+  # Sitemap
+  core.sitemap.manager:
+    class: BackBee\Sitemap\SitemapManager
+    arguments: [ '@bbapp', '@config', '@cloud.search_manager', '@core.redis.manager' ]
+
+  core.sitemap.controller:
+    class: BackBee\Controller\SitemapController
+    arguments: [ '@bbapp', '@core.sitemap.manager' ]
+
+  # Search engine
+  core.search_engine.controller:
+    class: BackBeeCloud\Controller\SearchEngineController
+    arguments: [ '@renderer', '@core.search_engine.manager' ]
+
+  core.search_engine.manager:
+    class: BackBeeCloud\SearchEngine\SearchEngineManager
+    arguments:
+        [ '@user_preference.manager' ]
+
+  # Knowledge Graph
+  core.knowledge_graph.seo_metadata.manager:
+    class: BackBee\KnowledgeGraph\SeoMetadataManager
+    arguments:
+      - '@bbapp'
+      - '@em'
+      - '@core.search_engine.manager'
+      - '@elasticsearch.manager'
+      - '@multilang_manager'
+      - '@cloud.multilang.page_association.manager'
+
+  core.knowledge_graph.manager:
+    class: BackBee\KnowledgeGraph\KnowledgeGraphManager
+    arguments:
+      - '@bbapp'
+      - '@user_preference.manager'
+      - '@config'
+      - '@core.page.page_from_raw_data'
+      - '@core.knowledge_graph.seo_metadata.manager'
+
+  # Menu
+  core.menu.listener:
+    class: BackBeeCloud\Listener\MenuListener
+    arguments:
+        [ '@bbapp', '@core.page.content.manager' ]
+
+  # Elasticsearch
+  elasticsearch.client:
+    class: BackBeeCloud\Elasticsearch\ElasticsearchClient
+    arguments:
+      - '@bbapp'
+      - '@config'
+
+  elasticsearch.manager:
+    class: BackBeeCloud\Elasticsearch\ElasticsearchManager
+    arguments: [ "@bbapp", '@core.page.content.manager', '@multilang_manager', '@elasticsearch.query', '@core.search_engine.manager' ]
+    tags:
+      - { name: worker.job_handler, dispatch_event: false }
+
+  elasticsearch.query:
+    class: BackBeeCloud\Elasticsearch\ElasticsearchQuery
+    arguments:
+      - '@bbapp'
+      - '@cloud.page_type.manager'
+      - '@core.elasticsearch.title.filter'
+
+  core.elasticsearch.title.filter:
+    class: BackBee\Elasticsearch\Filter\TitleFilter
+
+  core.elasticsearch.index_analysis.config:
+    class: BackBee\Elasticsearch\Config\IndexAnalysisConfig
+
+  core.elasticsearch.page_mapping.config:
+    class: BackBee\Elasticsearch\Config\PageMappingConfig
+
+  core.elasticsearch.tag_mapping.config:
+    class: BackBee\Elasticsearch\Config\TagMappingConfig
+
+  # Installer
+  core.installer.page:
+    class: BackBee\Installer\PageInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.keyword:
+    class: BackBee\Installer\KeywordInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.site:
+    class: BackBee\Installer\SiteInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.layout:
+    class: BackBee\Installer\LayoutInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.sudoer:
+    class: BackBee\Installer\SudoerInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.database:
+    class: BackBee\Installer\DatabaseInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.repository:
+    class: BackBee\Installer\RepositoryInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.assets:
+    class: BackBee\Installer\AssetsInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.user_rights:
+    class: BackBee\Installer\UserRightsInstaller
+    arguments: [ '@bbapp' ]
+
+  core.installer.elasticsearch:
+    class: BackBee\Installer\ElasticsearchInstaller
+    arguments: [ '@bbapp' ]
+
+  # Standalone
+  core.standalone.abstract_standalone.helper:
+    class: BackBeePlanet\Standalone\AbstractStandaloneHelper
+
+  # Redis
+  core.redis.manager:
+    class: BackBee\Cache\RedisManager
+    arguments:
+        [ '@config', '@backbee.logger' ]
+
+  # Class content
+  core.class_content.media.video.manager:
+    class: BackBee\ClassContent\Media\VideoManager
+    arguments: [ '@backbee.logger' ]
+
+  # Listener
+  core.cache.listener:
+    class: BackBeeCloud\Listener\CacheListener
+    arguments:
+        [ '@core.redis.manager' ]
+
+  core.core.listener:
+    class: BackBeeCloud\Listener\CoreListener
+    arguments:
+        [ '@bbapp', '@user_preference.manager' ]
+
+  core.class_content.video.listener:
+    class: BackBeeCloud\Listener\ClassContent\VideoListener
+    arguments:
+        [ '@core.class_content.media.video.manager', '@backbee.logger' ]
+
+  core.page.listener:
+    class: BackBeeCloud\Listener\PageListener
+
+  core.search_result.listener:
+    class: BackBeeCloud\Listener\ClassContent\SearchResultListener
+    arguments: [ '@config' ]
+
+  core.log.class_content.listener:
+    class: BackBee\Listener\Log\ClassContentLogListener
+    arguments:
+        [ '@security.context', '@em', '@?monolog.logger.admin_log' ]
+
+  core.log.page.listener:
+    class: BackBee\Listener\Log\PageLogListener
+    arguments:
+        [ '@security.context', '@em', '@cloud.page_manager', '@?monolog.logger.admin_log' ]
+
+  core.log.tag.listener:
+    class: BackBee\Listener\Log\TagLogListener
+    arguments:
+        [ '@security.context', '@em', '@cloud.tag_manager', '@?monolog.logger.admin_log' ]
+
+  core.log.user.listener:
+    class: BackBee\Listener\Log\UserLogListener
+    arguments:
+        [ '@security.context', '@em', '@cloud.user_manager', '@?monolog.logger.admin_log' ]
+
+  core.log.group_type.listener:
+    class: BackBee\Listener\Log\GroupTypeLogListener
+    arguments:
+        [ '@security.context', '@em', '@cloud.group_type.manager', '@?monolog.logger.admin_log' ]
+
+  core.recaptcha.listener:
+    class: BackBeeCloud\ReCaptcha\ReCaptchaListener

@@ -51,6 +51,8 @@ class IndexElasticsearchCommand extends AbstractCommand
     {
         $io = new SymfonyStyle($input, $output);
 
+        $this->makeWritable();
+
         $this->getBBApp()->getContainer()->get('core.installer.elasticsearch')->index($io);
 
         $this->cleanup();

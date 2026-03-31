@@ -91,7 +91,7 @@ class ElasticsearchManager extends ElasticsearchClient implements JobHandlerInte
     /**
      * Deletes the index if it exists and create a new one.
      */
-    public function resetIndex(): ElasticsearchManager
+    public function resetIndex(): self
     {
         $params = ['index' => $this->getIndexName()];
 

@@ -156,10 +156,25 @@ class AbstractCommand extends Command
     /**
      * Cleanup.
      */
-    protected function cleanup(): void
+    public function cleanup(): void
     {
-        exec(sprintf('rm -rf %s/*', StandaloneHelper::cacheDir()));
-        exec(sprintf('chmod -R 777 %s/*', StandaloneHelper::logDir()));
+        exec(\sprintf('rm -rf %s/*', StandaloneHelper::cacheDir()));
+    }
+
+    /**
+     * Make writable folder.
+     *
+     * @return void
+     */
+    public function makeWritable(): void
+    {
+        exec(
+            \sprintf(
+                'chmod -R 777 %s %s/*',
+                StandaloneHelper::cacheDir(),
+                StandaloneHelper::logDir()
+            )
+        );
     }
 
     /**
@@ -183,7 +198,7 @@ class AbstractCommand extends Command
         $size = memory_get_usage();
         $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
 
-        return @round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[(int) $i];
+        return @round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[(int)$i];
     }
 
     /**
