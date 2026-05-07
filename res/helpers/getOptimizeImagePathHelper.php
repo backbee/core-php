@@ -29,14 +29,18 @@ class getOptimizeImagePathHelper extends AbstractHelper
     /**
      * Invoke.
      *
-     * @param string $path
+     * @param null|string $path
      * @param bool   $inFluid
      * @param int    $colSize
      *
      * @return string
      */
-    public function __invoke(string $path, bool $inFluid, int $colSize): string
+    public function __invoke(?string $path, bool $inFluid, int $colSize): string
     {
+        if ($path === null) {
+            return '';
+        }
+
         return $this
             ->getRenderer()
             ->getApplication()

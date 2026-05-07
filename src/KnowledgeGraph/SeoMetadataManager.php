@@ -39,44 +39,44 @@ use Exception;
  *
  * @package BackBee\KnowledgeGraph
  *
- * @author Djoudi Bensid <d.bensid@obione.eu>
+ * @author  Djoudi Bensid <d.bensid@obione.eu>
  */
 class SeoMetadataManager
 {
     /**
      * @var BBApplication
      */
-    private $bbApp;
+    private BBApplication $bbApp;
 
     /**
      * @var EntityManagerInterface
      */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     /**
      * @var SearchEngineManager
      */
-    private $searchEngineManager;
+    private SearchEngineManager $searchEngineManager;
 
     /**
      * @var ElasticsearchManager
      */
-    private $elasticsearchManager;
+    private ElasticsearchManager $elasticsearchManager;
 
     /**
      * @var PageAssociationManager
      */
-    private $pageAssociationManager;
+    private PageAssociationManager $pageAssociationManager;
 
     /**
      * @var MultiLangManager
      */
-    private $multiLangManager;
+    private MultiLangManager $multiLangManager;
 
     /**
      * @var array
      */
-    private $seoData;
+    private array $seoData = [];
 
     /**
      * @var MetaDataBag|array
@@ -86,7 +86,7 @@ class SeoMetadataManager
     /**
      * @var null|array
      */
-    private $esResult;
+    private ?array $esResult = null;
 
     /**
      * SeoMetadataManager constructor.
@@ -112,9 +112,6 @@ class SeoMetadataManager
         $this->elasticsearchManager = $elasticsearchManager;
         $this->multiLangManager = $multiLangManager;
         $this->pageAssociationManager = $pageAssociationManager;
-        $this->seoData = [];
-        $this->pageMetadataBag = [];
-        $this->esResult = [];
     }
 
     /**
@@ -126,16 +123,13 @@ class SeoMetadataManager
      */
     public function getPageSeoMetadata(Page $page): array
     {
-        $this->pageMetadataBag = $page->getMetaData() ?: new MetaDataBag();
+        $this->pageMetadataBag = $page->getMetaData() ?? new MetaDataBag();
 
-        $this
-            ->setHost()
-            ->setMetadata()
-            ->getElasticSearchResult($page->getUid());
+        $this->setHost()->setMetadata();
+        $this->getElasticSearchResult($page->getUid());
 
-        if ($this->esResult) {
-            $this
-                ->setTitle()
+        if ($this->esResult !== null) {
+            $this->setTitle()
                 ->setDescription()
                 ->setImageUrl()
                 ->setSearchEngineOptions();
@@ -171,8 +165,6 @@ class SeoMetadataManager
             );
         }
 
-        //dump($params);
-
         return $this->bbApp->getRenderer()->partial('KnowledgeGraph/seoMetadata.html.twig', $params);
     }
 
@@ -185,13 +177,13 @@ class SeoMetadataManager
      */
     public function getValueWithoutForbiddenCharacters(string $value): string
     {
-        $symbols = "\x{1F100}-\x{1F1FF}" // Enclosed Alphanumeric Supplement
-            . "\x{1F300}-\x{1F5FF}" // Miscellaneous Symbols and Pictographs
-            . "\x{1F600}-\x{1F64F}" //Emoticons
-            . "\x{1F680}-\x{1F6FF}" // Transport And Map Symbols
-            . "\x{1F900}-\x{1F9FF}" // Supplemental Symbols and Pictographs
-            . "\x{2600}-\x{26FF}" // Miscellaneous Symbols
-            . "\x{2700}-\x{27BF}"; // Dingbats
+        $symbols = "\\x{1F100}-\\x{1F1FF}" // Enclosed Alphanumeric Supplement
+            . "\\x{1F300}-\\x{1F5FF}" // Miscellaneous Symbols and Pictographs
+            . "\\x{1F600}-\\x{1F64F}" // Emoticons
+            . "\\x{1F680}-\\x{1F6FF}" // Transport And Map Symbols
+            . "\\x{1F900}-\\x{1F9FF}" // Supplemental Symbols and Pictographs
+            . "\\x{2600}-\\x{26FF}"   // Miscellaneous Symbols
+            . "\\x{2700}-\\x{27BF}";  // Dingbats
 
         return trim(preg_replace('/[' . $symbols . ']+/u', '', $value));
     }
@@ -216,7 +208,8 @@ class SeoMetadataManager
     private function setMetadata(): self
     {
         foreach ($this->pageMetadataBag as $attr => $metadata) {
-            if (($metadata->getAttribute('name') === $attr) && $value = $metadata->getAttribute('content')) {
+            $value = $metadata->getAttribute('content');
+            if ($metadata->getAttribute('name') === $attr && $value) {
                 $this->seoData[(string)$attr] = $value;
             }
         }
@@ -231,7 +224,7 @@ class SeoMetadataManager
      */
     private function setTitle(): self
     {
-        $this->seoData['title'] = $this->seoData['title'] ?? $this->esResult['_source']['title'];
+        $this->seoData['title'] ??= $this->esResult['_source']['title'];
 
         return $this;
     }
@@ -246,21 +239,14 @@ class SeoMetadataManager
     private function getElasticSearchResult(string $pageUid): void
     {
         try {
-            $this->esResult = $this->elasticsearchManager->getClient()->get(
-                [
-                    'id' => $pageUid,
-                    'index' => $this->elasticsearchManager->getIndexName(),
-                    '_source' => ['title', 'abstract_uid', 'type', 'image_uid'],
-                ]
-            );
+            $this->esResult = $this->elasticsearchManager->getClient()->get([
+                'id' => $pageUid,
+                'index' => $this->elasticsearchManager->getIndexName(),
+                '_source' => ['title', 'abstract_uid', 'type', 'image_uid', 'seo_title', 'seo_description'],
+            ]);
         } catch (Exception $exception) {
             $this->bbApp->getLogging()->warning(
-                sprintf(
-                    '%s : %s :%s',
-                    __CLASS__,
-                    __FUNCTION__,
-                    $exception->getMessage()
-                )
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
             );
             $this->esResult = null;
         }
@@ -273,42 +259,11 @@ class SeoMetadataManager
      */
     public function setDescription(): self
     {
-        try {
-            if (($this->seoData['description'] ?? null) === null &&
-                $this->esResult['_source']['abstract_uid'] &&
-                $abstract = $this->entityManager->find(
-                    ArticleAbstract::class,
-                    $this->esResult['_source']['abstract_uid']
-                )
-            ) {
-                $this->seoData['description'] = $this->getValueWithoutForbiddenCharacters(
-                    mb_substr(
-                        trim(
-                            html_entity_decode(
-                                strip_tags(
-                                    preg_replace(
-                                        ['#<[^>]+>#', '#\s\s+#', '#&nbsp;#', '/\\\\n/', '#"#'],
-                                        [' ', ' ', '', ''],
-                                        $abstract->value
-                                    )
-                                )
-                            )
-                        ),
-                        0,
-                        300
-                    )
-                );
-            }
-        } catch (Exception $exception) {
-            $this->bbApp->getLogging()->error(
-                sprintf(
-                    '%s : %s : %s',
-                    __CLASS__,
-                    __FUNCTION__,
-                    $exception->getMessage()
-                )
-            );
+        if (($this->seoData['description'] ?? null) !== null) {
+            return $this;
         }
+
+        $this->seoData['description'] = $this->resolveSeoDescription();
 
         return $this;
     }
@@ -325,23 +280,18 @@ class SeoMetadataManager
         try {
             if ($imageUid === null) {
                 $knowledgeGraphConfig = $this->bbApp->getConfig()->getSection('knowledge_graph');
-                $this->seoData['image_url'] = $knowledgeGraphConfig['graph']['image'] ??
-                    $knowledgeGraphConfig['graph']['logo'];
+                $this->seoData['image_url'] = $knowledgeGraphConfig['graph']['image']
+                    ?? $knowledgeGraphConfig['graph']['logo'];
             } else {
                 $image = $this->entityManager->find(Image::class, $imageUid);
 
-                if ($image) {
+                if ($image !== null) {
                     $this->seoData['image_url'] = $image->image->path;
                 }
             }
         } catch (Exception $exception) {
             $this->bbApp->getLogging()->error(
-                sprintf(
-                    '%s : %s : %s',
-                    __CLASS__,
-                    __FUNCTION__,
-                    $exception->getMessage()
-                )
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
             );
         }
 
@@ -357,9 +307,65 @@ class SeoMetadataManager
     {
         $searchEngine = $this->searchEngineManager->googleSearchEngineIsActivated();
 
-        $this->seoData['index'] = $this->pageMetadataBag->get('index') === null ?
-            $searchEngine : $this->pageMetadataBag->get('index')->getAttribute('content');
-        $this->seoData['follow'] = $this->pageMetadataBag->get('follow') === null ?
-            $searchEngine : $this->pageMetadataBag->get('follow')->getAttribute('content');
+        foreach (['index', 'follow'] as $key) {
+            $meta = $this->pageMetadataBag->get($key);
+            $this->seoData[$key] = $meta === null
+                ? $searchEngine
+                : $meta->getAttribute('content');
+        }
+    }
+
+    /**
+     * Resolve the best available SEO description.
+     *
+     * @return string|null
+     */
+    private function resolveSeoDescription(): ?string
+    {
+        $seoDescription = $this->esResult['_source']['seo_description'] ?? null;
+
+        if (!empty($seoDescription)) {
+            return $seoDescription;
+        }
+
+        $abstractUid = $this->esResult['_source']['abstract_uid'] ?? null;
+
+        if ($abstractUid === null) {
+            return null;
+        }
+
+        try {
+            $abstract = $this->entityManager->find(ArticleAbstract::class, $abstractUid);
+
+            return $abstract !== null
+                ? $this->buildDescriptionFromAbstract($abstract->value)
+                : null;
+        } catch (Exception $exception) {
+            $this->bbApp->getLogging()->error(
+                sprintf('%s : %s : %s', __CLASS__, __FUNCTION__, $exception->getMessage())
+            );
+
+            return null;
+        }
+    }
+
+    /**
+     * Build a clean plain-text description from raw abstract HTML.
+     *
+     * @param string $rawHtml
+     *
+     * @return string
+     */
+    private function buildDescriptionFromAbstract(string $rawHtml): string
+    {
+        $cleaned = preg_replace(
+            ['#<[^>]+>#', '#\s{2,}#', '#&nbsp;#', '/\\\\n/', '#"#'],
+            [' ',         ' ',        '',        '',         ''],
+            $rawHtml
+        );
+
+        $plainText = trim(html_entity_decode(strip_tags($cleaned)));
+
+        return $this->getValueWithoutForbiddenCharacters(mb_substr($plainText, 0, 300));
     }
 }
