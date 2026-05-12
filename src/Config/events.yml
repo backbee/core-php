@@ -1,442 +1,443 @@
 # Application listeners
 bbapplication.init:
-    listeners:
-        # Legacy
-        - [ BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit, -8000 ]
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit ]
-        - [ BackBee\Renderer\Listener\TwigListener, onApplicationReady ]
-        # Core
-        - [ '@core.core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
-        - [ '@core.core.listener', onApplicationInit, 200 ]
-        - [ '@core.page.listener', onApplicationInit ]
-        - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
-        - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
-        # App
-        - [ BackBee\Listener\AppListener, onApplicationInit, -7997 ]
-        - [ BackBee\Listener\AppListener, onLoadClassContent, -7000 ]
+  listeners:
+    # Legacy
+    - [ BackBee\DependencyInjection\Listener\ContainerListener, onApplicationInit, -8000 ]
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onApplicationInit ]
+    - [ BackBee\Renderer\Listener\TwigListener, onApplicationReady ]
+    # Core
+    - [ '@core.core.listener', forceClassContentLoadOnApplicationInit, -7999 ]
+    - [ '@core.core.listener', onApplicationInit, 200 ]
+    - [ '@core.page.listener', onApplicationInit ]
+    - [ BackBeeCloud\Listener\UserRightListener, onApplicationInit ]
+    - [ "@cloud.classcontent_overrider.listener", onApplicationInit, -7998 ]
+    # App
+    - [ BackBee\Listener\AppListener, onApplicationInit, -7997 ]
+    - [ BackBee\Listener\AppListener, onLoadClassContent, -7000 ]
 
 bbapplication.start:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.core.listener', onApplicationStart, -50 ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.core.listener', onApplicationStart, -50 ]
 
 bbapplication.stop:
-    listeners:
-        - [ BackBee\Bundle\Listener\BundleListener, onApplicationStop ]
+  listeners:
+    - [ BackBee\Bundle\Listener\BundleListener, onApplicationStop ]
 
 # Config listeners
 service.tagged.config_per_site:
-    listeners:
-        - [ @config.configurator, onGetServiceConfig ]
+  listeners:
+    - [ @config.configurator, onGetServiceConfig ]
 
 
 # Kernel listeners
 kernel.request:
-    listeners:
-        - [ @profiler.listener, onKernelRequest ]
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\RequestListener, onKernelRequest ]
+  listeners:
+    - [ @profiler.listener, onKernelRequest ]
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\RequestListener, onKernelRequest ]
 
 kernel.exception:
-    listeners:
-        - [ @rest.listener.exception, onKernelException ]
-        - [ @exception.listener, onKernelException ]
-        # BackBee Cloud listeners
-        - [ '@cloud.api.user_right.listener', onKernelException, 100 ]
-        - [ "@cloud.api.user_controller.listener", onKernelException, 100 ]
-        - [ '@core.page.listener', onPageNotFoundException, 100 ]
-        - [ @cloud.disqus_listener, onDisqusControlledException, 100 ]
-        - [ '@core.core.listener', onAuthenticationException, 100 ]
-        - [ "@api.multilang.listener", onMultiLangException, 100 ]
-        - [ '@core.core.listener', onKernelException, 50 ]
-        - [ '@core.recaptcha.listener', onRecaptchaFailedValidationException, 100 ]
+  listeners:
+    - [ @rest.listener.exception, onKernelException ]
+    - [ @exception.listener, onKernelException ]
+    # BackBee Cloud listeners
+    - [ '@cloud.api.user_right.listener', onKernelException, 100 ]
+    - [ "@cloud.api.user_controller.listener", onKernelException, 100 ]
+    - [ '@core.page.listener', onPageNotFoundException, 100 ]
+    - [ @cloud.disqus_listener, onDisqusControlledException, 100 ]
+    - [ '@core.core.listener', onAuthenticationException, 100 ]
+    - [ "@api.multilang.listener", onMultiLangException, 100 ]
+    - [ '@core.core.listener', onKernelException, 50 ]
+    - [ '@core.recaptcha.listener', onRecaptchaFailedValidationException, 100 ]
 
 kernel.controller:
-    listeners:
-        - [ @rest.listener.param_converter, onKernelController ]
-        - [ @rest.listener.security, onKernelController ]
-        - [ @rest.listener.validation, onKernelController ]
-        - [ @rest.listener.pagination, onKernelController ]
-        # BackBee Cloud listeners
-        - [ '@core.core.listener', onKernelController ]
-        - [ "@cloud.api.user_right.listener", onKernelController ]
+  listeners:
+    - [ @rest.listener.param_converter, onKernelController ]
+    - [ @rest.listener.security, onKernelController ]
+    - [ @rest.listener.validation, onKernelController ]
+    - [ @rest.listener.pagination, onKernelController ]
+    # BackBee Cloud listeners
+    - [ '@core.core.listener', onKernelController ]
+    - [ "@cloud.api.user_right.listener", onKernelController ]
 
 kernel.response:
-    listeners:
-        - [ @profiler.toolbar.listener, onKernelResponse ]
-        - [ @profiler.listener, onKernelResponse ]
-        - [ "@cloud.theme_color.listener", onKernelResponse ]
-        - [ "@cloud.favicon.listener", onKernelResponse ]
-        - [ BackBeeCloud\Listener\PrivacyPolicyListener, onKernelResponse ]
-        - [ '@core.cache.listener', onKernelResponse, -8000 ]
+  listeners:
+    - [ @profiler.toolbar.listener, onKernelResponse ]
+    - [ @profiler.listener, onKernelResponse ]
+    - [ "@cloud.theme_color.listener", onKernelResponse ]
+    - [ "@cloud.favicon.listener", onKernelResponse ]
+    - [ BackBeeCloud\Listener\PrivacyPolicyListener, onKernelResponse ]
+    - [ '@core.cache.listener', onKernelResponse, -8000 ]
+    - [ '@core.sitemap_response.listener', onKernelResponse, -9000 ]
 
 # ClassContent listeners
 classcontent.include:
-    listeners:
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onInclude ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onInclude ]
 
 classcontent.postload:
-    listeners:
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onPostload ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onPostload ]
 
 classcontent.update:
-    listeners:
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onUpdate ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onUpdate ]
 
 element.file.postremove:
-    listeners:
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onRemoveElementFile ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onRemoveElementFile ]
 
 classcontent.onflush:
-    listeners:
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onFlushContent ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onFlushContent ]
 
 classcontent.prerender:
-    listeners:
-        - [ BackBee\ClassContent\Listener\RevisionListener, onPrerenderContent ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\RevisionListener, onPrerenderContent ]
 
 revision.postload:
-    listeners:
-        - [ BackBee\ClassContent\Listener\RevisionListener, onPostLoad ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\RevisionListener, onPostLoad ]
 
 revision.onflush:
-    listeners:
-        - [ BackBee\ClassContent\Listener\RevisionListener, onFlushElementFile ]
-        - [ '@core.class_content.video.listener', onVideoRevisionFlush ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\RevisionListener, onFlushElementFile ]
+    - [ '@core.class_content.video.listener', onVideoRevisionFlush ]
 
 basic.searchresult.render:
-    listeners:
-        - [ '@core.search_result.listener', onRender ]
+  listeners:
+    - [ '@core.search_result.listener', onRender ]
 
 media.video.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.class_content.video.listener', onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.class_content.video.listener', onRender ]
 
 media.soundcloud.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\SoundcloudListener, onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\SoundcloudListener, onRender ]
 
 social.tweet.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\TweetListener, onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\TweetListener, onRender ]
 
 basic.menu.prepersist:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@api.multilang.listener", onMenuPrePersist, 100 ]
-        - [ "@core.menu.listener", onPrePersist ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ "@api.multilang.listener", onMenuPrePersist, 100 ]
+    - [ "@core.menu.listener", onPrePersist ]
 
 basic.menu.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@core.menu.listener", onRender ]
-        - [ "@api.multilang.listener", onMenuRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ "@core.menu.listener", onRender ]
+    - [ "@api.multilang.listener", onMenuRender ]
 
 contentautoblock.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ContentAutoblockListener, onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ContentAutoblockListener, onRender ]
 
 content.highlightcontent.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@cloud.highlightcontent.listener', onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@cloud.highlightcontent.listener', onRender ]
 
 element.image.onflush:
-    listeners:
-        # BackBee Cloud listeners
-        - [ @cloud.image_listener, onImageFlush ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ @cloud.image_listener, onImageFlush ]
 
 basic.slider.prepersist:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\ContentListener, onSliderPrePersist ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\ContentListener, onSliderPrePersist ]
 
 content.duplicate.presave:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\ContentListener, onContentDuplicatePreSave ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\ContentListener, onContentDuplicatePreSave ]
 
 cloudcontentset.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\ContentListener, onCloudContentSetRender ]
-        - [ @cloud.image_listener, onCloudContentSetRender ]
-        - [ BackBeeCloud\Listener\ClassContent\CardListener, onCloudContentSetRender ]
-        - [ "@cloud.auto_height_content.listener", onCloudContentSetRender ]
-        # Optimize image listeners
-        - [ '@app.optimize_image.listener', onCloudContentSetRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\ContentListener, onCloudContentSetRender ]
+    - [ @cloud.image_listener, onCloudContentSetRender ]
+    - [ BackBeeCloud\Listener\ClassContent\CardListener, onCloudContentSetRender ]
+    - [ "@cloud.auto_height_content.listener", onCloudContentSetRender ]
+    # Optimize image listeners
+    - [ '@app.optimize_image.listener', onCloudContentSetRender ]
 
 basic.contact.render:
-    listeners:
-        - [ '@core.recaptcha.listener', onContentRequireReCaptchaRender ]
+  listeners:
+    - [ '@core.recaptcha.listener', onContentRequireReCaptchaRender ]
 
 basic.pagebytagresult.render:
-    listeners:
-        # BackBeeCloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\PageByTagResultListener, onRender ]
+  listeners:
+    # BackBeeCloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\PageByTagResultListener, onRender ]
 
 basic.newsletter.render:
-    listeners:
-        - [ '@core.recaptcha.listener', onContentRequireReCaptchaRender ]
+  listeners:
+    - [ '@core.recaptcha.listener', onContentRequireReCaptchaRender ]
 
 basic.cards.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\CardListener, onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\CardListener, onRender ]
 
 contentset.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\ClassContent\ContentSetListener, onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\ClassContent\ContentSetListener, onRender ]
 
 comment.disqus.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@cloud.disqus_listener', onRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@cloud.disqus_listener', onRender ]
 
 # Controller listeners
 rest.controller.classcontentcontroller.getaction.postcall:
-    listeners:
-        - [ BackBee\ClassContent\Listener\ClassContentListener, onPostCall ]
-        # BackBee Cloud listeners
-        - [ '@cloud.highlightcontent.listener', onPostCall ]
-        - [ BackBeeCloud\Listener\ContentAutoblockListener, onPostCall ]
+  listeners:
+    - [ BackBee\ClassContent\Listener\ClassContentListener, onPostCall ]
+    # BackBee Cloud listeners
+    - [ '@cloud.highlightcontent.listener', onPostCall ]
+    - [ BackBeeCloud\Listener\ContentAutoblockListener, onPostCall ]
 
 frontcontroller.request:
-    listeners:
-        - [ @rest.listener.body, onRequest ]
+  listeners:
+    - [ @rest.listener.body, onRequest ]
 
 rest.controller.classcontentcontroller.postaction.precall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@cloud.disqus_listener', onCreateContent ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@cloud.disqus_listener', onCreateContent ]
 
 rest.controller.classcontentcontroller.postaction.postcall:
-    listeners:
-        - [ '@core.page.listener', onRestContentUpdatePostcall ]
-        - [ '@core.log.class_content.listener', onPostActionPostCall ]
+  listeners:
+    - [ '@core.page.listener', onRestContentUpdatePostcall ]
+    - [ '@core.log.class_content.listener', onPostActionPostCall ]
 
 rest.controller.classcontentcontroller.putaction.postcall:
-    listeners:
-        - [ '@core.page.listener', onRestContentUpdatePostCall ]
-        - [ '@core.log.class_content.listener', onPutActionPostCall ]
-        - [ '@cloud.image_listener', onPutActionPostCall ]
+  listeners:
+    - [ '@core.page.listener', onRestContentUpdatePostCall ]
+    - [ '@core.log.class_content.listener', onPutActionPostCall ]
+    - [ '@cloud.image_listener', onPutActionPostCall ]
 
 rest.controller.securitycontroller.deletesessionaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onLogoutPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onLogoutPostCall ]
 
 rest.controller.securitycontroller.authenticateaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onAuthenticationPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onAuthenticationPostCall ]
 
 rest.controller.classcontentcontroller.getcategorycollectionaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageTypeListener, onGetCategoryPostCall ]
-        - [ '@content.category_listener', onGetCategoryPostCall ]
-        - [ '@core.cache.listener', onGetCategoryPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\PageTypeListener, onGetCategoryPostCall ]
+    - [ '@content.category_listener', onGetCategoryPostCall ]
+    - [ '@core.cache.listener', onGetCategoryPostCall ]
 
 rest.controller.pagecontroller.deleteaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onChangePostCall ]
-        - [ BackBeeCloud\Listener\ElasticsearchListener, onPageDeletePostcall ]
-        - [ '@core.page.listener', onPageDeletePostcall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onChangePostCall ]
+    - [ BackBeeCloud\Listener\ElasticsearchListener, onPageDeletePostcall ]
+    - [ '@core.page.listener', onPageDeletePostcall ]
 
 rest.controller.pagecontroller.deleteaction.precall:
-    listeners:
-        - [ '@core.log.page.listener', onDeleteActionPreCall ]
+  listeners:
+    - [ '@core.log.page.listener', onDeleteActionPreCall ]
 
 rest.controller.resourcecontroller.uploadaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ @cloud.image_listener, onUploadPostCall ]
-        # Optimize image listeners
-        - [ '@app.optimize_image.listener', onImageUploadPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ @cloud.image_listener, onUploadPostCall ]
+    # Optimize image listeners
+    - [ '@app.optimize_image.listener', onImageUploadPostCall ]
 
 rest.controller.bundlecontroller.getcollectionaction.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\BundleListener, onGetCollectionPostCall ]
-        - [ "@cloud.api.user_right.listener", onBundleGetCollectionPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\BundleListener, onGetCollectionPostCall ]
+    - [ "@cloud.api.user_right.listener", onBundleGetCollectionPostCall ]
 
 controller.frontcontroller.rssaction.precall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onRssActionPreCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onRssActionPreCall ]
 
 controller.frontcontroller.defaultaction.precall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@api.multilang.listener", onHomePreCall, 100 ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ "@api.multilang.listener", onHomePreCall, 100 ]
 
 backbeecloud.api.controller.contentcontroller.delete.precall:
-    listeners:
-        - [ '@cloud.disqus_listener', onDeleteContent ]
-        - [ '@core.log.class_content.listener', onDeleteActionPreCall ]
+  listeners:
+    - [ '@cloud.disqus_listener', onDeleteContent ]
+    - [ '@core.log.class_content.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.delete.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onRestContentUpdatePostcall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onRestContentUpdatePostcall ]
 
 backbeecloud.api.controller.pagecontroller.post.postcall:
-    listeners:
-        - [ '@core.log.page.listener', onPostActionPostCall ]
+  listeners:
+    - [ '@core.log.page.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.pagecontroller.put.postcall:
-    listeners:
-        - [ '@core.cache.listener', onChangePostCall ]
-        - [ '@core.log.page.listener', onPutActionPostCall ]
+  listeners:
+    - [ '@core.cache.listener', onChangePostCall ]
+    - [ '@core.log.page.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.post.postcall:
-    listeners:
-        - [ '@core.log.tag.listener', onPostActionPostCall ]
+  listeners:
+    - [ '@core.log.tag.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.put.postcall:
-    listeners:
-        - [ '@core.cache.listener', onChangePostCall ]
-        - [ '@core.log.tag.listener', onPutActionPostCall ]
+  listeners:
+    - [ '@core.cache.listener', onChangePostCall ]
+    - [ '@core.log.tag.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.tagcontroller.delete.postcall:
-    listeners:
-        - [ '@core.cache.listener', onChangePostCall ]
+  listeners:
+    - [ '@core.cache.listener', onChangePostCall ]
 
 backbeecloud.api.controller.tagcontroller.delete.precall:
-    listeners:
-        - [ '@core.log.tag.listener', onDeleteActionPreCall ]
+  listeners:
+    - [ '@core.log.tag.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.contentcontroller.publish.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onPublishPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onPublishPostCall ]
 
 backbeecloud.api.controller.contentcontroller.publishall.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onPublishAllPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onPublishAllPostCall ]
 
 backbeecloud.controller.contactcontroller.send.precall:
-    listeners:
-        - [ '@core.recaptcha.listener', onReCaptchaFormSubmissionPreCall ]
+  listeners:
+    - [ '@core.recaptcha.listener', onReCaptchaFormSubmissionPreCall ]
 
 backbeecloud.controller.newslettercontroller.send.precall:
-    listeners:
-        - [ '@core.recaptcha.listener', onReCaptchaFormSubmissionPreCall ]
+  listeners:
+    - [ '@core.recaptcha.listener', onReCaptchaFormSubmissionPreCall ]
 
 backbeecloud.api.controller.userpreferencecontroller.put.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onChangePostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onChangePostCall ]
 
 backbeecloud.api.controller.userpreferencecontroller.delete.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.cache.listener', onChangePostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.cache.listener', onChangePostCall ]
 
 rest.controller.usercontroller.postaction.postcall:
-    listeners:
-        - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
-        - [ '@core.log.user.listener', onPostActionPostCall ]
+  listeners:
+    - [ "@cloud.api.user_controller.listener", onRestUserPostActionPostCall ]
+    - [ '@core.log.user.listener', onPostActionPostCall ]
 
 rest.controller.usercontroller.putaction.postcall:
-    listeners:
-        - [ "@cloud.api.user_controller.listener", onRestUserPutActionPostCall ]
-        - [ '@core.log.user.listener', onPutActionPostCall ]
+  listeners:
+    - [ "@cloud.api.user_controller.listener", onRestUserPutActionPostCall ]
+    - [ '@core.log.user.listener', onPutActionPostCall ]
 
 rest.controller.usercontroller.deleteaction.precall:
-    listeners:
-        - [ '@core.log.user.listener', onDeleteActionPreCall ]
+  listeners:
+    - [ '@core.log.user.listener', onDeleteActionPreCall ]
 
 backbeecloud.api.controller.grouptypecontroller.create.postcall:
-    listeners:
-        - [ '@core.log.group_type.listener', onPostActionPostCall ]
+  listeners:
+    - [ '@core.log.group_type.listener', onPostActionPostCall ]
 
 backbeecloud.api.controller.grouptypecontroller.update.postcall:
-    listeners:
-        - [ '@core.log.group_type.listener', onPutActionPostCall ]
+  listeners:
+    - [ '@core.log.group_type.listener', onPutActionPostCall ]
 
 backbeecloud.api.controller.grouptypecontroller.delete.precall:
-    listeners:
-        - [ '@core.log.group_type.listener', onDeleteActionPreCall ]
+  listeners:
+    - [ '@core.log.group_type.listener', onDeleteActionPreCall ]
 
 # Page and Section listeners
 
 nestednode.page.postload:
-    listeners:
-        - [ @nestednode.page_listener, onPostLoad ]
+  listeners:
+    - [ @nestednode.page_listener, onPostLoad ]
 
 nestednode.section.preupdate:
-    listeners:
-        - [ BackBee\Event\Listener\PageListener, onPreUpdate ]
+  listeners:
+    - [ BackBee\Event\Listener\PageListener, onPreUpdate ]
 
 nestednode.page.preupdate:
-    listeners:
-        - [ BackBee\Event\Listener\PageListener, onPreUpdate ]
-        - [ BackBee\Workflow\Listener\PageListener, onPreUpdate ]
+  listeners:
+    - [ BackBee\Event\Listener\PageListener, onPreUpdate ]
+    - [ BackBee\Workflow\Listener\PageListener, onPreUpdate ]
 
 nestednode.page.onflush:
-    listeners:
-        - [ BackBee\Event\Listener\PageListener, onFlushPage ]
-        - [ BackBee\Event\Listener\RewritingListener, onFlushPage ]
-        - [ BackBee\MetaData\Listener\MetaDataListener, onFlushPage, -100 ]
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onFlush ]
-        - [ '@core.page.listener', handleUriCollisionOnFlushPage ]
+  listeners:
+    - [ BackBee\Event\Listener\PageListener, onFlushPage ]
+    - [ BackBee\Event\Listener\RewritingListener, onFlushPage ]
+    - [ BackBee\MetaData\Listener\MetaDataListener, onFlushPage, -100 ]
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onFlush ]
+    - [ '@core.page.listener', handleUriCollisionOnFlushPage ]
 
 nestednode.page.postremove:
-    listeners:
-        # BackBee Cloud Listener
-        - [ '@core.page.listener', onPostRemove ]
-        - [ '@core.page.listener', onPagePostChange ]
+  listeners:
+    # BackBee Cloud Listener
+    - [ '@core.page.listener', onPostRemove ]
+    - [ '@core.page.listener', onPagePostChange ]
 
 # PageType listeners
 backbeecloud.entity.pagetype.postload:
-    listeners:
-        # BackBee Cloud listeners
-        - [ BackBeeCloud\Listener\PageTypeListener, onPostload ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ BackBeeCloud\Listener\PageTypeListener, onPostload ]
 
 nestednode.page.postpersist:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onPagePostChange ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onPagePostChange ]
 
 nestednode.page.postupdate:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onPagePostChange ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onPagePostChange ]
 
 nestednode.page.render:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onPageRender ]
-        - [ "@api.multilang.listener", onPageRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onPageRender ]
+    - [ "@api.multilang.listener", onPageRender ]
 
 nestednode.page.postrender:
-    listeners:
-        # BackBee Cloud listeners
-        - [ '@core.page.listener', onPostRender ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ '@core.page.listener', onPostRender ]
 
 # User listeners
 rest.user.creation:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@cloud.api.user_controller.listener", onRestUserCreationEvent ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ "@cloud.api.user_controller.listener", onRestUserCreationEvent ]
 
 # User Right listeners
 backbeecloud.api.controller.pagetypecontroller.getcollection.postcall:
-    listeners:
-        # BackBee Cloud listeners
-        - [ "@cloud.api.user_right.listener", onPageTypeGetCollectionPostCall ]
+  listeners:
+    # BackBee Cloud listeners
+    - [ "@cloud.api.user_right.listener", onPageTypeGetCollectionPostCall ]
 
 # Optimize image
 basic.image.render:
-    listeners:
-        - [ '@app.optimize_image.listener', onBasicImageRender ]
+  listeners:
+    - [ '@app.optimize_image.listener', onBasicImageRender ]

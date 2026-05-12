@@ -591,6 +591,9 @@ services:
     class: BackBee\Controller\SitemapController
     arguments: [ '@bbapp', '@core.sitemap.manager' ]
 
+  core.sitemap_response.listener:
+    class: BackBee\Listener\SitemapResponseListener
+
   # Search engine
   core.search_engine.controller:
     class: BackBeeCloud\Controller\SearchEngineController

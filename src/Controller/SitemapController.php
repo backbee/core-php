@@ -21,11 +21,10 @@
 
 namespace BackBee\Controller;
 
-use BackBee\BBApplication;
-use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\ApplicationInterface;
 use BackBee\Sitemap\SitemapManager;
-use Exception;
 use Symfony\Component\HttpFoundation\Response;
+use function sprintf;
 
 /**
  * Class SitemapController
@@ -36,31 +35,24 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @author  Djoudi Bensid <djoudi.bensid@lp-digital.fr>
  */
-class SitemapController
+class SitemapController extends Controller
 {
     /**
      * The bundle instance.
      *
      * @var SitemapManager
      */
-    private $sitemapManager;
+    private SitemapManager $sitemapManager;
 
     /**
-     * The current application services container.
+     * Constructor.
      *
-     * @var ContainerInterface
+     * @param \BackBee\ApplicationInterface   $application
+     * @param \BackBee\Sitemap\SitemapManager $sitemapManager
      */
-    private $container;
-
-    /**
-     * SitemapController constructor.
-     *
-     * @param BBApplication  $bbApp
-     * @param SitemapManager $sitemapManager
-     */
-    public function __construct(BBApplication $bbApp, SitemapManager $sitemapManager)
+    public function __construct(ApplicationInterface $application, SitemapManager $sitemapManager)
     {
-        $this->container = $bbApp->getContainer();
+        parent::__construct($application);
         $this->sitemapManager = $sitemapManager;
     }
 
@@ -71,15 +63,23 @@ class SitemapController
      */
     public function indexAction(): Response
     {
+        if ($this->getApplication()->getSession()->isStarted()) {
+            $this->getApplication()->getSession()->save();
+        }
+
+        $sitemap = null;
+
         try {
-            if (($sitemap = $this->sitemapManager->loadCache()) === null) {
+            $sitemap = $this->sitemapManager->loadCache();
+
+            if ($sitemap === null) {
                 $sitemap = $this->sitemapManager->generate();
                 $this->sitemapManager->saveCache($sitemap);
             }
-        } catch (Exception $exception) {
-            $this->container->get('logger')->error(
+        } catch (\Exception $exception) {
+            $this->logger->error(
                 sprintf(
-                    '%s : %s :%s',
+                    '%s : %s : %s',
                     __CLASS__,
                     __FUNCTION__,
                     $exception->getMessage()
@@ -87,6 +87,6 @@ class SitemapController
             );
         }
 
-        return $this->sitemapManager->buildResponse($sitemap ?? null);
+        return $this->sitemapManager->buildResponse($sitemap);
     }
 }

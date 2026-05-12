@@ -28,6 +28,7 @@ use BackBeeCloud\Search\SearchManager;
 use DateTime;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
+use function sprintf;
 
 /**
  * Class SitemapManager
@@ -130,35 +131,43 @@ class SitemapManager
     /**
      * Builds a valid response.
      *
-     * @param array $sitemap The sitemap content.
+     * @param null|array $sitemap The sitemap content.
      *
      * @return Response          The valid response.
      */
-    public function buildResponse(array $sitemap): Response
+    public function buildResponse(?array $sitemap): Response
     {
         $response = new Response();
 
+        if ($sitemap === null) {
+            $response->setStatusCode(Response::HTTP_SERVICE_UNAVAILABLE);
+            $response->setContent('Sitemap unavailable');
+
+            return $response;
+        }
+
         try {
-            $response
-                ->setLastModified(new DateTime($sitemap['lastModified']['date'] ?? $sitemap['lastModified']))
-                ->setContent($sitemap['urlSet'])
-                ->setStatusCode(Response::HTTP_OK)
-                ->headers
-                ->set('content-type', 'text/xml');
+            $lastModified = new DateTime($sitemap['lastModified']);
+
+            $response->setContent($sitemap['urlSet']);
+            $response->setStatusCode(Response::HTTP_OK);
+            $response->headers->set('Content-Type', 'text/xml; charset=UTF-8');
+            $response->setLastModified($lastModified);
+            $response->setPublic();
+            $response->setMaxAge(3600);
+            $response->setSharedMaxAge(86400);
+
         } catch (Exception $exception) {
             $this->logger->error(
                 sprintf(
-                    '%s : %s :%s',
+                    '%s : %s : %s',
                     __CLASS__,
                     __FUNCTION__,
                     $exception->getMessage()
                 )
             );
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $response->headers->set('cache-control', 'no-cache');
-        $response->headers->set('pragma', 'no-cache');
-        $response->headers->set('expires', -1);
 
         return $response;
     }
@@ -233,6 +242,6 @@ class SitemapManager
      */
     public function isCacheAvailable(): bool
     {
-        return (!$this->bbApp->isDebugMode() && null !== $this->redisManager->getClient());
+        return (!$this->bbApp->isDebugMode() && $this->redisManager->getClient() !== null);
     }
 }
