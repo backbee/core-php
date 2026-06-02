@@ -21,6 +21,8 @@
 
 namespace BackBee\Installer;
 
+use BackBee\NestedNode\KeyWord;
+use BackBee\NestedNode\Page;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -50,12 +52,12 @@ class ElasticsearchInstaller extends AbstractInstaller
         $elasticsearchManager->createTypes();
 
         $io->section('Reindexing all pages');
-        $io->progressStart($elasticsearchManager->getTotalOfUndeletedPages());
+        $io->progressStart($this->getEntityManager()->getRepository(Page::class)->getTotalOfUndeletedPages());
         $elasticsearchManager->indexAllPages(true, $io);
         $io->progressFinish();
 
         $io->section('Reindexing all tags');
-        $io->progressStart($elasticsearchManager->getTotalOfTags());
+        $io->progressStart($this->getEntityManager()->getRepository(KeyWord::class)->getTotalOfTags());
         $elasticsearchManager->indexAllTags($io);
         $io->progressFinish();
 
